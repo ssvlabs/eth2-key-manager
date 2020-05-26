@@ -1,16 +1,19 @@
-package Encryptors
+package encryptors
 
 import (
 	"encoding/json"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type PlainTextEncryptor struct {
-	wtypes.Encryptor
+
 }
 
 type plainTextEncryption struct {
 	original string
+}
+
+func NewPlainTextEncryptor() *PlainTextEncryptor {
+	return &PlainTextEncryptor{}
 }
 
 // Name() provides the name of the encryptor
