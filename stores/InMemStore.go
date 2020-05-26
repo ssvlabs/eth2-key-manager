@@ -2,9 +2,13 @@ package stores
 
 import (
 	"fmt"
-	uuid "github.com/satori/go.uuid"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
+	uuid "github.com/google/uuid"
 )
+
+type InMemStore struct {
+	memory      map[string]*wallet
+	mapIdToName map[string]string
+}
 
 type wallet struct {
 	name string
@@ -14,12 +18,12 @@ type wallet struct {
 	accounts map[string][]byte
 }
 
-type InMemStore struct {
-	wtypes.Store
-	memory      map[string]*wallet
-	mapIdToName map[string]string
+func NewInMemStore() *InMemStore {
+	return &InMemStore{
+		memory:      make(map[string]*wallet),
+		mapIdToName: make(map[string]string),
+	}
 }
-
 
 // Name provides the name of the store
 func (store *InMemStore) Name() string {
@@ -121,6 +125,7 @@ func (store *InMemStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) err
 		return error
 	}
 	wallet.accountIndex = data
+	return nil
 }
 
 // RetrieveAccountsIndex retrieves the index of accounts for a given wallet.
