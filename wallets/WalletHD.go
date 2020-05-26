@@ -1,0 +1,3 @@
+package wallets
+
+func CreatWallet()
