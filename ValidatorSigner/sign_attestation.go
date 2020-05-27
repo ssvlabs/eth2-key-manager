@@ -59,9 +59,6 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	res := &pb.SignResponse{
 		State:                pb.ResponseState_SUCCEEDED,
 		Signature:            sig.Marshal(),
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
 	}
 
 	// 5. add to protection storage

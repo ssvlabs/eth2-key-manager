@@ -72,7 +72,7 @@ func attestationsFixtures() ([]*pb.SignBeaconAttestationRequest,[]string) {
 		}
 }
 
-func TestRootComputation(t *testing.T) {
+func TestAttestationRootComputation(t *testing.T) {
 	attestations, roots := attestationsFixtures()
 
 	for i := range attestations {
@@ -89,4 +89,8 @@ func TestRootComputation(t *testing.T) {
 	}
 }
 
+
+func TestProposalRootComputation(t *testing.T) {
+	t.Skip("not implemented")
+}
 

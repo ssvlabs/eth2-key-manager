@@ -14,6 +14,11 @@ type ValidatorSigner interface {
 	Sign(req *pb.SignRequest) (*pb.SignResponse, error)
 }
 
+type signingRoot struct {
+	Hash   [32]byte `ssz-size:"32"`
+	Domain []byte `ssz-size:"32"`
+}
+
 type SimpleSigner struct {
 	wallet types.Wallet
 	slashingProtector VaultSlashingProtector

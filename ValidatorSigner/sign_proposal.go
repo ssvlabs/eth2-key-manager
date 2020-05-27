@@ -15,11 +15,6 @@ type beaconBlockHeader struct {
 	BodyRoot      []byte `ssz-size:"32"`
 }
 
-type signingRoot struct {
-	Hash   [32]byte `ssz-size:"32"`
-	Domain []byte `ssz-size:"32"`
-}
-
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
 	// 1. check we can even sign this
 	if val,err := signer.slashingProtector.IsSlashablePropose(req); err != nil || !val {
@@ -58,9 +53,6 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	res := &pb.SignResponse{
 		State:                pb.ResponseState_SUCCEEDED,
 		Signature:            sig.Marshal(),
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
 	}
 
 	// 5. add to protection storage
