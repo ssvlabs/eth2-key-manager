@@ -59,6 +59,9 @@ account, _ = vault.wallet.AccountByName("account")
 // protecting against slashing
 slashProtection := protec.NewNormalProtection(store)
 
-// manage all validator duty signitures
+// manage all validator duty signatures
+// pb package is [what used in prysm](github.com/wealdtech/eth2-signer-api/pb/v1)
 signer := signer.NewSimpleSigner(vault.wallet, slashProtection)
+signer.SignBeaconProposal(*pb.SignBeaconProposalRequest)
+signer.SignBeaconAttestation(*pb.SignBeaconAttestationRequest)
 ```
