@@ -1,7 +1,6 @@
 package ValidatorSigner
 
 import (
-	kv "github.com/bloxapp/KeyVault"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	types "github.com/wealdtech/go-eth2-wallet-types"

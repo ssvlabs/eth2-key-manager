@@ -5,26 +5,46 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
+	"strings"
 )
 
-type HashcorpVaultStore struct {
+type HashicorpVaultStore struct {
 	storage logical.Storage
 	ctx context.Context
 }
 
+func NewHashicorpVaultStore(storage logical.Storage, ctx context.Context) *HashicorpVaultStore {
+	return &HashicorpVaultStore{
+		storage: storage,
+		ctx:     ctx,
+	}
+}
+
 const (
 	WalletBasePathStr = "wallets/"
-	WalletDataPathStr = WalletBasePathStr + "%s/data"
+	WalletIdsBaseePath = WalletBasePathStr + "ids/"
+	WalletDataPathStr = WalletIdsBaseePath + "%s/data"
 
-	WalletAccountBase = WalletBasePathStr + "%s/accounts/"
+	WalletAccountBase = WalletBasePathStr + "ids/%s/accounts/"
 	WalletAccountPath = WalletAccountBase + "%s"
 
 
 	WalletsIdMappingPathStr = WalletBasePathStr + "mappings/%s"
 )
 
+// Name provides the name of the store
+func (store *HashicorpVaultStore) Name() string {
+	return "Hashicorp Vault"
+}
+
+
 // StoreWallet stores wallet data.  It will fail if it cannot store the data.
-func (store *HashcorpVaultStore) StoreWallet(walletID uuid.UUID, walletName string, data []byte) error {
+func (store *HashicorpVaultStore) StoreWallet(walletID uuid.UUID, walletName string, data []byte) error {
+	if len(walletName) == 0 {
+		return fmt.Errorf("wallet name must be provided")
+	}
+
+
 	// put wallet data
 	path := fmt.Sprintf(WalletDataPathStr, walletID.String())
 	entry := &logical.StorageEntry{
@@ -48,14 +68,14 @@ func (store *HashcorpVaultStore) StoreWallet(walletID uuid.UUID, walletName stri
 }
 
 // RetrieveWallet retrieves wallet data for all wallets.
-func (store *HashcorpVaultStore) RetrieveWallets() <-chan []byte {
+func (store *HashicorpVaultStore) RetrieveWallets() <-chan []byte {
 	ch := make(chan []byte, 1024)
 
 	go func() {
-		walletNames,err := store.storage.List(store.ctx, WalletBasePathStr)
+		walletNames,err := store.storage.List(store.ctx, WalletIdsBaseePath)
 		if err == nil {
 			for _, w := range walletNames {
-				path := fmt.Sprintf(WalletDataPathStr, w)
+				path := fmt.Sprintf(WalletDataPathStr, cleanFromPathSymbols(w))
 				entry,error := store.storage.Get(store.ctx,path)
 				if error != nil || entry == nil {
 					continue
@@ -71,10 +91,10 @@ func (store *HashcorpVaultStore) RetrieveWallets() <-chan []byte {
 
 // RetrieveWallet retrieves wallet data for a wallet with a given name.
 // It will fail if it cannot retrieve the data.
-func (store *HashcorpVaultStore) RetrieveWallet(walletName string) ([]byte, error) {
+func (store *HashicorpVaultStore) RetrieveWallet(walletName string) ([]byte, error) {
 	// first find the mapping between wallet name and id
-	path := fmt.Sprintf(WalletsIdMappingPathStr, walletName)
-	entry,error := store.storage.Get(store.ctx,path)
+	mappingpath := fmt.Sprintf(WalletsIdMappingPathStr, walletName)
+	entry,error := store.storage.Get(store.ctx, mappingpath)
 	if error != nil {
 		return nil, error
 	}
@@ -82,12 +102,17 @@ func (store *HashcorpVaultStore) RetrieveWallet(walletName string) ([]byte, erro
 		return nil, fmt.Errorf("could not retrieve mappings to wallet id from wallet name: %s", walletName)
 	}
 
-	return entry.Value,nil
+	// second return wallet by id
+	walletId, err := uuid.Parse(string(entry.Value))
+	if err != nil {
+		return nil, err
+	}
+	return store.RetrieveWalletByID(walletId)
 }
 
 // RetrieveWalletByID retrieves wallet data for a wallet with a given ID.
 // It will fail if it cannot retrieve the data.
-func (store *HashcorpVaultStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) {
+func (store *HashicorpVaultStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) {
 	path := fmt.Sprintf(WalletDataPathStr, walletID.String())
 	entry,error := store.storage.Get(store.ctx,path)
 	if error != nil {
@@ -101,7 +126,13 @@ func (store *HashcorpVaultStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte,
 }
 
 // StoreAccount stores account data.  It will fail if it cannot store the data.
-func (store *HashcorpVaultStore) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, data []byte) error {
+// will fail for non existing wallet
+func (store *HashicorpVaultStore) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, data []byte) error {
+	_, err := store.RetrieveWalletByID(walletID)
+	if err != nil {
+		return err
+	}
+
 	// store account
 	path := fmt.Sprintf(WalletAccountPath, walletID.String(), accountID.String())
 	entry := &logical.StorageEntry{
@@ -113,7 +144,7 @@ func (store *HashcorpVaultStore) StoreAccount(walletID uuid.UUID, accountID uuid
 }
 
 // RetrieveAccounts retrieves account information for all accounts.
-func (store *HashcorpVaultStore) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
+func (store *HashicorpVaultStore) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
 	ch := make(chan []byte, 1024)
 
 	go func() {
@@ -137,7 +168,7 @@ func (store *HashcorpVaultStore) RetrieveAccounts(walletID uuid.UUID) <-chan []b
 
 // RetrieveAccount retrieves account data for a wallet with a given ID.
 // It will fail if it cannot retrieve the data.
-func (store *HashcorpVaultStore) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID) ([]byte, error) {
+func (store *HashicorpVaultStore) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID) ([]byte, error) {
 	path := fmt.Sprintf(WalletAccountPath, walletID.String(), accountID.String())
 	entry,error := store.storage.Get(store.ctx,path)
 	if error != nil {
@@ -151,11 +182,15 @@ func (store *HashcorpVaultStore) RetrieveAccount(walletID uuid.UUID, accountID u
 }
 
 // StoreAccountsIndex stores the index of accounts for a given wallet.
-func (store *HashcorpVaultStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
+func (store *HashicorpVaultStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
 	return fmt.Errorf("StoreAccountsIndex not implemented")
 }
 
 // RetrieveAccountsIndex retrieves the index of accounts for a given wallet.
-func (store *HashcorpVaultStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
+func (store *HashicorpVaultStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
 	return nil,fmt.Errorf("RetrieveAccountsIndex not implemented")
+}
+
+func cleanFromPathSymbols(str string) string {
+	return strings.Replace(str,"/","",-1)
 }
