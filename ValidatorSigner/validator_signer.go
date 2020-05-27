@@ -1,6 +1,7 @@
 package ValidatorSigner
 
 import (
+	"github.com/google/uuid"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
@@ -22,9 +23,20 @@ type signingRoot struct {
 type SimpleSigner struct {
 	wallet types.Wallet
 	slashingProtector VaultSlashingProtector
+	signLocks map[string]*sync.RWMutex
+}
 
-	proposalLocks map[string]*sync.RWMutex
-	attestationLocks map[string]*sync.RWMutex
+// if already locked, will lock until released
+func (signer *SimpleSigner) lock (accountId uuid.UUID, operation string) {
+	k := accountId.String() + "_" + operation
+	signer.signLocks[k] = &sync.RWMutex{}
+	signer.signLocks[k].Lock()
+}
+
+func (signer *SimpleSigner) unlockAndDelete (accountId uuid.UUID, operation string) {
+	k := accountId.String() + "_" + operation
+	signer.signLocks[k].Unlock()
+	delete(signer.signLocks,k)
 }
 
 func prepareForSig(data interface{}, domain []byte) ([32]byte,error) {

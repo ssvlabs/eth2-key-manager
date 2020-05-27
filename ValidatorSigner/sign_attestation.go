@@ -3,7 +3,6 @@ package ValidatorSigner
 import (
 	"fmt"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-	"sync"
 )
 
 // copy from prysm
@@ -40,11 +39,9 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}
 
 	// 3. lock for current account
-	signer.attestationLocks[account.ID().String()] = &sync.RWMutex{}
-	signer.attestationLocks[account.ID().String()].Lock()
+	signer.lock(account.ID(), "attestation")
 	defer func () {
-		signer.attestationLocks[account.ID().String()].Unlock()
-		delete(signer.attestationLocks,account.ID().String())
+		signer.unlockAndDelete(account.ID(), "attestation")
 	}()
 
 	// 4.

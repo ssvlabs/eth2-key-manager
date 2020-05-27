@@ -3,7 +3,6 @@ package ValidatorSigner
 import (
 	"fmt"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-	"sync"
 )
 
 // copy from prysm https://github.com/prysmaticlabs/prysm/blob/master/validator/client/validator_propose.go#L220-L226
@@ -34,11 +33,9 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}
 
 	// 3. lock for current account
-	signer.proposalLocks[account.ID().String()] = &sync.RWMutex{}
-	signer.proposalLocks[account.ID().String()].Lock()
+	signer.lock(account.ID(), "proposal")
 	defer func () {
-		signer.proposalLocks[account.ID().String()].Unlock()
-		delete(signer.proposalLocks,account.ID().String())
+		signer.unlockAndDelete(account.ID(), "proposal")
 	}()
 
 	// 4. generate ssz root hash and sign
