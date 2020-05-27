@@ -1,13 +1,11 @@
 package KeyVault
 
 import (
-	"crypto/rand"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types"
+	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type WalletOptions struct {
 	encryptor wtypes.Encryptor
-	seed []byte
 	password []byte
 	walletIndex uint64
 	name string
@@ -21,11 +19,6 @@ func (options *WalletOptions)SetEncryptor(encryptor wtypes.Encryptor) *WalletOpt
 
 func (options *WalletOptions)SetStore(store wtypes.Store) *WalletOptions {
 	options.store = store
-	return options
-}
-
-func (options *WalletOptions)SetSeed(seed []byte) *WalletOptions {
-	options.seed = seed
 	return options
 }
 
@@ -44,11 +37,11 @@ func (options *WalletOptions)SetWalletIndex(index uint64) *WalletOptions {
 	return options
 }
 
-func (options *WalletOptions) GenerateSeed() error {
-	seed := make([]byte, 32)
-	_, err := rand.Read(seed)
-
-	options.SetSeed(seed)
-
-	return err
-}
+//func (options *WalletOptions) GenerateSeed() error {
+//	seed := make([]byte, 32)
+//	_, err := rand.Read(seed)
+//
+//	options.SetSeed(seed)
+//
+//	return err
+//}

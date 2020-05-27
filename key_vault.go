@@ -11,16 +11,11 @@ type KeyVault struct {
 }
 
 func NewKeyVault(options WalletOptions) (*KeyVault,error) {
-	if options.seed == nil {
-		options.GenerateSeed()
-	}
-
-	wallet,error := hd.CreateWalletFromSeed(
+	wallet,error := hd.CreateWallet(
 		options.name,
 		options.password,
 		options.store,
 		options.encryptor,
-		options.seed,
 	)
 	if error != nil {
 		return nil, error
