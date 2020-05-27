@@ -39,7 +39,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}
 
 	// 3. lock for current account
-	signer.proposalLocks[account.ID().String()] = sync.RWMutex{}
+	signer.proposalLocks[account.ID().String()] = &sync.RWMutex{}
 	signer.proposalLocks[account.ID().String()].Lock()
 	defer func () {
 		signer.proposalLocks[account.ID().String()].Unlock()
@@ -47,18 +47,11 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}()
 
 	// 4. generate ssz root hash and sign
-	data := &beaconBlockHeader{ // Create a local copy of the data; we need ssz size information to calculate the correct root.
-		Slot:          req.Data.Slot,
-		ProposerIndex: req.Data.ProposerIndex,
-		ParentRoot:    req.Data.ParentRoot,
-		StateRoot:     req.Data.StateRoot,
-		BodyRoot:      req.Data.BodyRoot,
-	}
-	forSig,err := signer.prepareForSig(data, req.Domain)
+	forSig,err := prepareProposalReqForSigning(req)
 	if err != nil {
 		return nil, err
 	}
-	sig,err := account.Sign(forSig[:])
+	sig,err := account.Sign(forSig)
 	if err != nil {
 		return nil, err
 	}
@@ -77,4 +70,19 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}
 
 	return res,nil
+}
+
+func prepareProposalReqForSigning(req *pb.SignBeaconProposalRequest) ([]byte,error) {
+	data := &beaconBlockHeader{ // Create a local copy of the data; we need ssz size information to calculate the correct root.
+		Slot:          req.Data.Slot,
+		ProposerIndex: req.Data.ProposerIndex,
+		ParentRoot:    req.Data.ParentRoot,
+		StateRoot:     req.Data.StateRoot,
+		BodyRoot:      req.Data.BodyRoot,
+	}
+	forSig,err := prepareForSig(data, req.Domain)
+	if err != nil {
+		return nil, err
+	}
+	return forSig[:],nil
 }

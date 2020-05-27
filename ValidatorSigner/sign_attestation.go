@@ -40,7 +40,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}
 
 	// 3. lock for current account
-	signer.attestationLocks[account.ID().String()] = sync.RWMutex{}
+	signer.attestationLocks[account.ID().String()] = &sync.RWMutex{}
 	signer.attestationLocks[account.ID().String()].Lock()
 	defer func () {
 		signer.attestationLocks[account.ID().String()].Unlock()
@@ -48,24 +48,11 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}()
 
 	// 4.
-	data := &BeaconAttestation{ // Create a local copy of the data; we need ssz size information to calculate the correct root.
-		Slot:            req.Data.Slot,
-		CommitteeIndex:  req.Data.CommitteeIndex,
-		BeaconBlockRoot: req.Data.BeaconBlockRoot,
-		Source: &Checkpoint{
-			Epoch: req.Data.Source.Epoch,
-			Root:  req.Data.Source.Root,
-		},
-		Target: &Checkpoint{
-			Epoch: req.Data.Target.Epoch,
-			Root:  req.Data.Target.Root,
-		},
-	}
-	forSig,err := signer.prepareForSig(data, req.Domain)
+	forSig,err := prepareAttestationReqForSigning(req)
 	if err != nil {
 		return nil, err
 	}
-	sig,err := account.Sign(forSig[:])
+	sig,err := account.Sign(forSig)
 	if err != nil {
 		return nil, err
 	}
@@ -84,4 +71,25 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}
 
 	return res,nil
+}
+
+func prepareAttestationReqForSigning(req *pb.SignBeaconAttestationRequest) ([]byte,error) {
+	data := &BeaconAttestation{ // Create a local copy of the data; we need ssz size information to calculate the correct root.
+		Slot:            req.Data.Slot,
+		CommitteeIndex:  req.Data.CommitteeIndex,
+		BeaconBlockRoot: req.Data.BeaconBlockRoot,
+		Source: &Checkpoint{
+			Epoch: req.Data.Source.Epoch,
+			Root:  req.Data.Source.Root,
+		},
+		Target: &Checkpoint{
+			Epoch: req.Data.Target.Epoch,
+			Root:  req.Data.Target.Root,
+		},
+	}
+	forSig,err := prepareForSig(data, req.Domain)
+	if err != nil {
+		return nil, err
+	}
+	return forSig[:],nil
 }

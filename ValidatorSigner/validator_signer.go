@@ -18,11 +18,11 @@ type SimpleSigner struct {
 	wallet types.Wallet
 	slashingProtector VaultSlashingProtector
 
-	proposalLocks map[string]sync.RWMutex
-	attestationLocks map[string]sync.RWMutex
+	proposalLocks map[string]*sync.RWMutex
+	attestationLocks map[string]*sync.RWMutex
 }
 
-func (signer *SimpleSigner) prepareForSig(data interface{}, domain []byte) ([32]byte,error) {
+func prepareForSig(data interface{}, domain []byte) ([32]byte,error) {
 	root, err := ssz.HashTreeRoot(data)
 	if err != nil {
 		return [32]byte{}, err
