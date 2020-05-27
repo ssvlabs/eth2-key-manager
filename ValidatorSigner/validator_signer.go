@@ -1,6 +1,7 @@
 package ValidatorSigner
 
 import (
+	"github.com/bloxapp/KeyVault/slashing_protectors"
 	"github.com/google/uuid"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
@@ -21,9 +22,17 @@ type signingRoot struct {
 }
 
 type SimpleSigner struct {
-	wallet types.Wallet
-	slashingProtector VaultSlashingProtector
-	signLocks map[string]*sync.RWMutex
+	wallet            types.Wallet
+	slashingProtector slashing_protectors.VaultSlashingProtector
+	signLocks         map[string]*sync.RWMutex
+}
+
+func NewSimpleSigner(wallet types.Wallet, slashingProtector slashing_protectors.VaultSlashingProtector) *SimpleSigner {
+	return &SimpleSigner{
+		wallet:            wallet,
+		slashingProtector: slashingProtector,
+		signLocks: map[string]*sync.RWMutex{},
+	}
 }
 
 // if already locked, will lock until released

@@ -38,8 +38,21 @@ Make a change in your file and instantaneously see your updates!
 git clone https://github.com/bloxapp/KeyVault.git
 ```
 
-##### Lint (TBD)
-- Before any commit please ensure no lint errors by running
-```sh
+Basic use:
+```go
+	
+// minimal configuration
+store := stores.NewInMemStore()
+encryptor := enc.NewPlainTextEncryptor()
+options := vault.WalletOptions{}
+options.SetEncryptor(encryptor).SetStore(store)
 
+// key management in one place
+vault, _ := NewKeyVault(options)
+
+// protecting against slashing
+slashProtection := protec.NewNormalProtection(store)
+
+// manage all validator duty signitures
+signer := signer.NewSimpleSigner(vault.wallet, slashProtection)
 ```
