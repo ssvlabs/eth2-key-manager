@@ -11,6 +11,7 @@ type KeyVault struct {
 }
 
 func NewKeyVault(options WalletOptions) (*KeyVault,error) {
+	options.SetEncryptor(encryptor).SetStore(store).SetWalletName("wallet").SetWalletPassword("password")
 	wallet,error := hd.CreateWallet(
 		options.name,
 		options.password,

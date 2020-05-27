@@ -44,11 +44,17 @@ Basic use:
 // minimal configuration
 store := stores.NewInMemStore()
 encryptor := enc.NewPlainTextEncryptor()
+
 options := vault.WalletOptions{}
-options.SetEncryptor(encryptor).SetStore(store)
+options.SetEncryptor(encryptor)
+options.SetStore(store)
+options.SetWalletName("wallet")
+options.SetWalletPassword("password")
 
 // key management in one place
 vault, _ := NewKeyVault(options)
+account, _ := vault.wallet.CreateAccount("account","unlock_password")
+account, _ = vault.wallet.AccountByName("account")
 
 // protecting against slashing
 slashProtection := protec.NewNormalProtection(store)

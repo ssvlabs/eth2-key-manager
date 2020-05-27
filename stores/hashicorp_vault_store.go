@@ -44,7 +44,6 @@ func (store *HashicorpVaultStore) StoreWallet(walletID uuid.UUID, walletName str
 		return fmt.Errorf("wallet name must be provided")
 	}
 
-
 	// put wallet data
 	path := fmt.Sprintf(WalletDataPathStr, walletID.String())
 	entry := &logical.StorageEntry{
