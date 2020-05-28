@@ -23,7 +23,13 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 		return nil, fmt.Errorf("slashable proposal, not signing")
 	}
 
-	// 2. get the account
+	// 2. add to protection storage
+	err := signer.slashingProtector.SaveProposal(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. get the account
 	if req.GetAccount() == "" { // TODO by public key
 		return nil, fmt.Errorf("account was not supplied")
 	}
@@ -32,13 +38,13 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 		return nil,error
 	}
 
-	// 3. lock for current account
+	// 4. lock for current account
 	signer.lock(account.ID(), "proposal")
 	defer func () {
 		signer.unlockAndDelete(account.ID(), "proposal")
 	}()
 
-	// 4. generate ssz root hash and sign
+	// 5. generate ssz root hash and sign
 	forSig,err := prepareProposalReqForSigning(req)
 	if err != nil {
 		return nil, err
@@ -50,12 +56,6 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	res := &pb.SignResponse{
 		State:                pb.ResponseState_SUCCEEDED,
 		Signature:            sig.Marshal(),
-	}
-
-	// 5. add to protection storage
-	err = signer.slashingProtector.SaveProposal(req)
-	if err != nil {
-		return nil, err
 	}
 
 	return res,nil

@@ -29,7 +29,13 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 		return nil, fmt.Errorf("slashable attestation, not signing")
 	}
 
-	// 2. get the account
+	// 2. add to protection storage
+	err := signer.slashingProtector.SaveAttestation(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. get the account
 	if req.GetAccount() == "" { // TODO by public key
 		return nil, fmt.Errorf("account was not supplied")
 	}
@@ -38,13 +44,13 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 		return nil,error
 	}
 
-	// 3. lock for current account
+	// 4. lock for current account
 	signer.lock(account.ID(), "attestation")
 	defer func () {
 		signer.unlockAndDelete(account.ID(), "attestation")
 	}()
 
-	// 4.
+	// 5.
 	forSig,err := prepareAttestationReqForSigning(req)
 	if err != nil {
 		return nil, err
@@ -56,12 +62,6 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	res := &pb.SignResponse{
 		State:                pb.ResponseState_SUCCEEDED,
 		Signature:            sig.Marshal(),
-	}
-
-	// 5. add to protection storage
-	err = signer.slashingProtector.SaveAttestation(req)
-	if err != nil {
-		return nil, err
 	}
 
 	return res,nil
