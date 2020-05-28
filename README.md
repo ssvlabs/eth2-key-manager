@@ -50,18 +50,15 @@ options.SetEncryptor(encryptor)
 options.SetStore(store)
 options.SetWalletName("wallet")
 options.SetWalletPassword("password")
+options.EnableSimpleSigner(true) // false by default. if false, signer will not be available
 
 // key management in one place
 vault, _ := NewKeyVault(options)
 account, _ := vault.wallet.CreateAccount("account","unlock_password")
 account, _ = vault.wallet.AccountByName("account")
 
-// protecting against slashing
-slashProtection := protec.NewNormalProtection(store)
-
 // manage all validator duty signatures
 // pb package is [what used in prysm](github.com/wealdtech/eth2-signer-api/pb/v1)
-signer := signer.NewSimpleSigner(vault.wallet, slashProtection)
-signer.SignBeaconProposal(*pb.SignBeaconProposalRequest)
-signer.SignBeaconAttestation(*pb.SignBeaconAttestationRequest)
+vault.signer.SignBeaconProposal(*pb.SignBeaconProposalRequest)
+vault.signer.SignBeaconAttestation(*pb.SignBeaconAttestationRequest)
 ```
