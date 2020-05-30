@@ -9,7 +9,7 @@ type PlainTextEncryptor struct {
 }
 
 type plainTextEncryption struct {
-	original string
+	Original []byte `json:"original"`
 }
 
 func NewPlainTextEncryptor() *PlainTextEncryptor {
@@ -28,8 +28,7 @@ func (encryptor *PlainTextEncryptor) Version() uint {
 
 // Encrypt encrypts a byte array with its encryption mechanism and key
 func (encryptor *PlainTextEncryptor) Encrypt(data []byte, key []byte) (map[string]interface{}, error) {
-	output := &plainTextEncryption{original:string(data)}
-	bytes, err := json.Marshal(output)
+	bytes, err := json.Marshal(plainTextEncryption{Original:data})
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +37,6 @@ func (encryptor *PlainTextEncryptor) Encrypt(data []byte, key []byte) (map[strin
 	if err != nil {
 		return nil, err
 	}
-
 	return res, nil
 }
 
@@ -53,5 +51,5 @@ func (encryptor *PlainTextEncryptor) Decrypt(data map[string]interface{}, key []
 	if err != nil {
 		return nil, err
 	}
-	return []byte(ks.original),nil
+	return ks.Original,nil
 }
