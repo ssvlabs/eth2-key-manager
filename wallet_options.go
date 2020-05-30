@@ -10,6 +10,7 @@ type WalletOptions struct {
 	name string
 	store wtypes.Store
 	enableSimpleSigner bool
+	seed []byte
 }
 
 func (options *WalletOptions)SetEncryptor(encryptor wtypes.Encryptor) *WalletOptions {
@@ -34,6 +35,11 @@ func (options *WalletOptions)SetWalletPassword(password string) *WalletOptions {
 
 func (options *WalletOptions)EnableSimpleSigner(val bool) *WalletOptions {
 	options.enableSimpleSigner = true
+	return options
+}
+
+func (options *WalletOptions)SetSeed(seed []byte) *WalletOptions {
+	options.seed = seed
 	return options
 }
 
