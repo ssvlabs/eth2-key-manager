@@ -1,13 +1,17 @@
-package stores
+package in_memory
 
 import (
 	"fmt"
 	uuid "github.com/google/uuid"
+	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
 type InMemStore struct {
-	memory      map[string]*wallet
-	mapIdToName map[string]string
+	memory         map[string]*wallet
+	accountIndx	   map[string][]byte
+	attMemory      map[string]*pb.SignBeaconAttestationRequest
+	proposalMemory map[string]*pb.SignBeaconProposalRequest
+	mapIdToName    map[string]string
 }
 
 type wallet struct {
@@ -20,8 +24,11 @@ type wallet struct {
 
 func NewInMemStore() *InMemStore {
 	return &InMemStore{
-		memory:      make(map[string]*wallet),
-		mapIdToName: make(map[string]string),
+		memory:         make(map[string]*wallet),
+		accountIndx: 	make(map[string][]byte),
+		mapIdToName:    make(map[string]string),
+		attMemory:      make(map[string]*pb.SignBeaconAttestationRequest),
+		proposalMemory: make(map[string]*pb.SignBeaconProposalRequest),
 	}
 }
 
@@ -120,28 +127,19 @@ func (store *InMemStore) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID
 
 // StoreAccountsIndex stores the index of accounts for a given wallet.
 func (store *InMemStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
-	wallet,error := store.walletById(walletID)
-	if error != nil {
-		return error
-	}
-	wallet.accountIndex = data
+	store.accountIndx[walletID.String()] = data
 	return nil
 }
 
 // RetrieveAccountsIndex retrieves the index of accounts for a given wallet.
 func (store *InMemStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
-	wallet,error := store.walletById(walletID)
-	if error != nil {
-		return nil,error
-	}
-
-	return wallet.accountIndex, nil
+	return store.accountIndx[walletID.String()], nil
 }
 
 func (store *InMemStore) wallet(walletName string) (*wallet,error) {
 	w := store.memory[walletName]
 	if w == nil {
-		return nil, fmt.Errorf("wallet %s not found", walletName)
+		return nil, fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
 	}
 	return w,nil
 }
