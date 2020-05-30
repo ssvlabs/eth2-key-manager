@@ -15,21 +15,7 @@ type beaconBlockHeader struct {
 }
 
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
-	// 1. check we can even sign this
-	if val,err := signer.slashingProtector.IsSlashablePropose(req); err != nil || !val {
-		if err != nil {
-			return nil,err
-		}
-		return nil, fmt.Errorf("slashable proposal, not signing")
-	}
-
-	// 2. add to protection storage
-	err := signer.slashingProtector.SaveProposal(req)
-	if err != nil {
-		return nil, err
-	}
-
-	// 3. get the account
+	// 1. get the account
 	if req.GetAccount() == "" { // TODO by public key
 		return nil, fmt.Errorf("account was not supplied")
 	}
@@ -38,11 +24,25 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 		return nil,error
 	}
 
-	// 4. lock for current account
+	// 2. lock for current account
 	signer.lock(account.ID(), "proposal")
 	defer func () {
 		signer.unlockAndDelete(account.ID(), "proposal")
 	}()
+
+	// 3. check we can even sign this
+	if val,err := signer.slashingProtector.IsSlashablePropose(account,req); err != nil || !val {
+		if err != nil {
+			return nil,err
+		}
+		return nil, fmt.Errorf("slashable proposal, not signing")
+	}
+
+	// 4. add to protection storage
+	err := signer.slashingProtector.SaveProposal(account,req)
+	if err != nil {
+		return nil, err
+	}
 
 	// 5. generate ssz root hash and sign
 	forSig,err := prepareProposalReqForSigning(req)

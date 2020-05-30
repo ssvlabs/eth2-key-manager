@@ -6,32 +6,39 @@ import (
 )
 
 type VaultSlashingProtector interface {
-	IsSlashableAttestation(req *pb.SignBeaconAttestationRequest) (bool,error)
-	IsSlashablePropose(req *pb.SignBeaconProposalRequest) (bool,error)
-	SaveAttestation(req *pb.SignBeaconAttestationRequest) error
-	SaveProposal(req *pb.SignBeaconProposalRequest) error
+	IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) (bool,error)
+	IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error)
+	SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error
+	SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error
+}
+
+type SlashingStore interface {
+	SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error
+	RetrieveAttestation(account types.Account, epoch uint64, slot uint64) (*pb.SignBeaconAttestationRequest, error)
+	SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error
+	RetrieveProposal(account types.Account, epoch uint64, slot uint64) (*pb.SignBeaconProposalRequest, error)
 }
 
 type NormalProtection struct {
-	store types.Store
+	store SlashingStore
 }
 
-func NewNormalProtection(store types.Store) *NormalProtection {
+func NewNormalProtection(store SlashingStore) *NormalProtection {
 	return &NormalProtection{store:store}
 }
 
-func (protector *NormalProtection) IsSlashableAttestation(req *pb.SignBeaconAttestationRequest) (bool,error) {
+func (protector *NormalProtection) IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) (bool,error) {
 	return false,nil
 }
 
-func (protector *NormalProtection) IsSlashablePropose(req *pb.SignBeaconProposalRequest) (bool,error) {
+func (protector *NormalProtection) IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error) {
 	return false,nil
 }
 
-func (protector *NormalProtection) SaveAttestation(req *pb.SignBeaconAttestationRequest) error {
-	return nil
+func (protector *NormalProtection) SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error {
+	return protector.store.SaveAttestation(account,req)
 }
 
-func (protector *NormalProtection) SaveProposal(req *pb.SignBeaconProposalRequest) error {
+func (protector *NormalProtection) SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error {
 	return nil
 }
