@@ -1,7 +1,7 @@
 package KeyVault
 
 import (
-	"github.com/bloxapp/KeyVault/ValidatorSigner"
+	"github.com/bloxapp/KeyVault/validator_signer"
 	"github.com/bloxapp/KeyVault/slashing_protectors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
@@ -9,9 +9,9 @@ import (
 )
 
 type KeyVault struct {
-	store wtypes.Store
+	store  wtypes.Store
 	wallet wtypes.Wallet
-	signer ValidatorSigner.ValidatorSigner
+	signer validator_signer.ValidatorSigner
 }
 
 func NewKeyVault(options WalletOptions) (*KeyVault,error) {
@@ -44,10 +44,10 @@ func NewKeyVault(options WalletOptions) (*KeyVault,error) {
 		}
 	}
 
-	var signer ValidatorSigner.ValidatorSigner
+	var signer validator_signer.ValidatorSigner
 	if options.enableSimpleSigner{
 		slashingProtection := slashing_protectors.NewNormalProtection(options.store.(slashing_protectors.SlashingStore))
-		signer = ValidatorSigner.NewSimpleSigner(wallet,slashingProtection)
+		signer = validator_signer.NewSimpleSigner(wallet,slashingProtection)
 	}
 
 	return &KeyVault{

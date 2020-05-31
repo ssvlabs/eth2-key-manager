@@ -4,9 +4,9 @@
 [![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
 
 Blox KeyVault is a library wrapping all major functionality an eth 2.0 validator will need:
-  - Multi key storage implementations
-  - Signer
-  - Slashing protection
+  - [Multi key storage implementations](https://github.com/bloxapp/KeyVault/tree/master/stores)
+  - [Signer](https://github.com/bloxapp/KeyVault/tree/master/validator_signer)
+  - [Slashing protection](https://github.com/bloxapp/KeyVault/tree/master/slashing_protectors)
   - Tests
 
 
