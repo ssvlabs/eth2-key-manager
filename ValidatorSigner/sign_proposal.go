@@ -2,17 +2,9 @@ package ValidatorSigner
 
 import (
 	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
-
-// copy from prysm https://github.com/prysmaticlabs/prysm/blob/master/validator/client/validator_propose.go#L220-L226
-type beaconBlockHeader struct {
-	Slot          uint64
-	ProposerIndex uint64
-	ParentRoot    []byte `ssz-size:"32"`
-	StateRoot     []byte `ssz-size:"32"`
-	BodyRoot      []byte `ssz-size:"32"`
-}
 
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
 	// 1. get the account
@@ -62,13 +54,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 }
 
 func prepareProposalReqForSigning(req *pb.SignBeaconProposalRequest) ([]byte,error) {
-	data := &beaconBlockHeader{ // Create a local copy of the data; we need ssz size information to calculate the correct root.
-		Slot:          req.Data.Slot,
-		ProposerIndex: req.Data.ProposerIndex,
-		ParentRoot:    req.Data.ParentRoot,
-		StateRoot:     req.Data.StateRoot,
-		BodyRoot:      req.Data.BodyRoot,
-	}
+	data := core.ToCoreBlockData(req)
 	forSig,err := prepareForSig(data, req.Domain)
 	if err != nil {
 		return nil, err
