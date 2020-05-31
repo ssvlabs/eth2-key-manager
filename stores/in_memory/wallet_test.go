@@ -1,19 +1,13 @@
-package hashicorp
+package in_memory
 
 import (
-	"context"
 	"github.com/bloxapp/KeyVault/stores"
-	"github.com/hashicorp/vault/sdk/logical"
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func getStorage() logical.Storage {
-	return &logical.InmemStorage{}
-}
-
 func getWalletStorage() wtypes.Store {
-	return NewHashicorpVaultStore(getStorage(),context.Background())
+	return NewInMemStore()
 }
 
 func TestNonExistingWallet(t *testing.T) {

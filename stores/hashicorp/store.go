@@ -118,7 +118,7 @@ func (store *HashicorpVaultStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte
 		return nil, error
 	}
 	if entry == nil {
-		return nil, fmt.Errorf("could not retrieve wallet id: %s", walletID.String())
+		return nil, fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
 	}
 
 	return entry.Value,nil

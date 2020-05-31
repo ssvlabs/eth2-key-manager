@@ -1,4 +1,4 @@
-package hashicorp
+package in_memory
 
 import (
 	"github.com/bloxapp/KeyVault/stores"
