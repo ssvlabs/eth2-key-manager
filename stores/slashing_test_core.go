@@ -7,6 +7,52 @@ import (
 	"testing"
 )
 
+func TestingSaveProposal(storage slash.SlashingStore, t *testing.T) {
+	tests := []struct {
+		name string
+		proposal *core.BeaconBlockHeader
+		account types.Account
+	}{
+		{
+			name:"simple save",
+			proposal: &core.BeaconBlockHeader{
+				Slot:          100,
+				ProposerIndex: 1,
+				ParentRoot:    []byte("A"),
+				StateRoot:     []byte("A"),
+				BodyRoot:      []byte("A"),
+			},
+			account: core.NewSimpleAccount(),
+		},
+	}
+
+	for _,test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// save
+			err := storage.SaveProposal(test.account,test.proposal)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// fetch
+			proposal,err := storage.RetrieveProposal(test.account,test.proposal.Slot)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if proposal == nil {
+				t.Errorf("proposal not saved and retrieved")
+				return
+			}
+			if proposal.Compare(test.proposal) != true {
+				t.Errorf("retrieved proposal not matching saved attestation")
+				return
+			}
+		})
+	}
+}
+
 func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string

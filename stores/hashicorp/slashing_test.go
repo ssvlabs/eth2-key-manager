@@ -10,10 +10,6 @@ func getSlashingStorage() slash.SlashingStore {
 	return NewInMemStore()
 }
 
-func TestSavingProposal (t *testing.T) {
-	stores.TestingSaveProposal(getSlashingStorage(),t)
-}
-
 func TestSavingAttestation (t *testing.T) {
 	stores.TestingSaveAttestation(getSlashingStorage(),t)
 }
