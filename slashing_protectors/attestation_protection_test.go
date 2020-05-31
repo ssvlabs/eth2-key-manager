@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func setup() (VaultSlashingProtector, types.Account,error) {
+func setupAttestation() (VaultSlashingProtector, types.Account,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
@@ -101,17 +101,34 @@ func setup() (VaultSlashingProtector, types.Account,error) {
 			},
 		},
 	})
+	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+		Id:                   nil,
+		Domain:               []byte("domain"),
+		Data:                 &pb.AttestationData{
+			Slot:                 30,
+			CommitteeIndex:       5,
+			BeaconBlockRoot:      []byte("B"),
+			Source:               &pb.Checkpoint{
+				Epoch:                5,
+				Root:                 []byte("C"),
+			},
+			Target:               &pb.Checkpoint{
+				Epoch:                9,
+				Root:                 []byte("D"),
+			},
+		},
+	})
 	return protector, account1,nil
 }
 
 func TestSurroundingVote(t *testing.T) {
-	protector,account,err := setup()
+	protector,account,err := setupAttestation()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	t.Run("Surrounding vote",func(t *testing.T) {
+	t.Run("1 Surrounded vote",func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
@@ -132,16 +149,52 @@ func TestSurroundingVote(t *testing.T) {
 
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		if len(res) != 1 {
 			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
+			return
 		}
-		if res[0].Status != core.SurroundingVote {
+		if res[0].Status != core.SurroundedVote {
 			t.Errorf("wrong attestation status returned, expected SurroundingVote")
+			return
 		}
 	})
 
-	t.Run("Surrounded vote",func(t *testing.T) {
+	t.Run("2 Surrounded votes",func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+			Id:                   nil,
+			Domain:               []byte("domain"),
+			Data:                 &pb.AttestationData{
+				Slot:                 30,
+				CommitteeIndex:       4,
+				BeaconBlockRoot:      []byte("A"),
+				Source:               &pb.Checkpoint{
+					Epoch:                1,
+					Root:                 []byte("B"),
+				},
+				Target:               &pb.Checkpoint{
+					Epoch:                7,
+					Root:                 []byte("C"),
+				},
+			},
+		})
+
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if len(res) != 2 {
+			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),2)
+			return
+		}
+		if res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote {
+			t.Errorf("wrong attestation status returned, expected SurroundingVote")
+			return
+		}
+	})
+
+	t.Run("1 Surrounding vote",func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
@@ -161,24 +214,59 @@ func TestSurroundingVote(t *testing.T) {
 		})
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		if len(res) != 1 {
 			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
+			return
 		}
-		if res[0].Status != core.SurroundedVote {
+		if res[0].Status != core.SurroundingVote {
 			t.Errorf("wrong attestation status returned, expected SurroundedVote")
+			return
+		}
+	})
+
+	t.Run("2 Surrounding vote",func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+			Id:                   nil,
+			Domain:               []byte("domain"),
+			Data:                 &pb.AttestationData{
+				Slot:                 30,
+				CommitteeIndex:       4,
+				BeaconBlockRoot:      []byte("A"),
+				Source:               &pb.Checkpoint{
+					Epoch:                6,
+					Root:                 []byte("B"),
+				},
+				Target:               &pb.Checkpoint{
+					Epoch:                7,
+					Root:                 []byte("C"),
+				},
+			},
+		})
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if len(res) != 2 {
+			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),2)
+			return
+		}
+		if res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote {
+			t.Errorf("wrong attestation status returned, expected SurroundedVote")
+			return
 		}
 	})
 }
 
 func TestDoubleAttestationVote(t *testing.T) {
-	protector,account,err := setup()
+	protector,account,err := setupAttestation()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	t.Run("Simple1",func(t *testing.T) {
+	t.Run("Different committee index, should slash",func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
@@ -208,20 +296,20 @@ func TestDoubleAttestationVote(t *testing.T) {
 		}
 	})
 
-	t.Run("Simple2",func(t *testing.T) {
+	t.Run("Different block root, should slash",func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
 				Slot:                 30,
-				CommitteeIndex:       4,
-				BeaconBlockRoot:      []byte("A"),
+				CommitteeIndex:       5,
+				BeaconBlockRoot:      []byte("AA"),
 				Source:               &pb.Checkpoint{
-					Epoch:                3,
+					Epoch:                2,
 					Root:                 []byte("B"),
 				},
 				Target:               &pb.Checkpoint{
-					Epoch:                4,
+					Epoch:                3,
 					Root:                 []byte("C"),
 				},
 			},
@@ -238,7 +326,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 		}
 	})
 
-	t.Run("Existing attestation, should not error",func(t *testing.T) {
+	t.Run("Same attestation, should not error",func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
