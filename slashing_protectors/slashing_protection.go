@@ -7,7 +7,7 @@ import (
 )
 
 type VaultSlashingProtector interface {
-	IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) (bool,error)
+	IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus,error)
 	IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error)
 	SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error
 	SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error
@@ -18,6 +18,7 @@ type VaultSlashingProtector interface {
 type SlashingStore interface {
 	SaveAttestation(account types.Account, req *core.BeaconAttestation) error
 	RetrieveAttestation(account types.Account, epoch uint64) (*core.BeaconAttestation, error)
+	// both epochStart and epochEnd reflect saved attestations by their target epoch
 	ListAttestations(account types.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error)
 	SaveProposal(account types.Account, req *core.BeaconBlockHeader) error
 	RetrieveProposal(account types.Account, epoch uint64) (*core.BeaconBlockHeader, error)
@@ -40,7 +41,7 @@ func NewNormalProtection(store SlashingStore) *NormalProtection {
 const epochLookback = 128
 
 // will detect double, surround and surrounded slashable events
-func (protector *NormalProtection) IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) (bool,error) {
+func (protector *NormalProtection) IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus,error) {
 	data := core.ToCoreAttestationData(req)
 
 	lookupStartEpoch := lookupEpochSub(data.Source.Epoch, epochLookback)
@@ -49,21 +50,18 @@ func (protector *NormalProtection) IsSlashableAttestation(account types.Account,
 	// lookupEndEpoch should be the latest written attestation, if not than req.Data.Target.Epoch
 	latestAtt,err := protector.RetrieveLatestAttestation(account)
 	if err != nil {
-		return true,err
+		return nil,err
 	}
 	if latestAtt != nil {
 		lookupEndEpoch = latestAtt.Target.Epoch
 	}
 
-
 	history,err := protector.store.ListAttestations(account, lookupStartEpoch, lookupEndEpoch)
 	if err != nil {
-		return true,err
+		return nil,err
 	}
 
-	slashableAttestations := data.SlashesAttestations(history)
-
-	return len(slashableAttestations)!=0, nil
+	return data.SlashesAttestations(history), nil
 }
 
 func (protector *NormalProtection) IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error) {

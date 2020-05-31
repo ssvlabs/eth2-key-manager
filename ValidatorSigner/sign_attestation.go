@@ -23,7 +23,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}()
 
 	// 3. check we can even sign this
-	if val,err := signer.slashingProtector.IsSlashableAttestation(account,req); err != nil || !val {
+	if val,err := signer.slashingProtector.IsSlashableAttestation(account,req); err != nil || len(val) != 0 {
 		if err != nil {
 			return nil,err
 		}

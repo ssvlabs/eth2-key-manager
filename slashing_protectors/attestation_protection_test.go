@@ -2,6 +2,7 @@ package slashing_protectors
 
 import (
 	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/encryptors"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
@@ -40,6 +41,23 @@ func setup() (VaultSlashingProtector, types.Account,error) {
 			CommitteeIndex:       5,
 			BeaconBlockRoot:      []byte("A"),
 			Source:               &pb.Checkpoint{
+				Epoch:                1,
+				Root:                 []byte("B"),
+			},
+			Target:               &pb.Checkpoint{
+				Epoch:                2,
+				Root:                 []byte("C"),
+			},
+		},
+	})
+	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+		Id:                   nil,
+		Domain:               []byte("domain"),
+		Data:                 &pb.AttestationData{
+			Slot:                 30,
+			CommitteeIndex:       5,
+			BeaconBlockRoot:      []byte("A"),
+			Source:               &pb.Checkpoint{
 				Epoch:                2,
 				Root:                 []byte("B"),
 			},
@@ -66,11 +84,94 @@ func setup() (VaultSlashingProtector, types.Account,error) {
 			},
 		},
 	})
+	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+		Id:                   nil,
+		Domain:               []byte("domain"),
+		Data:                 &pb.AttestationData{
+			Slot:                 30,
+			CommitteeIndex:       5,
+			BeaconBlockRoot:      []byte("B"),
+			Source:               &pb.Checkpoint{
+				Epoch:                4,
+				Root:                 []byte("C"),
+			},
+			Target:               &pb.Checkpoint{
+				Epoch:                10,
+				Root:                 []byte("D"),
+			},
+		},
+	})
 	return protector, account1,nil
 }
 
+func TestSurroundingVote(t *testing.T) {
+	protector,account,err := setup()
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
-func TestCorrectAttestation(t *testing.T) {
+	t.Run("Surrounding vote",func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+			Id:                   nil,
+			Domain:               []byte("domain"),
+			Data:                 &pb.AttestationData{
+				Slot:                 30,
+				CommitteeIndex:       4,
+				BeaconBlockRoot:      []byte("A"),
+				Source:               &pb.Checkpoint{
+					Epoch:                2,
+					Root:                 []byte("B"),
+				},
+				Target:               &pb.Checkpoint{
+					Epoch:                5,
+					Root:                 []byte("C"),
+				},
+			},
+		})
+
+		if err != nil {
+			t.Error(err)
+		}
+		if len(res) != 1 {
+			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
+		}
+		if res[0].Status != core.SurroundingVote {
+			t.Errorf("wrong attestation status returned, expected SurroundingVote")
+		}
+	})
+
+	t.Run("Surrounded vote",func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+			Id:                   nil,
+			Domain:               []byte("domain"),
+			Data:                 &pb.AttestationData{
+				Slot:                 30,
+				CommitteeIndex:       4,
+				BeaconBlockRoot:      []byte("A"),
+				Source:               &pb.Checkpoint{
+					Epoch:                5,
+					Root:                 []byte("B"),
+				},
+				Target:               &pb.Checkpoint{
+					Epoch:                7,
+					Root:                 []byte("C"),
+				},
+			},
+		})
+		if err != nil {
+			t.Error(err)
+		}
+		if len(res) != 1 {
+			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
+		}
+		if res[0].Status != core.SurroundedVote {
+			t.Errorf("wrong attestation status returned, expected SurroundedVote")
+		}
+	})
+}
+
+func TestDoubleAttestationVote(t *testing.T) {
 	protector,account,err := setup()
 	if err != nil {
 		t.Error(err)
@@ -99,8 +200,11 @@ func TestCorrectAttestation(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if res != true {
-			t.Error(fmt.Errorf("non correct attestation found no slashable"))
+		if len(res) != 1 {
+			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
+		}
+		if res[0].Status != core.DoubleVote {
+			t.Errorf("wrong attestation status returned, expected DoubleVote")
 		}
 	})
 
@@ -126,8 +230,11 @@ func TestCorrectAttestation(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if res != true {
-			t.Error(fmt.Errorf("non correct attestation found no slashable"))
+		if len(res) != 1 {
+			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
+		}
+		if res[0].Status != core.DoubleVote {
+			t.Errorf("wrong attestation status returned, expected DoubleVote")
 		}
 	})
 
@@ -150,10 +257,7 @@ func TestCorrectAttestation(t *testing.T) {
 			},
 		})
 
-		if err != nil {
-			t.Error(err)
-		}
-		if res != false {
+		if err != nil || len(res) != 0 {
 			t.Error(fmt.Errorf("correct attestation found slashable"))
 		}
 	})
@@ -167,20 +271,17 @@ func TestCorrectAttestation(t *testing.T) {
 				CommitteeIndex:       5,
 				BeaconBlockRoot:      []byte("E"),
 				Source:               &pb.Checkpoint{
-					Epoch:                6,
+					Epoch:                10,
 					Root:                 []byte("I"),
 				},
 				Target:               &pb.Checkpoint{
-					Epoch:                7,
+					Epoch:                11,
 					Root:                 []byte("H"),
 				},
 			},
 		})
 
-		if err != nil {
-			t.Error(err)
-		}
-		if res != false {
+		if err != nil || len(res) != 0 {
 			t.Error(fmt.Errorf("correct attestation found slashable"))
 		}
 	})
