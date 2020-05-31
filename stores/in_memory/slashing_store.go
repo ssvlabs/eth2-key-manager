@@ -42,6 +42,15 @@ func (store *InMemStore) RetrieveProposal(account types.Account, epoch uint64) (
 	return ret,nil
 }
 
+func (store *InMemStore) SaveLatestAttestation(account types.Account, req *core.BeaconAttestation) error {
+	store.attMemory[account.ID().String() + "_latest"] = req
+	return nil
+}
+
+func (store *InMemStore) RetrieveLatestAttestation(account types.Account) (*core.BeaconAttestation, error) {
+	return store.attMemory[account.ID().String() + "_latest"],nil
+}
+
 func attestationKey(account types.Account, targetEpoch uint64) string {
 	return fmt.Sprintf("%s_%d",account.ID().String(),targetEpoch)
 }
