@@ -27,10 +27,9 @@ type BeaconAttestation struct {
 
 type VoteDetectionType uint8
 const (
-	Verified 		VoteDetectionType = 0
-	DoubleVote 		VoteDetectionType = 1
-	SurroundingVote VoteDetectionType = 2
-	SurroundedVote 	VoteDetectionType = 3
+	DoubleVote 		VoteDetectionType = 0
+	SurroundingVote VoteDetectionType = 1
+	SurroundedVote 	VoteDetectionType = 2
 )
 
 type AttestationSlashStatus struct {

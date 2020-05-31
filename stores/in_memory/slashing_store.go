@@ -34,8 +34,8 @@ func (store *InMemStore) SaveProposal(account types.Account, req *core.BeaconBlo
 	return nil
 }
 
-func (store *InMemStore) RetrieveProposal(account types.Account, epoch uint64) (*core.BeaconBlockHeader, error) {
-	ret := store.proposalMemory[proposalKey(account,epoch)]
+func (store *InMemStore) RetrieveProposal(account types.Account, slot uint64) (*core.BeaconBlockHeader, error) {
+	ret := store.proposalMemory[proposalKey(account,slot)]
 	if ret == nil {
 		return nil,fmt.Errorf("proposal not found")
 	}

@@ -23,7 +23,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}()
 
 	// 3. check we can even sign this
-	if val,err := signer.slashingProtector.IsSlashablePropose(account,req); err != nil || !val {
+	if val,err := signer.slashingProtector.IsSlashableProposal(account,req); err != nil || val != nil {
 		if err != nil {
 			return nil,err
 		}

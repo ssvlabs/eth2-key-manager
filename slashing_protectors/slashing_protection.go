@@ -8,7 +8,7 @@ import (
 
 type VaultSlashingProtector interface {
 	IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus,error)
-	IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error)
+	IsSlashableProposal(account types.Account, req *pb.SignBeaconProposalRequest) (*core.ProposalSlashStatus,error)
 	SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error
 	SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error
 	SaveLatestAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error
@@ -21,7 +21,7 @@ type SlashingStore interface {
 	// both epochStart and epochEnd reflect saved attestations by their target epoch
 	ListAttestations(account types.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error)
 	SaveProposal(account types.Account, req *core.BeaconBlockHeader) error
-	RetrieveProposal(account types.Account, epoch uint64) (*core.BeaconBlockHeader, error)
+	RetrieveProposal(account types.Account, slot uint64) (*core.BeaconBlockHeader, error)
 	SaveLatestAttestation(account types.Account, req *core.BeaconAttestation) error
 	RetrieveLatestAttestation(account types.Account) (*core.BeaconAttestation, error)
 }
@@ -64,8 +64,28 @@ func (protector *NormalProtection) IsSlashableAttestation(account types.Account,
 	return data.SlashesAttestations(history), nil
 }
 
-func (protector *NormalProtection) IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error) {
-	return false,nil
+func (protector *NormalProtection) IsSlashableProposal(account types.Account, req *pb.SignBeaconProposalRequest) (*core.ProposalSlashStatus,error) {
+	matchedProposal,err := protector.store.RetrieveProposal(account,req.Data.Slot)
+	if err != nil && err.Error() != "proposal not found" {
+		return nil, err
+	}
+
+	if matchedProposal == nil {
+		return nil,nil
+	}
+
+	data := core.ToCoreBlockData(req)
+
+	// if it's the same
+	if data.Compare(matchedProposal) {
+		return nil, nil
+	}
+
+	// slashable
+	return &core.ProposalSlashStatus{
+		Proposal: data,
+		Status:   core.DoubleProposal,
+	},nil
 }
 
 func (protector *NormalProtection) SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error {
