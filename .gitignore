@@ -28,7 +28,6 @@ yarn-error.log
 password.txt
 
 # go dependancy
-/go.mod
 /go.sum
 
 # Dist files
