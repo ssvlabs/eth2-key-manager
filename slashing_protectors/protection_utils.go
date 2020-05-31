@@ -1,1 +1,0 @@
-package slashing_protectors

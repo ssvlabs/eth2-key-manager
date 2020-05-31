@@ -1,6 +1,7 @@
 package slashing_protectors
 
 import (
+	"github.com/bloxapp/KeyVault/core"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
@@ -13,10 +14,11 @@ type VaultSlashingProtector interface {
 }
 
 type SlashingStore interface {
-	SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error
-	RetrieveAttestation(account types.Account, epoch uint64, slot uint64) (*pb.SignBeaconAttestationRequest, error)
-	SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error
-	RetrieveProposal(account types.Account, epoch uint64, slot uint64) (*pb.SignBeaconProposalRequest, error)
+	SaveAttestation(account types.Account, req *core.BeaconAttestation) error
+	RetrieveAttestation(account types.Account, epoch uint64) (*core.BeaconAttestation, error)
+	ListAttestations(account types.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error)
+	SaveProposal(account types.Account, req *core.BeaconBlockHeader) error
+	RetrieveProposal(account types.Account, epoch uint64) (*core.BeaconBlockHeader, error)
 }
 
 type NormalProtection struct {
@@ -36,9 +38,11 @@ func (protector *NormalProtection) IsSlashablePropose(account types.Account, req
 }
 
 func (protector *NormalProtection) SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error {
-	return protector.store.SaveAttestation(account,req)
+	data := core.ToCoreAttestationData(req)
+	return protector.store.SaveAttestation(account,data)
 }
 
 func (protector *NormalProtection) SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error {
-	return nil
+	data := core.ToCoreBlockData(req)
+	return protector.store.SaveProposal(account,data)
 }

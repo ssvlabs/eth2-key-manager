@@ -2,15 +2,15 @@ package in_memory
 
 import (
 	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	uuid "github.com/google/uuid"
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
 type InMemStore struct {
 	memory         map[string]*wallet
 	accountIndx	   map[string][]byte
-	attMemory      map[string]*pb.SignBeaconAttestationRequest
-	proposalMemory map[string]*pb.SignBeaconProposalRequest
+	attMemory      map[string]*core.BeaconAttestation
+	proposalMemory map[string]*core.BeaconBlockHeader
 	mapIdToName    map[string]string
 }
 
@@ -27,8 +27,8 @@ func NewInMemStore() *InMemStore {
 		memory:         make(map[string]*wallet),
 		accountIndx: 	make(map[string][]byte),
 		mapIdToName:    make(map[string]string),
-		attMemory:      make(map[string]*pb.SignBeaconAttestationRequest),
-		proposalMemory: make(map[string]*pb.SignBeaconProposalRequest),
+		attMemory:      make(map[string]*core.BeaconAttestation),
+		proposalMemory: make(map[string]*core.BeaconBlockHeader),
 	}
 }
 

@@ -2,16 +2,16 @@ package in_memory
 
 import (
 	"fmt"
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
+	"github.com/bloxapp/KeyVault/core"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
-func (store *InMemStore) SaveAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) error {
-	store.attMemory[attestationKey(account,req.Data.Target.Epoch)] = req
+func (store *InMemStore) SaveAttestation(account types.Account, req *core.BeaconAttestation) error {
+	store.attMemory[attestationKey(account,req.Target.Epoch)] = req
 	return nil
 }
 
-func (store *InMemStore) RetrieveAttestation(account types.Account, epoch uint64, slot uint64) (*pb.SignBeaconAttestationRequest, error) {
+func (store *InMemStore) RetrieveAttestation(account types.Account, epoch uint64) (*core.BeaconAttestation, error) {
 	ret := store.attMemory[attestationKey(account,epoch)]
 	if ret == nil {
 		return nil,fmt.Errorf("attestation not found")
@@ -19,12 +19,22 @@ func (store *InMemStore) RetrieveAttestation(account types.Account, epoch uint64
 	return ret,nil
 }
 
-func (store *InMemStore) SaveProposal(account types.Account, req *pb.SignBeaconProposalRequest) error {
-	store.proposalMemory[proposalKey(account,req.Data.Slot)] = req
+func (store *InMemStore) ListAttestations(account types.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {
+	ret := make([]*core.BeaconAttestation,0)
+	for i:= epochStart ; i <= epochEnd ; i++ {
+		if val,err := store.RetrieveAttestation(account,i); val != nil && err == nil {
+			ret = append(ret, val)
+		}
+	}
+	return ret,nil
+}
+
+func (store *InMemStore) SaveProposal(account types.Account, req *core.BeaconBlockHeader) error {
+	store.proposalMemory[proposalKey(account,req.Slot)] = req
 	return nil
 }
 
-func (store *InMemStore) RetrieveProposal(account types.Account, epoch uint64, slot uint64) (*pb.SignBeaconProposalRequest, error) {
+func (store *InMemStore) RetrieveProposal(account types.Account, epoch uint64) (*core.BeaconBlockHeader, error) {
 	ret := store.proposalMemory[proposalKey(account,epoch)]
 	if ret == nil {
 		return nil,fmt.Errorf("proposal not found")
