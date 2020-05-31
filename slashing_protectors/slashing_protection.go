@@ -29,8 +29,26 @@ func NewNormalProtection(store SlashingStore) *NormalProtection {
 	return &NormalProtection{store:store}
 }
 
+// From prysm:
+// We look back 128 epochs when updating min/max spans
+// for incoming attestations.
+// TODO - verify this is true
+const epochLookback = 128
+
+// will detect double, surround and surrounded slashable events
 func (protector *NormalProtection) IsSlashableAttestation(account types.Account, req *pb.SignBeaconAttestationRequest) (bool,error) {
-	return false,nil
+	data := core.ToCoreAttestationData(req)
+
+	lookupStartEpoch := data.Source.Epoch
+	lookupEndEpoch := data.Target.Epoch
+	history,err := protector.store.ListAttestations(account, lookupStartEpoch, lookupEndEpoch)
+	if err != nil {
+		return true,err
+	}
+
+	slashableAttestations := data.SlashesAttestations(history)
+
+	return len(slashableAttestations)!=0, nil
 }
 
 func (protector *NormalProtection) IsSlashablePropose(account types.Account, req *pb.SignBeaconProposalRequest) (bool,error) {
