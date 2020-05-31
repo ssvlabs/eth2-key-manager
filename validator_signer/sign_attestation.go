@@ -1,4 +1,4 @@
-package ValidatorSigner
+package validator_signer
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
-func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
+func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error) {
 	// 1. get the account
 	if req.GetAccount() == "" { // TODO by public key
 		return nil, fmt.Errorf("account was not supplied")
@@ -17,27 +17,27 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}
 
 	// 2. lock for current account
-	signer.lock(account.ID(), "proposal")
+	signer.lock(account.ID(), "attestation")
 	defer func () {
-		signer.unlockAndDelete(account.ID(), "proposal")
+		signer.unlockAndDelete(account.ID(), "attestation")
 	}()
 
 	// 3. check we can even sign this
-	if val,err := signer.slashingProtector.IsSlashableProposal(account,req); err != nil || val != nil {
+	if val,err := signer.slashingProtector.IsSlashableAttestation(account,req); err != nil || len(val) != 0 {
 		if err != nil {
 			return nil,err
 		}
-		return nil, fmt.Errorf("slashable proposal, not signing")
+		return nil, fmt.Errorf("slashable attestation, not signing")
 	}
 
 	// 4. add to protection storage
-	err := signer.slashingProtector.SaveProposal(account,req)
+	err := signer.slashingProtector.SaveAttestation(account,req)
 	if err != nil {
 		return nil, err
 	}
 
-	// 5. generate ssz root hash and sign
-	forSig,err := prepareProposalReqForSigning(req)
+	// 5.
+	forSig,err := prepareAttestationReqForSigning(req)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +53,8 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	return res,nil
 }
 
-func prepareProposalReqForSigning(req *pb.SignBeaconProposalRequest) ([]byte,error) {
-	data := core.ToCoreBlockData(req)
+func prepareAttestationReqForSigning(req *pb.SignBeaconAttestationRequest) ([]byte,error) {
+	data := core.ToCoreAttestationData(req)
 	forSig,err := prepareForSig(data, req.Domain)
 	if err != nil {
 		return nil, err

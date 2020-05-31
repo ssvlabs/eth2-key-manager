@@ -1,4 +1,4 @@
-package ValidatorSigner
+package validator_signer
 
 import (
 	"fmt"
