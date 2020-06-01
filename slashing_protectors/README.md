@@ -11,6 +11,8 @@ Slashing can occur for validators proposing a block or signing attestations whic
 #### Attestation - Double Vote
 Description: Do not sign 2 attestations for the same block height. [eth 2 spec](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/validator.md#attester-slashing).
 
+![alt text](https://github.com/bloxapp/KeyVault/blob/master/slashing_protectors/images/Screen%20Shot%202020-06-01%20at%208.51.17.png?raw=true)
+
  ```python
 def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationData) -> bool:
     """
