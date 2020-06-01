@@ -1,8 +1,8 @@
 package KeyVault
 
 import (
-	"github.com/bloxapp/KeyVault/validator_signer"
 	"github.com/bloxapp/KeyVault/slashing_protectors"
+	"github.com/bloxapp/KeyVault/validator_signer"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
