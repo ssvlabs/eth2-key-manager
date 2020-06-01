@@ -28,10 +28,12 @@ def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationDa
 Description: Do not surround an already existing attestation/s, a.k.a do not forget them. [eth 2 spec](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/validator.md#attester-slashing).
 
 Surrounded:
+
 ![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protectors/images/Screen%20Shot%202020-06-01%20at%208.51.21.png?raw=true)
 
 
 Surrounding:
+
 ![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protectors/images/Screen%20Shot%202020-06-01%20at%208.51.27.png?raw=true)
 
 
