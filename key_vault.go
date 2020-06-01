@@ -14,7 +14,34 @@ type KeyVault struct {
 	Signer validator_signer.ValidatorSigner
 }
 
-func NewKeyVault(options WalletOptions) (*KeyVault,error) {
+func OpenKeyVault(options *WalletOptions) (*KeyVault,error) {
+	if err := e2types.InitBLS(); err != nil { // very important!
+		return nil,err
+	}
+
+	wallet,err := hd.OpenWallet(
+			options.name,
+			options.store,
+			options.encryptor,
+		)
+	if err != nil {
+		return nil, err
+	}
+
+	var signer validator_signer.ValidatorSigner
+	if options.enableSimpleSigner{
+		slashingProtection := slashing_protectors.NewNormalProtection(options.store.(slashing_protectors.SlashingStore))
+		signer = validator_signer.NewSimpleSigner(wallet,slashingProtection)
+	}
+
+	return &KeyVault{
+		Store:  options.store,
+		Wallet: wallet,
+		Signer: signer,
+	},nil
+}
+
+func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,err
 	}
