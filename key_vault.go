@@ -9,9 +9,9 @@ import (
 )
 
 type KeyVault struct {
-	store  wtypes.Store
-	wallet wtypes.Wallet
-	signer validator_signer.ValidatorSigner
+	Store  wtypes.Store
+	Wallet wtypes.Wallet
+	Signer validator_signer.ValidatorSigner
 }
 
 func NewKeyVault(options WalletOptions) (*KeyVault,error) {
@@ -51,8 +51,8 @@ func NewKeyVault(options WalletOptions) (*KeyVault,error) {
 	}
 
 	return &KeyVault{
-		store:  options.store,
-		wallet:	wallet,
-		signer: signer,
+		Store:  options.store,
+		Wallet: wallet,
+		Signer: signer,
 	},nil
 }
