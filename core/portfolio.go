@@ -15,7 +15,11 @@ type Portfolio interface {
 	// AccountByName provides a single account from the wallet given its name.
 	// This will error if the account is not found.
 	WalletByName(name string) (Wallet, error)
+	// lock will encrypt the seed, save it to memory and nil the plain text seed.
+	// it will use an internally save locking password so it could be locked at all times
 	Lock() error
 	IsLocked() bool
+	// unlock will decrypt the seed and save on memory
+	// it needs a provided password
 	Unlock(password []byte) error
 }

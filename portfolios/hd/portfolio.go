@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"github.com/wealdtech/go-indexer"
+	util "github.com/wealdtech/go-eth2-util"
 )
 
 // This is an EIP 2333,2334,2335 compliant hierarchical deterministic wallet
@@ -19,14 +20,53 @@ type HDPortfolio struct {
 	lockPolicy core.LockablePolicy
 	walletsIndexer indexer.Index // maps indexs <> names
 	walletIds []uuid.UUID
-	lockPassword []byte
+	lockPassword []byte // only used internally for quick lock
 }
 
 // CreateAccount creates a new account in the wallet.
 // This will error if an account with the name already exists.
 // Will push to the new wallet the lock policy
 func (portfolio *HDPortfolio) CreateWallet(name string) (core.Wallet, error) {
+	var retWallet *HDWallet
+	if portfolio.IsLocked() {
+		return nil,fmt.Errorf("portfolio is locked")
+	}
+	defer func() {
+		if portfolio.lockPolicy.LockAfterOperation(core.Creation) {
+			portfolio.Lock()
+			if retWallet != nil {
+				retWallet.Lock()
+			}
+		}
+	}()
 
+	// create wallet
+	id := len(portfolio.walletIds)
+	path := fmt.Sprintf("m/12381/3600/%d",id)
+	nodeBytes,err := util.PrivateKeyFromSeedAndPath(portfolio.seed.Seed(),path)
+	if err != nil {
+		return nil,err
+	}
+	lockableKey := core.NewEncryptableSeed(nodeBytes.Marshal(),portfolio.encryptor)
+	retWallet = NewHDWallet(name,
+		lockableKey,
+		path,
+		portfolio.lockPolicy,
+		portfolio.encryptor,
+		portfolio.lockPassword,
+	)
+
+	// register new wallet and save portfolio
+	portfolio.walletIds = append(portfolio.walletIds,retWallet.id)
+	portfolio.walletsIndexer.Add(retWallet.id,name)
+	err = portfolio.storage.SavePortfolio(portfolio)
+	if err != nil {
+		portfolio.walletsIndexer.Remove(retWallet.id,name)
+		portfolio.walletIds = portfolio.walletIds[:len(portfolio.walletIds)-1]
+		return nil,err
+	}
+
+	return retWallet,nil
 }
 
 // Accounts provides all accounts in the wallet.
