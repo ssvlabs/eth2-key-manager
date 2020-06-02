@@ -18,6 +18,12 @@ func (signer *SimpleSigner) Sign(req *pb.SignRequest) (*pb.SignResponse, error) 
 	if error != nil {
 		return nil,error
 	}
+	if !account.IsUnlocked() {
+		err := account.Unlock([]byte("")) // TODO
+		if err != nil {
+			return nil,err
+		}
+	}
 
 	// 3. lock for current account
 	// TODO - shoul we?
