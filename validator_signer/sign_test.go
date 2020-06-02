@@ -1,13 +1,14 @@
 package validator_signer
 
 import (
-	"bytes"
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault/encryptors"
+	"fmt"
 	prot "github.com/bloxapp/KeyVault/slashing_protectors"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+	util "github.com/wealdtech/go-eth2-util"
+	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
@@ -28,7 +29,7 @@ func walletWithSeed(seed []byte, store types.Store) (types.Wallet,error) {
 		return nil,err
 	}
 
-	wallet, err := hd.CreateWalletFromSeed("test",[]byte(""),store,encryptors.NewPlainTextEncryptor(),seed)
+	wallet, err := hd.CreateWalletFromSeed("test",[]byte(""),store,keystorev4.New(),seed)
 	if err != nil {
 		return nil,err
 	}
@@ -36,14 +37,16 @@ func walletWithSeed(seed []byte, store types.Store) (types.Wallet,error) {
 	if err != nil {
 		return nil,err
 	}
-	account,err := wallet.CreateAccount("1",[]byte(""))
+	_,err = wallet.CreateAccount("1",[]byte(""))
 	if err != nil {
 		return nil,err
 	}
-	err = account.Unlock([]byte(""))
+	_,err = wallet.CreateAccount("2",[]byte("1234")) // non standard password, will not be able to unlock
 	if err != nil {
 		return nil,err
 	}
+
+
 	return wallet,nil
 }
 
@@ -54,12 +57,18 @@ func TestSignatures(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0")
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	tests := []struct {
 		name string
 		req *pb.SignRequest
-		expectedSig []byte
 		expectedError error
+		accountPriv *e2types.BLSPrivateKey
+		msg string
 	}{
 		{
 			name:"simple sign",
@@ -68,8 +77,31 @@ func TestSignatures(t *testing.T) {
 				Data:                 []byte("data"),
 				Domain:               []byte("domain"),
 			},
-			expectedSig: []byte(""),
 			expectedError: nil,
+			accountPriv: accountPriv,
+			msg: "c47e6c550b583a4bce0f2504d81045042d7c4bf439f769e8838f8686a93993f7",
+		},
+		{
+			name:"unknown account, should error",
+			req: &pb.SignRequest{
+				Id:                   &pb.SignRequest_Account{Account:"10"},
+				Data:                 []byte("data"),
+				Domain:               []byte("domain"),
+			},
+			expectedError: fmt.Errorf("no account with name \"10\""),
+			accountPriv: nil,
+			msg: "",
+		},
+		{
+			name:"unable to unlock account, should error",
+			req: &pb.SignRequest{
+				Id:                   &pb.SignRequest_Account{Account:"2"},
+				Data:                 []byte("data"),
+				Domain:               []byte("domain"),
+			},
+			expectedError: fmt.Errorf("incorrect passphrase"),
+			accountPriv: nil,
+			msg: "",
 		},
 	}
 
@@ -84,10 +116,32 @@ func TestSignatures(t *testing.T) {
 				} else {
 					t.Errorf("no error returned, expected: %s", test.expectedError.Error())
 				}
-			} else if bytes.Compare(res.Signature,test.expectedSig) != 0 {
-				t.Errorf("returned signature different that expectd.")
+			} else {
+				// check sign worked
+				if err != nil {
+					t.Error(err)
+					return
+				}
+
+				sig,err := e2types.BLSSignatureFromBytes(res.Signature)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				msgBytes,err := hex.DecodeString(test.msg)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				if !sig.Verify(msgBytes,test.accountPriv.PublicKey()) {
+					t.Errorf("signature does not verify against pubkey",)
+				}
 			}
 
+
+			//else if hex.EncodeToString(res.Signature) == test.expectedSigHex {
+			//	t.Errorf("sig doesn't match expected")
+			//}
 		})
 	}
 }

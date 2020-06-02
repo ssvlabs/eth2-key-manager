@@ -11,6 +11,19 @@ func ignoreError(val interface{}, err error)interface{} {
 	return val
 }
 
+func aggreggateFixtures() ([]*pb.SignRequest,[]string) {
+	return []*pb.SignRequest{
+		{
+			Id:&pb.SignRequest_Account{Account:"1"},
+			Data:[]byte("data"),
+			Domain: []byte("domain"),
+		},
+	},
+	[]string{
+		"c47e6c550b583a4bce0f2504d81045042d7c4bf439f769e8838f8686a93993f7",
+	}
+}
+
 func proposalFixtures() ([]*pb.SignBeaconProposalRequest,[]string) {
 	return []*pb.SignBeaconProposalRequest{
 			{
@@ -113,6 +126,22 @@ func attestationsFixtures() ([]*pb.SignBeaconAttestationRequest,[]string) {
 			"a69d9159fb2be639ef74749eca81d60490e1589bf75011aca8c5c0324cf463c0",
 			"310351fd11e8fc3c7342ca91fde5e29b69873df4f378355988af583cd47b9206",
 		}
+}
+
+func TestSignRootComputation(t *testing.T) {
+	reqs, roots := aggreggateFixtures()
+	for i := range reqs {
+		t.Run(fmt.Sprintf("TestRootComputation %d", i), func(t *testing.T) {
+			root,error := prepareReqForSigning(reqs[i])
+			if error != nil {
+				t.Error(error)
+			}
+			expectedroot := roots[i]
+			if val := hex.EncodeToString(root[:]); val != expectedroot {
+				t.Error(fmt.Errorf("calculateed root: %s not equal to expected root: %s",val, expectedroot))
+			}
+		})
+	}
 }
 
 func TestAttestationRootComputation(t *testing.T) {
