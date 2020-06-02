@@ -140,3 +140,50 @@ func TestingWalletStorage(storage wtypes.Store, t *testing.T) {
 		})
 	}
 }
+
+func TestingUpdatingWallet(storage wtypes.Store, t *testing.T) {
+	id := uuid.New()
+
+	// new wallet
+	err := storage.StoreWallet(id,"wallet",[]byte("wallet"))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// add accounts
+	err = storage.StoreAccount(id,uuid.New(),[]byte("account 1"))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	err = storage.StoreAccount(id,uuid.New(),[]byte("account 2"))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// update just wallet data
+	err = storage.StoreWallet(id,"wallet",[]byte("wallet updated"))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	// verify wallet data
+	value, err := storage.RetrieveWalletByID(id)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare([]byte("wallet updated"),value) != 0 {
+		t.Error(fmt.Errorf("did not retrieve the same data, required: %s, received: %s","wallet updated", string(value)))
+		return
+	}
+	// verify accounts
+	expectedAccountCnt := 0
+	for _ = range storage.RetrieveAccounts(id) {
+		expectedAccountCnt ++
+	}
+	if expectedAccountCnt != 2 {
+		t.Error(fmt.Errorf("expected %d accounts, recieved: %d",2,expectedAccountCnt))
+	}
+}

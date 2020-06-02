@@ -27,3 +27,7 @@ func TestMultiWalletStorage(t *testing.T) {
 func TestWalletStorage(t *testing.T) {
 	stores.TestingWalletStorage(getWalletStorage(),t)
 }
+
+func TestUpdatingWallet(t *testing.T) {
+	stores.TestingUpdatingWallet(getWalletStorage(),t)
+}

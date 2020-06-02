@@ -7,24 +7,16 @@ import (
 )
 
 type InMemStore struct {
-	memory         map[string]*wallet
+	memory         map[string]map[string][]byte
 	accountIndx    map[string][]byte
 	attMemory      map[string]*core.BeaconAttestation
 	proposalMemory map[string]*core.BeaconBlockHeader
 	mapNameToId    map[string]uuid.UUID
 }
 
-type wallet struct {
-	name string
-	id string
-	wallet []byte
-	accountIndex []byte
-	accounts map[string][]byte
-}
-
 func NewInMemStore() *InMemStore {
 	return &InMemStore{
-		memory:         make(map[string]*wallet),
+		memory:         make(map[string]map[string][]byte),
 		accountIndx:    make(map[string][]byte),
 		mapNameToId:    make(map[string]uuid.UUID),
 		attMemory:      make(map[string]*core.BeaconAttestation),
@@ -39,13 +31,14 @@ func (store *InMemStore) Name() string {
 
 // StoreWallet stores wallet data.  It will fail if it cannot store the data.
 func (store *InMemStore) StoreWallet(walletID uuid.UUID, walletName string, data []byte) error {
-	store.memory[walletID.String()] = &wallet{
-		name:     walletName,
-		id:       walletID.String(),
-		wallet:	  data,
-		accounts: make(map[string][]byte),
+	if val := store.memory[walletID.String()]; val != nil { // existing wallet
+		store.memory[walletID.String()]["wallet"] = data
+	} else {
+		store.memory[walletID.String()] = map[string][]byte { // new wallet
+			"wallet":data,
+		}
+		store.mapNameToId[walletName] = walletID
 	}
-	store.mapNameToId[walletName] = walletID
 	return nil
 }
 
@@ -55,7 +48,7 @@ func (store *InMemStore) RetrieveWallets() <-chan []byte {
 
 	go func() {
 		for _, w := range store.memory {
-			ch <- w.wallet
+			ch <- w["wallet"]
 		}
 		close(ch)
 	}()
@@ -70,7 +63,7 @@ func (store *InMemStore) RetrieveWallet(walletName string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return w.wallet,nil
+	return w["wallet"],nil
 }
 
 // RetrieveWalletByID retrieves wallet data for a wallet with a given ID.
@@ -80,7 +73,7 @@ func (store *InMemStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) 
 	if err != nil {
 		return nil,err
 	}
-	return w.wallet,nil
+	return w["wallet"],nil
 }
 
 // StoreAccount stores account data.  It will fail if it cannot store the data.
@@ -90,7 +83,7 @@ func (store *InMemStore) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, d
 		return error
 	}
 
-	wallet.accounts[accountID.String()] = data
+	wallet[accountID.String()] = data
 	return nil
 }
 
@@ -100,8 +93,10 @@ func (store *InMemStore) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
 
 	go func() {
 		if wallet, err := store.walletById(walletID); err == nil {
-			for _, a := range wallet.accounts {
-				ch <- a
+			for key, a := range wallet {
+				if key != "wallet" {
+					ch <- a
+				}
 			}
 		}
 
@@ -119,10 +114,8 @@ func (store *InMemStore) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID
 		return nil,error
 	}
 
-	for id, a := range wallet.accounts {
-		if id == accountID.String() {
-			return a, nil
-		}
+	if val := wallet[accountID.String()]; val != nil {
+		return val,nil
 	}
 
 	return nil, fmt.Errorf("account id %s in wallet id %s, not found",accountID.String(), walletID.String())
@@ -139,14 +132,14 @@ func (store *InMemStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, erro
 	return store.accountIndx[walletID.String()], nil
 }
 
-func (store *InMemStore) walletByName(walletName string) (*wallet,error) {
+func (store *InMemStore) walletByName(walletName string) (map[string][]byte,error) {
 	if walletId, ok := store.mapNameToId[walletName]; ok {
 		return store.walletById(walletId)
 	}
 	return nil,fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
 }
 
-func (store *InMemStore) walletById(walletID uuid.UUID) (*wallet,error) {
+func (store *InMemStore) walletById(walletID uuid.UUID) (map[string][]byte,error) {
 	w := store.memory[walletID.String()]
 	if w == nil {
 		return nil, fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
