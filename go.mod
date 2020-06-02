@@ -14,6 +14,7 @@ require (
 	github.com/wealdtech/go-eth2-wallet-hd/v2 v2.0.4
 	github.com/wealdtech/go-eth2-wallet-store-filesystem v1.7.3
 	github.com/wealdtech/go-eth2-wallet-types/v2 v2.0.2
+	github.com/wealdtech/go-indexer v1.0.0
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 )
