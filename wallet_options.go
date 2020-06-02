@@ -1,16 +1,24 @@
 package KeyVault
 
 import (
+	"crypto/rand"
+	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/encryptors"
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type WalletOptions struct {
 	encryptor wtypes.Encryptor
 	password []byte
-	name string
-	store wtypes.Store
+	storage interface{}
 	enableSimpleSigner bool
 	seed []byte
+	portfolioLockPolicy core.LockablePolicy
+}
+
+func (options *WalletOptions)SetPortfolioLockPolicy(lockPolicy core.LockablePolicy) *WalletOptions {
+	options.portfolioLockPolicy = lockPolicy
+	return options
 }
 
 func (options *WalletOptions)SetEncryptor(encryptor wtypes.Encryptor) *WalletOptions {
@@ -18,17 +26,12 @@ func (options *WalletOptions)SetEncryptor(encryptor wtypes.Encryptor) *WalletOpt
 	return options
 }
 
-func (options *WalletOptions)SetStore(store wtypes.Store) *WalletOptions {
-	options.store = store
+func (options *WalletOptions)SetStorage(storage interface{}) *WalletOptions {
+	options.storage = storage
 	return options
 }
 
-func (options *WalletOptions)SetWalletName(name string) *WalletOptions {
-	options.name = name
-	return options
-}
-
-func (options *WalletOptions)SetWalletPassword(password string) *WalletOptions {
+func (options *WalletOptions)SetPassword(password string) *WalletOptions {
 	options.password = []byte(password)
 	return options
 }
@@ -43,11 +46,19 @@ func (options *WalletOptions)SetSeed(seed []byte) *WalletOptions {
 	return options
 }
 
-//func (options *WalletOptions) GenerateSeed() error {
-//	seed := make([]byte, 32)
-//	_, err := rand.Read(seed)
-//
-//	options.SetSeed(seed)
-//
-//	return err
-//}
+func (options *WalletOptions) GenerateSeed() error {
+	seed := make([]byte, 32)
+	_, err := rand.Read(seed)
+
+	options.SetSeed(seed)
+
+	return err
+}
+
+func (options *WalletOptions) setNoEncryptor() *WalletOptions{
+	return options.SetEncryptor(encryptors.NewPlainTextEncryptor())
+}
+
+func (options *WalletOptions) setNoLockPolicy() *WalletOptions{
+	return options.SetPortfolioLockPolicy(&core.NoLockPolicy{})
+}

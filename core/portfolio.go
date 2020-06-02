@@ -1,6 +1,9 @@
 package core
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+)
 
 // A portfolio is a container of wallets
 type Portfolio interface {
@@ -22,4 +25,11 @@ type Portfolio interface {
 	// unlock will decrypt the seed and save on memory
 	// it needs a provided password
 	Unlock(password []byte) error
+}
+
+type PortfolioContext struct {
+	Storage PortfolioStorage
+	Encryptor types.Encryptor
+	LockPolicy LockablePolicy
+	LockPassword []byte // only used internally for quick lock
 }

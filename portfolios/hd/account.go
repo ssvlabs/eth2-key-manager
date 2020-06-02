@@ -13,11 +13,10 @@ type HDAccount struct {
 	publicKey e2types.PublicKey
 	secretKey *core.EncryptableSeed
 	path string
-	lockPolicy core.LockablePolicy
-	lockPassword []byte // only used internally for quick lock
+	context *core.PortfolioContext
 }
 
-func newHDAccount(name string, secretKey *core.EncryptableSeed, path string, lockPolicy core.LockablePolicy, lockPassword []byte) (*HDAccount,error) {
+func newHDAccount(name string, secretKey *core.EncryptableSeed, path string, context *core.PortfolioContext) (*HDAccount,error) {
 	if secretKey.IsEncrypted() {
 		return nil,fmt.Errorf("account is locked")
 	}
@@ -33,8 +32,7 @@ func newHDAccount(name string, secretKey *core.EncryptableSeed, path string, loc
 		publicKey:    priv.PublicKey(),
 		secretKey:    secretKey,
 		path:         path,
-		lockPolicy:   lockPolicy,
-		lockPassword: lockPassword,
+		context:	  context,
 	},nil
 }
 
@@ -61,11 +59,11 @@ func (account *HDAccount) Path() string {
 
 // Sign signs data with the account.
 func (account *HDAccount) Sign(data []byte) (e2types.Signature, error) {
-
+	// TODO lockable policy
 }
 
 func (account *HDAccount) Lock() error {
-	return account.secretKey.Encrypt(account.lockPassword)
+	return account.secretKey.Encrypt(account.context.LockPassword)
 }
 
 func (account *HDAccount) IsLocked() bool {

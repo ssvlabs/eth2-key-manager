@@ -12,3 +12,12 @@ type LockablePolicy interface {
 	// Depending on the operation type, will return if should lock
 	LockAfterOperation(op OperationType) bool
 }
+
+// will never lock
+type NoLockPolicy struct {
+
+}
+
+func (policy *NoLockPolicy) LockAfterOperation(op OperationType) bool {
+	return false
+}
