@@ -15,6 +15,12 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	if error != nil {
 		return nil,error
 	}
+	if !account.IsUnlocked() {
+		err := account.Unlock([]byte("")) // TODO
+		if err != nil {
+			return nil,err
+		}
+	}
 
 	// 2. lock for current account
 	signer.lock(account.ID(), "attestation")

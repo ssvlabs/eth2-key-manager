@@ -24,6 +24,16 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	return NewSimpleSigner(wallet,noProtection),nil
 }
 
+func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
+	store := in_memory.NewInMemStore()
+	protector := prot.NewNormalProtection(store)
+	wallet,err := walletWithSeed(seed,store)
+	if err != nil {
+		return nil,err
+	}
+	return NewSimpleSigner(wallet,protector),nil
+}
+
 func walletWithSeed(seed []byte, store types.Store) (types.Wallet,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,err
@@ -137,11 +147,6 @@ func TestSignatures(t *testing.T) {
 					t.Errorf("signature does not verify against pubkey",)
 				}
 			}
-
-
-			//else if hex.EncodeToString(res.Signature) == test.expectedSigHex {
-			//	t.Errorf("sig doesn't match expected")
-			//}
 		})
 	}
 }
