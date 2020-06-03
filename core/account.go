@@ -26,11 +26,4 @@ type Account interface {
 	Path() string
 	// Sign signs data with the account.
 	Sign(data []byte) (e2types.Signature, error)
-	// lock will encrypt the seed, save it to memory and nil the plain text seed.
-	// it will use an internally save locking password so it could be locked at all times
-	Lock() error
-	IsLocked() bool
-	// unlock will decrypt the seed and save on memory
-	// it needs a provided password
-	Unlock(password []byte) error
 }
