@@ -1,8 +1,10 @@
 package core
 
 import (
+	"fmt"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
+	"regexp"
 )
 
 const (
@@ -27,6 +29,10 @@ func BaseKeyFromSeed(seed []byte) (*DerivableKey,error) {
 }
 
 func (baseKey *DerivableKey) Derive(relativePath string) (*DerivableKey,error) {
+	if !validateRelativePath(relativePath) {
+		return nil, fmt.Errorf("invalid relative path. Example: /1/2/3")
+	}
+
 	path := baseKey.Path + relativePath
 	key,err := util.PrivateKeyFromSeedAndPath(baseKey.seed,path)
 	if err != nil {
@@ -34,4 +40,9 @@ func (baseKey *DerivableKey) Derive(relativePath string) (*DerivableKey,error) {
 	}
 
 	return &DerivableKey{seed:baseKey.seed,Key:key,Path:path},nil
+}
+
+func validateRelativePath(relativePath string) bool {
+	match, _ := regexp.MatchString(`^(\/(\d\d?\d?))+$`, relativePath)
+	return match
 }
