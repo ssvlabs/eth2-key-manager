@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
-	types2 "github.com/wealdtech/go-eth2-types/v2"
 	"github.com/wealdtech/go-indexer"
 )
 
@@ -20,20 +19,18 @@ type HDWallet struct {
 	name string
 	id uuid.UUID
 	walletType core.WalletType
-	nodeKey *core.EncryptableSeed // the node key from which all accounts are derived
-	path string
-	accountsIndexer *indexer.Index  // maps indexs <> names
+	key *core.DerivableKey // the node key from which all accounts are derived
+	accountsIndexer *indexer.Index  // maps indexes <> names
 	accountIds []uuid.UUID
 	context *core.PortfolioContext
 }
 
-func NewHDWallet(name string, nodeKey *core.EncryptableSeed, path string, context *core.PortfolioContext) (*HDWallet,error) {
+func NewHDWallet(name string, key *core.DerivableKey, path string, context *core.PortfolioContext) (*HDWallet,error) {
 	ret := &HDWallet{
 		name:            name,
 		id:              uuid.New(),
 		walletType:      core.HDWallet,
-		nodeKey:         nodeKey,
-		path:            path,
+		key:        	 key,
 		accountsIndexer: indexer.New(),
 		accountIds:      make([]uuid.UUID,0),
 		context:		 context,
@@ -82,7 +79,7 @@ func (wallet *HDWallet) Accounts() <-chan core.Account {
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
-	wallet.context.Storage.OpenAccount(id)
+	return wallet.context.Storage.OpenAccount(id)
 }
 
 // AccountByName provides a single account from the wallet given its name.
@@ -96,24 +93,18 @@ func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
 	return wallet.AccountByID(id)
 }
 
-func (wallet *HDWallet) deriveAccount(path string, seed []byte) (*types2.BLSPrivateKey,error) {
-	return types2.BLSPrivateKeyFromBytes(seed) // TODO - implement
-}
-
 func (wallet *HDWallet) createKey(name string, path string, accountType core.AccountType) (core.Account, error) {
 	var retAccount *HDAccount
 
 	// create account
-	nodeBytes,err := wallet.deriveAccount(path,wallet.nodeKey.Seed())
+	key,err := wallet.key.Derive(path)
 	if err != nil {
 		return nil,err
 	}
-	lockableKey := core.NewEncryptableSeed(nodeBytes.Marshal(),wallet.context.Encryptor)
 	retAccount,err = newHDAccount(
 		name,
 		accountType,
-		lockableKey,
-		path,
+		key,
 		wallet.context,
 	)
 

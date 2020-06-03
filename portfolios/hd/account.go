@@ -1,7 +1,6 @@
 package hd
 
 import (
-	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -12,28 +11,17 @@ type HDAccount struct {
 	id uuid.UUID
 	accountType core.AccountType
 	publicKey e2types.PublicKey
-	secretKey *core.EncryptableSeed
-	path string
+	key *core.DerivableKey
 	context *core.PortfolioContext
 }
 
-func newHDAccount(name string, accountType core.AccountType, secretKey *core.EncryptableSeed, path string, context *core.PortfolioContext) (*HDAccount,error) {
-	if secretKey.IsEncrypted() {
-		return nil,fmt.Errorf("account is locked")
-	}
-
-	priv,err := e2types.BLSPrivateKeyFromBytes(secretKey.Seed())
-	if err != nil {
-		return nil,err
-	}
-
+func newHDAccount(name string, accountType core.AccountType, key *core.DerivableKey, context *core.PortfolioContext) (*HDAccount,error) {
 	return &HDAccount{
 		name:         name,
 		id:           uuid.New(),
 		accountType:  accountType,
-		publicKey:    priv.PublicKey(),
-		secretKey:    secretKey,
-		path:         path,
+		publicKey:    key.Key.PublicKey(),
+		key:    	  key,
 		context:	  context,
 	},nil
 }
@@ -61,10 +49,10 @@ func (account *HDAccount) PublicKey() e2types.PublicKey {
 // Path provides the path for the account.
 // Can be empty if the account is not derived from a path.
 func (account *HDAccount) Path() string {
-	return account.path
+	return account.key.Path
 }
 
 // Sign signs data with the account.
-func (account *HDAccount) Sign(data []byte) (e2types.Signature, error) {
-	// TODO lockable policy
+func (account *HDAccount) Sign(data []byte) e2types.Signature {
+	return account.key.Key.Sign(data)
 }

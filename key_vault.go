@@ -19,7 +19,7 @@ type KeyVault struct {
 	walletsIndexer indexer.Index // maps indexs <> names
 	walletIds []uuid.UUID
 	context *core.PortfolioContext
-	key *core.EncryptableSeed
+	key *core.DerivableKey
 }
 
 //func OpenKeyVault(options *WalletOptions) (*KeyVault,error) {
@@ -60,11 +60,13 @@ func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
 	}
 
 	// set seed
-	var seed *core.EncryptableSeed
 	if options.seed == nil {
 		options.GenerateSeed()
 	}
-	seed = core.NewEncryptableSeed(options.seed, options.encryptor)
+	seed,err := core.BaseKeyFromSeed(options.seed)
+	if err != nil {
+		return nil,err
+	}
 
 	// storage
 	if _,ok := options.storage.(core.PortfolioStorage); !ok {
@@ -78,16 +80,10 @@ func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
 		}
 	}
 
-	// lock policy
-	if options.portfolioLockPolicy == nil {
-		options.setNoLockPolicy()
-	}
-
 	// portfolio context
 	context := &core.PortfolioContext {
 		Storage: 		options.storage.(core.PortfolioStorage),
 		Encryptor: 		options.encryptor,
-		LockPolicy:		options.portfolioLockPolicy,
 		LockPassword:	options.password,
 	}
 

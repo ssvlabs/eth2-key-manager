@@ -13,12 +13,6 @@ type WalletOptions struct {
 	storage interface{}
 	enableSimpleSigner bool
 	seed []byte
-	portfolioLockPolicy core.LockablePolicy
-}
-
-func (options *WalletOptions)SetPortfolioLockPolicy(lockPolicy core.LockablePolicy) *WalletOptions {
-	options.portfolioLockPolicy = lockPolicy
-	return options
 }
 
 func (options *WalletOptions)SetEncryptor(encryptor wtypes.Encryptor) *WalletOptions {

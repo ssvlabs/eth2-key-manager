@@ -5,7 +5,6 @@ import (
 	core "github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/portfolios/hd"
 	"github.com/google/uuid"
-	util "github.com/wealdtech/go-eth2-util"
 )
 
 // CreateAccount creates a new account in the wallet.
@@ -16,14 +15,13 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 
 	// create wallet
 	id := len(portfolio.walletIds)
-	path := fmt.Sprintf("m/12381/3600/%d",id)
-	nodeBytes,err := util.PrivateKeyFromSeedAndPath(portfolio.key.Seed(),path)
+	path := fmt.Sprintf("%d",id)
+	key,err := portfolio.key.Derive(path)
 	if err != nil {
 		return nil,err
 	}
-	lockableKey := core.NewEncryptableSeed(nodeBytes.Marshal(),portfolio.context.Encryptor)
 	retWallet,err = hd.NewHDWallet(name,
-		lockableKey,
+		key,
 		path,
 		portfolio.context,
 	)
