@@ -2,13 +2,17 @@ package hd
 
 import (
 	"fmt"
-	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	types2 "github.com/wealdtech/go-eth2-types/v2"
-	util "github.com/wealdtech/go-eth2-util"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"github.com/wealdtech/go-indexer"
+)
+
+// according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
+const (
+	WithdrawalKeyPath = "0"
+	WithdrawalKeyName = "wallet_withdrawal_key_unique"
+	ValidatorKeyPath = "0/%d"
 )
 
 // an hierarchical deterministic wallet
@@ -23,8 +27,8 @@ type HDWallet struct {
 	context *core.PortfolioContext
 }
 
-func NewHDWallet(name string, nodeKey *core.EncryptableSeed, path string, context *core.PortfolioContext) *HDWallet {
-	return &HDWallet{
+func NewHDWallet(name string, nodeKey *core.EncryptableSeed, path string, context *core.PortfolioContext) (*HDWallet,error) {
+	ret := &HDWallet{
 		name:            name,
 		id:              uuid.New(),
 		walletType:      core.HDWallet,
@@ -34,6 +38,13 @@ func NewHDWallet(name string, nodeKey *core.EncryptableSeed, path string, contex
 		accountIds:      make([]uuid.UUID,0),
 		context:		 context,
 	}
+
+	_,err := ret.createKey(WithdrawalKeyName,WithdrawalKeyPath,core.WithdrawalAccount)
+	if err != nil {
+		return nil,err
+	}
+
+	return ret,nil
 }
 
 // ID provides the ID for the wallet.
@@ -51,47 +62,17 @@ func (wallet *HDWallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
-// CreateAccount creates a new account in the wallet.
+// CreateWithdrawalKey creates a new withdrawal key pair in the wallet.
 // This will error if an account with the name already exists.
-// Will push to the new account the lock policy
-func (wallet *HDWallet) CreateAccount(name string) (core.Account, error) {
-	var retAccount *HDAccount
-	if wallet.IsLocked() {
-		return nil,fmt.Errorf("wallet is locked")
-	}
-	defer func() {
-		if wallet.context.LockPolicy.LockAfterOperation(core.Creation) {
-			wallet.Lock()
-			if retAccount != nil {
-				retAccount.Lock()
-			}
-		}
-	}()
+func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
+	return wallet.AccountByName(WithdrawalKeyName) // created when wallet is called with NewHDWallet
+}
 
-	// create account
-	id := len(wallet.accountIds)
-	path := fmt.Sprintf("%d",id)
-	nodeBytes,err := wallet.deriveAccount(path,wallet.nodeKey.Seed())
-	if err != nil {
-		return nil,err
-	}
-	lockableKey := core.NewEncryptableSeed(nodeBytes.Marshal(),wallet.context.Encryptor)
-	retAccount,err = newHDAccount(
-		name,
-		lockableKey,
-		path,
-		wallet.context,
-	)
-
-	// register new wallet and save portfolio
-	wallet.accountIds = append(wallet.accountIds,retAccount.ID())
-	wallet.accountsIndexer.Add(retAccount.ID(),name)
-	err = wallet.context.Storage.SavePortfolio(wallet)
-	if err != nil {
-		wallet.accountsIndexer.Remove(retAccount.id,name)
-		wallet.accountIds = wallet.accountIds[:len(wallet.accountIds)-1]
-		return nil,err
-	}
+// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
+// This will error if an account with the name already exists.
+func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error) {
+	path := fmt.Sprintf(ValidatorKeyPath,len(wallet.accountIds))
+	return wallet.createKey(name,path,core.ValidatorAccount)
 }
 
 // Accounts provides all accounts in the wallet.
@@ -125,4 +106,35 @@ func (wallet *HDWallet) Unlock(password []byte) error {
 
 func (wallet *HDWallet) deriveAccount(path string, seed []byte) (*types2.BLSPrivateKey,error) {
 	return types2.BLSPrivateKeyFromBytes(seed) // TODO - implement
+}
+
+func (wallet *HDWallet) createKey(name string, path string, accountType core.AccountType) (core.Account, error) {
+	var retAccount *HDAccount
+	if wallet.IsLocked() {
+		return nil,fmt.Errorf("wallet is locked")
+	}
+
+	// create account
+	nodeBytes,err := wallet.deriveAccount(path,wallet.nodeKey.Seed())
+	if err != nil {
+		return nil,err
+	}
+	lockableKey := core.NewEncryptableSeed(nodeBytes.Marshal(),wallet.context.Encryptor)
+	retAccount,err = newHDAccount(
+		name,
+		accountType,
+		lockableKey,
+		path,
+		wallet.context,
+	)
+
+	// register new wallet and save portfolio
+	wallet.accountIds = append(wallet.accountIds,retAccount.ID())
+	wallet.accountsIndexer.Add(retAccount.ID(),name)
+	err = wallet.context.Storage.SavePortfolio(wallet)
+	if err != nil {
+		wallet.accountsIndexer.Remove(retAccount.id,name)
+		wallet.accountIds = wallet.accountIds[:len(wallet.accountIds)-1]
+		return nil,err
+	}
 }

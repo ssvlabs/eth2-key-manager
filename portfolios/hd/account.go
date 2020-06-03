@@ -10,13 +10,14 @@ import (
 type HDAccount struct {
 	name string
 	id uuid.UUID
+	accountType core.AccountType
 	publicKey e2types.PublicKey
 	secretKey *core.EncryptableSeed
 	path string
 	context *core.PortfolioContext
 }
 
-func newHDAccount(name string, secretKey *core.EncryptableSeed, path string, context *core.PortfolioContext) (*HDAccount,error) {
+func newHDAccount(name string, accountType core.AccountType, secretKey *core.EncryptableSeed, path string, context *core.PortfolioContext) (*HDAccount,error) {
 	if secretKey.IsEncrypted() {
 		return nil,fmt.Errorf("account is locked")
 	}
@@ -29,6 +30,7 @@ func newHDAccount(name string, secretKey *core.EncryptableSeed, path string, con
 	return &HDAccount{
 		name:         name,
 		id:           uuid.New(),
+		accountType:  accountType,
 		publicKey:    priv.PublicKey(),
 		secretKey:    secretKey,
 		path:         path,
@@ -39,6 +41,11 @@ func newHDAccount(name string, secretKey *core.EncryptableSeed, path string, con
 // ID provides the ID for the account.
 func (account *HDAccount) ID() uuid.UUID {
 	return account.id
+}
+
+// ID provides the ID for the account.
+func (account *HDAccount) Type() core.AccountType {
+	return account.accountType
 }
 
 // Name provides the name for the account.

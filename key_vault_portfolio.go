@@ -16,14 +16,6 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 	if portfolio.IsLocked() {
 		return nil,fmt.Errorf("portfolio is locked")
 	}
-	defer func() {
-		if portfolio.context.LockPolicy.LockAfterOperation(core.Creation) {
-			portfolio.Lock()
-			if retWallet != nil {
-				retWallet.Lock()
-			}
-		}
-	}()
 
 	// create wallet
 	id := len(portfolio.walletIds)
@@ -68,10 +60,6 @@ func (portfolio *KeyVault) Wallets() (<-chan core.Wallet,error) {
 			}
 			ch <- wallet
 		}
-
-		if portfolio.context.LockPolicy.LockAfterOperation(core.FetchData) {
-			portfolio.Lock()
-		}
 	}()
 
 	return ch,nil
@@ -80,28 +68,13 @@ func (portfolio *KeyVault) Wallets() (<-chan core.Wallet,error) {
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (portfolio *KeyVault) WalletByID(id uuid.UUID) (core.Wallet, error) {
-	if portfolio.IsLocked() {
-		return nil,fmt.Errorf("portfolio is locked")
-	}
-	defer func() {
-		if portfolio.context.LockPolicy.LockAfterOperation(core.FetchData) {
-			portfolio.Lock()
-		}
-	}()
 
 }
 
 // AccountByName provides a single account from the wallet given its name.
 // This will error if the account is not found.
 func (portfolio *KeyVault) WalletByName(name string) (core.Wallet, error) {
-	if portfolio.IsLocked() {
-		return nil,fmt.Errorf("portfolio is locked")
-	}
-	defer func() {
-		if portfolio.context.LockPolicy.LockAfterOperation(core.FetchData) {
-			portfolio.Lock()
-		}
-	}()
+
 }
 
 func (portfolio *KeyVault) Lock() error {

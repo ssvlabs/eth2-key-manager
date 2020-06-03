@@ -17,9 +17,13 @@ type Wallet interface {
 	Name() string
 	// Type provides the type of the wallet.
 	Type() WalletType
-	// CreateAccount creates a new account in the wallet.
+	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 	// This will error if an account with the name already exists.
-	CreateAccount(name string) (Account, error)
+	CreateValidatorAccount(name string) (Account, error)
+	// CreateWithdrawalKey creates a new withdrawal key pair in the wallet.
+	// This will error if an account with the name already exists.
+	// according to EIP 2334 there is 1 withdrawal key per wallet hierarchy
+	GetWithdrawalAccount() (Account, error)
 	// Accounts provides all accounts in the wallet.
 	Accounts() <-chan Account
 	// AccountByID provides a single account from the wallet given its ID.

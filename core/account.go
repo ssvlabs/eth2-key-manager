@@ -5,10 +5,18 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
+type AccountType string
+const (
+	ValidatorAccount 	AccountType = "Validation"
+	WithdrawalAccount	AccountType = "Withdrawal"
+)
+
 // An account holds a key pair with the ability to do signatures and more
 type Account interface {
 	// ID provides the ID for the account.
 	ID() uuid.UUID
+	// ID provides the ID for the account.
+	Type() AccountType
 	// Name provides the name for the account.
 	Name() string
 	// PublicKey provides the public key for the account.

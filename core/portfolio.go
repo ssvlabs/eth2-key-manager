@@ -30,6 +30,5 @@ type Portfolio interface {
 type PortfolioContext struct {
 	Storage PortfolioStorage
 	Encryptor types.Encryptor
-	LockPolicy LockablePolicy
 	LockPassword []byte // only used internally for quick lock
 }
