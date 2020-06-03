@@ -11,25 +11,20 @@ import (
 // This will error if an account with the name already exists.
 // Will push to the new wallet the lock policy
 func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
-	var retWallet *hd.HDWallet
-
 	// create wallet
 	id := len(portfolio.walletIds)
-	path := fmt.Sprintf("%d",id)
+	path := fmt.Sprintf("/%d",id)
 	key,err := portfolio.key.Derive(path)
 	if err != nil {
 		return nil,err
 	}
-	retWallet,err = hd.NewHDWallet(name,
+	retWallet := hd.NewHDWallet(name,
 		key,
 		path,
 		portfolio.context,
 	)
-	if err != nil {
-		return nil,err
-	}
 
-	// register new wallet and save portfolio
+	// register new wallet and save portfolio + wallet
 	reset := func() {
 		portfolio.walletsIndexer.Remove(retWallet.ID(),name)
 		portfolio.walletIds = portfolio.walletIds[:len(portfolio.walletIds)-1]

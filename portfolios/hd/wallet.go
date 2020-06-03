@@ -9,9 +9,9 @@ import (
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 const (
-	WithdrawalKeyPath = "0"
+	WithdrawalKeyPath = "/0"
 	WithdrawalKeyName = "wallet_withdrawal_key_unique"
-	ValidatorKeyPath = "0/%d"
+	ValidatorKeyPath = "/0/%d"
 )
 
 // an hierarchical deterministic wallet
@@ -25,8 +25,8 @@ type HDWallet struct {
 	context *core.PortfolioContext
 }
 
-func NewHDWallet(name string, key *core.DerivableKey, path string, context *core.PortfolioContext) (*HDWallet,error) {
-	ret := &HDWallet{
+func NewHDWallet(name string, key *core.DerivableKey, path string, context *core.PortfolioContext) *HDWallet {
+	return &HDWallet{
 		name:            name,
 		id:              uuid.New(),
 		walletType:      core.HDWallet,
@@ -35,13 +35,6 @@ func NewHDWallet(name string, key *core.DerivableKey, path string, context *core
 		accountIds:      make([]uuid.UUID,0),
 		context:		 context,
 	}
-
-	_,err := ret.createKey(WithdrawalKeyName,WithdrawalKeyPath,core.WithdrawalAccount)
-	if err != nil {
-		return nil,err
-	}
-
-	return ret,nil
 }
 
 // ID provides the ID for the wallet.
@@ -62,7 +55,20 @@ func (wallet *HDWallet) Type() core.WalletType {
 // GetWithdrawalAccount returns this wallet's withdrawal key pair in the wallet as described in EIP-2334.
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
-	return wallet.AccountByName(WithdrawalKeyName) // created when wallet is called with NewHDWallet
+	account,err := wallet.AccountByName(WithdrawalKeyName)
+	if err != nil {
+		return nil,err
+	}
+
+	if account == nil { // create on the fly
+		created,err := wallet.createKey(WithdrawalKeyName,WithdrawalKeyPath,core.WithdrawalAccount)
+		if err != nil {
+			return nil,err
+		}
+		return created,nil
+	}
+
+	return wallet.AccountByName(WithdrawalKeyName)
 }
 
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
@@ -87,7 +93,7 @@ func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
 func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
 	id,exists := wallet.accountsIndexer.ID(name)
 	if !exists {
-		return nil,fmt.Errorf("account not found")
+		return nil,nil
 	}
 
 	return wallet.AccountByID(id)

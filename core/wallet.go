@@ -27,8 +27,10 @@ type Wallet interface {
 	Accounts() <-chan Account
 	// AccountByID provides a single account from the wallet given its ID.
 	// This will error if the account is not found.
+	// should return account = nil if not found (not an error!)
 	AccountByID(id uuid.UUID) (Account, error)
 	// AccountByName provides a single account from the wallet given its name.
 	// This will error if the account is not found.
+	// should return account = nil if not found (not an error!)
 	AccountByName(name string) (Account, error)
 }
