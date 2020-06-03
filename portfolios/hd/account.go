@@ -68,15 +68,3 @@ func (account *HDAccount) Path() string {
 func (account *HDAccount) Sign(data []byte) (e2types.Signature, error) {
 	// TODO lockable policy
 }
-
-func (account *HDAccount) Lock() error {
-	return account.secretKey.Encrypt(account.context.LockPassword)
-}
-
-func (account *HDAccount) IsLocked() bool {
-	return account.secretKey.IsEncrypted()
-}
-
-func (account *HDAccount) Unlock(password []byte) error {
-	return account.secretKey.Decrypt(password)
-}

@@ -62,7 +62,7 @@ func (wallet *HDWallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
-// CreateWithdrawalKey creates a new withdrawal key pair in the wallet.
+// GetWithdrawalAccount returns this wallet's withdrawal key pair in the wallet as described in EIP-2334.
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
 	return wallet.AccountByName(WithdrawalKeyName) // created when wallet is called with NewHDWallet
@@ -77,31 +77,23 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error
 
 // Accounts provides all accounts in the wallet.
 func (wallet *HDWallet) Accounts() <-chan core.Account {
-	// TODO lockable policy
 }
 
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
-	// TODO lockable policy
+	wallet.context.Storage.OpenAccount(id)
 }
 
 // AccountByName provides a single account from the wallet given its name.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
-	// TODO lockable policy
-}
+	id,exists := wallet.accountsIndexer.ID(name)
+	if !exists {
+		return nil,fmt.Errorf("account not found")
+	}
 
-func (wallet *HDWallet) Lock() error {
-	return wallet.nodeKey.Encrypt(wallet.context.LockPassword)
-}
-
-func (wallet *HDWallet) IsLocked() bool {
-	return wallet.nodeKey.IsEncrypted()
-}
-
-func (wallet *HDWallet) Unlock(password []byte) error {
-	return wallet.nodeKey.Decrypt(password)
+	return wallet.AccountByID(id)
 }
 
 func (wallet *HDWallet) deriveAccount(path string, seed []byte) (*types2.BLSPrivateKey,error) {
@@ -110,9 +102,6 @@ func (wallet *HDWallet) deriveAccount(path string, seed []byte) (*types2.BLSPriv
 
 func (wallet *HDWallet) createKey(name string, path string, accountType core.AccountType) (core.Account, error) {
 	var retAccount *HDAccount
-	if wallet.IsLocked() {
-		return nil,fmt.Errorf("wallet is locked")
-	}
 
 	// create account
 	nodeBytes,err := wallet.deriveAccount(path,wallet.nodeKey.Seed())
@@ -129,12 +118,22 @@ func (wallet *HDWallet) createKey(name string, path string, accountType core.Acc
 	)
 
 	// register new wallet and save portfolio
-	wallet.accountIds = append(wallet.accountIds,retAccount.ID())
-	wallet.accountsIndexer.Add(retAccount.ID(),name)
-	err = wallet.context.Storage.SavePortfolio(wallet)
-	if err != nil {
+	reset := func() {
 		wallet.accountsIndexer.Remove(retAccount.id,name)
 		wallet.accountIds = wallet.accountIds[:len(wallet.accountIds)-1]
+	}
+	wallet.accountIds = append(wallet.accountIds,retAccount.ID())
+	wallet.accountsIndexer.Add(retAccount.ID(),name)
+	err = wallet.context.Storage.SaveAccount(retAccount)
+	if err != nil {
+		reset()
 		return nil,err
 	}
+	err = wallet.context.Storage.SaveWallet(wallet)
+	if err != nil {
+		reset()
+		return nil,err
+	}
+
+	return retAccount,nil
 }
