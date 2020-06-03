@@ -3,7 +3,7 @@ package KeyVault
 import (
 	"fmt"
 	core "github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/portfolios/hd"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	"github.com/google/uuid"
 )
 
@@ -18,7 +18,7 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 	if err != nil {
 		return nil,err
 	}
-	retWallet := hd.NewHDWallet(name,
+	retWallet := wallet_hd.NewHDWallet(name,
 		key,
 		path,
 		portfolio.context,

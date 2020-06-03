@@ -1,4 +1,4 @@
-package hd
+package wallet_hd
 
 import (
 	"fmt"

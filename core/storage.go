@@ -2,7 +2,7 @@ package core
 
 import "github.com/google/uuid"
 
-// Implements methods to store and retrieve portfolios
+// Implements methods to store and retrieve wallet_hd
 // Any encryption is done on the implementation level but is not obligatory
 type PortfolioStorage interface {
 	/*
