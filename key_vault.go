@@ -14,6 +14,7 @@ import (
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
+	id uuid.UUID
 	Storage  interface{}
 	enableSimpleSigner bool
 	walletsIndexer indexer.Index // maps indexs <> names
@@ -83,18 +84,21 @@ func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
 	// portfolio context
 	context := &core.PortfolioContext {
 		Storage: 		options.storage.(core.PortfolioStorage),
-		Encryptor: 		options.encryptor,
-		LockPassword:	options.password,
 	}
 
-	return &KeyVault{
+	ret := &KeyVault{
 		Storage:            options.storage,
 		enableSimpleSigner: options.enableSimpleSigner,
 		walletsIndexer:     indexer.Index{},
 		walletIds:          make([]uuid.UUID,0),
 		context:            context,
 		key:				seed,
-	},nil
+	}
+
+	// update context with portfolio id
+	context.PortfolioId = ret.ID()
+
+	return ret,nil
 
 	//var wallet wtypes.Wallet
 	//var error error

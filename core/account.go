@@ -15,6 +15,8 @@ const (
 type Account interface {
 	// ID provides the ID for the account.
 	ID() uuid.UUID
+	// WalletID provides the ID for the wallet holding this account.
+	WalletID() uuid.UUID
 	// ID provides the ID for the account.
 	Type() AccountType
 	// Name provides the name for the account.

@@ -2,16 +2,17 @@ package core
 
 import (
 	"github.com/google/uuid"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 // A portfolio is a container of wallets
 type Portfolio interface {
+	// ID provides the ID for the portfolio.
+	ID() uuid.UUID
 	// CreateAccount creates a new account in the wallet.
 	// This will error if an account with the name already exists.
 	CreateWallet(name string) (Wallet, error)
 	// Accounts provides all accounts in the wallet.
-	Wallets() (<-chan Wallet,error)
+	Wallets() <-chan Wallet
 	// AccountByID provides a single account from the wallet given its ID.
 	// This will error if the account is not found.
 	WalletByID(id uuid.UUID) (Wallet, error)
@@ -22,6 +23,14 @@ type Portfolio interface {
 
 type PortfolioContext struct {
 	Storage PortfolioStorage
-	Encryptor types.Encryptor
-	LockPassword []byte // only used internally for quick lock
+	PortfolioId uuid.UUID
+	WalletId uuid.UUID // could be nil for wallets
+}
+
+func (context *PortfolioContext) CopyForAccount(walletID uuid.UUID) *PortfolioContext {
+	return &PortfolioContext{
+		Storage:     context.Storage,
+		PortfolioId: context.PortfolioId,
+		WalletId:    walletID,
+	}
 }

@@ -80,6 +80,19 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error
 
 // Accounts provides all accounts in the wallet.
 func (wallet *HDWallet) Accounts() <-chan core.Account {
+	ch := make (chan core.Account,1024) // TODO - handle more? change from chan?
+	go func() {
+		for i := range wallet.accountIds {
+			id := wallet.accountIds[i]
+			account,err := wallet.AccountByID(id)
+			if err != nil {
+				continue
+			}
+			ch <- account
+		}
+	}()
+
+	return ch
 }
 
 // AccountByID provides a single account from the wallet given its ID.
@@ -107,11 +120,12 @@ func (wallet *HDWallet) createKey(name string, path string, accountType core.Acc
 	if err != nil {
 		return nil,err
 	}
+	newContext := wallet.context.CopyForAccount(wallet.ID())
 	retAccount,err = newHDAccount(
 		name,
 		accountType,
 		key,
-		wallet.context,
+		newContext,
 	)
 
 	// register new wallet and save portfolio

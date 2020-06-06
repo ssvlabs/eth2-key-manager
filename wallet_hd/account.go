@@ -15,7 +15,10 @@ type HDAccount struct {
 	context *core.PortfolioContext
 }
 
-func newHDAccount(name string, accountType core.AccountType, key *core.DerivableKey, context *core.PortfolioContext) (*HDAccount,error) {
+func newHDAccount(name string,
+	accountType core.AccountType,
+	key *core.DerivableKey,
+	context *core.PortfolioContext) (*HDAccount,error) {
 	return &HDAccount{
 		name:         name,
 		id:           uuid.New(),
@@ -29,6 +32,11 @@ func newHDAccount(name string, accountType core.AccountType, key *core.Derivable
 // ID provides the ID for the account.
 func (account *HDAccount) ID() uuid.UUID {
 	return account.id
+}
+
+// WalletID provides the ID for the wallet holding this account.
+func (account *HDAccount) WalletID() uuid.UUID {
+	return account.context.WalletId
 }
 
 // ID provides the ID for the account.

@@ -7,6 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+func (portfolio *KeyVault) ID() uuid.UUID {
+	return portfolio.id
+}
+
 // CreateAccount creates a new account in the wallet.
 // This will error if an account with the name already exists.
 // Will push to the new wallet the lock policy
@@ -46,8 +50,8 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 }
 
 // Accounts provides all accounts in the wallet.
-func (portfolio *KeyVault) Wallets() (<-chan core.Wallet,error) {
-	ch := make (chan core.Wallet,1024) // TODO - handle more?
+func (portfolio *KeyVault) Wallets() <-chan core.Wallet {
+	ch := make (chan core.Wallet,1024) // TODO - handle more? change from chan?
 	go func() {
 		for i := range portfolio.walletIds {
 			id := portfolio.walletIds[i]
@@ -59,7 +63,7 @@ func (portfolio *KeyVault) Wallets() (<-chan core.Wallet,error) {
 		}
 	}()
 
-	return ch,nil
+	return ch
 }
 
 // AccountByID provides a single account from the wallet given its ID.
