@@ -15,6 +15,7 @@ type PortfolioStorage interface {
 	SavePortfolio(portfolio Portfolio) error
 	// will return nil,nil if no portfolio was found
 	OpenPortfolio() (Portfolio,error)
+	ListWallets() ([]Wallet,error)
 
 	///*
 	//	Wallet specific
@@ -22,6 +23,8 @@ type PortfolioStorage interface {
 	SaveWallet(wallet Wallet) error
 	// will return nil,nil if no wallet was found
 	OpenWallet(uuid uuid.UUID) (Wallet,error)
+	// will return an empty array for no accounts
+	ListAccounts(walletID uuid.UUID) ([]Account,error)
 
 	///*
 	//	Account specific

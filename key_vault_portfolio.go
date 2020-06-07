@@ -7,6 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+func (portfolio *KeyVault) SetContext(ctx *core.PortfolioContext) {
+	portfolio.Context = ctx
+}
+
 func (portfolio *KeyVault) ID() uuid.UUID {
 	return portfolio.id
 }
@@ -25,7 +29,7 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 	retWallet := wallet_hd.NewHDWallet(name,
 		key,
 		path,
-		portfolio.context,
+		portfolio.Context,
 	)
 
 	// register new wallet and save portfolio + wallet
@@ -33,12 +37,12 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 		delete(portfolio.indexMapper,name)
 	}
 	portfolio.indexMapper[name] = retWallet.ID()
-	err = portfolio.context.Storage.SaveWallet(retWallet)
+	err = portfolio.Context.Storage.SaveWallet(retWallet)
 	if err != nil {
 		reset()
 		return nil,err
 	}
-	err = portfolio.context.Storage.SavePortfolio(portfolio)
+	err = portfolio.Context.Storage.SavePortfolio(portfolio)
 	if err != nil {
 		reset()
 		return nil,err
@@ -59,6 +63,7 @@ func (portfolio *KeyVault) Wallets() <-chan core.Wallet {
 			}
 			ch <- wallet
 		}
+		close(ch)
 	}()
 
 	return ch
@@ -67,7 +72,7 @@ func (portfolio *KeyVault) Wallets() <-chan core.Wallet {
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (portfolio *KeyVault) WalletByID(id uuid.UUID) (core.Wallet, error) {
-	return portfolio.context.Storage.OpenWallet(id)
+	return portfolio.Context.Storage.OpenWallet(id)
 }
 
 // AccountByName provides a single account from the wallet given its name.

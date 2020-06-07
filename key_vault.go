@@ -13,12 +13,11 @@ import (
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
-	id uuid.UUID
-	Storage  interface{}
+	id                 uuid.UUID
 	enableSimpleSigner bool
-	indexMapper map[string]uuid.UUID
-	context *core.PortfolioContext
-	key *core.DerivableKey
+	indexMapper        map[string]uuid.UUID
+	Context            *core.PortfolioContext
+	key                *core.DerivableKey
 }
 
 //func OpenKeyVault(options *PortfolioOptions) (*KeyVault,error) {
@@ -79,20 +78,19 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 		}
 	}
 
-	// portfolio context
+	// portfolio Context
 	context := &core.PortfolioContext {
 		Storage: 		options.storage.(core.PortfolioStorage),
 	}
 
 	ret := &KeyVault{
-		Storage:            options.storage,
 		enableSimpleSigner: options.enableSimpleSigner,
 		indexMapper:        make(map[string]uuid.UUID),
-		context:            context,
-		key:				seed,
+		Context:            context,
+		key:                seed,
 	}
 
-	// update context with portfolio id
+	// update Context with portfolio id
 	context.PortfolioId = ret.ID()
 
 	return ret,nil

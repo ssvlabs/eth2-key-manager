@@ -19,6 +19,8 @@ type Portfolio interface {
 	// AccountByName provides a single account from the wallet given its name.
 	// This will error if the account is not found.
 	WalletByName(name string) (Wallet, error)
+	//
+	SetContext(ctx *PortfolioContext)
 }
 
 type PortfolioContext struct {

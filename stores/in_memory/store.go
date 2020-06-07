@@ -77,18 +77,26 @@ func (store *InMemStore) OpenPortfolio() (core.Portfolio,error) {
 	return nil,nil
 }
 
-//func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
-//	p,err := store.OpenPortfolio()
-//	if err != nil {
-//		return nil,err
-//	}
-//
-//	ret := make([]core.Wallet,0)
-//	for w := range p.Wallets() {
-//		ret = append(ret,w)
-//	}
-//	return ret,nil
-//}
+func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
+	p,err := store.OpenPortfolio()
+	if err != nil {
+		return nil,err
+	}
+
+	// set this storage as context so p.Wallets() will work
+	// TODO - this needs to be better, we shouldn't fetch portoflio to get wallets. Storage should literally be a db
+	ctx := &core.PortfolioContext {
+		Storage:     store,
+		PortfolioId: p.ID(),
+	}
+	p.SetContext(ctx)
+
+	ret := make([]core.Wallet,0)
+	for w := range p.Wallets() {
+		ret = append(ret,w)
+	}
+	return ret,nil
+}
 
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
 	data,err := store.maybeEncrypt(wallet)
@@ -115,23 +123,23 @@ func (store *InMemStore) OpenWallet(uuid uuid.UUID) (core.Wallet,error) {
 }
 
 // will return an empty array for no accounts
-//func (store *InMemStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
-//	p,err := store.OpenPortfolio()
-//	if err != nil {
-//		return nil,err
-//	}
-//
-//	w,err := p.WalletByID(walletID)
-//	if err != nil {
-//		return nil,err
-//	}
-//
-//	ret := make([]core.Account,0)
-//	for a := range w.Accounts() {
-//		ret = append(ret,a)
-//	}
-//	return ret,nil
-//}
+func (store *InMemStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
+	p,err := store.OpenPortfolio()
+	if err != nil {
+		return nil,err
+	}
+
+	w,err := p.WalletByID(walletID)
+	if err != nil {
+		return nil,err
+	}
+
+	ret := make([]core.Account,0)
+	for a := range w.Accounts() {
+		ret = append(ret,a)
+	}
+	return ret,nil
+}
 
 func (store *InMemStore) SaveAccount(account core.Account) error {
 	data,err := store.maybeEncrypt(account)
