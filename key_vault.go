@@ -1,12 +1,12 @@
 package KeyVault
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/slashing_protectors"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	"github.com/wealdtech/go-indexer"
 )
 
 // This is an EIP 2333,2334,2335 compliant hierarchical deterministic portfolio
@@ -17,13 +17,60 @@ type KeyVault struct {
 	id uuid.UUID
 	Storage  interface{}
 	enableSimpleSigner bool
-	walletsIndexer indexer.Index // maps indexs <> names
-	walletIds []uuid.UUID
+	indexMapper map[string]uuid.UUID
 	context *core.PortfolioContext
 	key *core.DerivableKey
 }
 
-//func OpenKeyVault(options *WalletOptions) (*KeyVault,error) {
+
+func (vault *KeyVault) MarshalJSON() ([]byte, error) {
+	data := make(map[string]interface{})
+
+	data["id"] = vault.id
+	data["enableSimpleSigner"] = vault.enableSimpleSigner
+	data["indexMapper"] = vault.indexMapper
+
+	return json.Marshal(data)
+}
+
+func (vault *KeyVault) UnmarshalJSON(data []byte) error {
+	// parse
+	var v map[string]interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	var err error
+
+	// id
+	if val, exists := v["id"]; exists {
+		vault.id,err = uuid.Parse(val.(string))
+		if err != nil {
+			return err
+		}
+	} else {return fmt.Errorf("could not find var: id")}
+
+	// simple signer
+	if val, exists := v["enableSimpleSigner"]; exists {
+		vault.enableSimpleSigner = val.(bool)
+		if err != nil {
+			return err
+		}
+	} else {return fmt.Errorf("could not find var: enableSimpleSigner")}
+
+	// indexMapper
+	if val, exists := v["indexMapper"]; exists {
+		vault.indexMapper = make(map[string]uuid.UUID)
+		for k,v := range val.(map[string]interface{}) {
+			vault.indexMapper[k],err = uuid.Parse(v.(string))
+			if err != nil {
+				return err
+			}
+		}
+	} else {return fmt.Errorf("could not find var: indexMapper")}
+	return nil
+}
+
+//func OpenKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 //	if err := e2types.InitBLS(); err != nil { // very important!
 //		return nil,err
 //	}
@@ -50,7 +97,7 @@ type KeyVault struct {
 //	},nil
 //}
 
-func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
+func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,err
 	}
@@ -89,8 +136,7 @@ func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
 	ret := &KeyVault{
 		Storage:            options.storage,
 		enableSimpleSigner: options.enableSimpleSigner,
-		walletsIndexer:     indexer.Index{},
-		walletIds:          make([]uuid.UUID,0),
+		indexMapper:        make(map[string]uuid.UUID),
 		context:            context,
 		key:				seed,
 	}
@@ -99,41 +145,4 @@ func NewKeyVault(options *WalletOptions) (*KeyVault,error) {
 	context.PortfolioId = ret.ID()
 
 	return ret,nil
-
-	//var wallet wtypes.Wallet
-	//var error error
-	//if options.seed != nil {
-	//	wallet,error = hd.CreateWalletFromSeed(
-	//		options.name,
-	//		options.password,
-	//		options.store,
-	//		options.encryptor,
-	//		options.seed,
-	//	)
-	//	if error != nil {
-	//		return nil, error
-	//	}
-	//} else {
-	//	wallet,error = hd.CreateWallet(
-	//		options.name,
-	//		options.password,
-	//		options.store,
-	//		options.encryptor,
-	//	)
-	//	if error != nil {
-	//		return nil, error
-	//	}
-	//}
-	//
-	//var signer validator_signer.ValidatorSigner
-	//if options.enableSimpleSigner{
-	//	slashingProtection := slashing_protectors.NewNormalProtection(options.store.(slashing_protectors.SlashingStore))
-	//	signer = validator_signer.NewSimpleSigner(wallet,slashingProtection)
-	//}
-	//
-	//return &KeyVault{
-	//	Store:  options.store,
-	//	Wallet: wallet,
-	//	Signer: signer,
-	//},nil
 }

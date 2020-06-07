@@ -16,7 +16,7 @@ func (portfolio *KeyVault) ID() uuid.UUID {
 // Will push to the new wallet the lock policy
 func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 	// create wallet
-	id := len(portfolio.walletIds)
+	id := len(portfolio.indexMapper)
 	path := fmt.Sprintf("/%d",id)
 	key,err := portfolio.key.Derive(path)
 	if err != nil {
@@ -30,11 +30,9 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 
 	// register new wallet and save portfolio + wallet
 	reset := func() {
-		portfolio.walletsIndexer.Remove(retWallet.ID(),name)
-		portfolio.walletIds = portfolio.walletIds[:len(portfolio.walletIds)-1]
+		delete(portfolio.indexMapper,name)
 	}
-	portfolio.walletIds = append(portfolio.walletIds,retWallet.ID()) // we first save indexes so they could be saved as part of the portfolio
-	portfolio.walletsIndexer.Add(retWallet.ID(),name)
+	portfolio.indexMapper[name] = retWallet.ID()
 	err = portfolio.context.Storage.SaveWallet(retWallet)
 	if err != nil {
 		reset()
@@ -53,8 +51,8 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 func (portfolio *KeyVault) Wallets() <-chan core.Wallet {
 	ch := make (chan core.Wallet,1024) // TODO - handle more? change from chan?
 	go func() {
-		for i := range portfolio.walletIds {
-			id := portfolio.walletIds[i]
+		for name := range portfolio.indexMapper {
+			id := portfolio.indexMapper[name]
 			wallet,err := portfolio.WalletByID(id)
 			if err != nil {
 				continue
@@ -75,7 +73,7 @@ func (portfolio *KeyVault) WalletByID(id uuid.UUID) (core.Wallet, error) {
 // AccountByName provides a single account from the wallet given its name.
 // This will error if the account is not found.
 func (portfolio *KeyVault) WalletByName(name string) (core.Wallet, error) {
-	id,exists := portfolio.walletsIndexer.ID(name)
+	id,exists := portfolio.indexMapper[name]
 	if !exists {
 		return nil, fmt.Errorf("no wallet found")
 	}
