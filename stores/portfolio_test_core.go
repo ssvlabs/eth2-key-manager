@@ -11,8 +11,6 @@ import (
 	"testing"
 )
 
-
-
 func portfolio(storage core.PortfolioStorage) (core.Portfolio,error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
