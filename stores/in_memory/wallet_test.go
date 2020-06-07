@@ -1,27 +1,27 @@
 package in_memory
 
 import (
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func getWalletStorage() wtypes.Store {
+func getStorage() core.PortfolioStorage {
 	return NewInMemStore()
 }
 
 func TestNonExistingWallet(t *testing.T) {
-	stores.TestingNonExistingWallet(getWalletStorage(),t)
+	stores.TestingNonExistingWallet(getStorage(),t)
 }
 
 func TestMultiWalletStorage(t *testing.T) {
-	stores.TestingMultiWalletStorage(getWalletStorage(),t)
+	stores.TestingWalletListing(getStorage(),t)
 }
 
 func TestWalletStorage(t *testing.T) {
-	stores.TestingWalletStorage(getWalletStorage(),t)
+	stores.TestingWalletStorage(getStorage(),t)
 }
 
-func TestUpdatingWallet(t *testing.T) {
-	stores.TestingUpdatingWallet(getWalletStorage(),t)
-}
+//func TestUpdatingWallet(t *testing.T) {
+//	stores.TestingUpdatingWallet(getStorage(),t)
+//}
