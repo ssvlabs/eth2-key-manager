@@ -3,11 +3,10 @@ package in_memory
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/wallet_hd"
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+	"reflect"
 )
 
 type InMemStore struct {
@@ -16,19 +15,36 @@ type InMemStore struct {
 	proposalMemory 		map[string]*core.BeaconBlockHeader
 	encryptor	   		types.Encryptor
 	encryptionPassword 	[]byte
+
+	portfolioType reflect.Type
+	walletType reflect.Type
+	accountType reflect.Type
 }
 
-func NewInMemStore() *InMemStore {
-	return NewInMemStoreWithEncryptor(nil,nil)
+func NewInMemStore(
+	portfolioType reflect.Type,
+	walletType reflect.Type,
+	accountType reflect.Type,
+	) *InMemStore {
+	return NewInMemStoreWithEncryptor(nil,nil, portfolioType,walletType,accountType)
 }
 
-func NewInMemStoreWithEncryptor(encryptor types.Encryptor, password []byte) *InMemStore {
+func NewInMemStoreWithEncryptor(
+	encryptor types.Encryptor,
+	password []byte,
+	portfolioType reflect.Type,
+	walletType reflect.Type,
+	accountType reflect.Type,
+	) *InMemStore {
 	return &InMemStore{
 		memory:         	make(map[string][]byte),
 		attMemory:      	make(map[string]*core.BeaconAttestation),
 		proposalMemory: 	make(map[string]*core.BeaconBlockHeader),
 		encryptor:			encryptor,
 		encryptionPassword:	password,
+		portfolioType:portfolioType,
+		walletType:walletType,
+		accountType:accountType,
 	}
 }
 
@@ -50,29 +66,29 @@ func (store *InMemStore) SavePortfolio(portfolio core.Portfolio) error {
 func (store *InMemStore) OpenPortfolio() (core.Portfolio,error) {
 	bytes  := store.memory["portfolio"]
 	if bytes != nil {
-		ret := &KeyVault.KeyVault{}
+		ret := reflect.New(store.portfolioType.Elem()).Interface()
 		err := store.maybeDecrypt(bytes,ret)
 		if err != nil {
 			return nil,err
 		}
 
-		return ret,nil
+		return ret.(core.Portfolio),nil
 	}
 	return nil,nil
 }
 
-func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
-	p,err := store.OpenPortfolio()
-	if err != nil {
-		return nil,err
-	}
-
-	ret := make([]core.Wallet,0)
-	for w := range p.Wallets() {
-		ret = append(ret,w)
-	}
-	return ret,nil
-}
+//func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
+//	p,err := store.OpenPortfolio()
+//	if err != nil {
+//		return nil,err
+//	}
+//
+//	ret := make([]core.Wallet,0)
+//	for w := range p.Wallets() {
+//		ret = append(ret,w)
+//	}
+//	return ret,nil
+//}
 
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
 	data,err := store.maybeEncrypt(wallet)
@@ -87,35 +103,35 @@ func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
 func (store *InMemStore) OpenWallet(uuid uuid.UUID) (core.Wallet,error) {
 	bytes  := store.memory[uuid.String()]
 	if bytes != nil {
-		ret := &wallet_hd.HDWallet{}
+		ret := reflect.New(store.walletType.Elem()).Interface()
 		err := store.maybeDecrypt(bytes,ret)
 		if err != nil {
 			return nil,err
 		}
 
-		return ret,nil
+		return ret.(core.Wallet),nil
 	}
 	return nil,nil
 }
 
 // will return an empty array for no accounts
-func (store *InMemStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
-	p,err := store.OpenPortfolio()
-	if err != nil {
-		return nil,err
-	}
-
-	w,err := p.WalletByID(walletID)
-	if err != nil {
-		return nil,err
-	}
-
-	ret := make([]core.Account,0)
-	for a := range w.Accounts() {
-		ret = append(ret,a)
-	}
-	return ret,nil
-}
+//func (store *InMemStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
+//	p,err := store.OpenPortfolio()
+//	if err != nil {
+//		return nil,err
+//	}
+//
+//	w,err := p.WalletByID(walletID)
+//	if err != nil {
+//		return nil,err
+//	}
+//
+//	ret := make([]core.Account,0)
+//	for a := range w.Accounts() {
+//		ret = append(ret,a)
+//	}
+//	return ret,nil
+//}
 
 func (store *InMemStore) SaveAccount(account core.Account) error {
 	data,err := store.maybeEncrypt(account)
@@ -130,13 +146,13 @@ func (store *InMemStore) SaveAccount(account core.Account) error {
 func (store *InMemStore) OpenAccount(uuid uuid.UUID) (core.Account,error) {
 	bytes  := store.memory[uuid.String()]
 	if bytes != nil {
-		ret := &wallet_hd.HDAccount{}
+		ret := reflect.New(store.accountType.Elem()).Interface()
 		err := store.maybeDecrypt(bytes,ret)
 		if err != nil {
 			return nil,err
 		}
 
-		return ret,nil
+		return ret.(core.Account),nil
 	}
 	return nil,nil
 }
