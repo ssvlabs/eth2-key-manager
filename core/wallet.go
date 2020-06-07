@@ -2,7 +2,7 @@ package core
 
 import "github.com/google/uuid"
 
-type WalletType string
+type WalletType = string
 const (
 	HDWallet WalletType = "HD" // hierarchical deterministic wallet
 	ND		 WalletType = "ND" // non - deterministic

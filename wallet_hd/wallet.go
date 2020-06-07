@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
-	"github.com/wealdtech/go-indexer"
 )
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
@@ -16,13 +15,12 @@ const (
 
 // an hierarchical deterministic wallet
 type HDWallet struct {
-	name string
-	id uuid.UUID
-	walletType core.WalletType
-	key *core.DerivableKey // the node key from which all accounts are derived
-	accountsIndexer *indexer.Index  // maps indexes <> names
-	accountIds []uuid.UUID
-	context *core.PortfolioContext
+	name 		string
+	id 			uuid.UUID
+	walletType 	core.WalletType
+	key 		*core.DerivableKey // the node key from which all accounts are derived
+	indexMapper map[string]uuid.UUID
+	context 	*core.PortfolioContext
 }
 
 func NewHDWallet(name string, key *core.DerivableKey, path string, context *core.PortfolioContext) *HDWallet {
@@ -31,8 +29,7 @@ func NewHDWallet(name string, key *core.DerivableKey, path string, context *core
 		id:              uuid.New(),
 		walletType:      core.HDWallet,
 		key:        	 key,
-		accountsIndexer: indexer.New(),
-		accountIds:      make([]uuid.UUID,0),
+		indexMapper: 	 make(map[string]uuid.UUID),
 		context:		 context,
 	}
 }
@@ -74,7 +71,7 @@ func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error) {
-	path := fmt.Sprintf(ValidatorKeyPath,len(wallet.accountIds))
+	path := fmt.Sprintf(ValidatorKeyPath,len(wallet.indexMapper))
 	return wallet.createKey(name,path,core.ValidatorAccount)
 }
 
@@ -82,8 +79,8 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error
 func (wallet *HDWallet) Accounts() <-chan core.Account {
 	ch := make (chan core.Account,1024) // TODO - handle more? change from chan?
 	go func() {
-		for i := range wallet.accountIds {
-			id := wallet.accountIds[i]
+		for name := range wallet.indexMapper {
+			id := wallet.indexMapper[name]
 			account,err := wallet.AccountByID(id)
 			if err != nil {
 				continue
@@ -104,11 +101,7 @@ func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
 // AccountByName provides a single account from the wallet given its name.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
-	id,exists := wallet.accountsIndexer.ID(name)
-	if !exists {
-		return nil,nil
-	}
-
+	id := wallet.indexMapper[name]
 	return wallet.AccountByID(id)
 }
 
@@ -130,11 +123,9 @@ func (wallet *HDWallet) createKey(name string, path string, accountType core.Acc
 
 	// register new wallet and save portfolio
 	reset := func() {
-		wallet.accountsIndexer.Remove(retAccount.id,name)
-		wallet.accountIds = wallet.accountIds[:len(wallet.accountIds)-1]
+		delete(wallet.indexMapper,name)
 	}
-	wallet.accountIds = append(wallet.accountIds,retAccount.ID())
-	wallet.accountsIndexer.Add(retAccount.ID(),name)
+	wallet.indexMapper[name] = retAccount.ID()
 	err = wallet.context.Storage.SaveAccount(retAccount)
 	if err != nil {
 		reset()
