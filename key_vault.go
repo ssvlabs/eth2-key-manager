@@ -3,7 +3,6 @@ package KeyVault
 import (
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/slashing_protectors"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -36,7 +35,7 @@ type KeyVault struct {
 //
 //	var signer validator_signer.ValidatorSigner
 //	if options.enableSimpleSigner{
-//		slashingProtection := slashing_protectors.NewNormalProtection(options.store.(slashing_protectors.SlashingStore))
+//		slashingProtection := slashing_protection.NewNormalProtection(options.store.(slashing_protection.SlashingStore))
 //		signer = validator_signer.NewSimpleSigner(wallet,slashingProtection)
 //	}
 //
@@ -73,7 +72,7 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 
 	// signer
 	if options.enableSimpleSigner {
-		if _,ok := options.storage.(slashing_protectors.SlashingStore); !ok {
+		if _,ok := options.storage.(core.SlashingStore); !ok {
 			return nil,fmt.Errorf("storage does not implement SlashingStore")
 		}
 	}

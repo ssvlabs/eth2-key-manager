@@ -1,38 +1,37 @@
-package slashing_protectors
+package slashing_protection
 
 import (
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/encryptors"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func setupAttestation() (VaultSlashingProtector, types.Account,error) {
+func setupAttestation() (core.VaultSlashingProtector, []core.Account,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
 
-	store := in_memory.NewInMemStore()
-	wallet,err := hd.CreateWallet("test",[]byte(""), store, encryptors.NewPlainTextEncryptor())
+	// create an account to use
+	vault,err := vault()
 	if err != nil {
 		return nil,nil,err
 	}
-	err = wallet.Unlock([]byte(""))
+	w,err := vault.CreateWallet("test")
+	if err != nil {
+		return nil,nil,err
+	}
+	account1,err := w.CreateValidatorAccount("1")
+	if err != nil {
+		return nil,nil,err
+	}
+	account2,err := w.CreateValidatorAccount("2")
 	if err != nil {
 		return nil,nil,err
 	}
 
-	account1,err := wallet.CreateAccount("1",[]byte(""))
-	if err != nil {
-		return nil,nil,err
-	}
-
-	protector := NewNormalProtection(store)
+	protector := core.NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
@@ -118,18 +117,18 @@ func setupAttestation() (VaultSlashingProtector, types.Account,error) {
 			},
 		},
 	})
-	return protector, account1,nil
+	return protector, []core.Account{account1,account2},nil
 }
 
 func TestSurroundingVote(t *testing.T) {
-	protector,account,err := setupAttestation()
+	protector,accounts,err := setupAttestation()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	t.Run("1 Surrounded vote",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -162,7 +161,7 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("2 Surrounded votes",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -195,7 +194,7 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("1 Surrounding vote",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -227,7 +226,7 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("2 Surrounding vote",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -260,14 +259,14 @@ func TestSurroundingVote(t *testing.T) {
 }
 
 func TestDoubleAttestationVote(t *testing.T) {
-	protector,account,err := setupAttestation()
+	protector,accounts,err := setupAttestation()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	t.Run("Different committee index, should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -297,7 +296,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("Different block root, should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -327,7 +326,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("Same attestation, should not error",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -351,7 +350,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("new attestation, should not error",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(account, &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{

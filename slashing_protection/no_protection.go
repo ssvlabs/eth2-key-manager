@@ -1,4 +1,4 @@
-package slashing_protectors
+package slashing_protection
 import (
 	"github.com/bloxapp/KeyVault/core"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"

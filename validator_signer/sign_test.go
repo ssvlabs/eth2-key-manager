@@ -3,20 +3,32 @@ package validator_signer
 import (
 	"encoding/hex"
 	"fmt"
-	prot "github.com/bloxapp/KeyVault/slashing_protectors"
+	"github.com/bloxapp/KeyVault"
+	"github.com/bloxapp/KeyVault/core"
+	prot "github.com/bloxapp/KeyVault/slashing_protection"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+	"reflect"
 	"testing"
 )
 
+func inmemStorage() *in_memory.InMemStore {
+	return in_memory.NewInMemStore(
+			reflect.TypeOf(KeyVault.KeyVault{}),
+			reflect.TypeOf(wallet_hd.HDWallet{}),
+			reflect.TypeOf(wallet_hd.HDAccount{}),
+		)
+}
+
 func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	noProtection := &prot.NoProtection{}
-	store := in_memory.NewInMemStore()
+	store := inmemStorage()
 	wallet,err := walletWithSeed(seed,store)
 	if err != nil {
 		return nil,err
@@ -25,8 +37,8 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {
 }
 
 func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
-	store := in_memory.NewInMemStore()
-	protector := prot.NewNormalProtection(store)
+	store := inmemStorage()
+	protector := core.NewNormalProtection(store)
 	wallet,err := walletWithSeed(seed,store)
 	if err != nil {
 		return nil,err

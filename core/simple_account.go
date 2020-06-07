@@ -26,6 +26,12 @@ func NewSimpleAccount() *SimpleAccount {
 	return &SimpleAccount{privateKey:priv,id:uuid.New()}
 }
 
+
+// WalletID provides the ID for the wallet holding this account.
+func (account *SimpleAccount) WalletID() uuid.UUID {
+	return uuid.New()
+}
+
 // ID provides the ID for the account.
 func (account *SimpleAccount) ID() uuid.UUID {
 	return account.id
@@ -34,6 +40,11 @@ func (account *SimpleAccount) ID() uuid.UUID {
 // Name provides the name for the account.
 func (account *SimpleAccount) Name() string {
 	return hex.EncodeToString(account.privateKey.PublicKey().Marshal())
+}
+
+// ID provides the ID for the account.
+func (account *SimpleAccount) Type() AccountType {
+	return ValidatorAccount
 }
 
 // PublicKey provides the public key for the account.
@@ -47,22 +58,7 @@ func (account *SimpleAccount) Path() string {
 	return "m"
 }
 
-// Lock locks the account.  A locked account cannot sign.
-func (account *SimpleAccount) Lock() {
-
-}
-
-// Unlock unlocks the account.  An unlocked account can sign.
-func (account *SimpleAccount) Unlock([]byte) error {
-	return nil
-}
-
-// IsUnlocked returns true if the account is unlocked.
-func (account *SimpleAccount) IsUnlocked() bool {
-	return true
-}
-
 // Sign signs data with the account.
-func (account *SimpleAccount) Sign(data []byte) (e2types.Signature, error) {
-	return account.privateKey.Sign(data),nil
+func (account *SimpleAccount) Sign(data []byte) e2types.Signature {
+	return account.privateKey.Sign(data)
 }

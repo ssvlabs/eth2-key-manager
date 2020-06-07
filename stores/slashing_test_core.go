@@ -2,16 +2,14 @@ package stores
 
 import (
 	"github.com/bloxapp/KeyVault/core"
-	slash "github.com/bloxapp/KeyVault/slashing_protectors"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func TestingSaveProposal(storage slash.SlashingStore, t *testing.T) {
+func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		proposal *core.BeaconBlockHeader
-		account types.Account
+		account core.Account
 	}{
 		{
 			name:"simple save",
@@ -53,11 +51,11 @@ func TestingSaveProposal(storage slash.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
+func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		att *core.BeaconAttestation
-		account types.Account
+		account core.Account
 	}{
 		{
 			name:"simple save",
@@ -122,11 +120,11 @@ func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingSaveLatestAttestation(storage slash.SlashingStore, t *testing.T) {
+func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		att *core.BeaconAttestation
-		account types.Account
+		account core.Account
 	}{
 		{
 			name:"simple save",
@@ -191,7 +189,7 @@ func TestingSaveLatestAttestation(storage slash.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingListingAttestation(storage slash.SlashingStore, t *testing.T) {
+func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 	attestations := []*core.BeaconAttestation{
 		&core.BeaconAttestation{
 			Slot:            30,
