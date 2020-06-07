@@ -15,5 +15,4 @@ require (
 	github.com/wealdtech/go-eth2-wallet-hd/v2 v2.0.4
 	github.com/wealdtech/go-eth2-wallet-store-filesystem v1.7.3
 	github.com/wealdtech/go-eth2-wallet-types/v2 v2.0.2
-	github.com/wealdtech/go-indexer v1.0.0
 )
