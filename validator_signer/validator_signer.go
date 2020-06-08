@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"sync"
 )
 
@@ -22,12 +21,12 @@ type signingRoot struct {
 }
 
 type SimpleSigner struct {
-	wallet            types.Wallet
+	wallet            core.Wallet
 	slashingProtector core.VaultSlashingProtector
 	signLocks         map[string]*sync.RWMutex
 }
 
-func NewSimpleSigner(wallet types.Wallet, slashingProtector core.VaultSlashingProtector) *SimpleSigner {
+func NewSimpleSigner(wallet core.Wallet, slashingProtector core.VaultSlashingProtector) *SimpleSigner {
 	return &SimpleSigner{
 		wallet:            wallet,
 		slashingProtector: slashingProtector,

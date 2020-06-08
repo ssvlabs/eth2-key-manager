@@ -11,9 +11,9 @@ import (
 
 func getSlashingStorage() core.SlashingStore {
 	return NewInMemStore(
-		reflect.TypeOf(KeyVault.KeyVault{}),
-		reflect.TypeOf(wallet_hd.HDWallet{}),
-		reflect.TypeOf(wallet_hd.HDAccount{}),
+		reflect.TypeOf(&KeyVault.KeyVault{}),
+		reflect.TypeOf(&wallet_hd.HDWallet{}),
+		reflect.TypeOf(&wallet_hd.HDAccount{}),
 	)
 }
 

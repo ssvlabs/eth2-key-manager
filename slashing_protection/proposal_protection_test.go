@@ -19,9 +19,9 @@ func _byteArray(input string) []byte {
 
 func store () *in_memory.InMemStore {
 	return in_memory.NewInMemStore(
-		reflect.TypeOf(KeyVault.KeyVault{}),
-		reflect.TypeOf(wallet_hd.HDWallet{}),
-		reflect.TypeOf(wallet_hd.HDAccount{}),
+		reflect.TypeOf(&KeyVault.KeyVault{}),
+		reflect.TypeOf(&wallet_hd.HDWallet{}),
+		reflect.TypeOf(&wallet_hd.HDAccount{}),
 	)
 }
 

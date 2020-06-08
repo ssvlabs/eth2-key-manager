@@ -11,18 +11,15 @@ import (
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"reflect"
 	"testing"
 )
 
 func inmemStorage() *in_memory.InMemStore {
 	return in_memory.NewInMemStore(
-			reflect.TypeOf(KeyVault.KeyVault{}),
-			reflect.TypeOf(wallet_hd.HDWallet{}),
-			reflect.TypeOf(wallet_hd.HDAccount{}),
+			reflect.TypeOf(&KeyVault.KeyVault{}),
+			reflect.TypeOf(&wallet_hd.HDWallet{}),
+			reflect.TypeOf(&wallet_hd.HDAccount{}),
 		)
 }
 
@@ -46,28 +43,29 @@ func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	return NewSimpleSigner(wallet,protector),nil
 }
 
-func walletWithSeed(seed []byte, store types.Store) (types.Wallet,error) {
+func walletWithSeed(seed []byte, store core.PortfolioStorage) (core.Wallet,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,err
 	}
 
-	wallet, err := hd.CreateWalletFromSeed("test",[]byte(""),store,keystorev4.New(),seed)
-	if err != nil {
-		return nil,err
-	}
-	err = wallet.Unlock([]byte(""))
-	if err != nil {
-		return nil,err
-	}
-	_,err = wallet.CreateAccount("1",[]byte(""))
-	if err != nil {
-		return nil,err
-	}
-	_,err = wallet.CreateAccount("2",[]byte("1234")) // non standard password, will not be able to unlock
+
+	options := &KeyVault.PortfolioOptions{}
+	options.SetStorage(store)
+	options.SetSeed(seed)
+	vault,err := KeyVault.NewKeyVault(options)
 	if err != nil {
 		return nil,err
 	}
 
+	wallet,err := vault.CreateWallet("test")
+	if err != nil {
+		return nil,err
+	}
+
+	_,err = wallet.CreateValidatorAccount("1")
+	if err != nil {
+		return nil,err
+	}
 
 	return wallet,nil
 }
@@ -79,7 +77,7 @@ func TestSignatures(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0")
+	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0/0")
 	if err != nil {
 		t.Error(err)
 		return
@@ -110,18 +108,29 @@ func TestSignatures(t *testing.T) {
 				Data:                 []byte("data"),
 				Domain:               []byte("domain"),
 			},
-			expectedError: fmt.Errorf("no account with name \"10\""),
+			expectedError: fmt.Errorf("account not found"),
 			accountPriv: nil,
 			msg: "",
 		},
 		{
-			name:"unable to unlock account, should error",
+			name:"empty account, should error",
 			req: &pb.SignRequest{
-				Id:                   &pb.SignRequest_Account{Account:"2"},
+				Id:                   &pb.SignRequest_Account{Account:""},
 				Data:                 []byte("data"),
 				Domain:               []byte("domain"),
 			},
-			expectedError: fmt.Errorf("incorrect passphrase"),
+			expectedError: fmt.Errorf("account was not supplied"),
+			accountPriv: nil,
+			msg: "",
+		},
+		{
+			name:"nil account, should error",
+			req: &pb.SignRequest{
+				Id:                  nil,
+				Data:                 []byte("data"),
+				Domain:               []byte("domain"),
+			},
+			expectedError: fmt.Errorf("account was not supplied"),
 			accountPriv: nil,
 			msg: "",
 		},
