@@ -60,6 +60,16 @@ func TestMarshaling(t *testing.T) {
 			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
 			path: "/0/0",
 		},
+		{
+			testName:"simple portfolio without key path",
+			id:uuid.New(),
+			simpleSigner: false,
+			indexMapper:map[string]uuid.UUID{
+				"wallet1" : uuid.New(),
+			},
+			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			path: "",
+		},
 	}
 
 	for _, test := range tests {
