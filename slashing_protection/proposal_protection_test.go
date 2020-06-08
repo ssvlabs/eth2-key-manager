@@ -8,18 +8,12 @@ import (
 	"github.com/bloxapp/KeyVault/wallet_hd"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	"math/big"
 	"reflect"
 	"testing"
 )
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
-	return res
-}
-
-func _bigInt(input string) *big.Int {
-	res, _ := new(big.Int).SetString(input, 10)
 	return res
 }
 
