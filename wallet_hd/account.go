@@ -1,6 +1,8 @@
 package wallet_hd
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -13,6 +15,59 @@ type HDAccount struct {
 	publicKey e2types.PublicKey
 	key *core.DerivableKey
 	context *core.PortfolioContext
+}
+
+func (account *HDAccount) MarshalJSON() ([]byte, error) {
+	data := make(map[string]interface{})
+
+	data["id"] = account.id
+	data["name"] = account.name
+	data["type"] = account.accountType
+	data["key"] = account.key
+	return json.Marshal(data)
+}
+
+func (account *HDAccount) UnmarshalJSON(data []byte) error {
+	// parse
+	var v map[string]interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	var err error
+
+	// id
+	if val, exists := v["id"]; exists {
+		account.id,err = uuid.Parse(val.(string))
+		if err != nil {
+			return err
+		}
+	} else {return fmt.Errorf("could not find var: id")}
+
+	// name
+	if val, exists := v["name"]; exists {
+		account.name = val.(string)
+	} else {return fmt.Errorf("could not find var: id")}
+
+	// type
+	if val, exists := v["type"]; exists {
+		account.accountType = val.(string)
+	} else {return fmt.Errorf("could not find var: id")}
+
+	// key
+	if val, exists := v["key"]; exists {
+		byts,err := json.Marshal(val)
+		if err != nil {
+			return err
+		}
+		key := &core.DerivableKey{}
+		err = json.Unmarshal(byts,key)
+		if err != nil {
+			return err
+		}
+		account.key = key
+	} else {return fmt.Errorf("could not find var: key")}
+
+	return nil
 }
 
 func newHDAccount(name string,

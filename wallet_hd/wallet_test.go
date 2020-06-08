@@ -33,7 +33,7 @@ func key(seed []byte, relativePath string) (*core.DerivableKey,error) {
 	}
 }
 
-func TestMarshaling(t *testing.T) {
+func TestWalletMarshaling(t *testing.T) {
 	tests := []struct{
 		id uuid.UUID
 		testName string

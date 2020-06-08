@@ -5,7 +5,7 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
-type AccountType string
+type AccountType = string
 const (
 	ValidatorAccount 	AccountType = "Validation"
 	WithdrawalAccount	AccountType = "Withdrawal"
