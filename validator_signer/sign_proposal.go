@@ -41,10 +41,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	if err != nil {
 		return nil, err
 	}
-	sig,err := account.Sign(forSig)
-	if err != nil {
-		return nil, err
-	}
+	sig := account.Sign(forSig)
 	res := &pb.SignResponse{
 		State:                pb.ResponseState_SUCCEEDED,
 		Signature:            sig.Marshal(),

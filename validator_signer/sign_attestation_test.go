@@ -72,7 +72,7 @@ func TestAttestationSignatures(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0")
+	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0/0")
 	if err != nil {
 		t.Error(err)
 		return
@@ -127,14 +127,14 @@ func TestAttestationSignatures(t *testing.T) {
 					},
 				},
 			},
-			expectedError:fmt.Errorf("no account with name \"10\""),
+			expectedError:fmt.Errorf("account not found"),
 			accountPriv:nil,
 			msg:"",
 		},
 		{
-			name:"unable to unlock account, should error",
+			name:"nil account, should error",
 			req: &pb.SignBeaconAttestationRequest{
-				Id:                   &pb.SignBeaconAttestationRequest_Account{Account:"2"},
+				Id:                   nil,
 				Domain:               ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 				Data:                 &pb.AttestationData{
 					Slot:            284115,
@@ -150,7 +150,7 @@ func TestAttestationSignatures(t *testing.T) {
 					},
 				},
 			},
-			expectedError:fmt.Errorf("incorrect passphrase"),
+			expectedError:fmt.Errorf("account was not supplied"),
 			accountPriv:nil,
 			msg:"",
 		},
