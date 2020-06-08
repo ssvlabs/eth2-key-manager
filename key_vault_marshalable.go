@@ -3,6 +3,7 @@ package KeyVault
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 )
 
@@ -12,7 +13,7 @@ func (vault *KeyVault) MarshalJSON() ([]byte, error) {
 	data["id"] = vault.id
 	data["enableSimpleSigner"] = vault.enableSimpleSigner
 	data["indexMapper"] = vault.indexMapper
-
+	data["key"] = vault.key
 	return json.Marshal(data)
 }
 
@@ -50,5 +51,20 @@ func (vault *KeyVault) UnmarshalJSON(data []byte) error {
 			}
 		}
 	} else {return fmt.Errorf("could not find var: indexMapper")}
+
+	// key
+	if val, exists := v["key"]; exists {
+		byts,err := json.Marshal(val)
+		if err != nil {
+			return err
+		}
+		key := &core.DerivableKey{}
+		err = json.Unmarshal(byts,key)
+		if err != nil {
+			return err
+		}
+		vault.key = key
+	} else {return fmt.Errorf("could not find var: key")}
+
 	return nil
 }

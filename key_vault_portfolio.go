@@ -28,7 +28,6 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 	}
 	retWallet := wallet_hd.NewHDWallet(name,
 		key,
-		path,
 		portfolio.Context,
 	)
 
