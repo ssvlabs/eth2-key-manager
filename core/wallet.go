@@ -33,4 +33,6 @@ type Wallet interface {
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
 	AccountByName(name string) (Account, error)
+	//
+	SetContext(ctx *PortfolioContext)
 }

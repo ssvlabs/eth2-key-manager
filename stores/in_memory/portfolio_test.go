@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+func TestNonExistingPortfolio(t *testing.T) {
+	stores.TestingNonExistingPortfolio(getStorage(),t)
+}
+
 func TestPortfolioStorage(t *testing.T) {
 	stores.TestingPortfolioStorage(getStorage(),t)
 }

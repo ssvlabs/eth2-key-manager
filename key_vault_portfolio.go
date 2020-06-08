@@ -71,7 +71,12 @@ func (portfolio *KeyVault) Wallets() <-chan core.Wallet {
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (portfolio *KeyVault) WalletByID(id uuid.UUID) (core.Wallet, error) {
-	return portfolio.Context.Storage.OpenWallet(id)
+	w,err := portfolio.Context.Storage.OpenWallet(id)
+	if err != nil {
+		return nil,err
+	}
+	w.SetContext(portfolio.Context)
+	return w,nil
 }
 
 // AccountByName provides a single account from the wallet given its name.

@@ -12,7 +12,6 @@ type HDAccount struct {
 	name string
 	id uuid.UUID
 	accountType core.AccountType
-	publicKey e2types.PublicKey
 	key *core.DerivableKey
 	context *core.PortfolioContext
 }
@@ -78,7 +77,6 @@ func newHDAccount(name string,
 		name:         name,
 		id:           uuid.New(),
 		accountType:  accountType,
-		publicKey:    key.Key.PublicKey(),
 		key:    	  key,
 		context:	  context,
 	},nil
@@ -106,7 +104,7 @@ func (account *HDAccount) Name() string {
 
 // PublicKey provides the public key for the account.
 func (account *HDAccount) PublicKey() e2types.PublicKey {
-	return account.publicKey
+	return account.key.Key.PublicKey()
 }
 
 // Path provides the path for the account.

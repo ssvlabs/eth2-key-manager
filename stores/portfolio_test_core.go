@@ -22,6 +22,18 @@ func portfolio(storage core.PortfolioStorage) (core.Portfolio,error) {
 	return KeyVault.NewKeyVault(options)
 }
 
+func TestingNonExistingPortfolio(storage core.PortfolioStorage, t *testing.T) {
+	w, err := storage.OpenPortfolio()
+	if err != nil {
+		t.Error("returned an error for a non existing wallet, should not return an error but rather a nil wallet")
+		return
+	}
+
+	if w != nil {
+		t.Error("returned a wallet for a non existing uuid")
+	}
+}
+
 
 func TestingPortfolioStorage(storage core.PortfolioStorage, t *testing.T) {
 	tests := []struct{

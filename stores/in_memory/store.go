@@ -72,6 +72,14 @@ func (store *InMemStore) OpenPortfolio() (core.Portfolio,error) {
 			return nil,err
 		}
 
+		// set this storage as context so p.Wallets() will work
+		// TODO - this needs to be better, we shouldn't fetch portoflio to get wallets. Storage should literally be a db
+		ctx := &core.PortfolioContext {
+			Storage:     store,
+			PortfolioId: ret.(core.Portfolio).ID(),
+		}
+		ret.(core.Portfolio).SetContext(ctx)
+
 		return ret.(core.Portfolio),nil
 	}
 	return nil,nil
@@ -82,14 +90,6 @@ func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
 	if err != nil {
 		return nil,err
 	}
-
-	// set this storage as context so p.Wallets() will work
-	// TODO - this needs to be better, we shouldn't fetch portoflio to get wallets. Storage should literally be a db
-	ctx := &core.PortfolioContext {
-		Storage:     store,
-		PortfolioId: p.ID(),
-	}
-	p.SetContext(ctx)
 
 	ret := make([]core.Wallet,0)
 	for w := range p.Wallets() {

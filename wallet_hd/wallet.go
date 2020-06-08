@@ -87,6 +87,7 @@ func (wallet *HDWallet) Accounts() <-chan core.Account {
 			}
 			ch <- account
 		}
+		close(ch)
 	}()
 
 	return ch
@@ -96,6 +97,10 @@ func (wallet *HDWallet) Accounts() <-chan core.Account {
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
 	return wallet.context.Storage.OpenAccount(id)
+}
+
+func (wallet *HDWallet) SetContext(ctx *core.PortfolioContext) {
+	wallet.context = ctx
 }
 
 // AccountByName provides a single account from the wallet given its name.
