@@ -13,7 +13,7 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func getPopulatedWalletStorage(t *testing.T) (core.PortfolioStorage,[]core.Account,error) {
+func getPopulatedWalletStorage() (core.PortfolioStorage,[]core.Account,error) {
 	store := getStorage()
 
 	options := &KeyVault.PortfolioOptions{}
@@ -49,8 +49,17 @@ func getPopulatedWalletStorage(t *testing.T) (core.PortfolioStorage,[]core.Accou
 	return store,[]core.Account{a1,a2,a3,a4},nil
 }
 
+func TestOpeningAccount (t *testing.T) {
+	storage, accounts, err := getPopulatedWalletStorage()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	stores.TestingOpeningAccount(storage, accounts[0],t)
+}
+
 func TestAddingAccountsToWallet(t *testing.T) {
-	storage, accounts, err := getPopulatedWalletStorage(t)
+	storage, accounts, err := getPopulatedWalletStorage()
 	if err != nil {
 		t.Error(err)
 		return
@@ -59,7 +68,7 @@ func TestAddingAccountsToWallet(t *testing.T) {
 }
 
 func TestFetchingNonExistingAccount(t *testing.T) {
-	storage, _, err := getPopulatedWalletStorage(t)
+	storage, _, err := getPopulatedWalletStorage()
 	if err != nil {
 		t.Error(err)
 		return
@@ -68,7 +77,7 @@ func TestFetchingNonExistingAccount(t *testing.T) {
 }
 
 func TestListingAccounts(t *testing.T) {
-	storage, _, err := getPopulatedWalletStorage(t)
+	storage, _, err := getPopulatedWalletStorage()
 	if err != nil {
 		t.Error(err)
 		return

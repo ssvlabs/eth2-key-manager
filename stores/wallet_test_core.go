@@ -29,6 +29,76 @@ func _byteArray(input string) []byte {
 	return res
 }
 
+func TestingWithdrawalAccount(storage core.PortfolioStorage, t *testing.T) {
+	portfolio,err := portfolio(storage)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w,err := portfolio.CreateWallet("test")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	a,err := w.GetWithdrawalAccount()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	require.Equal(t,"wallet_withdrawal_key_unique",a.Name())
+	require.Equal(t,"m/12381/3600/0/0",a.Path())
+	require.Equal(t,"ad05971d7f95df8e9181d3d4fb298643493e32df84735ba98d63ddeb4c18492c191973c6dfb01d08ed4f93e7d8247933",hex.EncodeToString(a.PublicKey().Marshal()))
+}
+
+func TestingOpenAccounts(storage core.PortfolioStorage, t *testing.T) {
+	portfolio,err := portfolio(storage)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w,err := portfolio.CreateWallet("test")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	for i := 0 ; i < 10 ; i ++ {
+		testName := fmt.Sprintf("adding and fetching account: %d", i)
+		t.Run(testName, func(t *testing.T) {
+			// create
+			accountName := fmt.Sprintf("%d",i)
+			a,err := w.CreateValidatorAccount(accountName)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// open
+			a1,err := w.AccountByName(accountName)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			a2,err := w.AccountByID(a.ID())
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// verify
+			for _,fetchedAccount := range []core.Account{a1,a2} {
+				require.Equal(t,a.ID().String(),fetchedAccount.ID().String())
+				require.Equal(t,a.Name(),fetchedAccount.Name())
+				require.Equal(t,a.PublicKey().Marshal(),fetchedAccount.PublicKey().Marshal())
+				require.Equal(t,fmt.Sprintf("m/12381/3600/0/0/%d",i),fetchedAccount.Path())
+			}
+		})
+	}
+
+}
+
 func TestingNonExistingWallet(storage core.PortfolioStorage, t *testing.T) {
 	uid := uuid.New()
 	w, err := storage.OpenWallet(uid)

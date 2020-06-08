@@ -9,6 +9,17 @@ import (
 	"testing"
 )
 
+func TestingOpeningAccount(storage core.PortfolioStorage, account core.Account, t *testing.T) {
+	a1,err := storage.OpenAccount(account.ID())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	require.Equal(t,account.ID().String(),a1.ID().String())
+	require.Equal(t,account.PublicKey().Marshal(),a1.PublicKey().Marshal())
+	require.Equal(t,account.Name(),a1.Name())
+}
+
 func TestingSavingAccounts(storage core.PortfolioStorage, accounts []core.Account, t *testing.T) {
 	for _,account := range accounts {
 		testname := fmt.Sprintf("adding account %s",account.Name())
