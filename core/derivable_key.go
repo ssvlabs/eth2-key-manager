@@ -1,10 +1,13 @@
 package core
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -16,6 +19,54 @@ type DerivableKey struct {
 	seed []byte
 	Key  *e2types.BLSPrivateKey
 	Path string
+}
+func (key *DerivableKey) MarshalJSON() ([]byte, error) {
+	data := make(map[string]interface{})
+
+	data["seed"] = hex.EncodeToString(key.seed)
+	data["path"] = key.Path
+
+	return json.Marshal(data)
+}
+
+func (key *DerivableKey) UnmarshalJSON(data []byte) error {
+	// parse
+	var v map[string]interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	// path
+	if val, exists := v["path"]; exists {
+		key.Path = val.(string)
+	} else {return fmt.Errorf("could not find var: id")}
+
+	// seed
+	if val, exists := v["seed"]; exists {
+		byts,err := hex.DecodeString(val.(string))
+		if err != nil {
+			return err
+		}
+		key.seed = byts
+
+		baseKey,err := BaseKeyFromSeed(byts)
+		if err != nil {
+			return err
+		}
+		relativePath := strings.Replace(key.Path,BaseEIP2334Path,"",1)
+		if len(relativePath) > 0 {
+			derivedKey,err := baseKey.Derive(relativePath)
+			if err != nil {
+				return err
+			}
+			key.Key = derivedKey.Key
+		} else {
+			key.Key = baseKey.Key
+		}
+
+	} else {return fmt.Errorf("could not find var: id")}
+
+	return nil
 }
 
 // base key is m / purpose / coin_type / as EIP 2334 defines

@@ -2,8 +2,10 @@ package core
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"math/big"
 	"os"
@@ -22,6 +24,68 @@ func _byteArray(input string) []byte {
 func _bigInt(input string) *big.Int {
 	res, _ := new(big.Int).SetString(input, 10)
 	return res
+}
+
+func TestMarshaling(t *testing.T) {
+	if err := e2types.InitBLS(); err != nil {
+		os.Exit(1)
+	}
+
+	tests := []struct{
+		name string
+		seed []byte
+		path string
+		err  error
+	} {
+		{
+			name: "Base account derivation",
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			path:  "/0/0", // after basePath
+			err: nil,
+		},
+		{
+			name: "Base account derivation (base path only)",
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			path:  "", // after basePath
+			err: nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// create the key
+			key,err := BaseKeyFromSeed(test.seed)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if len(test.path) > 0 {
+				key,err = key.Derive(test.path)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+			}
+
+			// marshal and unmarshal
+			byts,err := json.Marshal(key)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			newKey := &DerivableKey{}
+			err = json.Unmarshal(byts,newKey)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// match
+			require.Equal(t,key.Path,newKey.Path)
+			require.Equal(t,key.Key.Marshal(),newKey.Key.Marshal())
+			require.Equal(t,key.seed,newKey.seed)
+		})
+	}
 }
 
 func TestRelativePathDerivation(t *testing.T) {
