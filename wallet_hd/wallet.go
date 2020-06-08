@@ -23,7 +23,7 @@ type HDWallet struct {
 	context 	*core.PortfolioContext
 }
 
-func NewHDWallet(name string, key *core.DerivableKey, path string, context *core.PortfolioContext) *HDWallet {
+func NewHDWallet(name string, key *core.DerivableKey, context *core.PortfolioContext) *HDWallet {
 	return &HDWallet{
 		name:            name,
 		id:              uuid.New(),

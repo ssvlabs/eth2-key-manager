@@ -3,6 +3,7 @@ package wallet_hd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 )
 
@@ -13,6 +14,7 @@ func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
 	data["name"] = wallet.name
 	data["type"] = wallet.walletType
 	data["indexMapper"] = wallet.indexMapper
+	data["key"] = wallet.key
 
 	return json.Marshal(data)
 }
@@ -53,5 +55,21 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 			}
 		}
 	} else {return fmt.Errorf("could not find var: indexMapper")}
+
+
+	// key
+	if val, exists := v["key"]; exists {
+		byts,err := json.Marshal(val)
+		if err != nil {
+			return err
+		}
+		key := &core.DerivableKey{}
+		err = json.Unmarshal(byts,key)
+		if err != nil {
+			return err
+		}
+		wallet.key = key
+	} else {return fmt.Errorf("could not find var: key")}
+
 	return nil
 }
