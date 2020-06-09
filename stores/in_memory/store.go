@@ -1,6 +1,7 @@
 package in_memory
 
 import (
+	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
@@ -117,62 +118,41 @@ func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte
 }
 
 func (store *InMemStore) SecurelyFetchPortfolioSeed() ([]byte,error) {
-	// TODO encrypt
 	if val := store.memory["portfolio_seed"]; val != nil {
-		return val.([]byte),nil
+		if store.verifyCanEncrypt() {
+			if encrypted,ok := val.(map[string]interface{}); ok {
+				decrypted,err := store.encryptor.Decrypt(encrypted,store.encryptionPassword)
+				if err != nil {
+					return nil,err
+				}
+				return decrypted,nil
+			} else {
+				return nil,fmt.Errorf("no encrypted data exists")
+			}
+
+		} else {
+			return val.([]byte),nil
+		}
 	} else {
 		return nil,nil
 	}
 }
 
 func (store *InMemStore) SecurelySavePortfolioSeed(secret []byte) error {
-	// TODO decrypt
-	store.memory["portfolio_seed"] = secret
+	if len(secret) > 32 {
+		return fmt.Errorf("secret can be only 32 bytes (not %d bytes)",len(secret))
+	}
+	if store.verifyCanEncrypt() {
+		encrypted,err := store.encryptor.Encrypt(secret,store.encryptionPassword)
+		if err != nil {
+			return err
+		}
+		store.memory["portfolio_seed"] = encrypted
+	} else {
+		store.memory["portfolio_seed"] = secret
+	}
 	return nil
 }
-
-//func (store *InMemStore) maybeEncrypt(input interface{}) (map[string][]byte,error) {
-//	data,err := json.Marshal(input)
-//	if err != nil {
-//		return nil,err
-//	}
-//
-//	if store.verifyCanEncrypt() {
-//		encrypted,err := input.(core.KeyBarer).EncryptedPrivateKey(store.encryptor,store.encryptionPassword)
-//		if err != nil {
-//			return nil,err
-//		}
-//		data,err = json.Marshal(encrypted)
-//		if err != nil {
-//			return nil,err
-//		}
-//	}
-//
-//	return data,nil
-//}
-//
-//func (store *InMemStore) maybeDecrypt(input []byte, ret interface{}) error {
-//	if store.verifyCanEncrypt() {
-//		// get encrypted data
-//		var data map[string]interface{}
-//		err := json.Unmarshal(input,&data)
-//		if err != nil {
-//			return err
-//		}
-//
-//		// decrypt
-//		decrypted,err := store.encryptor.Decrypt(data,store.encryptionPassword)
-//		if err != nil {
-//			return err
-//		}
-//
-//		// unmarshal to object
-//		return json.Unmarshal(decrypted,&ret)
-//	} else {
-//		// if not encrypted just unmarshal
-//		return json.Unmarshal(input,&ret)
-//	}
-//}
 
 func (store *InMemStore) freshContext() *core.PortfolioContext {
 	return &core.PortfolioContext {
