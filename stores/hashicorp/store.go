@@ -28,6 +28,7 @@ const (
 	WalletAccountBase = WalletBasePathStr + "ids/%s/accounts/"
 	WalletAccountPath = WalletAccountBase + "%s"
 
+	WalletIndexesPath = WalletBasePathStr + "%s/indexes"
 
 	WalletsIdMappingPathStr = WalletBasePathStr + "mappings/%s"
 )
@@ -182,12 +183,28 @@ func (store *HashicorpVaultStore) RetrieveAccount(walletID uuid.UUID, accountID 
 
 // StoreAccountsIndex stores the index of accounts for a given wallet.
 func (store *HashicorpVaultStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
-	return fmt.Errorf("StoreAccountsIndex not implemented")
+	// put wallet data
+	path := fmt.Sprintf(WalletIndexesPath, walletID.String())
+	entry := &logical.StorageEntry{
+		Key:      path,
+		Value:    data,
+		SealWrap: false,
+	}
+	return store.storage.Put(store.ctx, entry)
 }
 
 // RetrieveAccountsIndex retrieves the index of accounts for a given wallet.
 func (store *HashicorpVaultStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
-	return nil,fmt.Errorf("RetrieveAccountsIndex not implemented")
+	path := fmt.Sprintf(WalletIndexesPath, walletID.String())
+	entry,error := store.storage.Get(store.ctx,path)
+	if error != nil {
+		return nil, error
+	}
+	if entry == nil {
+		return nil, fmt.Errorf("could not retrieve indexes for wallet id: %s", walletID.String())
+	}
+
+	return entry.Value,nil
 }
 
 func cleanFromPathSymbols(str string) string {
