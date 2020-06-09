@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -16,12 +17,16 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func key(seed []byte, relativePath string) (*core.DerivableKey,error) {
+func inmemStorage() *in_memory.InMemStore {
+	return in_memory.NewInMemStore()
+}
+
+func key(seed []byte, relativePath string, storage core.Storage) (*core.DerivableKey,error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
-	key,err := core.BaseKeyFromSeed(seed)
+	key,err := core.BaseKeyFromSeed(seed, storage)
 	if err != nil {
 		return nil,err
 	}
@@ -67,12 +72,20 @@ func TestWalletMarshaling(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			key,err := key(test.seed,test.path)
+			// setup storage
+			storage := inmemStorage()
+			err := storage.SecurelySavePortfolioSeed(test.seed)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
+			// create key and wallet
+			key,err := key(test.seed,test.path,storage)
+			if err != nil {
+				t.Error(err)
+				return
+			}
 			w := &HDWallet{
 				walletType:test.walletType,
 				name:test.name,
@@ -88,7 +101,7 @@ func TestWalletMarshaling(t *testing.T) {
 				return
 			}
 			//unmarshal
-			w1 := &HDWallet{}
+			w1 := &HDWallet{context:&core.PortfolioContext{Storage:storage}}
 			err = json.Unmarshal(byts,w1)
 			if err != nil {
 				t.Error(err)
@@ -102,7 +115,7 @@ func TestWalletMarshaling(t *testing.T) {
 				v := w.indexMapper[k]
 				require.Equal(t,v,w1.indexMapper[k])
 			}
-			require.Equal(t,w.key.Key.Marshal(),w1.key.Key.Marshal())
+			require.Equal(t,w.key.PublicKey().Marshal(),w1.key.PublicKey().Marshal())
 		})
 	}
 

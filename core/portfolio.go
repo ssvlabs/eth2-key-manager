@@ -24,15 +24,6 @@ type Portfolio interface {
 }
 
 type PortfolioContext struct {
-	Storage PortfolioStorage
+	Storage     Storage
 	PortfolioId uuid.UUID
-	WalletId uuid.UUID // could be nil for wallets
-}
-
-func (context *PortfolioContext) CopyForAccount(walletID uuid.UUID) *PortfolioContext {
-	return &PortfolioContext{
-		Storage:     context.Storage,
-		PortfolioId: context.PortfolioId,
-		WalletId:    walletID,
-	}
 }

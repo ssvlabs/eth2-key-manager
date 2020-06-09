@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func portfolio(storage core.PortfolioStorage) (core.Portfolio,error) {
+func portfolio(storage core.Storage) (core.Portfolio,error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
@@ -22,7 +22,7 @@ func portfolio(storage core.PortfolioStorage) (core.Portfolio,error) {
 	return KeyVault.NewKeyVault(options)
 }
 
-func TestingNonExistingPortfolio(storage core.PortfolioStorage, t *testing.T) {
+func TestingNonExistingPortfolio(storage core.Storage, t *testing.T) {
 	w, err := storage.OpenPortfolio()
 	if err != nil {
 		t.Error("returned an error for a non existing wallet, should not return an error but rather a nil wallet")
@@ -35,7 +35,7 @@ func TestingNonExistingPortfolio(storage core.PortfolioStorage, t *testing.T) {
 }
 
 
-func TestingPortfolioStorage(storage core.PortfolioStorage, t *testing.T) {
+func TestingPortfolioStorage(storage core.Storage, t *testing.T) {
 	tests := []struct{
 		name string
 		encryptor types.Encryptor

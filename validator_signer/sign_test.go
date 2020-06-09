@@ -43,7 +43,7 @@ func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	return NewSimpleSigner(wallet,protector),nil
 }
 
-func walletWithSeed(seed []byte, store core.PortfolioStorage) (core.Wallet,error) {
+func walletWithSeed(seed []byte, store core.Storage) (core.Wallet,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,err
 	}

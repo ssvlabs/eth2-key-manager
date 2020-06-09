@@ -13,7 +13,7 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func getPopulatedWalletStorage() (core.PortfolioStorage,[]core.Account,error) {
+func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
 	store := getStorage()
 
 	options := &KeyVault.PortfolioOptions{}

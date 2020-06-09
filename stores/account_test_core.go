@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestingOpeningAccount(storage core.PortfolioStorage, account core.Account, t *testing.T) {
+func TestingOpeningAccount(storage core.Storage, account core.Account, t *testing.T) {
 	a1,err := storage.OpenAccount(account.ID())
 	if err != nil {
 		t.Error(err)
@@ -20,7 +20,7 @@ func TestingOpeningAccount(storage core.PortfolioStorage, account core.Account, 
 	require.Equal(t,account.Name(),a1.Name())
 }
 
-func TestingSavingAccounts(storage core.PortfolioStorage, accounts []core.Account, t *testing.T) {
+func TestingSavingAccounts(storage core.Storage, accounts []core.Account, t *testing.T) {
 	for _,account := range accounts {
 		testname := fmt.Sprintf("adding account %s",account.Name())
 		t.Run(testname, func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestingSavingAccounts(storage core.PortfolioStorage, accounts []core.Accoun
 	}
 }
 
-func TestingFetchingNonExistingAccount(storage core.PortfolioStorage, t *testing.T) {
+func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 	t.Run("testing", func(t *testing.T) {
 		// fetch non existing account
 		_,err := storage.OpenAccount(uuid.New())
@@ -52,7 +52,7 @@ func TestingFetchingNonExistingAccount(storage core.PortfolioStorage, t *testing
 	})
 }
 
-func TestingListingAccounts(storage core.PortfolioStorage, t *testing.T) {
+func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	// create keyvault and wallet
 	options := &KeyVault.PortfolioOptions{}
 	options.SetStorage(storage)

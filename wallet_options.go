@@ -8,7 +8,7 @@ import (
 type PortfolioOptions struct {
 	encryptor wtypes.Encryptor
 	password []byte
-	storage interface{}
+	storage interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
 	enableSimpleSigner bool
 	seed []byte
 }

@@ -118,12 +118,12 @@ func (wallet *HDWallet) createKey(name string, path string, accountType core.Acc
 	if err != nil {
 		return nil,err
 	}
-	newContext := wallet.context.CopyForAccount(wallet.ID())
 	retAccount,err = newHDAccount(
 		name,
 		accountType,
+		wallet.id,
 		key,
-		newContext,
+		wallet.context,
 	)
 
 	// register new wallet and save portfolio

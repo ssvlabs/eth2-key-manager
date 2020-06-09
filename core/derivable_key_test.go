@@ -4,9 +4,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"math/big"
 	"os"
 	"testing"
@@ -15,6 +17,23 @@ import (
 const (
 	basePath = "m/12381/3600"
 )
+
+type mockedStorage struct {
+	seed []byte
+	err error
+}
+func (s *mockedStorage) Name() string {return ""}
+func (s *mockedStorage) SavePortfolio(portfolio Portfolio) error {return nil}
+func (s *mockedStorage) OpenPortfolio() (Portfolio,error) {return nil,nil}
+func (s *mockedStorage) ListWallets() ([]Wallet,error) {return nil,nil}
+func (s *mockedStorage) SaveWallet(wallet Wallet) error {return nil}
+func (s *mockedStorage) OpenWallet(uuid uuid.UUID) (Wallet,error) {return nil,nil}
+func (s *mockedStorage) ListAccounts(walletID uuid.UUID) ([]Account,error) {return nil,nil}
+func (s *mockedStorage) SaveAccount(account Account) error {return nil}
+func (s *mockedStorage) OpenAccount(uuid uuid.UUID) (Account,error) {return nil,nil}
+func (s *mockedStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
+func (s *mockedStorage) SecurelyFetchPortfolioSeed() ([]byte,error) {return s.seed,nil}
+func (s *mockedStorage) SecurelySavePortfolioSeed(secret []byte) error {return s.err}
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -26,7 +45,11 @@ func _bigInt(input string) *big.Int {
 	return res
 }
 
-func TestMarshaling(t *testing.T) {
+func storage(seed []byte, err error) Storage {
+	return &mockedStorage{seed:seed,err:err}
+}
+
+func TestMarshalingDerivableKey(t *testing.T) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
@@ -59,8 +82,15 @@ func TestMarshaling(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			// create the key
-			key,err := BaseKeyFromSeed(test.seed)
+			storage := storage(test.seed,test.err)
+			err := storage.SecurelySavePortfolioSeed(test.seed)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// create the privKey
+			key,err := BaseKeyFromSeed(test.seed, storage)
 			if err != nil {
 				t.Error(err)
 				return
@@ -87,14 +117,14 @@ func TestMarshaling(t *testing.T) {
 			}
 
 			// match
-			require.Equal(t,key.Path,newKey.Path)
-			require.Equal(t,key.Key.Marshal(),newKey.Key.Marshal())
-			require.Equal(t,key.seed,newKey.seed)
+			require.Equal(t,key.Path(),newKey.Path())
+			require.Equal(t,key.id.String(),newKey.id.String())
+			require.Equal(t,key.PublicKey().Marshal(),newKey.PublicKey().Marshal())
 		})
 	}
 }
 
-func TestRelativePathDerivation(t *testing.T) {
+func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
@@ -152,7 +182,8 @@ func TestRelativePathDerivation(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			key,err := BaseKeyFromSeed(test.seed)
+			storage := storage(test.seed,test.err)
+			key,err := BaseKeyFromSeed(test.seed, storage)
 			if err != nil {
 				t.Error(err)
 				return
@@ -173,8 +204,10 @@ func TestRelativePathDerivation(t *testing.T) {
 				}
 			}
 
-			assert.Equal(t,basePath + test.path,key.Path)
-			assert.Equal(t,test.expectedKey.Bytes(),key.Key.Marshal())
+			assert.Equal(t,basePath + test.path,key.Path())
+			privkey,err := e2types.BLSPrivateKeyFromBytes(test.expectedKey.Bytes())
+			assert.NoError(t,err)
+			assert.Equal(t,privkey.PublicKey().Marshal(),key.PublicKey().Marshal())
 		})
 	}
 }

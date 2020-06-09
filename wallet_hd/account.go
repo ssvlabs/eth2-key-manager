@@ -13,6 +13,7 @@ type HDAccount struct {
 	id uuid.UUID
 	accountType core.AccountType
 	key *core.DerivableKey
+	parentWalletId uuid.UUID
 	context *core.PortfolioContext
 }
 
@@ -23,6 +24,7 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	data["name"] = account.name
 	data["type"] = account.accountType
 	data["key"] = account.key
+	data["parentWalletId"] = account.parentWalletId
 	return json.Marshal(data)
 }
 
@@ -58,7 +60,7 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		key := &core.DerivableKey{}
+		key := &core.DerivableKey{Storage:account.context.Storage}
 		err = json.Unmarshal(byts,key)
 		if err != nil {
 			return err
@@ -66,17 +68,27 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		account.key = key
 	} else {return fmt.Errorf("could not find var: key")}
 
+	// type
+	if val, exists := v["parentWalletId"]; exists {
+		account.parentWalletId,err = uuid.Parse(val.(string))
+		if err != nil {
+			return err
+		}
+	} else {return fmt.Errorf("could not find var: id")}
+
 	return nil
 }
 
 func newHDAccount(name string,
 	accountType core.AccountType,
+	walletId uuid.UUID,
 	key *core.DerivableKey,
 	context *core.PortfolioContext) (*HDAccount,error) {
 	return &HDAccount{
 		name:         name,
 		id:           uuid.New(),
 		accountType:  accountType,
+		parentWalletId:walletId,
 		key:    	  key,
 		context:	  context,
 	},nil
@@ -89,7 +101,7 @@ func (account *HDAccount) ID() uuid.UUID {
 
 // WalletID provides the ID for the wallet holding this account.
 func (account *HDAccount) WalletID() uuid.UUID {
-	return account.context.WalletId
+	return account.parentWalletId
 }
 
 // ID provides the ID for the account.
@@ -110,10 +122,10 @@ func (account *HDAccount) PublicKey() e2types.PublicKey {
 // Path provides the path for the account.
 // Can be empty if the account is not derived from a path.
 func (account *HDAccount) Path() string {
-	return account.key.GetPath()
+	return account.key.Path()
 }
 
 // Sign signs data with the account.
-func (account *HDAccount) Sign(data []byte) e2types.Signature {
+func (account *HDAccount) Sign(data []byte) (e2types.Signature,error) {
 	return account.key.Sign(data)
 }

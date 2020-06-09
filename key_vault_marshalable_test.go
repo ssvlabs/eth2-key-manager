@@ -4,10 +4,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/stores/in_memory"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -16,12 +19,20 @@ func _byteArray(input string) []byte {
 	return res
 }
 
+func inmemStorage() *in_memory.InMemStore {
+	return in_memory.NewInMemStore(
+		reflect.TypeOf(&KeyVault{}),
+		reflect.TypeOf(&wallet_hd.HDWallet{}),
+		reflect.TypeOf(&wallet_hd.HDAccount{}),
+	)
+}
+
 func key(seed []byte, relativePath string) (*core.DerivableKey,error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
-	key,err := core.BaseKeyFromSeed(seed)
+	key,err := core.BaseKeyFromSeed(seed, inmemStorage())
 	if err != nil {
 		return nil,err
 	}

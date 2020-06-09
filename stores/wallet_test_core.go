@@ -29,7 +29,7 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func TestingWithdrawalAccount(storage core.PortfolioStorage, t *testing.T) {
+func TestingWithdrawalAccount(storage core.Storage, t *testing.T) {
 	portfolio,err := portfolio(storage)
 	if err != nil {
 		t.Error(err)
@@ -52,7 +52,7 @@ func TestingWithdrawalAccount(storage core.PortfolioStorage, t *testing.T) {
 	require.Equal(t,"ad05971d7f95df8e9181d3d4fb298643493e32df84735ba98d63ddeb4c18492c191973c6dfb01d08ed4f93e7d8247933",hex.EncodeToString(a.PublicKey().Marshal()))
 }
 
-func TestingOpenAccounts(storage core.PortfolioStorage, t *testing.T) {
+func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 	portfolio,err := portfolio(storage)
 	if err != nil {
 		t.Error(err)
@@ -99,7 +99,7 @@ func TestingOpenAccounts(storage core.PortfolioStorage, t *testing.T) {
 
 }
 
-func TestingNonExistingWallet(storage core.PortfolioStorage, t *testing.T) {
+func TestingNonExistingWallet(storage core.Storage, t *testing.T) {
 	uid := uuid.New()
 	w, err := storage.OpenWallet(uid)
 	if err != nil {
@@ -112,7 +112,7 @@ func TestingNonExistingWallet(storage core.PortfolioStorage, t *testing.T) {
 	}
 }
 
-func TestingWalletListing(storage core.PortfolioStorage, t *testing.T) {
+func TestingWalletListing(storage core.Storage, t *testing.T) {
 	wallets := []struct{
 		name string
 		walletName string
@@ -190,7 +190,7 @@ func TestingWalletListing(storage core.PortfolioStorage, t *testing.T) {
 	})
 }
 
-func TestingWalletStorage(storage core.PortfolioStorage, t *testing.T) {
+func TestingWalletStorage(storage core.Storage, t *testing.T) {
 	tests := []struct{
 		name string
 		walletName string
@@ -278,7 +278,7 @@ func TestingWalletStorage(storage core.PortfolioStorage, t *testing.T) {
 	storage.SetEncryptor(nil,nil)
 }
 
-//func TestingUpdatingWallet(storage core.PortfolioStorage, t *testing.T) {
+//func TestingUpdatingWallet(storage core.Storage, t *testing.T) {
 //	id := uuid.New()
 //
 //	// new wallet

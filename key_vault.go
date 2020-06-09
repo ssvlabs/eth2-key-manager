@@ -51,22 +51,22 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 		return nil,err
 	}
 
+	// storage
+	if _,ok := options.storage.(core.Storage); !ok {
+		return nil,fmt.Errorf("storage does not implement Storage")
+	} else {
+		if options.encryptor != nil && options.password != nil {
+			options.storage.(core.Storage).SetEncryptor(options.encryptor,options.password)
+		}
+	}
+
 	// set seed
 	if options.seed == nil {
 		options.GenerateSeed()
 	}
-	seed,err := core.BaseKeyFromSeed(options.seed)
+	seed,err := core.BaseKeyFromSeed(options.seed,options.storage.(core.Storage))
 	if err != nil {
 		return nil,err
-	}
-
-	// storage
-	if _,ok := options.storage.(core.PortfolioStorage); !ok {
-		return nil,fmt.Errorf("storage does not implement PortfolioStorage")
-	} else {
-		if options.encryptor != nil && options.password != nil {
-			options.storage.(core.PortfolioStorage).SetEncryptor(options.encryptor,options.password)
-		}
 	}
 
 	// signer
@@ -78,7 +78,7 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 
 	// portfolio Context
 	context := &core.PortfolioContext {
-		Storage:	options.storage.(core.PortfolioStorage),
+		Storage:	options.storage.(core.Storage),
 	}
 
 	ret := &KeyVault{
@@ -90,6 +90,9 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 
 	// update Context with portfolio id
 	context.PortfolioId = ret.ID()
+
+	// save seed
+	ret.Context.Storage.SecurelySavePortfolioSeed(options.seed)
 
 	return ret,nil
 }

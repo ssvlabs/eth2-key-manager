@@ -7,7 +7,7 @@ import (
 
 // Implements methods to store and retrieve wallet_hd
 // Any encryption is done on the implementation level but is not obligatory
-type PortfolioStorage interface {
+type Storage interface {
 	Name() string
 	/*
 		Portfolio specific
@@ -35,4 +35,8 @@ type PortfolioStorage interface {
 
 	// could also bee set to nil
 	SetEncryptor(encryptor types.Encryptor, password []byte)
+	//
+	SecurelyFetchPortfolioSeed() ([]byte,error)
+	//
+	SecurelySavePortfolioSeed(secret []byte) error
 }

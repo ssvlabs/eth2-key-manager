@@ -9,7 +9,6 @@ import (
 
 func (vault *KeyVault) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
-
 	data["id"] = vault.id
 	data["enableSimpleSigner"] = vault.enableSimpleSigner
 	data["indexMapper"] = vault.indexMapper
@@ -58,7 +57,7 @@ func (vault *KeyVault) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		key := &core.DerivableKey{}
+		key := &core.DerivableKey{Storage:vault.Context.Storage}
 		err = json.Unmarshal(byts,key)
 		if err != nil {
 			return err

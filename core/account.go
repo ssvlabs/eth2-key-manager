@@ -27,5 +27,5 @@ type Account interface {
 	// Can be empty if the account is not derived from a path.
 	Path() string
 	// Sign signs data with the account.
-	Sign(data []byte) e2types.Signature
+	Sign(data []byte) (e2types.Signature,error)
 }
