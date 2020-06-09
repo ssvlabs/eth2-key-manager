@@ -28,4 +28,6 @@ type Account interface {
 	Path() string
 	// Sign signs data with the account.
 	Sign(data []byte) (e2types.Signature,error)
+	//
+	SetContext(ctx *PortfolioContext)
 }

@@ -129,3 +129,7 @@ func (account *HDAccount) Path() string {
 func (account *HDAccount) Sign(data []byte) (e2types.Signature,error) {
 	return account.key.Sign(data)
 }
+
+func (account *HDAccount) SetContext(ctx *core.PortfolioContext) {
+	account.context = ctx
+}

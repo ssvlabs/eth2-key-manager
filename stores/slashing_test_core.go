@@ -18,6 +18,7 @@ func (a *mockAccount) Name() string {return ""}
 func (a *mockAccount) PublicKey() e2types.PublicKey {return nil}
 func (a *mockAccount) Path() string {return ""}
 func (a *mockAccount) Sign(data []byte) (e2types.Signature,error) {return nil,nil}
+func (a *mockAccount) SetContext(ctx *core.PortfolioContext){}
 
 func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
