@@ -104,16 +104,16 @@ func (account *HDAccount) Name() string {
 
 // PublicKey provides the public key for the account.
 func (account *HDAccount) PublicKey() e2types.PublicKey {
-	return account.key.Key.PublicKey()
+	return account.key.PublicKey()
 }
 
 // Path provides the path for the account.
 // Can be empty if the account is not derived from a path.
 func (account *HDAccount) Path() string {
-	return account.key.Path
+	return account.key.GetPath()
 }
 
 // Sign signs data with the account.
 func (account *HDAccount) Sign(data []byte) e2types.Signature {
-	return account.key.Key.Sign(data)
+	return account.key.Sign(data)
 }

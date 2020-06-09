@@ -51,11 +51,6 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 		return nil,err
 	}
 
-	// set encryptor
-	if options.encryptor == nil {
-		options.setNoEncryptor()
-	}
-
 	// set seed
 	if options.seed == nil {
 		options.GenerateSeed()
@@ -68,6 +63,10 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 	// storage
 	if _,ok := options.storage.(core.PortfolioStorage); !ok {
 		return nil,fmt.Errorf("storage does not implement PortfolioStorage")
+	} else {
+		if options.encryptor != nil && options.password != nil {
+			options.storage.(core.PortfolioStorage).SetEncryptor(options.encryptor,options.password)
+		}
 	}
 
 	// signer
@@ -79,7 +78,7 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 
 	// portfolio Context
 	context := &core.PortfolioContext {
-		Storage: 		options.storage.(core.PortfolioStorage),
+		Storage:	options.storage.(core.PortfolioStorage),
 	}
 
 	ret := &KeyVault{

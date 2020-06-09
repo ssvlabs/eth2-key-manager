@@ -2,7 +2,6 @@ package KeyVault
 
 import (
 	"crypto/rand"
-	"github.com/bloxapp/KeyVault/encryptors"
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
@@ -46,8 +45,4 @@ func (options *PortfolioOptions) GenerateSeed() error {
 	options.SetSeed(seed)
 
 	return err
-}
-
-func (options *PortfolioOptions) setNoEncryptor() *PortfolioOptions {
-	return options.SetEncryptor(encryptors.NewPlainTextEncryptor())
 }
