@@ -139,7 +139,7 @@ func (store *InMemStore) SecurelyFetchPortfolioSeed() ([]byte,error) {
 }
 
 func (store *InMemStore) SecurelySavePortfolioSeed(secret []byte) error {
-	if len(secret) > 32 {
+	if len(secret) != 32 {
 		return fmt.Errorf("secret can be only 32 bytes (not %d bytes)",len(secret))
 	}
 	if store.verifyCanEncrypt() {

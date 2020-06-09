@@ -1,7 +1,6 @@
 package KeyVault
 
 import (
-	"crypto/rand"
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
@@ -36,13 +35,4 @@ func (options *PortfolioOptions)EnableSimpleSigner(val bool) *PortfolioOptions {
 func (options *PortfolioOptions)SetSeed(seed []byte) *PortfolioOptions {
 	options.seed = seed
 	return options
-}
-
-func (options *PortfolioOptions) GenerateSeed() error {
-	seed := make([]byte, 32)
-	_, err := rand.Read(seed)
-
-	options.SetSeed(seed)
-
-	return err
 }

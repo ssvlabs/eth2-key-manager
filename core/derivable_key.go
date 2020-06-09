@@ -98,6 +98,9 @@ func (baseKey *DerivableKey) Derive(relativePath string) (*DerivableKey,error) {
 	if err != nil {
 		return nil,err
 	}
+	if seed == nil {
+		return nil,fmt.Errorf("seed is nil")
+	}
 
 	//derive
 	path := baseKey.path + relativePath

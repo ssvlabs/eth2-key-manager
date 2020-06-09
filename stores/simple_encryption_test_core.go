@@ -21,14 +21,10 @@ func TestingPortfolioStorageWithEncryption(storage core.Storage, t *testing.T) {
 		err error
 	}{
 		{
-			testName:"password empty string",
-			password:[]byte(""),
-			secret: []byte("some seed"),
-		},
-		{
-			testName:"some password",
+			testName:"secret smaller than 32 bytes, should error",
 			password:[]byte("12345"),
 			secret: []byte("some seed"),
+			err:fmt.Errorf("secret can be only 32 bytes (not 9 bytes)"),
 		},
 		{
 			testName:"secret longer than 32 bytes, should error",
@@ -39,6 +35,11 @@ func TestingPortfolioStorageWithEncryption(storage core.Storage, t *testing.T) {
 		{
 			testName:"secret exactly 32 bytes",
 			password:[]byte("12345"),
+			secret: []byte("i am exactly 32 bytes, pass me!!"),
+		},
+		{
+			testName:"password empty string",
+			password:[]byte(""),
 			secret: []byte("i am exactly 32 bytes, pass me!!"),
 		},
 	}
