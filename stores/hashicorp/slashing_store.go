@@ -1,12 +1,10 @@
 package hashicorp
 
-
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/hashicorp/vault/sdk/logical"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 const (
@@ -16,7 +14,7 @@ const (
 	WalletProposalsPath = "proposals/%s/%d/" // account/proposal
 )
 
-func (store *HashicorpVaultStore) SaveAttestation(account types.Account, req *core.BeaconAttestation) error {
+func (store *HashicorpVaultStore) SaveAttestation(account core.Account, req *core.BeaconAttestation) error {
 	path := fmt.Sprintf(WalletAttestationPath, account.ID().String(),req.Target.Epoch)
 	data,err := json.Marshal(req)
 	if err != nil {
@@ -31,7 +29,7 @@ func (store *HashicorpVaultStore) SaveAttestation(account types.Account, req *co
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) RetrieveAttestation(account types.Account, epoch uint64) (*core.BeaconAttestation, error) {
+func (store *HashicorpVaultStore) RetrieveAttestation(account core.Account, epoch uint64) (*core.BeaconAttestation, error) {
 	path := fmt.Sprintf(WalletAttestationPath, account.ID().String(),epoch)
 	entry,error := store.storage.Get(store.ctx, path)
 	if error != nil {
@@ -51,7 +49,7 @@ func (store *HashicorpVaultStore) RetrieveAttestation(account types.Account, epo
 }
 
 // both epochStart and epochEnd reflect saved attestations by their target epoch
-func (store *HashicorpVaultStore) ListAttestations(account types.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {
+func (store *HashicorpVaultStore) ListAttestations(account core.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {
 	ret := make([]*core.BeaconAttestation,0)
 	for i:= epochStart ; i <= epochEnd ; i++ {
 		att,err := store.RetrieveAttestation(account,i)
@@ -65,7 +63,7 @@ func (store *HashicorpVaultStore) ListAttestations(account types.Account, epochS
 	return ret,nil
 }
 
-func (store *HashicorpVaultStore) SaveProposal(account types.Account, req *core.BeaconBlockHeader) error {
+func (store *HashicorpVaultStore) SaveProposal(account core.Account, req *core.BeaconBlockHeader) error {
 	path := fmt.Sprintf(WalletProposalsPath, account.ID().String(),req.Slot)
 	data,err := json.Marshal(req)
 	if err != nil {
@@ -80,7 +78,7 @@ func (store *HashicorpVaultStore) SaveProposal(account types.Account, req *core.
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) RetrieveProposal(account types.Account, slot uint64) (*core.BeaconBlockHeader, error) {
+func (store *HashicorpVaultStore) RetrieveProposal(account core.Account, slot uint64) (*core.BeaconBlockHeader, error) {
 	path := fmt.Sprintf(WalletProposalsPath, account.ID().String(),slot)
 	entry,error := store.storage.Get(store.ctx, path)
 	if error != nil {
@@ -99,7 +97,7 @@ func (store *HashicorpVaultStore) RetrieveProposal(account types.Account, slot u
 	return ret,nil
 }
 
-func (store *HashicorpVaultStore) SaveLatestAttestation(account types.Account, req *core.BeaconAttestation) error {
+func (store *HashicorpVaultStore) SaveLatestAttestation(account core.Account, req *core.BeaconAttestation) error {
 	path := fmt.Sprintf(WalletLatestAttestationPath, account.ID().String())
 	data,err := json.Marshal(req)
 	if err != nil {
@@ -114,7 +112,7 @@ func (store *HashicorpVaultStore) SaveLatestAttestation(account types.Account, r
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) RetrieveLatestAttestation(account types.Account) (*core.BeaconAttestation, error) {
+func (store *HashicorpVaultStore) RetrieveLatestAttestation(account core.Account) (*core.BeaconAttestation, error) {
 	path := fmt.Sprintf(WalletLatestAttestationPath, account.ID().String())
 	entry,error := store.storage.Get(store.ctx, path)
 	if error != nil {

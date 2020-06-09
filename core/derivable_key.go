@@ -138,7 +138,8 @@ func (key *DerivableKey) tempFetchPrivKey() (e2types.PrivateKey,error) {
 	if err != nil {
 		return nil,err
 	}
-	return e2types.BLSPrivateKeyFromBytes(seed)
+
+	return util.PrivateKeyFromSeedAndPath(seed,key.Path())
 }
 
 // TODO - this is a limitation of the util library that we use as it can't derive relative path but only absolute from the seed.

@@ -2,13 +2,13 @@ package hashicorp
 
 import (
 	"context"
-	slash "github.com/bloxapp/KeyVault/slashing_protectors"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores"
 	"github.com/hashicorp/vault/sdk/logical"
 	"testing"
 )
 
-func getSlashingStorage() slash.SlashingStore {
+func getSlashingStorage() core.SlashingStore {
 	return NewHashicorpVaultStore(&logical.InmemStorage{},context.Background())
 }
 

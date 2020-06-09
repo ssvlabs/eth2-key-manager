@@ -100,6 +100,9 @@ func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
 	if err != nil {
 		return nil,err
 	}
+	if ret == nil {
+		return nil,nil
+	}
 	ret.SetContext(wallet.context)
 	return ret,nil
 }

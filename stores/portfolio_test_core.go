@@ -1,11 +1,11 @@
 package stores
 
 import (
-	"fmt"
 	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"os"
 	"testing"
@@ -47,13 +47,8 @@ func TestingPortfolioStorage(storage core.Storage, t *testing.T) {
 		},
 		{
 			name:"serialization and fetching with encryptor",
-			encryptor: &dummyEncryptor{},
+			encryptor: keystorev4.New(),
 			password: []byte("password"),
-		},
-		{
-			name:"serialization and fetching with encryptor (no password)",
-			encryptor: &dummyEncryptor{},
-			error: fmt.Errorf("can't encrypt, missing password"),
 		},
 	}
 

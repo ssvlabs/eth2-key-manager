@@ -6,23 +6,10 @@ import (
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
-
-type dummyEncryptor struct {
-}
-func (enc *dummyEncryptor)Name() string { return "" }
-func (enc *dummyEncryptor)Version() uint {return 0}
-func (enc *dummyEncryptor) Encrypt(data []byte, key []byte) (map[string]interface{}, error) {
-	return map[string]interface{}{
-		"data":string(data),
-	},nil
-}
-func (enc *dummyEncryptor) Decrypt(data map[string]interface{}, key []byte) ([]byte, error) {
-	return []byte(data["data"].(string)),nil
-}
-
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -205,14 +192,8 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 		{
 			name:"serialization and fetching with encryptor",
 			walletName:"test",
-			encryptor: &dummyEncryptor{},
+			encryptor: keystorev4.New(),
 			password: []byte("password"),
-		},
-		{
-			name:"serialization and fetching with encryptor (no password)",
-			walletName:"test",
-			encryptor: &dummyEncryptor{},
-			error: fmt.Errorf("can't encrypt, missing password"),
 		},
 	}
 

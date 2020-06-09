@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
-	"github.com/bloxapp/KeyVault/wallet_hd"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"os"
-	"reflect"
 	"testing"
 )
 
@@ -20,19 +18,15 @@ func _byteArray(input string) []byte {
 }
 
 func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore(
-		reflect.TypeOf(&KeyVault{}),
-		reflect.TypeOf(&wallet_hd.HDWallet{}),
-		reflect.TypeOf(&wallet_hd.HDAccount{}),
-	)
+	return in_memory.NewInMemStore()
 }
 
-func key(seed []byte, relativePath string) (*core.DerivableKey,error) {
+func key(seed []byte, relativePath string, storage core.Storage) (*core.DerivableKey,error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
-	key,err := core.BaseKeyFromSeed(seed, inmemStorage())
+	key,err := core.BaseKeyFromSeed(seed, storage)
 	if err != nil {
 		return nil,err
 	}
@@ -85,7 +79,16 @@ func TestMarshaling(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			key,err := key(test.seed,test.path)
+			// setup storage
+			storage := inmemStorage()
+			err := storage.SecurelySavePortfolioSeed(test.seed)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// create key and vault
+			key,err := key(test.seed,test.path, storage)
 			if err != nil {
 				t.Error(err)
 				return
@@ -95,6 +98,7 @@ func TestMarshaling(t *testing.T) {
 				enableSimpleSigner: test.simpleSigner,
 				indexMapper:test.indexMapper,
 				key:key,
+				Context:&core.PortfolioContext{Storage:storage},
 			}
 
 			// marshal
@@ -104,7 +108,7 @@ func TestMarshaling(t *testing.T) {
 				return
 			}
 			//unmarshal
-			w1 := &KeyVault{}
+			w1 := &KeyVault{Context:&core.PortfolioContext{Storage:storage},}
 			err = json.Unmarshal(byts,w1)
 			if err != nil {
 				t.Error(err)
@@ -117,7 +121,7 @@ func TestMarshaling(t *testing.T) {
 				v := w.indexMapper[k]
 				require.Equal(t,v,w1.indexMapper[k])
 			}
-			require.Equal(t,w.key.Key.Marshal(),w1.key.Key.Marshal())
+			require.Equal(t,w.key.PublicKey().Marshal(),w1.key.PublicKey().Marshal())
 		})
 	}
 
