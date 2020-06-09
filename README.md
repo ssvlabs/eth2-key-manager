@@ -17,18 +17,18 @@ go get github.com/bloxapp/KeyVault
    ```
 
 ### Security and Architecture
-KeyVault is built in an hierarchy starting with the concept of a [Portfolio]() which represents the seed.<br/>
-A portfolio can then create [wallets]() under itself and a wallet can create [accounts]() under itself.
+KeyVault is built in an hierarchy starting with the concept of a [Portfolio](https://github.com/bloxapp/KeyVault/blob/master/core/portfolio.go) which represents the seed.<br/>
+A portfolio can then create [wallets](https://github.com/bloxapp/KeyVault/blob/master/core/wallet.go) under itself and a wallet can create [accounts](https://github.com/bloxapp/KeyVault/blob/master/core/account.go) under itself.
 
 An account is the entity that will ultimately signs transactions.<br/> 
 Wallets and accounts are derived according to [EIP-2334](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md#validator-keys):<br/>
 1) Withdrawal key: m/12381/3600/wallet_index/0<br/>
 2) Validation key: m/12381/3600/wallet_index/0/account_index
 
-The seed and private keys are never held in memory by one of the objects but rather we use our [DerivableKey]() object which asks the storage for the decrypted seed for each operation.<br/>
+The seed and private keys are never held in memory by one of the objects but rather we use our [DerivableKey](https://github.com/bloxapp/KeyVault/blob/master/core/derivable_key.go) object which asks the storage for the decrypted seed for each operation.<br/>
 This is done so to not mistakenly print to console or serialize an object with the secret in plain text in it.
 
-![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protectors/images/Screen%20Shot%202020-06-01%20at%208.51.17.png?raw=true)
+![](https://github.com/bloxapp/KeyVault/blob/master/images/arch_overview.png?raw=true)
 
 
 Basic use:
