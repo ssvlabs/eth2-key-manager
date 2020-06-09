@@ -10,56 +10,37 @@ Blox KeyVault is a library wrapping all major functionality an eth 2.0 validator
   - [HD wallet](https://github.com/bloxapp/KeyVault/tree/master/wallet_hd) (EIP-2333,2334,2335 compliant)
   - Tests
 
-
 ### Installation
 
  ```sh
 go get github.com/bloxapp/KeyVault
    ```
 
-### Tech
+### Security and Architecture
+KeyVault is built in an hierarchy starting with the concept of a [Portfolio]() which represents the seed.<br/>
+A portfolio can then create [wallets]() under itself and a wallet can create [accounts]() under itself.
 
-KeyVault uses a number of open source projects:
+An account is the entity that will ultimately signs transactions.<br/> 
+Wallets and accounts are derived according to [EIP-2334](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md#validator-keys):<br/>
+1) Withdrawal key: m/12381/3600/wallet_index/0<br/>
+2) Validation key: m/12381/3600/wallet_index/0/account_index
 
-* [Prysm remote signer proto](github.com/wealdtech/eth2-signer-api) - Set of calls and structures for prysm's remote wallet
-* [HashiCorp's Vault](https://github.com/hashicorp/vault) - As one of the key storage and ecnryption implementations
+The seed and private keys are never held in memory by one of the objects but rather we use our [DerivableKey]() object which asks the storage for the decrypted seed for each operation.<br/>
+This is done so to not mistakenly print to console or serialize an object with the secret in plain text in it.
 
+![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protectors/images/Screen%20Shot%202020-06-01%20at%208.51.17.png?raw=true)
 
-### Development and Debugging (via [goland](https://www.jetbrains.com/go/))
-
-Want to contribute? Great!
-
-The project uses Go modules for fast builds and clean dependencies.
-Make a change in your file and instantaneously see your updates!
-
-##### Install pre-requirement
-* Install latest goland version
-* clone the project:
-```sh
-git clone https://github.com/bloxapp/KeyVault.git
-```
 
 Basic use:
 ```go
 	
 // minimal configuration
-store := stores.NewInMemStore()
-encryptor := enc.NewPlainTextEncryptor()
-
 options := vault.WalletOptions{}
-options.SetEncryptor(encryptor)
-options.SetStore(store)
-options.SetWalletName("wallet")
-options.SetWalletPassword("password")
-options.EnableSimpleSigner(true) // false by default. if false, signer will not be available
+options.SetStore(stores.NewInMemStore())
 
 // key management in one place
 vault, _ := NewKeyVault(options)
-account, _ := vault.wallet.CreateAccount("account","unlock_password")
-account, _ = vault.wallet.AccountByName("account")
-
-// manage all validator duty signatures
-// pb package is [what used in prysm](github.com/wealdtech/eth2-signer-api/pb/v1)
-vault.signer.SignBeaconProposal(*pb.SignBeaconProposalRequest)
-vault.signer.SignBeaconAttestation(*pb.SignBeaconAttestationRequest)
+wallet, _ := vault.CreateWallet("wallet")
+validator, _ = wallet.CreateValidatorAccount("account")
+withdrawal, _ = wallet.GetWithdrawalAccount() // only 1 per wallet
 ```
