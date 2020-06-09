@@ -15,11 +15,8 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	if error != nil {
 		return nil,error
 	}
-	if !account.IsUnlocked() {
-		err := account.Unlock([]byte("")) // TODO
-		if err != nil {
-			return nil,err
-		}
+	if account == nil {
+		return nil,fmt.Errorf("account not found")
 	}
 
 	// 2. lock for current account

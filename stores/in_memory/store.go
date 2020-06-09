@@ -4,23 +4,32 @@ import (
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	uuid "github.com/google/uuid"
+	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type InMemStore struct {
-	memory         map[string]map[string][]byte
-	accountIndx    map[string][]byte
-	attMemory      map[string]*core.BeaconAttestation
-	proposalMemory map[string]*core.BeaconBlockHeader
-	mapNameToId    map[string]uuid.UUID
+	memory         		map[string]interface{}
+	attMemory      		map[string]*core.BeaconAttestation
+	proposalMemory 		map[string]*core.BeaconBlockHeader
+	encryptor	   		types.Encryptor
+	encryptionPassword 	[]byte
 }
 
-func NewInMemStore() *InMemStore {
+func NewInMemStore(
+	) *InMemStore {
+	return NewInMemStoreWithEncryptor(nil,nil)
+}
+
+func NewInMemStoreWithEncryptor(
+	encryptor types.Encryptor,
+	password []byte,
+	) *InMemStore {
 	return &InMemStore{
-		memory:         make(map[string]map[string][]byte),
-		accountIndx:    make(map[string][]byte),
-		mapNameToId:    make(map[string]uuid.UUID),
-		attMemory:      make(map[string]*core.BeaconAttestation),
-		proposalMemory: make(map[string]*core.BeaconBlockHeader),
+		memory:         	make(map[string]interface{}),
+		attMemory:      	make(map[string]*core.BeaconAttestation),
+		proposalMemory: 	make(map[string]*core.BeaconBlockHeader),
+		encryptor:			encryptor,
+		encryptionPassword:	password,
 	}
 }
 
@@ -29,120 +38,134 @@ func (store *InMemStore) Name() string {
 	return "in-memory"
 }
 
-// StoreWallet stores wallet data.  It will fail if it cannot store the data.
-func (store *InMemStore) StoreWallet(walletID uuid.UUID, walletName string, data []byte) error {
-	if val := store.memory[walletID.String()]; val != nil { // existing wallet
-		store.memory[walletID.String()]["wallet"] = data
-	} else {
-		store.memory[walletID.String()] = map[string][]byte { // new wallet
-			"wallet":data,
-		}
-		store.mapNameToId[walletName] = walletID
-	}
+func (store *InMemStore) SavePortfolio(portfolio core.Portfolio) error {
+	store.memory["portfolio"] = portfolio
 	return nil
 }
 
-// RetrieveWallet retrieves wallet data for all wallets.
-func (store *InMemStore) RetrieveWallets() <-chan []byte {
-	ch := make(chan []byte, 1024)
-
-	go func() {
-		for _, w := range store.memory {
-			ch <- w["wallet"]
-		}
-		close(ch)
-	}()
-
-	return ch
-}
-
-// RetrieveWallet retrieves wallet data for a wallet with a given name.
-// It will fail if it cannot retrieve the data.
-func (store *InMemStore) RetrieveWallet(walletName string) ([]byte, error) {
-	w, err := store.walletByName(walletName)
-	if err != nil {
-		return nil, err
+// will return nil,nil if no portfolio was found
+func (store *InMemStore) OpenPortfolio() (core.Portfolio,error) {
+	if val := store.memory["portfolio"]; val != nil {
+		return val.(core.Portfolio),nil
+	} else {
+		return nil,nil
 	}
-	return w["wallet"],nil
 }
 
-// RetrieveWalletByID retrieves wallet data for a wallet with a given ID.
-// It will fail if it cannot retrieve the data.
-func (store *InMemStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) {
-	w, err := store.walletById(walletID)
+func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
+	p,err := store.OpenPortfolio()
 	if err != nil {
 		return nil,err
 	}
-	return w["wallet"],nil
+
+	ret := make([]core.Wallet,0)
+	for w := range p.Wallets() {
+		ret = append(ret,w)
+	}
+	return ret,nil
 }
 
-// StoreAccount stores account data.  It will fail if it cannot store the data.
-func (store *InMemStore) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, data []byte) error {
-	wallet,error := store.walletById(walletID)
-	if error != nil {
-		return error
-	}
-
-	wallet[accountID.String()] = data
+func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
+	store.memory[wallet.ID().String()] = wallet
 	return nil
 }
 
-// RetrieveAccounts retrieves account information for all accounts.
-func (store *InMemStore) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
-	ch := make(chan []byte, 1024)
+// will return nil,nil if no wallet was found
+func (store *InMemStore) OpenWallet(uuid uuid.UUID) (core.Wallet,error) {
+	if val := store.memory[uuid.String()]; val != nil {
+		return val.(core.Wallet),nil
+	} else {
+		return nil,nil
+	}
+}
 
-	go func() {
-		if wallet, err := store.walletById(walletID); err == nil {
-			for key, a := range wallet {
-				if key != "wallet" {
-					ch <- a
+// will return an empty array for no accounts
+func (store *InMemStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
+	p,err := store.OpenPortfolio()
+	if err != nil {
+		return nil,err
+	}
+
+	w,err := p.WalletByID(walletID)
+	if err != nil {
+		return nil,err
+	}
+
+	ret := make([]core.Account,0)
+	for a := range w.Accounts() {
+		ret = append(ret,a)
+	}
+	return ret,nil
+}
+
+func (store *InMemStore) SaveAccount(account core.Account) error {
+	store.memory[account.ID().String()] = account
+	return nil
+}
+
+// will return nil,nil if no account was found
+func (store *InMemStore) OpenAccount(uuid uuid.UUID) (core.Account,error) {
+	if val := store.memory[uuid.String()]; val != nil {
+		return val.(core.Account),nil
+	} else {
+		return nil,nil
+	}
+}
+
+func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte) {
+	store.encryptor = encryptor
+	store.encryptionPassword = password
+}
+
+func (store *InMemStore) SecurelyFetchPortfolioSeed() ([]byte,error) {
+	if val := store.memory["portfolio_seed"]; val != nil {
+		if store.verifyCanEncrypt() {
+			if encrypted,ok := val.(map[string]interface{}); ok {
+				decrypted,err := store.encryptor.Decrypt(encrypted,store.encryptionPassword)
+				if err != nil {
+					return nil,err
 				}
+				return decrypted,nil
+			} else {
+				return nil,fmt.Errorf("no encrypted data exists")
 			}
+
+		} else {
+			return val.([]byte),nil
 		}
-
-		close(ch)
-	}()
-
-	return ch
+	} else {
+		return nil,nil
+	}
 }
 
-// RetrieveAccount retrieves account data for a wallet with a given ID.
-// It will fail if it cannot retrieve the data.
-func (store *InMemStore) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID) ([]byte, error) {
-	wallet,error := store.walletById(walletID)
-	if error != nil {
-		return nil,error
+func (store *InMemStore) SecurelySavePortfolioSeed(secret []byte) error {
+	if len(secret) != 32 {
+		return fmt.Errorf("secret can be only 32 bytes (not %d bytes)",len(secret))
 	}
-
-	if val := wallet[accountID.String()]; val != nil {
-		return val,nil
+	if store.verifyCanEncrypt() {
+		encrypted,err := store.encryptor.Encrypt(secret,store.encryptionPassword)
+		if err != nil {
+			return err
+		}
+		store.memory["portfolio_seed"] = encrypted
+	} else {
+		store.memory["portfolio_seed"] = secret
 	}
-
-	return nil, fmt.Errorf("account id %s in wallet id %s, not found",accountID.String(), walletID.String())
-}
-
-// StoreAccountsIndex stores the index of accounts for a given wallet.
-func (store *InMemStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
-	store.accountIndx[walletID.String()] = data
 	return nil
 }
 
-// RetrieveAccountsIndex retrieves the index of accounts for a given wallet.
-func (store *InMemStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
-	return store.accountIndx[walletID.String()], nil
+func (store *InMemStore) freshContext() *core.PortfolioContext {
+	return &core.PortfolioContext {
+		Storage:     store,
+	}
 }
 
-func (store *InMemStore) walletByName(walletName string) (map[string][]byte,error) {
-	if walletId, ok := store.mapNameToId[walletName]; ok {
-		return store.walletById(walletId)
+func (store *InMemStore) verifyCanEncrypt() bool {
+	if store.encryptor != nil {
+		if store.encryptionPassword == nil {
+			return false
+		}
+		return true
 	}
-	return nil,fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
-}
-
-func (store *InMemStore) walletById(walletID uuid.UUID) (map[string][]byte,error) {
-	w := store.memory[walletID.String()]
-	if w == nil {
-		return nil, fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
-	}
-	return w,nil
+	return false
 }

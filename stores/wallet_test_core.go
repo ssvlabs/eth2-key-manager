@@ -1,189 +1,307 @@
 package stores
 
 import (
-	"bytes"
+	"encoding/hex"
 	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
-	"strings"
+	"github.com/stretchr/testify/require"
+	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func TestingNonExistingWallet(storage wtypes.Store, t *testing.T) {
-	uid := uuid.New()
-	_, err := storage.RetrieveWalletByID(uid)
-	if err == nil {
-		fmt.Errorf("returned a non error for a non existing wallet")
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
+}
+
+func TestingWithdrawalAccount(storage core.Storage, t *testing.T) {
+	portfolio,err := portfolio(storage)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w,err := portfolio.CreateWallet("test")
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
-	expectedErr := fmt.Sprintf("wallet not found")
-	if err.Error() != expectedErr {
-		t.Error(fmt.Errorf("errors not match, required: %s, received: %s",expectedErr,err.Error()))
+	a,err := w.GetWithdrawalAccount()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	require.Equal(t,"wallet_withdrawal_key_unique",a.Name())
+	require.Equal(t,"m/12381/3600/0/0",a.Path())
+	require.Equal(t,"b08033f01d0c71f63a46117915791187e3257a95552b3701fef80124c492eabe1f10795e684055895b887220460e5f24",hex.EncodeToString(a.PublicKey().Marshal()))
+}
+
+func TestingOpenAccounts(storage core.Storage, t *testing.T) {
+	portfolio,err := portfolio(storage)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w,err := portfolio.CreateWallet("test")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	for i := 0 ; i < 10 ; i ++ {
+		testName := fmt.Sprintf("adding and fetching account: %d", i)
+		t.Run(testName, func(t *testing.T) {
+			// create
+			accountName := fmt.Sprintf("%d",i)
+			a,err := w.CreateValidatorAccount(accountName)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// open
+			a1,err := w.AccountByName(accountName)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			a2,err := w.AccountByID(a.ID())
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// verify
+			for _,fetchedAccount := range []core.Account{a1,a2} {
+				require.Equal(t,a.ID().String(),fetchedAccount.ID().String())
+				require.Equal(t,a.Name(),fetchedAccount.Name())
+				require.Equal(t,a.PublicKey().Marshal(),fetchedAccount.PublicKey().Marshal())
+				require.Equal(t,fmt.Sprintf("m/12381/3600/0/0/%d",i),fetchedAccount.Path())
+			}
+		})
+	}
+
+}
+
+func TestingNonExistingWallet(storage core.Storage, t *testing.T) {
+	uid := uuid.New()
+	w, err := storage.OpenWallet(uid)
+	if err != nil {
+		t.Error("returned an error for a non existing wallet, should not return an error but rather a nil wallet")
+		return
+	}
+
+	if w != nil {
+		t.Error("returned a wallet for a non existing uuid")
 	}
 }
 
-func TestingMultiWalletStorage(storage wtypes.Store, t *testing.T) {
+func TestingWalletListing(storage core.Storage, t *testing.T) {
 	wallets := []struct{
 		name string
-		walletId uuid.UUID
 		walletName string
-		data []byte
-		error string
 	}{
 		{
-			name:"1",
-			walletId:uuid.New(),
+			name:"add wallet 1",
 			walletName:"1",
-			data: []byte("1"),
 		},
 		{
-			name:"2",
-			walletId:uuid.New(),
+			name:"add wallet 2",
 			walletName:"2",
-			data: []byte("2"),
 		},
 		{
-			name:"3",
-			walletId:uuid.New(),
+			name:"add wallet 3",
 			walletName:"3",
-			data: []byte("3"),
 		},
 		{
-			name:"4",
-			walletId:uuid.New(),
+			name:"add wallet 4",
 			walletName:"4",
-			data: []byte("4"),
 		},
+	}
+
+	ids := make([]uuid.UUID,4)
+	portfolio,err := portfolio(storage)
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
 	// store
 	t.Run("storing", func(t *testing.T) {
-		for _, test := range wallets {
-			err := storage.StoreWallet(test.walletId,test.walletName, test.data)
+		for i, test := range wallets {
+			w,err := portfolio.CreateWallet(test.walletName)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			err = storage.SaveWallet(w)
 			if err != nil {
 				t.Error(err)
 			}
+
+			ids[i] = w.ID()
 		}
 
 	})
 
-	// fetch all
-	t.Run("fetching", func(t *testing.T) {
-		walletnames := map[string]bool{"1":false,"2":false,"3":false,"4":false}
-		for w := range storage.RetrieveWallets() {
-			walletnames[string(w)] = true
-		}
-
-		for k,v := range walletnames {
-			if v != true {
-				t.Error(fmt.Errorf("Wallet %s not fetched",k))
-				return
+	// util
+	findFunc := func(slice []uuid.UUID, val uuid.UUID) (int, bool) {
+		for i, item := range slice {
+			if item == val {
+				return i, true
 			}
 		}
+		return -1, false
+	}
+
+	matched := 0
+	// fetch all
+	t.Run("fetching", func(t *testing.T) {
+		wallets, err := storage.ListWallets()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		for _,w := range wallets {
+			if _,res := findFunc(ids,w.ID()); res {
+				matched ++
+			}
+		}
+
+		require.Equal(t,len(ids),matched, "not all saved wallets found")
 	})
 }
 
-func TestingWalletStorage(storage wtypes.Store, t *testing.T) {
+func TestingWalletStorage(storage core.Storage, t *testing.T) {
 	tests := []struct{
 		name string
-		walletId uuid.UUID
 		walletName string
-		data []byte
-		error string
+		encryptor types.Encryptor
+		password []byte
+		error
 	}{
 		{
-			name:"simple data",
-			walletId:uuid.New(),
+			name:"serialization and fetching",
 			walletName:"test",
-			data: []byte("test data"),
 		},
 		{
-			name:"no wallet name",
-			walletId:uuid.New(),
-			walletName:"",
-			data: []byte("test data"),
-			error: "wallet name must be provided",
+			name:"serialization and fetching with encryptor",
+			walletName:"test",
+			encryptor: keystorev4.New(),
+			password: []byte("password"),
 		},
+	}
+
+	portfolio,err := portfolio(storage)
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := storage.StoreWallet(test.walletId,test.walletName, test.data)
+			w,err := portfolio.CreateWallet(test.walletName)
 			if err != nil {
-				if len(test.error) != 0 {
-					if res := strings.Compare(test.error,err.Error()); res != 0 {
-						t.Error(fmt.Errorf("received wrong error, required: %s, received: %s",test.error, err.Error()))
-					}
+				t.Error(err)
+				return
+			}
+
+			// set encryptor
+			if test.encryptor != nil {
+				storage.SetEncryptor(test.encryptor,test.password)
+			} else {
+				storage.SetEncryptor(nil,nil)
+			}
+
+			err = storage.SaveWallet(w)
+			if err != nil {
+				if test.error != nil {
+					require.Equal(t,test.error.Error(),err.Error())
 				} else {
 					t.Error(err)
 				}
 				return
 			}
 
-			// by value
-			value, err := storage.RetrieveWalletByID(test.walletId)
+			// fetch wallet by id
+			fetched, err := storage.OpenWallet(w.ID())
 			if err != nil {
-				t.Error(err)
+				if test.error != nil {
+					require.Equal(t,test.error.Error(),err.Error())
+				} else {
+					t.Error(err)
+				}
+				return
 			}
-			if bytes.Compare(test.data,value) != 0 {
-				t.Error(fmt.Errorf("did not retrieve the same data, required: %s, received: %s",string(test.data), string(value)))
+			if fetched == nil {
+				t.Errorf("wallet could not be fetched by id")
+				return
 			}
 
-			// by wallet name
-			value, err = storage.RetrieveWallet(test.walletName)
-			if err != nil {
-				t.Error(err)
+			if test.error != nil {
+				t.Errorf("expected error: %s", test.error.Error())
+				return
 			}
-			if bytes.Compare(test.data,value) != 0 {
-				t.Error(fmt.Errorf("did not retrieve the same data, required: %s, received: %s",string(test.data), string(value)))
-			}
+
+			// assert
+			require.Equal(t,w.ID(),fetched.ID())
+			require.Equal(t,w.Name(),fetched.Name())
+			require.Equal(t,w.Type(),fetched.Type())
 		})
 	}
+
+	// reset
+	storage.SetEncryptor(nil,nil)
 }
 
-func TestingUpdatingWallet(storage wtypes.Store, t *testing.T) {
-	id := uuid.New()
-
-	// new wallet
-	err := storage.StoreWallet(id,"wallet",[]byte("wallet"))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	// add accounts
-	err = storage.StoreAccount(id,uuid.New(),[]byte("account 1"))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	err = storage.StoreAccount(id,uuid.New(),[]byte("account 2"))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	// update just wallet data
-	err = storage.StoreWallet(id,"wallet",[]byte("wallet updated"))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	// verify wallet data
-	value, err := storage.RetrieveWalletByID(id)
-	if err != nil {
-		t.Error(err)
-	}
-	if bytes.Compare([]byte("wallet updated"),value) != 0 {
-		t.Error(fmt.Errorf("did not retrieve the same data, required: %s, received: %s","wallet updated", string(value)))
-		return
-	}
-	// verify accounts
-	expectedAccountCnt := 0
-	for _ = range storage.RetrieveAccounts(id) {
-		expectedAccountCnt ++
-	}
-	if expectedAccountCnt != 2 {
-		t.Error(fmt.Errorf("expected %d accounts, recieved: %d",2,expectedAccountCnt))
-	}
-}
+//func TestingUpdatingWallet(storage core.Storage, t *testing.T) {
+//	id := uuid.New()
+//
+//	// new wallet
+//	err := storage.StoreWallet(id,"wallet",[]byte("wallet"))
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//
+//	// add accounts
+//	err = storage.StoreAccount(id,uuid.New(),[]byte("account 1"))
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//	err = storage.StoreAccount(id,uuid.New(),[]byte("account 2"))
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//
+//	// update just wallet data
+//	err = storage.StoreWallet(id,"wallet",[]byte("wallet updated"))
+//	if err != nil {
+//		t.Error(err)
+//		return
+//	}
+//	// verify wallet data
+//	value, err := storage.RetrieveWalletByID(id)
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	if bytes.Compare([]byte("wallet updated"),value) != 0 {
+//		t.Error(fmt.Errorf("did not retrieve the same data, required: %s, received: %s","wallet updated", string(value)))
+//		return
+//	}
+//	// verify accounts
+//	expectedAccountCnt := 0
+//	for _ = range storage.RetrieveAccounts(id) {
+//		expectedAccountCnt ++
+//	}
+//	if expectedAccountCnt != 2 {
+//		t.Error(fmt.Errorf("expected %d accounts, recieved: %d",2,expectedAccountCnt))
+//	}
+//}

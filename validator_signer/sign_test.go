@@ -3,20 +3,23 @@ package validator_signer
 import (
 	"encoding/hex"
 	"fmt"
-	prot "github.com/bloxapp/KeyVault/slashing_protectors"
+	"github.com/bloxapp/KeyVault"
+	"github.com/bloxapp/KeyVault/core"
+	prot "github.com/bloxapp/KeyVault/slashing_protection"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
+func inmemStorage() *in_memory.InMemStore {
+	return in_memory.NewInMemStore()
+}
+
 func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	noProtection := &prot.NoProtection{}
-	store := in_memory.NewInMemStore()
+	store := inmemStorage()
 	wallet,err := walletWithSeed(seed,store)
 	if err != nil {
 		return nil,err
@@ -25,8 +28,8 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {
 }
 
 func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
-	store := in_memory.NewInMemStore()
-	protector := prot.NewNormalProtection(store)
+	store := inmemStorage()
+	protector := core.NewNormalProtection(store)
 	wallet,err := walletWithSeed(seed,store)
 	if err != nil {
 		return nil,err
@@ -34,28 +37,29 @@ func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	return NewSimpleSigner(wallet,protector),nil
 }
 
-func walletWithSeed(seed []byte, store types.Store) (types.Wallet,error) {
+func walletWithSeed(seed []byte, store core.Storage) (core.Wallet,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,err
 	}
 
-	wallet, err := hd.CreateWalletFromSeed("test",[]byte(""),store,keystorev4.New(),seed)
-	if err != nil {
-		return nil,err
-	}
-	err = wallet.Unlock([]byte(""))
-	if err != nil {
-		return nil,err
-	}
-	_,err = wallet.CreateAccount("1",[]byte(""))
-	if err != nil {
-		return nil,err
-	}
-	_,err = wallet.CreateAccount("2",[]byte("1234")) // non standard password, will not be able to unlock
+
+	options := &KeyVault.PortfolioOptions{}
+	options.SetStorage(store)
+	options.SetSeed(seed)
+	vault,err := KeyVault.ImportKeyVault(options)
 	if err != nil {
 		return nil,err
 	}
 
+	wallet,err := vault.CreateWallet("test")
+	if err != nil {
+		return nil,err
+	}
+
+	_,err = wallet.CreateValidatorAccount("1")
+	if err != nil {
+		return nil,err
+	}
 
 	return wallet,nil
 }
@@ -67,7 +71,7 @@ func TestSignatures(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0")
+	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0/0")
 	if err != nil {
 		t.Error(err)
 		return
@@ -98,18 +102,29 @@ func TestSignatures(t *testing.T) {
 				Data:                 []byte("data"),
 				Domain:               []byte("domain"),
 			},
-			expectedError: fmt.Errorf("no account with name \"10\""),
+			expectedError: fmt.Errorf("account not found"),
 			accountPriv: nil,
 			msg: "",
 		},
 		{
-			name:"unable to unlock account, should error",
+			name:"empty account, should error",
 			req: &pb.SignRequest{
-				Id:                   &pb.SignRequest_Account{Account:"2"},
+				Id:                   &pb.SignRequest_Account{Account:""},
 				Data:                 []byte("data"),
 				Domain:               []byte("domain"),
 			},
-			expectedError: fmt.Errorf("incorrect passphrase"),
+			expectedError: fmt.Errorf("account was not supplied"),
+			accountPriv: nil,
+			msg: "",
+		},
+		{
+			name:"nil account, should error",
+			req: &pb.SignRequest{
+				Id:                  nil,
+				Data:                 []byte("data"),
+				Domain:               []byte("domain"),
+			},
+			expectedError: fmt.Errorf("account was not supplied"),
 			accountPriv: nil,
 			msg: "",
 		},

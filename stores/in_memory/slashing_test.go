@@ -1,12 +1,12 @@
 package in_memory
 
 import (
-	slash "github.com/bloxapp/KeyVault/slashing_protectors"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores"
 	"testing"
 )
 
-func getSlashingStorage() slash.SlashingStore {
+func getSlashingStorage() core.SlashingStore {
 	return NewInMemStore()
 }
 

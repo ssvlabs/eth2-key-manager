@@ -1,85 +1,94 @@
 package stores
 
 import (
-	"bytes"
 	"fmt"
+	"github.com/bloxapp/KeyVault"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
-	"strings"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestingAccountAtNonExistingWallet(storage wtypes.Store, _ []uuid.UUID, t *testing.T) {
-	walletId := uuid.New()
-	err := storage.StoreAccount(walletId,uuid.New(),[]byte("account 1"))
-	if err == nil {
-		t.Error(fmt.Errorf("no error was thrown"))
+func TestingOpeningAccount(storage core.Storage, account core.Account, t *testing.T) {
+	a1,err := storage.OpenAccount(account.ID())
+	if err != nil {
+		t.Error(err)
+		return
 	}
-
-	expectedErr := fmt.Sprintf("wallet not found")
-	if strings.Compare(err.Error(),expectedErr) != 0 {
-		t.Error(fmt.Errorf("expeced error: %s but received: %s",expectedErr,err.Error()))
-	}
+	require.Equal(t,account.ID().String(),a1.ID().String())
+	require.Equal(t,account.PublicKey().Marshal(),a1.PublicKey().Marshal())
+	require.Equal(t,account.Name(),a1.Name())
 }
 
-func TestingAddingAccountsToWallet(storage wtypes.Store, ids []uuid.UUID, t *testing.T) {
-	for i := 0 ; i < 10 ; i++ {
-		accountId := uuid.New()
-		testname := fmt.Sprintf("adding account %s",accountId.String())
+func TestingSavingAccounts(storage core.Storage, accounts []core.Account, t *testing.T) {
+	for _,account := range accounts {
+		testname := fmt.Sprintf("adding account %s",account.Name())
 		t.Run(testname, func(t *testing.T) {
-			err := storage.StoreAccount(ids[0],accountId,[]byte(accountId.String()))
+			err := storage.SaveAccount(account)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
 			// verify account was added
-			val,err := storage.RetrieveAccount(ids[0],accountId)
+			val,err := storage.OpenAccount(account.ID())
 			if err != nil {
 				t.Error(err)
 			}
-			if res := bytes.Compare(val,[]byte(accountId.String())); res != 0 {
-				t.Error(fmt.Errorf("could not fetch stored account %s",accountId.String()))
-			}
+			require.Equal(t,account.ID(), val.ID())
+			require.Equal(t,account.Name(), val.Name())
+			require.Equal(t,account.PublicKey().Marshal(), val.PublicKey().Marshal())
 		})
 	}
 }
 
-func TestingFetchingNonExistingAccount(storage wtypes.Store, ids []uuid.UUID, t *testing.T) {
+func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 	t.Run("testing", func(t *testing.T) {
-		err := storage.StoreAccount(ids[0],uuid.New(),[]byte("test"))
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
 		// fetch non existing account
-		_,err = storage.RetrieveAccount(ids[0],uuid.New())
-		if err == nil {
-			t.Error(fmt.Errorf("did not return error when fetching non existing account"))
+		_,err := storage.OpenAccount(uuid.New())
+		if err != nil {
+			t.Error(fmt.Errorf("should not return error for unknwon account, just nil"))
 		}
 	})
 }
 
-func TestingListingAccounts(storage wtypes.Store, ids []uuid.UUID, t *testing.T) {
+func TestingListingAccounts(storage core.Storage, t *testing.T) {
+	// create keyvault and wallet
+	options := &KeyVault.PortfolioOptions{}
+	options.SetStorage(storage)
+	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
+	vault,err := KeyVault.NewKeyVault(options)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	wallet,err := vault.CreateWallet("test")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// create accounts
 	accounts := map[string]bool{}
-	// add accounts
 	for i := 0 ; i < 10 ; i++ {
-		accountId := uuid.New()
-		err := storage.StoreAccount(ids[0],accountId,[]byte(accountId.String()))
+		account,err := wallet.CreateValidatorAccount(fmt.Sprintf("%d",i))
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		accounts[accountId.String()] = false
+		accounts[account.ID().String()] = false
 	}
 
 
 
 	// verify listing
-	for a := range storage.RetrieveAccounts(ids[0]) {
-		accountid := string(a)
-		accounts[accountid] = true
+	fetched,err := storage.ListAccounts(wallet.ID())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _,a := range fetched {
+		accounts[a.ID().String()] = true
 	}
 	for k,v := range accounts {
 		t.Run(k, func(t *testing.T) {

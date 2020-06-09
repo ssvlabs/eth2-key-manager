@@ -1,37 +1,55 @@
-package slashing_protectors
+package slashing_protection
 
 import (
+	"encoding/hex"
+	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/encryptors"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func setupProposal() (VaultSlashingProtector, types.Account,error) {
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
+}
+
+func store () *in_memory.InMemStore {
+	return in_memory.NewInMemStore()
+}
+
+func vault() (*KeyVault.KeyVault,error) {
+	options := &KeyVault.PortfolioOptions{}
+	options.SetStorage(store())
+	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
+	return KeyVault.NewKeyVault(options)
+}
+
+func setupProposal() (core.VaultSlashingProtector, []core.Account,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
 
-	store := in_memory.NewInMemStore()
-	wallet,err := hd.CreateWallet("test",[]byte(""), store, encryptors.NewPlainTextEncryptor())
+	// create an account to use
+	vault,err := vault()
 	if err != nil {
 		return nil,nil,err
 	}
-	err = wallet.Unlock([]byte(""))
+	w,err := vault.CreateWallet("test")
+	if err != nil {
+		return nil,nil,err
+	}
+	account1,err := w.CreateValidatorAccount("1")
+	if err != nil {
+		return nil,nil,err
+	}
+	account2,err := w.CreateValidatorAccount("2")
 	if err != nil {
 		return nil,nil,err
 	}
 
-	account1,err := wallet.CreateAccount("1",[]byte(""))
-	if err != nil {
-		return nil,nil,err
-	}
-
-	protector := NewNormalProtection(store)
+	protector := core.NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 	protector.SaveProposal(account1, &pb.SignBeaconProposalRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
@@ -66,20 +84,19 @@ func setupProposal() (VaultSlashingProtector, types.Account,error) {
 		},
 	})
 
-	return protector,account1,nil
+	return protector,[]core.Account{account1,account2},nil
 }
 
 
 func TestDoubleProposal(t *testing.T) {
-	protector,account,err := setupProposal()
-	account2 := core.NewSimpleAccount()
+	protector,accounts,err := setupProposal()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	t.Run("New proposal, should not slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(account, &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -102,7 +119,7 @@ func TestDoubleProposal(t *testing.T) {
 	})
 
 	t.Run("different proposer index, should not slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(account2, &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[1], &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -125,7 +142,7 @@ func TestDoubleProposal(t *testing.T) {
 	})
 
 	t.Run("double proposal (different body root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(account, &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{

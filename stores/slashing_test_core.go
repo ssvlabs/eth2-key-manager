@@ -2,16 +2,29 @@ package stores
 
 import (
 	"github.com/bloxapp/KeyVault/core"
-	slash "github.com/bloxapp/KeyVault/slashing_protectors"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+	"github.com/google/uuid"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
 )
 
-func TestingSaveProposal(storage slash.SlashingStore, t *testing.T) {
+type mockAccount struct {
+	id uuid.UUID
+	walletid uuid.UUID
+}
+func (a *mockAccount) ID() uuid.UUID {return a.id}
+func (a *mockAccount) WalletID() uuid.UUID {return a.walletid}
+func (a *mockAccount) Type() core.AccountType {return core.ValidatorAccount}
+func (a *mockAccount) Name() string {return ""}
+func (a *mockAccount) PublicKey() e2types.PublicKey {return nil}
+func (a *mockAccount) Path() string {return ""}
+func (a *mockAccount) Sign(data []byte) (e2types.Signature,error) {return nil,nil}
+func (a *mockAccount) SetContext(ctx *core.PortfolioContext){}
+
+func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		proposal *core.BeaconBlockHeader
-		account types.Account
+		account core.Account
 	}{
 		{
 			name:"simple save",
@@ -22,7 +35,10 @@ func TestingSaveProposal(storage slash.SlashingStore, t *testing.T) {
 				StateRoot:     []byte("A"),
 				BodyRoot:      []byte("A"),
 			},
-			account: core.NewSimpleAccount(),
+			account: &mockAccount{
+				id:       uuid.New(),
+				walletid: uuid.New(),
+			},
 		},
 	}
 
@@ -53,11 +69,11 @@ func TestingSaveProposal(storage slash.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
+func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		att *core.BeaconAttestation
-		account types.Account
+		account core.Account
 	}{
 		{
 			name:"simple save",
@@ -74,7 +90,10 @@ func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
 					Root:  []byte("Root"),
 				},
 			},
-			account: core.NewSimpleAccount(),
+			account: &mockAccount{
+				id:       uuid.New(),
+				walletid: uuid.New(),
+			},
 		},
 		{
 			name:"simple save with no change to latest attestation target",
@@ -91,7 +110,10 @@ func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
 					Root:  []byte("Root"),
 				},
 			},
-			account: core.NewSimpleAccount(),
+			account: &mockAccount{
+				id:       uuid.New(),
+				walletid: uuid.New(),
+			},
 		},
 	}
 
@@ -122,11 +144,11 @@ func TestingSaveAttestation(storage slash.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingSaveLatestAttestation(storage slash.SlashingStore, t *testing.T) {
+func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		att *core.BeaconAttestation
-		account types.Account
+		account core.Account
 	}{
 		{
 			name:"simple save",
@@ -143,7 +165,10 @@ func TestingSaveLatestAttestation(storage slash.SlashingStore, t *testing.T) {
 					Root:  []byte("Root"),
 				},
 			},
-			account: core.NewSimpleAccount(),
+			account: &mockAccount{
+				id:       uuid.New(),
+				walletid: uuid.New(),
+			},
 		},
 		{
 			name:"simple save with no change to latest attestation target",
@@ -160,7 +185,10 @@ func TestingSaveLatestAttestation(storage slash.SlashingStore, t *testing.T) {
 					Root:  []byte("Root"),
 				},
 			},
-			account: core.NewSimpleAccount(),
+			account: &mockAccount{
+				id:       uuid.New(),
+				walletid: uuid.New(),
+			},
 		},
 	}
 
@@ -191,7 +219,7 @@ func TestingSaveLatestAttestation(storage slash.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingListingAttestation(storage slash.SlashingStore, t *testing.T) {
+func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 	attestations := []*core.BeaconAttestation{
 		&core.BeaconAttestation{
 			Slot:            30,
@@ -233,7 +261,10 @@ func TestingListingAttestation(storage slash.SlashingStore, t *testing.T) {
 			},
 		},
 	}
-	account := core.NewSimpleAccount()
+	account := &mockAccount{
+		id:       uuid.New(),
+		walletid: uuid.New(),
+	}
 
 	// save
 	for _,att := range attestations {

@@ -4,50 +4,29 @@ import (
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
-type WalletOptions struct {
+type PortfolioOptions struct {
 	encryptor wtypes.Encryptor
 	password []byte
-	name string
-	store wtypes.Store
-	enableSimpleSigner bool
+	storage interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
 	seed []byte
 }
 
-func (options *WalletOptions)SetEncryptor(encryptor wtypes.Encryptor) *WalletOptions {
+func (options *PortfolioOptions)SetEncryptor(encryptor wtypes.Encryptor) *PortfolioOptions {
 	options.encryptor = encryptor
 	return options
 }
 
-func (options *WalletOptions)SetStore(store wtypes.Store) *WalletOptions {
-	options.store = store
+func (options *PortfolioOptions)SetStorage(storage interface{}) *PortfolioOptions {
+	options.storage = storage
 	return options
 }
 
-func (options *WalletOptions)SetWalletName(name string) *WalletOptions {
-	options.name = name
-	return options
-}
-
-func (options *WalletOptions)SetWalletPassword(password string) *WalletOptions {
+func (options *PortfolioOptions)SetPassword(password string) *PortfolioOptions {
 	options.password = []byte(password)
 	return options
 }
 
-func (options *WalletOptions)EnableSimpleSigner(val bool) *WalletOptions {
-	options.enableSimpleSigner = true
-	return options
-}
-
-func (options *WalletOptions)SetSeed(seed []byte) *WalletOptions {
+func (options *PortfolioOptions)SetSeed(seed []byte) *PortfolioOptions {
 	options.seed = seed
 	return options
 }
-
-//func (options *WalletOptions) GenerateSeed() error {
-//	seed := make([]byte, 32)
-//	_, err := rand.Read(seed)
-//
-//	options.SetSeed(seed)
-//
-//	return err
-//}

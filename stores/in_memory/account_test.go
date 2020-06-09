@@ -1,46 +1,86 @@
 package in_memory
 
 import (
+	"encoding/hex"
+	"github.com/bloxapp/KeyVault"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores"
-	"github.com/google/uuid"
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"testing"
 )
 
-func getPopulatedWalletStorage(t *testing.T) (wtypes.Store,[]uuid.UUID) {
-	store := getWalletStorage()
-
-	ids := []uuid.UUID{
-		uuid.New(),
-		uuid.New(),
-		uuid.New(),
-		uuid.New(),
-	}
-
-	if err := store.StoreWallet(ids[0],"1", []byte("wallet 1")); err != nil { t.Error(err) }
-	if err := store.StoreWallet(ids[1],"2", []byte("wallet 2")); err != nil { t.Error(err) }
-	if err := store.StoreWallet(ids[2],"3", []byte("wallet 3")); err != nil { t.Error(err) }
-	if err := store.StoreWallet(ids[3],"4", []byte("wallet 4")); err != nil { t.Error(err) }
-
-	return store,ids
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
 }
 
-func TestAccountAtNonExistingWallet(t *testing.T) {
-	storage, ids := getPopulatedWalletStorage(t)
-	stores.TestingAccountAtNonExistingWallet(storage, ids, t)
+func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
+	store := getStorage()
+
+	options := &KeyVault.PortfolioOptions{}
+	options.SetStorage(store)
+	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
+	vault,err := KeyVault.NewKeyVault(options)
+	if err != nil {
+		return nil,nil,err
+	}
+
+	wallet,err := vault.CreateWallet("test")
+	if err != nil {
+		return nil,nil,err
+	}
+
+	a1,err := wallet.CreateValidatorAccount("1")
+	if err != nil {
+		return nil,nil,err
+	}
+	a2,err := wallet.CreateValidatorAccount("2")
+	if err != nil {
+		return nil,nil,err
+	}
+	a3,err := wallet.CreateValidatorAccount("3")
+	if err != nil {
+		return nil,nil,err
+	}
+	a4,err := wallet.CreateValidatorAccount("4")
+	if err != nil {
+		return nil,nil,err
+	}
+
+	return store,[]core.Account{a1,a2,a3,a4},nil
+}
+
+func TestOpeningAccount (t *testing.T) {
+	storage, accounts, err := getPopulatedWalletStorage()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	stores.TestingOpeningAccount(storage, accounts[0],t)
 }
 
 func TestAddingAccountsToWallet(t *testing.T) {
-	storage, ids := getPopulatedWalletStorage(t)
-	stores.TestingAddingAccountsToWallet(storage, ids, t)
+	storage, accounts, err := getPopulatedWalletStorage()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	stores.TestingSavingAccounts(storage, accounts, t)
 }
 
 func TestFetchingNonExistingAccount(t *testing.T) {
-	storage, ids := getPopulatedWalletStorage(t)
-	stores.TestingFetchingNonExistingAccount(storage, ids, t)
+	storage, _, err := getPopulatedWalletStorage()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	stores.TestingFetchingNonExistingAccount(storage, t)
 }
 
 func TestListingAccounts(t *testing.T) {
-	storage, ids := getPopulatedWalletStorage(t)
-	stores.TestingListingAccounts(storage, ids, t)
+	storage, _, err := getPopulatedWalletStorage()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	stores.TestingListingAccounts(storage, t)
 }

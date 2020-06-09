@@ -9,6 +9,12 @@ import (
 	"testing"
 )
 
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
+}
+
+
 func TestAttestationSlashingSignatures(t *testing.T) {
 	seed,_ := hex.DecodeString("f51883a4c56467458c3b47d06cd135f862a6266fabdfb9e9e4702ea5511375d7")
 	signer,err := setupWithSlashingProtection(seed)
@@ -66,13 +72,13 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 }
 
 func TestAttestationSignatures(t *testing.T) {
-	seed,_ := hex.DecodeString("f51883a4c56467458c3b47d06cd135f862a6266fabdfb9e9e4702ea5511375d7")
+	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	signer,err := setupWithSlashingProtection(seed)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0")
+	accountPriv,err := util.PrivateKeyFromSeedAndPath(seed,"m/12381/3600/0/0/0")
 	if err != nil {
 		t.Error(err)
 		return
@@ -127,14 +133,14 @@ func TestAttestationSignatures(t *testing.T) {
 					},
 				},
 			},
-			expectedError:fmt.Errorf("no account with name \"10\""),
+			expectedError:fmt.Errorf("account not found"),
 			accountPriv:nil,
 			msg:"",
 		},
 		{
-			name:"unable to unlock account, should error",
+			name:"nil account, should error",
 			req: &pb.SignBeaconAttestationRequest{
-				Id:                   &pb.SignBeaconAttestationRequest_Account{Account:"2"},
+				Id:                   nil,
 				Domain:               ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 				Data:                 &pb.AttestationData{
 					Slot:            284115,
@@ -150,7 +156,7 @@ func TestAttestationSignatures(t *testing.T) {
 					},
 				},
 			},
-			expectedError:fmt.Errorf("incorrect passphrase"),
+			expectedError:fmt.Errorf("account was not supplied"),
 			accountPriv:nil,
 			msg:"",
 		},
