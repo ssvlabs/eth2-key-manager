@@ -7,20 +7,14 @@ import (
 	"github.com/bloxapp/KeyVault/core"
 	prot "github.com/bloxapp/KeyVault/slashing_protection"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
-	"github.com/bloxapp/KeyVault/wallet_hd"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
-	"reflect"
 	"testing"
 )
 
 func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore(
-			reflect.TypeOf(&KeyVault.KeyVault{}),
-			reflect.TypeOf(&wallet_hd.HDWallet{}),
-			reflect.TypeOf(&wallet_hd.HDAccount{}),
-		)
+	return in_memory.NewInMemStore()
 }
 
 func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {

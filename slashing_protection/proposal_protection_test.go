@@ -5,10 +5,8 @@ import (
 	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
-	"github.com/bloxapp/KeyVault/wallet_hd"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	"reflect"
 	"testing"
 )
 
@@ -18,11 +16,7 @@ func _byteArray(input string) []byte {
 }
 
 func store () *in_memory.InMemStore {
-	return in_memory.NewInMemStore(
-		reflect.TypeOf(&KeyVault.KeyVault{}),
-		reflect.TypeOf(&wallet_hd.HDWallet{}),
-		reflect.TypeOf(&wallet_hd.HDAccount{}),
-	)
+	return in_memory.NewInMemStore()
 }
 
 func vault() (*KeyVault.KeyVault,error) {
