@@ -14,7 +14,6 @@ import (
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
 	id                 uuid.UUID
-	enableSimpleSigner bool
 	indexMapper        map[string]uuid.UUID
 	Context            *core.PortfolioContext
 	key                *core.DerivableKey
@@ -98,20 +97,12 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 	return completeVaultSetup(options,key)
 }
 func completeVaultSetup(options *PortfolioOptions, key *core.DerivableKey) (*KeyVault,error) {
-	// signer
-	if options.enableSimpleSigner {
-		if _,ok := options.storage.(core.SlashingStore); !ok {
-			return nil,fmt.Errorf("storage does not implement SlashingStore")
-		}
-	}
-
 	// portfolio Context
 	context := &core.PortfolioContext {
 		Storage:	options.storage.(core.Storage),
 	}
 
 	ret := &KeyVault{
-		enableSimpleSigner: options.enableSimpleSigner,
 		indexMapper:        make(map[string]uuid.UUID),
 		Context:            context,
 		key:                key,

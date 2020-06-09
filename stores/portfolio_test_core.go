@@ -18,8 +18,8 @@ func portfolio(storage core.Storage) (core.Portfolio,error) {
 
 	options := &KeyVault.PortfolioOptions{}
 	options.SetStorage(storage)
-	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
-	return KeyVault.NewKeyVault(options)
+	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"))
+	return KeyVault.ImportKeyVault(options)
 }
 
 func TestingNonExistingPortfolio(storage core.Storage, t *testing.T) {

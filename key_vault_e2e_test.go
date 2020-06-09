@@ -17,7 +17,6 @@ func _bigInt(input string) *big.Int {
 func TestNewKeyVault(t *testing.T) {
 	// setup vault
 	options := &PortfolioOptions{}
-	options.EnableSimpleSigner(true)
 	options.SetStorage(inmemStorage())
 	options.SetEncryptor(keystorev4.New())
 	options.SetPassword("password")
@@ -30,7 +29,6 @@ func TestNewKeyVault(t *testing.T) {
 func TestImportKeyVault(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	options := &PortfolioOptions{}
-	options.EnableSimpleSigner(true)
 	options.SetStorage(inmemStorage())
 	options.SetSeed(seed)
 	options.SetEncryptor(keystorev4.New())
@@ -72,7 +70,6 @@ func TestOpenKeyVault(t *testing.T) {
 
 	// setup vault
 	options := &PortfolioOptions{}
-	options.EnableSimpleSigner(true)
 	options.SetStorage(storage)
 	options.SetEncryptor(keystorev4.New())
 	options.SetPassword("password")

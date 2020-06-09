@@ -36,7 +36,7 @@ func TestingWithdrawalAccount(storage core.Storage, t *testing.T) {
 
 	require.Equal(t,"wallet_withdrawal_key_unique",a.Name())
 	require.Equal(t,"m/12381/3600/0/0",a.Path())
-	require.Equal(t,"ad05971d7f95df8e9181d3d4fb298643493e32df84735ba98d63ddeb4c18492c191973c6dfb01d08ed4f93e7d8247933",hex.EncodeToString(a.PublicKey().Marshal()))
+	require.Equal(t,"b08033f01d0c71f63a46117915791187e3257a95552b3701fef80124c492eabe1f10795e684055895b887220460e5f24",hex.EncodeToString(a.PublicKey().Marshal()))
 }
 
 func TestingOpenAccounts(storage core.Storage, t *testing.T) {

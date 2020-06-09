@@ -10,7 +10,6 @@ import (
 func (vault *KeyVault) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 	data["id"] = vault.id
-	data["enableSimpleSigner"] = vault.enableSimpleSigner
 	data["indexMapper"] = vault.indexMapper
 	data["key"] = vault.key
 	return json.Marshal(data)
@@ -31,14 +30,6 @@ func (vault *KeyVault) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {return fmt.Errorf("could not find var: id")}
-
-	// simple signer
-	if val, exists := v["enableSimpleSigner"]; exists {
-		vault.enableSimpleSigner = val.(bool)
-		if err != nil {
-			return err
-		}
-	} else {return fmt.Errorf("could not find var: enableSimpleSigner")}
 
 	// indexMapper
 	if val, exists := v["indexMapper"]; exists {

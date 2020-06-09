@@ -54,7 +54,7 @@ func TestWalletMarshaling(t *testing.T) {
 			walletType:core.HDWallet,
 			name: "wallet1",
 			indexMapper:map[string]uuid.UUID{},
-			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "/0/0",
 		},
 		{
@@ -65,7 +65,7 @@ func TestWalletMarshaling(t *testing.T) {
 			indexMapper:map[string]uuid.UUID{
 				"account1" : uuid.New(),
 			},
-			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "/0/0",
 		},
 	}

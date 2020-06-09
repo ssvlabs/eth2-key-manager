@@ -46,7 +46,7 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet,error) {
 	options := &KeyVault.PortfolioOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault,err := KeyVault.NewKeyVault(options)
+	vault,err := KeyVault.ImportKeyVault(options)
 	if err != nil {
 		return nil,err
 	}

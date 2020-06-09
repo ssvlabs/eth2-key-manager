@@ -8,7 +8,6 @@ type PortfolioOptions struct {
 	encryptor wtypes.Encryptor
 	password []byte
 	storage interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
-	enableSimpleSigner bool
 	seed []byte
 }
 
@@ -24,11 +23,6 @@ func (options *PortfolioOptions)SetStorage(storage interface{}) *PortfolioOption
 
 func (options *PortfolioOptions)SetPassword(password string) *PortfolioOptions {
 	options.password = []byte(password)
-	return options
-}
-
-func (options *PortfolioOptions)EnableSimpleSigner(val bool) *PortfolioOptions {
-	options.enableSimpleSigner = true
 	return options
 }
 

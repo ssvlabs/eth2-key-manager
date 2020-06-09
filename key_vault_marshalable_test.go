@@ -52,7 +52,7 @@ func TestMarshaling(t *testing.T) {
 			id:uuid.New(),
 			simpleSigner: true,
 			indexMapper:map[string]uuid.UUID{},
-			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "/0/0",
 		},
 		{
@@ -62,7 +62,7 @@ func TestMarshaling(t *testing.T) {
 			indexMapper:map[string]uuid.UUID{
 				"wallet1" : uuid.New(),
 			},
-			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "/0/0",
 		},
 		{
@@ -72,7 +72,7 @@ func TestMarshaling(t *testing.T) {
 			indexMapper:map[string]uuid.UUID{
 				"wallet1" : uuid.New(),
 			},
-			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "",
 		},
 	}
@@ -95,7 +95,6 @@ func TestMarshaling(t *testing.T) {
 			}
 			w := &KeyVault{
 				id:test.id,
-				enableSimpleSigner: test.simpleSigner,
 				indexMapper:test.indexMapper,
 				key:key,
 				Context:&core.PortfolioContext{Storage:storage},
@@ -116,7 +115,6 @@ func TestMarshaling(t *testing.T) {
 			}
 
 			require.Equal(t,w.id,w1.id)
-			require.Equal(t,w.enableSimpleSigner,w1.enableSimpleSigner)
 			for k := range w.indexMapper {
 				v := w.indexMapper[k]
 				require.Equal(t,v,w1.indexMapper[k])
