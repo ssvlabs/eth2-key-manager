@@ -1,6 +1,7 @@
-package core
+package eth1_deposit
 
 import (
+	"github.com/bloxapp/KeyVault/core"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/go-ssz"
 	types "github.com/wealdtech/go-eth2-types/v2"
@@ -16,8 +17,17 @@ type ETH1DepositManager struct {
 
 }
 
+//func (d *ETH1DepositManager) RawDepositTransaction(validationAccount core.Account, withdrawalAccount core.Account, amount uint64) (*gethTypes.Transaction,error) {
+//	data,root,err := d.DepositData(validationAccount,withdrawalAccount,amount)
+//	if err != nil {
+//		return nil,err
+//	}
+//
+//
+//}
+
 // this is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
-func (d *ETH1DepositManager) DepositData(validationAccount Account, withdrawalAccount Account, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+func (d *ETH1DepositManager) DepositData(validationAccount core.Account, withdrawalAccount core.Account, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
 	di := &ethpb.Deposit_Data{
 		PublicKey:             validationAccount.PublicKey().Marshal(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalAccount),
@@ -67,7 +77,7 @@ func (d *ETH1DepositManager) DepositData(validationAccount Account, withdrawalAc
 //   withdrawal_credentials[:1] == BLS_WITHDRAWAL_PREFIX_BYTE
 //   withdrawal_credentials[1:] == hash(withdrawal_pubkey)[1:]
 // where withdrawal_credentials is of type bytes32.
-func withdrawalCredentialsHash(withdrawalAccount Account) []byte {
+func withdrawalCredentialsHash(withdrawalAccount core.Account) []byte {
 	h := util.SHA256(withdrawalAccount.PublicKey().Marshal())
 	return append([]byte{BLSWithdrawalPrefixByte}, h[1:]...)[:32]
 }

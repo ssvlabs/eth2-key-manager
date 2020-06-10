@@ -1,8 +1,10 @@
-package core
+package eth1_deposit
 
 import (
 	"bytes"
 	"encoding/hex"
+	"fmt"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -25,13 +27,13 @@ func newDummyAccount(privKey []byte) *dummyAccount {
 	return &dummyAccount{priv:k}
 }
 func (a *dummyAccount) ID() uuid.UUID {return uuid.New()}
-func (a *dummyAccount) WalletID() uuid.UUID {return uuid.New()}
-func (a *dummyAccount) Type() AccountType {return ValidatorAccount}
-func (a *dummyAccount) Name() string {return ""}
+func (a *dummyAccount) WalletID() uuid.UUID                        {return uuid.New()}
+func (a *dummyAccount) Type() core.AccountType                     {return core.ValidatorAccount }
+func (a *dummyAccount) Name() string                               {return ""}
 func (a *dummyAccount) PublicKey() e2types.PublicKey {return a.priv.PublicKey()}
 func (a *dummyAccount) Path() string {return ""}
 func (a *dummyAccount) Sign(data []byte) (e2types.Signature,error) {return a.priv.Sign(data),nil}
-func (a *dummyAccount) SetContext(ctx *PortfolioContext) {}
+func (a *dummyAccount) SetContext(ctx *core.PortfolioContext)      {}
 
 func _ignoreErr(a []byte, err error) []byte {
 	return a
@@ -62,14 +64,21 @@ func TestDepositData(t *testing.T) {
 
 			// create data
 			manager := &ETH1DepositManager{}
-			depositData,root,err := manager.DepositData(val,withd,MaxEffectiveBalanceInGwei)
+			depositData,root,err := manager.DepositData(val,withd, MaxEffectiveBalanceInGwei)
 			require.NoError(t,err)
 
 			require.Equal(t,val.PublicKey().Marshal(),depositData.PublicKey)
 			require.True(t,bytes.Equal(test.expectedWithdrawalCredentials,depositData.WithdrawalCredentials))
-			require.Equal(t,MaxEffectiveBalanceInGwei,depositData.Amount)
+			require.Equal(t, MaxEffectiveBalanceInGwei,depositData.Amount)
 			require.True(t,bytes.Equal(test.expectedRoot,root[:]))
 			require.True(t,bytes.Equal(test.expectedSig,depositData.Signature))
+
+
+			fmt.Printf("pubkey: %s\n",hex.EncodeToString(depositData.PublicKey))
+			fmt.Printf("WithdrawalCredentials: %s\n",hex.EncodeToString(depositData.WithdrawalCredentials))
+			fmt.Printf("Amount: %d\n",depositData.Amount)
+			fmt.Printf("root: %s\n",hex.EncodeToString(root[:]))
+			fmt.Printf("sig: %s\n",hex.EncodeToString(depositData.Signature))
 		})
 	}
 }
