@@ -104,8 +104,8 @@ func (store *InMemStore) SaveAccount(account core.Account) error {
 }
 
 // will return nil,nil if no account was found
-func (store *InMemStore) OpenAccount(uuid uuid.UUID) (core.Account,error) {
-	if val := store.memory[uuid.String()]; val != nil {
+func (store *InMemStore) OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (core.Account,error) {
+	if val := store.memory[accountId.String()]; val != nil {
 		return val.(core.Account),nil
 	} else {
 		return nil,nil
@@ -119,7 +119,7 @@ func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte
 
 func (store *InMemStore) SecurelyFetchPortfolioSeed() ([]byte,error) {
 	if val := store.memory["portfolio_seed"]; val != nil {
-		if store.verifyCanEncrypt() {
+		if store.canEncrypt() {
 			if encrypted,ok := val.(map[string]interface{}); ok {
 				decrypted,err := store.encryptor.Decrypt(encrypted,store.encryptionPassword)
 				if err != nil {
@@ -142,7 +142,7 @@ func (store *InMemStore) SecurelySavePortfolioSeed(secret []byte) error {
 	if len(secret) != 32 {
 		return fmt.Errorf("secret can be only 32 bytes (not %d bytes)",len(secret))
 	}
-	if store.verifyCanEncrypt() {
+	if store.canEncrypt() {
 		encrypted,err := store.encryptor.Encrypt(secret,store.encryptionPassword)
 		if err != nil {
 			return err
@@ -160,7 +160,7 @@ func (store *InMemStore) freshContext() *core.PortfolioContext {
 	}
 }
 
-func (store *InMemStore) verifyCanEncrypt() bool {
+func (store *InMemStore) canEncrypt() bool {
 	if store.encryptor != nil {
 		if store.encryptionPassword == nil {
 			return false

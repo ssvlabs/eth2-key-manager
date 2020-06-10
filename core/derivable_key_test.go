@@ -30,7 +30,7 @@ func (s *mockedStorage) SaveWallet(wallet Wallet) error {return nil}
 func (s *mockedStorage) OpenWallet(uuid uuid.UUID) (Wallet,error) {return nil,nil}
 func (s *mockedStorage) ListAccounts(walletID uuid.UUID) ([]Account,error) {return nil,nil}
 func (s *mockedStorage) SaveAccount(account Account) error {return nil}
-func (s *mockedStorage) OpenAccount(uuid uuid.UUID) (Account,error) {return nil,nil}
+func (s *mockedStorage) OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (Account,error) {return nil,nil}
 func (s *mockedStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
 func (s *mockedStorage) SecurelyFetchPortfolioSeed() ([]byte,error) {return s.seed,nil}
 func (s *mockedStorage) SecurelySavePortfolioSeed(secret []byte) error {return s.err}

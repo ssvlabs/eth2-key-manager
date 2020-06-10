@@ -2,15 +2,22 @@ package hashicorp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/bloxapp/KeyVault"
+	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
-	"strings"
+	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type HashicorpVaultStore struct {
 	storage logical.Storage
 	ctx context.Context
+
+	encryptor	   		types.Encryptor
+	encryptionPassword 	[]byte
 }
 
 func NewHashicorpVaultStore(storage logical.Storage, ctx context.Context) *HashicorpVaultStore {
@@ -21,170 +28,79 @@ func NewHashicorpVaultStore(storage logical.Storage, ctx context.Context) *Hashi
 }
 
 const (
-	WalletBasePathStr = "wallets/"
-	WalletIdsBaseePath = WalletBasePathStr + "ids/"
-	WalletDataPathStr = WalletIdsBaseePath + "%s/data"
+	PortfolioBasePath 		= "portfolio/"
+	PortfolioDataPath		= PortfolioBasePath		+ "/data"
+	SeedPath				= PortfolioBasePath  	+ "seed/"
 
-	WalletAccountBase = WalletBasePathStr + "ids/%s/accounts/"
-	WalletAccountPath = WalletAccountBase + "%s"
+	WalletBasePath     		= PortfolioBasePath 	+ "wallets/"
+	WalletIdsBaseePath 		= WalletBasePath 		+ "ids/"
+	WalletDataPath     		= WalletIdsBaseePath 	+ "%s/data"
 
-	WalletIndexesPath = WalletBasePathStr + "%s/indexes"
-
-	WalletsIdMappingPathStr = WalletBasePathStr + "mappings/%s"
+	AccountBase 			= WalletBasePath 		+ "ids/%s/accounts/"
+	AccountPath 			= AccountBase 			+ "%s"
 )
 
-// Name provides the name of the store
 func (store *HashicorpVaultStore) Name() string {
 	return "Hashicorp Vault"
 }
 
-
-// StoreWallet stores wallet data.  It will fail if it cannot store the data.
-func (store *HashicorpVaultStore) StoreWallet(walletID uuid.UUID, walletName string, data []byte) error {
-	if len(walletName) == 0 {
-		return fmt.Errorf("wallet name must be provided")
-	}
-
-	// put wallet data
-	path := fmt.Sprintf(WalletDataPathStr, walletID.String())
-	entry := &logical.StorageEntry{
-		Key:      path,
-		Value:    data,
-		SealWrap: false,
-	}
-	err := store.storage.Put(store.ctx, entry)
+func (store *HashicorpVaultStore) SavePortfolio(portfolio core.Portfolio) error {
+	// data
+	data,err := json.Marshal(portfolio)
 	if err != nil {
 		return err
 	}
 
-	// add map from wallet id to name
-	path = fmt.Sprintf(WalletsIdMappingPathStr, walletName)
-	entry = &logical.StorageEntry{
-		Key:      path,
-		Value:    []byte(walletID.String()),
+	// put wallet data
+	entry := &logical.StorageEntry{
+		Key:      PortfolioDataPath,
+		Value:    data,
 		SealWrap: false,
 	}
 	return store.storage.Put(store.ctx, entry)
 }
 
-// RetrieveWallet retrieves wallet data for all wallets.
-func (store *HashicorpVaultStore) RetrieveWallets() <-chan []byte {
-	ch := make(chan []byte, 1024)
-
-	go func() {
-		walletNames,err := store.storage.List(store.ctx, WalletIdsBaseePath)
-		if err == nil {
-			for _, w := range walletNames {
-				path := fmt.Sprintf(WalletDataPathStr, cleanFromPathSymbols(w))
-				entry,error := store.storage.Get(store.ctx,path)
-				if error != nil || entry == nil {
-					continue
-				}
-				ch <- entry.Value
-			}
-		}
-		close(ch)
-	}()
-
-	return ch
-}
-
-// RetrieveWallet retrieves wallet data for a wallet with a given name.
-// It will fail if it cannot retrieve the data.
-func (store *HashicorpVaultStore) RetrieveWallet(walletName string) ([]byte, error) {
-	// first find the mapping between wallet name and id
-	mappingpath := fmt.Sprintf(WalletsIdMappingPathStr, walletName)
-	entry,error := store.storage.Get(store.ctx, mappingpath)
+// will return nil,nil if no portfolio was found
+func (store *HashicorpVaultStore) OpenPortfolio() (core.Portfolio,error) {
+	entry,error := store.storage.Get(store.ctx,PortfolioDataPath)
 	if error != nil {
 		return nil, error
 	}
 	if entry == nil {
-		return nil, fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
+		return nil, nil
 	}
 
-	// second return wallet by id
-	walletId, err := uuid.Parse(string(entry.Value))
+	// un-marshal
+	ret := &KeyVault.KeyVault{Context:store.freshContext()} // not hardcode KeyVault
+	error = json.Unmarshal(entry.Value,&ret)
+	if error != nil {
+		return nil,error
+	}
+	return ret,nil
+}
+
+func (store *HashicorpVaultStore) ListWallets() ([]core.Wallet,error) {
+	p,err := store.OpenPortfolio()
 	if err != nil {
-		return nil, err
+		return nil,err
 	}
-	return store.RetrieveWalletByID(walletId)
+
+	ret := make([]core.Wallet,0)
+	for w := range p.Wallets() {
+		ret = append(ret,w)
+	}
+	return ret,nil
 }
 
-// RetrieveWalletByID retrieves wallet data for a wallet with a given ID.
-// It will fail if it cannot retrieve the data.
-func (store *HashicorpVaultStore) RetrieveWalletByID(walletID uuid.UUID) ([]byte, error) {
-	path := fmt.Sprintf(WalletDataPathStr, walletID.String())
-	entry,error := store.storage.Get(store.ctx,path)
-	if error != nil {
-		return nil, error
-	}
-	if entry == nil {
-		return nil, fmt.Errorf("wallet not found") // important as github.com/wealdtech/go-eth2-wallet-hd looks for this error
-	}
-
-	return entry.Value,nil
-}
-
-// StoreAccount stores account data.  It will fail if it cannot store the data.
-// will fail for non existing wallet
-func (store *HashicorpVaultStore) StoreAccount(walletID uuid.UUID, accountID uuid.UUID, data []byte) error {
-	_, err := store.RetrieveWalletByID(walletID)
+func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
+	// data
+	data,err := json.Marshal(wallet)
 	if err != nil {
 		return err
 	}
 
-	// store account
-	path := fmt.Sprintf(WalletAccountPath, walletID.String(), accountID.String())
-	entry := &logical.StorageEntry{
-		Key:      path,
-		Value:    data,
-		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
-}
-
-// RetrieveAccounts retrieves account information for all accounts.
-func (store *HashicorpVaultStore) RetrieveAccounts(walletID uuid.UUID) <-chan []byte {
-	ch := make(chan []byte, 1024)
-
-	go func() {
-		path := fmt.Sprintf(WalletAccountBase, walletID.String())
-		accountNames,err := store.storage.List(store.ctx, path)
-		if err == nil {
-			for _, a := range accountNames {
-				path := fmt.Sprintf(WalletAccountPath, walletID.String(), a)
-				entry,error := store.storage.Get(store.ctx,path)
-				if error != nil || entry == nil {
-					continue
-				}
-				ch <- entry.Value
-			}
-		}
-		close(ch)
-	}()
-
-	return ch
-}
-
-// RetrieveAccount retrieves account data for a wallet with a given ID.
-// It will fail if it cannot retrieve the data.
-func (store *HashicorpVaultStore) RetrieveAccount(walletID uuid.UUID, accountID uuid.UUID) ([]byte, error) {
-	path := fmt.Sprintf(WalletAccountPath, walletID.String(), accountID.String())
-	entry,error := store.storage.Get(store.ctx,path)
-	if error != nil {
-		return nil, error
-	}
-	if entry == nil {
-		return nil, fmt.Errorf("could not retrieve account id %s for wallet id: %s", accountID.String(), walletID.String())
-	}
-
-	return entry.Value,nil
-}
-
-// StoreAccountsIndex stores the index of accounts for a given wallet.
-func (store *HashicorpVaultStore) StoreAccountsIndex(walletID uuid.UUID, data []byte) error {
 	// put wallet data
-	path := fmt.Sprintf(WalletIndexesPath, walletID.String())
+	path := fmt.Sprintf(WalletDataPath, wallet.ID().String())
 	entry := &logical.StorageEntry{
 		Key:      path,
 		Value:    data,
@@ -193,20 +109,164 @@ func (store *HashicorpVaultStore) StoreAccountsIndex(walletID uuid.UUID, data []
 	return store.storage.Put(store.ctx, entry)
 }
 
-// RetrieveAccountsIndex retrieves the index of accounts for a given wallet.
-func (store *HashicorpVaultStore) RetrieveAccountsIndex(walletID uuid.UUID) ([]byte, error) {
-	path := fmt.Sprintf(WalletIndexesPath, walletID.String())
+// will return nil,nil if no wallet was found
+func (store *HashicorpVaultStore) OpenWallet(uuid uuid.UUID) (core.Wallet,error) {
+	path := fmt.Sprintf(WalletDataPath, uuid.String())
 	entry,error := store.storage.Get(store.ctx,path)
 	if error != nil {
 		return nil, error
 	}
 	if entry == nil {
-		return nil, fmt.Errorf("could not retrieve indexes for wallet id: %s", walletID.String())
+		return nil, nil
 	}
 
-	return entry.Value,nil
+	// un-marshal
+	ret := &wallet_hd.HDWallet{} // not hardcode HDWallet
+	ret.SetContext(store.freshContext())
+	error = json.Unmarshal(entry.Value,&ret)
+	if error != nil {
+		return nil,error
+	}
+	return ret,nil
 }
 
-func cleanFromPathSymbols(str string) string {
-	return strings.Replace(str,"/","",-1)
+// will return an empty array for no accounts
+func (store *HashicorpVaultStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
+	p,err := store.OpenPortfolio()
+	if err != nil {
+		return nil,err
+	}
+
+	w,err := p.WalletByID(walletID)
+	if err != nil {
+		return nil,err
+	}
+
+	ret := make([]core.Account,0)
+	for a := range w.Accounts() {
+		ret = append(ret,a)
+	}
+	return ret,nil
+}
+
+func (store *HashicorpVaultStore) SaveAccount(account core.Account) error {
+	// data
+	data,err := json.Marshal(account)
+	if err != nil {
+		return err
+	}
+
+	// put wallet data
+	path := fmt.Sprintf(AccountPath,account.WalletID().String(), account.ID().String())
+	entry := &logical.StorageEntry{
+		Key:      path,
+		Value:    data,
+		SealWrap: false,
+	}
+	return store.storage.Put(store.ctx, entry)
+}
+
+// will return nil,nil if no account was found
+func (store *HashicorpVaultStore) OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (core.Account,error) {
+	path := fmt.Sprintf(AccountPath, walletId, accountId)
+	entry,error := store.storage.Get(store.ctx,path)
+	if error != nil {
+		return nil, error
+	}
+	if entry == nil {
+		return nil, nil
+	}
+
+	// un-marshal
+	ret := &wallet_hd.HDAccount{} // not hardcode HDAccount
+	ret.SetContext(store.freshContext())
+	error = json.Unmarshal(entry.Value,&ret)
+	if error != nil {
+		return nil,error
+	}
+	return ret,nil
+}
+
+
+// could also bee set to nil
+func (store *HashicorpVaultStore) SetEncryptor(encryptor types.Encryptor, password []byte) {
+	store.encryptor = encryptor
+	store.encryptionPassword = password
+}
+
+//
+func (store *HashicorpVaultStore) SecurelyFetchPortfolioSeed() ([]byte,error) {
+	// get data
+	path := fmt.Sprintf(SeedPath)
+	entry,error := store.storage.Get(store.ctx,path)
+	if error != nil {
+		return nil, error
+	}
+	if entry == nil {
+		return nil, nil
+	}
+
+	// decrypt and return
+	var data []byte
+	if store.canEncrypt() {
+		var input map[string]interface{}
+		err := json.Unmarshal(entry.Value,&input)
+		if err != nil {
+			return nil, error
+		}
+		if input == nil {
+			return nil,nil
+		}
+		data,err = store.encryptor.Decrypt(input,store.encryptionPassword)
+		if err != nil {
+			return nil,err
+		}
+	} else {
+		data = entry.Value
+	}
+
+	return data,nil
+}
+
+//
+func (store *HashicorpVaultStore) SecurelySavePortfolioSeed(secret []byte) error {
+	// data
+	var data []byte
+	if store.canEncrypt() {
+		encrypted,err := store.encryptor.Encrypt(secret,store.encryptionPassword)
+		if err != nil {
+			return err
+		}
+		data,err = json.Marshal(encrypted)
+		if err != nil {
+			return err
+		}
+	} else {
+		data = secret
+	}
+
+	// save
+	path := fmt.Sprintf(SeedPath)
+	entry := &logical.StorageEntry{
+		Key:      path,
+		Value:    data,
+		SealWrap: false,
+	}
+	return store.storage.Put(store.ctx, entry)
+}
+
+func (store *HashicorpVaultStore) freshContext() *core.PortfolioContext {
+	return &core.PortfolioContext {
+		Storage:     store,
+	}
+}
+
+func (store *HashicorpVaultStore) canEncrypt() bool {
+	if store.encryptor != nil {
+		if store.encryptionPassword == nil {
+			return false
+		}
+		return true
+	}
+	return false
 }

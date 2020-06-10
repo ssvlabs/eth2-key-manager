@@ -31,7 +31,7 @@ type Storage interface {
 	// */
 	SaveAccount(account Account) error
 	// will return nil,nil if no account was found
-	OpenAccount(uuid uuid.UUID) (Account,error)
+	OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (Account,error)
 
 	// could also bee set to nil
 	SetEncryptor(encryptor types.Encryptor, password []byte)
