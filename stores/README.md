@@ -1,10 +1,20 @@
-package core
+# Blox KeyVault - Stores
 
-import (
-	"github.com/google/uuid"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-)
 
+[![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
+
+Store is a place that saves and fetches data used by a portfolio,wallet and accounts. 
+It also stores sensitive information like a seed.
+
+Currently there are the following implementations:
+- In memory storage (mostly used for testing as a quick storage setup)
+- (Hashicorp's Vault)[https://www.vaultproject.io]
+
+
+#### Develop you own store
+You could develop you own store, for example saving it to an S3, local file system and so on.
+To implement a store, simple override the methods below from [here](https://github.com/bloxapp/KeyVault/blob/master/core/storage.go)
+```go
 // Implements methods to store and retrieve data
 // Any encryption is done on the implementation level but is not obligatory
 type Storage interface {
@@ -40,3 +50,5 @@ type Storage interface {
 	//
 	SecurelySavePortfolioSeed(secret []byte) error
 }
+
+```
