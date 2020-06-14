@@ -187,11 +187,11 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 	}{
 		{
 			name:"serialization and fetching",
-			walletName:"test",
+			walletName:"test1",
 		},
 		{
 			name:"serialization and fetching with encryptor",
-			walletName:"test",
+			walletName:"test2",
 			encryptor: keystorev4.New(),
 			password: []byte("password"),
 		},

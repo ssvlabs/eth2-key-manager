@@ -38,6 +38,61 @@ func key(seed []byte, relativePath string, storage core.Storage) (*core.Derivabl
 	}
 }
 
+func TestCreateAccounts(t *testing.T) {
+	tests := []struct{
+		testName string
+		newAccounttName string
+		expectedErr string
+	} {
+		{
+			testName: "Add new account",
+			newAccounttName: "account1",
+			expectedErr:"",
+		},
+		{
+			testName: "Add duplicate account, should error",
+			newAccounttName: "account1",
+			expectedErr:"account account1 already exists",
+		},
+		{
+			testName: "Add account with no name, should error",
+			newAccounttName: "account1",
+			expectedErr:"account name is empty",
+		},
+	}
+
+	// create key and wallet
+	storage := inmemStorage()
+	seed :=  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
+	err := storage.SecurelySavePortfolioSeed(seed)
+	require.NoError(t,err)
+	key,err := key(seed,"",storage)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	w := &HDWallet{
+		name:"wallet",
+		id:uuid.New(),
+		indexMapper:make(map[string]uuid.UUID),
+		key:key,
+		context:&core.PortfolioContext{
+			Storage:     storage,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			_,err := w.CreateValidatorAccount(test.newAccounttName)
+			if test.expectedErr != "" {
+				require.Errorf(t,err,test.expectedErr)
+			} else {
+				require.NoError(t,err)
+			}
+		})
+	}
+}
+
 func TestWalletMarshaling(t *testing.T) {
 	tests := []struct{
 		id uuid.UUID

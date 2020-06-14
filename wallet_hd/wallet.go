@@ -71,6 +71,10 @@ func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error) {
+	if len(name) == 0 {
+		return nil, fmt.Errorf("account name is empty")
+	}
+
 	// Check if an account with the name already exists
 	_, exists := wallet.indexMapper[name]
 	if exists {
