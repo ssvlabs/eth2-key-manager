@@ -26,7 +26,7 @@ func vault() (*KeyVault.KeyVault,error) {
 	return KeyVault.NewKeyVault(options)
 }
 
-func setupProposal() (core.VaultSlashingProtector, []core.Account,error) {
+func setupProposal() (core.SlashingProtector, []core.Account,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
@@ -49,7 +49,7 @@ func setupProposal() (core.VaultSlashingProtector, []core.Account,error) {
 		return nil,nil,err
 	}
 
-	protector := core.NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
+	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 	protector.SaveProposal(account1, &pb.SignBeaconProposalRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),

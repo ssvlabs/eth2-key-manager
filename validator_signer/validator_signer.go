@@ -22,11 +22,11 @@ type signingRoot struct {
 
 type SimpleSigner struct {
 	wallet            core.Wallet
-	slashingProtector core.VaultSlashingProtector
+	slashingProtector core.SlashingProtector
 	signLocks         map[string]*sync.RWMutex
 }
 
-func NewSimpleSigner(wallet core.Wallet, slashingProtector core.VaultSlashingProtector) *SimpleSigner {
+func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtector) *SimpleSigner {
 	return &SimpleSigner{
 		wallet:            wallet,
 		slashingProtector: slashingProtector,

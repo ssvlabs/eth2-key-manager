@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func setupAttestation() (core.VaultSlashingProtector, []core.Account,error) {
+func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
@@ -31,7 +31,7 @@ func setupAttestation() (core.VaultSlashingProtector, []core.Account,error) {
 		return nil,nil,err
 	}
 
-	protector := core.NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
+	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),

@@ -29,7 +29,7 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner,error) {
 
 func setupWithSlashingProtection(seed []byte) (ValidatorSigner,error) {
 	store := inmemStorage()
-	protector := core.NewNormalProtection(store)
+	protector := prot.NewNormalProtection(store)
 	wallet,err := walletWithSeed(seed,store)
 	if err != nil {
 		return nil,err

@@ -3,6 +3,7 @@ package stores
 import (
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
 )
@@ -141,6 +142,20 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 				return
 			}
 		})
+	}
+}
+
+func TestingRetrieveEmptyLatestAttestation(storage core.SlashingStore, t *testing.T) {
+	account := &mockAccount{
+		id:       uuid.New(),
+		walletid: uuid.New(),
+	}
+
+	att,err := storage.RetrieveLatestAttestation(account)
+	require.NoError(t,err)
+	if att != nil {
+		t.Errorf("latest attestation should be nil")
+		return
 	}
 }
 

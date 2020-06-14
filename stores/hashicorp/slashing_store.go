@@ -119,7 +119,7 @@ func (store *HashicorpVaultStore) RetrieveLatestAttestation(account core.Account
 		return nil, error
 	}
 	if entry == nil {
-		return nil, fmt.Errorf("attestation not found")
+		return nil, nil
 	}
 
 	var ret *core.BeaconAttestation
