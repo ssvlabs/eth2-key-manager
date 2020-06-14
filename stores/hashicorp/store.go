@@ -62,6 +62,19 @@ func (store *HashicorpVaultStore) SavePortfolio(portfolio core.Portfolio) error 
 
 // will return nil,nil if no portfolio was found
 func (store *HashicorpVaultStore) OpenPortfolio() (core.Portfolio,error) {
+	entry,error := store.OpenPortfolioRaw()
+
+	// un-marshal
+	ret := &KeyVault.KeyVault{Context:store.freshContext()} // not hardcode KeyVault
+	error = json.Unmarshal(entry,&ret)
+	if error != nil {
+		return nil,error
+	}
+	return ret,nil
+}
+
+// used to fetch the raw bytes of a saved portfolio data
+func (store *HashicorpVaultStore) OpenPortfolioRaw() ([]byte,error) {
 	entry,error := store.storage.Get(store.ctx,PortfolioDataPath)
 	if error != nil {
 		return nil, error
@@ -69,14 +82,7 @@ func (store *HashicorpVaultStore) OpenPortfolio() (core.Portfolio,error) {
 	if entry == nil {
 		return nil, nil
 	}
-
-	// un-marshal
-	ret := &KeyVault.KeyVault{Context:store.freshContext()} // not hardcode KeyVault
-	error = json.Unmarshal(entry.Value,&ret)
-	if error != nil {
-		return nil,error
-	}
-	return ret,nil
+	return entry.Value,nil
 }
 
 func (store *HashicorpVaultStore) ListWallets() ([]core.Wallet,error) {

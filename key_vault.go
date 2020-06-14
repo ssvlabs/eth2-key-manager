@@ -2,6 +2,7 @@ package KeyVault
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
@@ -30,20 +31,23 @@ func OpenKeyVault(options *PortfolioOptions) (*KeyVault,error) {
 		return nil,err
 	}
 
-	// key
-	seed,err := storage.SecurelyFetchPortfolioSeed()
-	if err != nil {
-		return nil,err
-	}
-	if seed == nil {
-		return nil,fmt.Errorf("no seed found in storage")
-	}
-	key,err := core.BaseKeyFromSeed(seed,storage)
+	byts,err := storage.OpenPortfolioRaw()
 	if err != nil {
 		return nil,err
 	}
 
-	return completeVaultSetup(options,key)
+	// portfolio Context
+	context := &core.PortfolioContext {
+		Storage:	options.storage.(core.Storage),
+	}
+
+	ret := &KeyVault{Context:context}
+	err = json.Unmarshal(byts, &ret)
+	if err != nil {
+		return nil,err
+	}
+
+	return ret,nil
 }
 
 func ImportKeyVault(options *PortfolioOptions) (*KeyVault,error) {
@@ -103,6 +107,7 @@ func completeVaultSetup(options *PortfolioOptions, key *core.DerivableKey) (*Key
 	}
 
 	ret := &KeyVault{
+		id:					uuid.New(),
 		indexMapper:        make(map[string]uuid.UUID),
 		Context:            context,
 		key:                key,

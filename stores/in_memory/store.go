@@ -1,6 +1,7 @@
 package in_memory
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	uuid "github.com/google/uuid"
@@ -39,7 +40,13 @@ func (store *InMemStore) Name() string {
 }
 
 func (store *InMemStore) SavePortfolio(portfolio core.Portfolio) error {
+	raw,err := json.Marshal(portfolio)
+	if err != nil {
+		return err
+	}
+
 	store.memory["portfolio"] = portfolio
+	store.memory["portfolio_raw"] = raw
 	return nil
 }
 
@@ -50,6 +57,11 @@ func (store *InMemStore) OpenPortfolio() (core.Portfolio,error) {
 	} else {
 		return nil,nil
 	}
+}
+
+// used to fetch the raw bytes of a saved portfolio data
+func (store *InMemStore) OpenPortfolioRaw() ([]byte,error) {
+	return store.memory["portfolio_raw"].([]byte),nil
 }
 
 func (store *InMemStore) ListWallets() ([]core.Wallet,error) {

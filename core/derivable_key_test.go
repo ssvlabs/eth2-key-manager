@@ -25,6 +25,7 @@ type mockedStorage struct {
 func (s *mockedStorage) Name() string {return ""}
 func (s *mockedStorage) SavePortfolio(portfolio Portfolio) error {return nil}
 func (s *mockedStorage) OpenPortfolio() (Portfolio,error) {return nil,nil}
+func (s *mockedStorage) OpenPortfolioRaw() ([]byte,error) {return nil,nil}
 func (s *mockedStorage) ListWallets() ([]Wallet,error) {return nil,nil}
 func (s *mockedStorage) SaveWallet(wallet Wallet) error {return nil}
 func (s *mockedStorage) OpenWallet(uuid uuid.UUID) (Wallet,error) {return nil,nil}

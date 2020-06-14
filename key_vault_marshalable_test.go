@@ -114,12 +114,12 @@ func TestMarshaling(t *testing.T) {
 				return
 			}
 
-			require.Equal(t,w.id,w1.id)
-			for k := range w.indexMapper {
+			require.Equal(t,w.id,w1.id) // id
+			for k := range w.indexMapper { // index mapper
 				v := w.indexMapper[k]
 				require.Equal(t,v,w1.indexMapper[k])
 			}
-			require.Equal(t,w.key.PublicKey().Marshal(),w1.key.PublicKey().Marshal())
+			require.Equal(t,w.key.PublicKey().Marshal(),w1.key.PublicKey().Marshal()) // key
 		})
 	}
 

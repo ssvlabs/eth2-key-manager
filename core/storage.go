@@ -15,6 +15,8 @@ type Storage interface {
 	SavePortfolio(portfolio Portfolio) error
 	// will return nil,nil if no portfolio was found
 	OpenPortfolio() (Portfolio,error)
+	// used to fetch the raw bytes of a saved portfolio data
+	OpenPortfolioRaw() ([]byte,error)
 	ListWallets() ([]Wallet,error)
 
 	///*

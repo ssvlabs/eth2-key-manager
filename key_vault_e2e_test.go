@@ -121,22 +121,29 @@ func TestOpenKeyVault(t *testing.T) {
 
 	for _,test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
-			// set up existing seed
-			seed := test.seed
+			// options
 			storage := test.storage
 			storage.SetEncryptor(keystorev4.New(), []byte("password"))
-			require.NoError(t,storage.SecurelySavePortfolioSeed(seed))
-
-			// setup vault
 			options := &PortfolioOptions{}
 			options.SetStorage(storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
+
+			// import keyvault
+			options.SetSeed(test.seed)
+			importedVault,err := ImportKeyVault(options)
+			// test common tests
+			testVault(t,importedVault) // this will create some wallets and accounts
+
+			// open vault
+			options.SetSeed(nil) // important
 			v,err := OpenKeyVault(options)
 			require.NoError(t,err)
 
-			// test common tests
-			testVault(t,v)
+			// test imported and opened vaults are the same
+			require.Equal(t,importedVault.ID().String(),v.ID().String())
+			require.Equal(t,len(v.indexMapper),1)
+			require.Equal(t,v.key.PublicKey().Marshal(),importedVault.key.PublicKey().Marshal()) // key
 
 			// test specific derivation
 			w,err := v.WalletByName("wallet1")
