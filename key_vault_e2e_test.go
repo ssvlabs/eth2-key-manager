@@ -203,4 +203,16 @@ func testVault(t *testing.T, v *KeyVault) {
 	with,err := w.GetWithdrawalAccount()
 	require.NoError(t,err)
 	require.NotNil(t,with)
+
+	// wallets with the same name
+	wallet, err := v.CreateWallet("sameName")
+	require.NoError(t,err)
+	_, err = v.CreateWallet("sameName")
+	require.Error(t, err)
+
+	// accounts with the same name
+	_, err = wallet.CreateValidatorAccount("sameName")
+	require.NoError(t,err)
+	_, err = wallet.CreateValidatorAccount("sameName")
+	require.Error(t, err)
 }

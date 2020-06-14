@@ -19,6 +19,13 @@ func (portfolio *KeyVault) ID() uuid.UUID {
 // This will error if an account with the name already exists.
 // Will push to the new wallet the lock policy
 func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
+
+	// Check if a wallet with the name already exists
+	_, exists := portfolio.indexMapper[name]
+	if exists {
+		return nil, fmt.Errorf("wallet %q already exists", name)
+	}
+
 	// create wallet
 	id := len(portfolio.indexMapper)
 	path := fmt.Sprintf("/%d",id)
