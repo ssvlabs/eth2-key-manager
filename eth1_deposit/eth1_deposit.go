@@ -13,21 +13,8 @@ const (
 	BLSWithdrawalPrefixByte byte = byte(0)
 )
 
-type ETH1DepositManager struct {
-
-}
-
-//func (d *ETH1DepositManager) RawDepositTransaction(validationAccount core.Account, withdrawalAccount core.Account, amount uint64) (*gethTypes.Transaction,error) {
-//	data,root,err := d.DepositData(validationAccount,withdrawalAccount,amount)
-//	if err != nil {
-//		return nil,err
-//	}
-//
-//
-//}
-
 // this is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
-func (d *ETH1DepositManager) DepositData(validationAccount core.Account, withdrawalAccount core.Account, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+func DepositData(validationAccount core.Account, withdrawalAccount core.Account, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
 	di := &ethpb.Deposit_Data{
 		PublicKey:             validationAccount.PublicKey().Marshal(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalAccount),

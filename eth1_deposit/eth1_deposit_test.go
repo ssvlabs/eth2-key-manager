@@ -63,8 +63,7 @@ func TestDepositData(t *testing.T) {
 			withd := newDummyAccount(test.withdrawalPrivKey)
 
 			// create data
-			manager := &ETH1DepositManager{}
-			depositData,root,err := manager.DepositData(val,withd, MaxEffectiveBalanceInGwei)
+			depositData,root,err := DepositData(val,withd, MaxEffectiveBalanceInGwei)
 			require.NoError(t,err)
 
 			require.Equal(t,val.PublicKey().Marshal(),depositData.PublicKey)
