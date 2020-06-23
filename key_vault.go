@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -89,32 +90,10 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	}
 
 	// key
-	seed, err := saveNewSeed(storage)
-	if err != nil {
-		return nil, err
-	}
-
-	key, err := core.BaseKeyFromSeed(seed, storage)
-	if err != nil {
-		return nil, err
-	}
-
-	return completeVaultSetup(options, key)
-}
-
-func NewKeyVaultFromExistingSeed(options *PortfolioOptions) (*KeyVault, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
-		return nil, err
-	}
-
-	// storage
-	storage, err := setupStorage(options)
-	if err != nil {
-		return nil, err
-	}
-
-	// key
 	seed, err := storage.SecurelyFetchPortfolioSeed()
+	if err != nil || len(seed) == 0 {
+		seed, err = saveNewSeed(storage)
+	}
 	if err != nil {
 		return nil, err
 	}
