@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -14,134 +15,138 @@ import (
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
-	id                 uuid.UUID
-	indexMapper        map[string]uuid.UUID
-	Context            *core.PortfolioContext
-	key                *core.DerivableKey
+	id          uuid.UUID
+	indexMapper map[string]uuid.UUID
+	Context     *core.PortfolioContext
+	key         *core.DerivableKey
 }
 
-func OpenKeyVault(options *PortfolioOptions) (*KeyVault,error) {
+func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
-		return nil,err
+		return nil, err
 	}
 
 	// storage
-	storage,err := setupStorage(options)
+	storage, err := setupStorage(options)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	byts,err := storage.OpenPortfolioRaw()
+	byts, err := storage.OpenPortfolioRaw()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// portfolio Context
-	context := &core.PortfolioContext {
-		Storage:	options.storage.(core.Storage),
+	context := &core.PortfolioContext{
+		Storage: options.storage.(core.Storage),
 	}
 
-	ret := &KeyVault{Context:context}
+	ret := &KeyVault{Context: context}
 	err = json.Unmarshal(byts, &ret)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	return ret,nil
+	return ret, nil
 }
 
-func ImportKeyVault(options *PortfolioOptions) (*KeyVault,error) {
+func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
-		return nil,err
+		return nil, err
 	}
 
 	// storage
-	storage,err := setupStorage(options)
+	storage, err := setupStorage(options)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// key
 	if options.seed == nil {
-		return nil,fmt.Errorf("no seed was provided")
+		return nil, fmt.Errorf("no seed was provided")
 	}
 	err = storage.SecurelySavePortfolioSeed(options.seed)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	key,err := core.BaseKeyFromSeed(options.seed,storage)
+	key, err := core.BaseKeyFromSeed(options.seed, storage)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	return completeVaultSetup(options,key)
+	return completeVaultSetup(options, key)
 }
 
-func NewKeyVault(options *PortfolioOptions) (*KeyVault,error) {
+func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
-		return nil,err
+		return nil, err
 	}
 
 	// storage
-	storage,err := setupStorage(options)
+	storage, err := setupStorage(options)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// key
-	seed,err := saveNewSeed(storage)
-	if err != nil {
-		return nil,err
+	seed, err := storage.SecurelyFetchPortfolioSeed()
+	if err != nil || len(seed) == 0 {
+		seed, err = saveNewSeed(storage)
 	}
-	key,err := core.BaseKeyFromSeed(seed,storage)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	return completeVaultSetup(options,key)
+	key, err := core.BaseKeyFromSeed(seed, storage)
+	if err != nil {
+		return nil, err
+	}
+
+	return completeVaultSetup(options, key)
 }
-func completeVaultSetup(options *PortfolioOptions, key *core.DerivableKey) (*KeyVault,error) {
+
+func completeVaultSetup(options *PortfolioOptions, key *core.DerivableKey) (*KeyVault, error) {
 	// portfolio Context
-	context := &core.PortfolioContext {
-		Storage:	options.storage.(core.Storage),
+	context := &core.PortfolioContext{
+		Storage: options.storage.(core.Storage),
 	}
 
 	ret := &KeyVault{
-		id:					uuid.New(),
-		indexMapper:        make(map[string]uuid.UUID),
-		Context:            context,
-		key:                key,
+		id:          uuid.New(),
+		indexMapper: make(map[string]uuid.UUID),
+		Context:     context,
+		key:         key,
 	}
 
 	// update Context with portfolio id
 	context.PortfolioId = ret.ID()
 
-	return ret,nil
+	return ret, nil
 }
 
-func setupStorage(options *PortfolioOptions) (core.Storage,error) {
-	if _,ok := options.storage.(core.Storage); !ok {
-		return nil,fmt.Errorf("storage does not implement core.Storage")
+func setupStorage(options *PortfolioOptions) (core.Storage, error) {
+	if _, ok := options.storage.(core.Storage); !ok {
+		return nil, fmt.Errorf("storage does not implement core.Storage")
 	} else {
 		if options.encryptor != nil && options.password != nil {
-			options.storage.(core.Storage).SetEncryptor(options.encryptor,options.password)
+			options.storage.(core.Storage).SetEncryptor(options.encryptor, options.password)
 		}
 	}
 
-	return options.storage.(core.Storage),nil
+	return options.storage.(core.Storage), nil
 }
 
-func saveNewSeed(storage core.Storage) ([]byte,error) {
+func saveNewSeed(storage core.Storage) ([]byte, error) {
 	seed := make([]byte, 32)
 	_, err := rand.Read(seed)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	err = storage.SecurelySavePortfolioSeed(seed)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	return seed,nil
+	return seed, nil
 }
-
