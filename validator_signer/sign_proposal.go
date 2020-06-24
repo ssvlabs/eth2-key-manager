@@ -32,8 +32,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}
 
 	// 4. add to protection storage
-	err := signer.slashingProtector.SaveProposal(account, req)
-	if err != nil {
+	if err := signer.slashingProtector.SaveProposal(account, req); err != nil {
 		return nil, err
 	}
 
