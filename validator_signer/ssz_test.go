@@ -132,7 +132,7 @@ func TestSignRootComputation(t *testing.T) {
 	reqs, roots := aggreggateFixtures()
 	for i := range reqs {
 		t.Run(fmt.Sprintf("TestRootComputation %d", i), func(t *testing.T) {
-			root, error := prepareReqForSigning(reqs[i])
+			root, error := PrepareReqForSigning(reqs[i])
 			if error != nil {
 				t.Error(error)
 			}
