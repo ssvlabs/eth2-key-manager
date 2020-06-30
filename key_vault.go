@@ -45,7 +45,7 @@ func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 		return nil, err
 	}
 	if bytes == nil {
-		return nil, &NotExistError{"entry value is empty"}
+		return nil, &NotExistError{"key vault not found"}
 	}
 
 	// portfolio Context
