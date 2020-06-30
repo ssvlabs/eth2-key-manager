@@ -21,6 +21,14 @@ type KeyVault struct {
 	key         *core.DerivableKey
 }
 
+type NotExistError struct {
+	desc string
+}
+
+func (e *NotExistError) Error() string {
+	return fmt.Sprintf("%s", e.desc)
+}
+
 func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil, err
@@ -32,9 +40,12 @@ func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 		return nil, err
 	}
 
-	byts, err := storage.OpenPortfolioRaw()
+	bytes, err := storage.OpenPortfolioRaw()
 	if err != nil {
 		return nil, err
+	}
+	if bytes == nil {
+		return nil, &NotExistError{"entry value is empty"}
 	}
 
 	// portfolio Context
@@ -43,7 +54,7 @@ func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	}
 
 	ret := &KeyVault{Context: context}
-	err = json.Unmarshal(byts, &ret)
+	err = json.Unmarshal(bytes, &ret)
 	if err != nil {
 		return nil, err
 	}
