@@ -4,11 +4,23 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
+
+var initBLSOnce sync.Once
+
+// initBLS initializes BLS ONLY ONCE!
+func initBLS() error {
+	chDone := make(chan error)
+	initBLSOnce.Do(func() {
+		chDone <- e2types.InitBLS()
+	})
+	return <-chDone
+}
 
 // This is an EIP 2333,2334,2335 compliant hierarchical deterministic portfolio
 //https://eips.ethereum.org/EIPS/eip-2333
@@ -30,7 +42,8 @@ func (e *NotExistError) Error() string {
 }
 
 func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
+	// very important!
+	if err := initBLS(); err != nil {
 		return nil, err
 	}
 
@@ -63,7 +76,8 @@ func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 }
 
 func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
+	// very important!
+	if err := initBLS(); err != nil {
 		return nil, err
 	}
 
@@ -90,7 +104,8 @@ func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 }
 
 func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
+	// very important!
+	if err := initBLS(); err != nil {
 		return nil, err
 	}
 
