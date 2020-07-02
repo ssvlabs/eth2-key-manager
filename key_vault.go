@@ -15,11 +15,15 @@ var initBLSOnce sync.Once
 
 // initBLS initializes BLS ONLY ONCE!
 func initBLS() error {
-	chDone := make(chan error)
+	var err error
+	var wg sync.WaitGroup
 	initBLSOnce.Do(func() {
-		chDone <- e2types.InitBLS()
+		wg.Add(1)
+		err = e2types.InitBLS()
+		wg.Done()
 	})
-	return <-chDone
+	wg.Wait()
+	return err
 }
 
 // This is an EIP 2333,2334,2335 compliant hierarchical deterministic portfolio
