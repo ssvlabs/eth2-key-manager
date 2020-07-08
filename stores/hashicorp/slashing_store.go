@@ -39,8 +39,9 @@ func (store *HashicorpVaultStore) RetrieveAttestation(account core.Account, epoc
 		return nil, errors.Wrapf(err, "failed to get record from storage with path '%s'", path)
 	}
 
+	// Return nothing if there is no record
 	if entry == nil {
-		return nil, fmt.Errorf("attestation not found")
+		return nil, nil
 	}
 
 	var ret *core.BeaconAttestation
@@ -61,7 +62,9 @@ func (store *HashicorpVaultStore) ListAttestations(account core.Account, epochSt
 			return nil, errors.Wrapf(err, "failed to retrieve attestation with epoch %d", epoch)
 		}
 
-		ret = append(ret, att)
+		if att != nil {
+			ret = append(ret, att)
+		}
 	}
 
 	return ret, nil
@@ -88,8 +91,10 @@ func (store *HashicorpVaultStore) RetrieveProposal(account core.Account, slot ui
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
 	}
+
+	// Return nothing if there is no record
 	if entry == nil {
-		return nil, fmt.Errorf("proposal not found")
+		return nil, nil
 	}
 
 	var ret *core.BeaconBlockHeader
@@ -121,6 +126,8 @@ func (store *HashicorpVaultStore) RetrieveLatestAttestation(account core.Account
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
 	}
+
+	// Return nothing if there is no record
 	if entry == nil {
 		return nil, nil
 	}
