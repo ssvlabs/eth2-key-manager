@@ -85,6 +85,7 @@ func (store *HashicorpVaultStore) OpenPortfolioRaw() ([]byte, error) {
 		return nil, errors.Wrap(err, "failed to get record by portfolio data path")
 	}
 
+	// Return nothing if there is no record
 	if entry == nil {
 		return nil, nil
 	}
@@ -130,6 +131,8 @@ func (store *HashicorpVaultStore) OpenWallet(uuid uuid.UUID) (core.Wallet, error
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
 	}
+
+	// Return nothing if there is no record
 	if entry == nil {
 		return nil, nil
 	}
@@ -188,6 +191,8 @@ func (store *HashicorpVaultStore) OpenAccount(walletId uuid.UUID, accountId uuid
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
 	}
+
+	// Return nothing if there is no record
 	if entry == nil {
 		return nil, nil
 	}
@@ -214,6 +219,8 @@ func (store *HashicorpVaultStore) SecurelyFetchPortfolioSeed() ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get record with seed path")
 	}
+
+	// Return nothing if there is no record
 	if entry == nil {
 		return nil, nil
 	}
