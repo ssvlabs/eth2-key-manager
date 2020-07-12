@@ -19,9 +19,6 @@ func (signer *SimpleSigner) Sign(req *pb.SignRequest) (*pb.SignResponse, error) 
 	if error != nil {
 		return nil, error
 	}
-	if account == nil {
-		return nil, fmt.Errorf("account not found")
-	}
 
 	// 4.
 	forSig, err := PrepareReqForSigning(req)
