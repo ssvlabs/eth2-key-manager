@@ -180,3 +180,13 @@ func saveNewSeed(storage core.Storage) ([]byte, error) {
 
 	return seed, nil
 }
+
+func GenerateNewSeed() ([]byte, error) {
+	seed := make([]byte, 32)
+	_, err := rand.Read(seed)
+	if err != nil {
+		return nil, err
+	}
+
+	return seed, nil
+}
