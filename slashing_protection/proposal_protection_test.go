@@ -167,4 +167,58 @@ func TestDoubleProposal(t *testing.T) {
 			return
 		}
 	})
+
+	t.Run("double proposal (different state root), should slash",func(t *testing.T) {
+		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
+			Id:                   nil,
+			Domain:               []byte("domain"),
+			Data:                 &pb.BeaconBlockHeader{
+				Slot:                 100,
+				ProposerIndex:        2,
+				ParentRoot:           []byte("A"),
+				StateRoot:            []byte("B"),
+				BodyRoot:             []byte("A"),
+			},
+		})
+
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if res == nil {
+			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 0,1)
+			return
+		}
+		if res.Status != core.DoubleProposal {
+			t.Errorf("wrong proposal status returned, expected DoubleProposal")
+			return
+		}
+	})
+
+	t.Run("double proposal (different state and body root), should slash",func(t *testing.T) {
+		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
+			Id:                   nil,
+			Domain:               []byte("domain"),
+			Data:                 &pb.BeaconBlockHeader{
+				Slot:                 100,
+				ProposerIndex:        2,
+				ParentRoot:           []byte("A"),
+				StateRoot:            []byte("B"),
+				BodyRoot:             []byte("B"),
+			},
+		})
+
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if res == nil {
+			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 0,1)
+			return
+		}
+		if res.Status != core.DoubleProposal {
+			t.Errorf("wrong proposal status returned, expected DoubleProposal")
+			return
+		}
+	})
 }
