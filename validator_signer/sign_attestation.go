@@ -16,9 +16,6 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	if err != nil {
 		return nil, err
 	}
-	if account == nil {
-		return nil, fmt.Errorf("account not found")
-	}
 
 	// 2. lock for current account
 	signer.lock(account.ID(), "attestation")

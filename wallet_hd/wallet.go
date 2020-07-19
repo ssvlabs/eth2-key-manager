@@ -52,17 +52,17 @@ func (wallet *HDWallet) Type() core.WalletType {
 // GetWithdrawalAccount returns this wallet's withdrawal key pair in the wallet as described in EIP-2334.
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
-	account,err := wallet.AccountByName(WithdrawalKeyName)
-	if err != nil {
-		return nil,err
+	account, err := wallet.AccountByName(WithdrawalKeyName)
+	if err != nil && err.Error() != "account not found" {
+		return nil, err
 	}
 
 	if account == nil { // create on the fly
-		created,err := wallet.createKey(WithdrawalKeyName,WithdrawalKeyPath,core.WithdrawalAccount)
+		created, err := wallet.createKey(WithdrawalKeyName, WithdrawalKeyPath, core.WithdrawalAccount)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
-		return created,nil
+		return created, nil
 	}
 
 	return wallet.AccountByName(WithdrawalKeyName)
@@ -123,7 +123,10 @@ func (wallet *HDWallet) SetContext(ctx *core.PortfolioContext) {
 // AccountByName provides a single account from the wallet given its name.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
-	id := wallet.indexMapper[name]
+	id, exists := wallet.indexMapper[name]
+	if !exists {
+		return nil, fmt.Errorf("account not found")
+	}
 	return wallet.AccountByID(id)
 }
 
