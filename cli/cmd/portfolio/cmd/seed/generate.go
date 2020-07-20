@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	rootcmd "github.com/bloxapp/KeyVault/cli/cmd"
+	"github.com/bloxapp/KeyVault/cli/cmd/portfolio/cmd/seed/flag"
 	"github.com/bloxapp/KeyVault/cli/cmd/portfolio/cmd/seed/handler"
 )
 
@@ -19,5 +20,8 @@ var generateCmd = &cobra.Command{
 }
 
 func init() {
+	// Define flags for the command.
+	flag.AddMnemonicFlag(generateCmd)
+
 	Command.AddCommand(generateCmd)
 }
