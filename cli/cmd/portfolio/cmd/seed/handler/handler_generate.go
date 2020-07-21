@@ -12,7 +12,6 @@ import (
 
 // Seed generates a new portfolio seed and prints it.
 func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
-
 	var seed []byte
 	var mnemonic string
 
