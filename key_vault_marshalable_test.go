@@ -3,7 +3,6 @@ package KeyVault
 import (
 	"encoding/hex"
 	"encoding/json"
-	"os"
 	"testing"
 
 	"github.com/bloxapp/KeyVault/core"
@@ -22,10 +21,6 @@ func inmemStorage() *in_memory.InMemStore {
 }
 
 func key(seed []byte, relativePath string, storage core.Storage) (*core.DerivableKey, error) {
-	if err := initBLS(); err != nil {
-		os.Exit(1)
-	}
-
 	key, err := core.BaseKeyFromSeed(seed, storage)
 	if err != nil {
 		return nil, err

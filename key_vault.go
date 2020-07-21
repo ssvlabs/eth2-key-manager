@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/bloxapp/KeyVault/core"
@@ -27,6 +28,13 @@ func initBLS() error {
 	return err
 }
 
+func init() {
+	// !!!VERY IMPORTANT!!!
+	if err := initBLS(); err != nil {
+		log.Fatal(err)
+	}
+}
+
 // This is an EIP 2333,2334,2335 compliant hierarchical deterministic portfolio
 //https://eips.ethereum.org/EIPS/eip-2333
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
@@ -47,11 +55,6 @@ func (e *NotExistError) Error() string {
 }
 
 func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	// very important!
-	if err := initBLS(); err != nil {
-		return nil, err
-	}
-
 	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
@@ -81,11 +84,6 @@ func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 }
 
 func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	// very important!
-	if err := initBLS(); err != nil {
-		return nil, err
-	}
-
 	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
@@ -109,11 +107,6 @@ func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 }
 
 func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	// very important!
-	if err := initBLS(); err != nil {
-		return nil, err
-	}
-
 	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
@@ -200,8 +193,8 @@ func SeedToMnemonic(seed []byte) (string, error) {
 	return mnemonic, nil
 }
 
-func SeedFromMnemonic (mnemonic string) ([]byte, error) {
-	seed, err:= bip39.EntropyFromMnemonic(mnemonic)
+func SeedFromMnemonic(mnemonic string) ([]byte, error) {
+	seed, err := bip39.EntropyFromMnemonic(mnemonic)
 	if err != nil {
 		return nil, err
 	}
