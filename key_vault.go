@@ -8,6 +8,7 @@ import (
 
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
+	"github.com/tyler-smith/go-bip39"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -182,8 +183,25 @@ func saveNewSeed(storage core.Storage) ([]byte, error) {
 }
 
 func GenerateNewSeed() ([]byte, error) {
-	seed := make([]byte, 32)
-	_, err := rand.Read(seed)
+	seed, err := bip39.NewEntropy(256)
+	if err != nil {
+		return nil, err
+	}
+
+	return seed, nil
+}
+
+func SeedToMnemonic(seed []byte) (string, error) {
+	mnemonic, err := bip39.NewMnemonic(seed)
+	if err != nil {
+		return "", err
+	}
+
+	return mnemonic, nil
+}
+
+func SeedFromMnemonic (mnemonic string) ([]byte, error) {
+	seed, err:= bip39.EntropyFromMnemonic(mnemonic)
 	if err != nil {
 		return nil, err
 	}
