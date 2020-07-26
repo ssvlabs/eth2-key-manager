@@ -53,7 +53,7 @@ func (vault *KeyVault) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		key := &core.DerivableKey{Storage: vault.Context.Storage}
+		key := &core.MasterDerivableKey{Storage: vault.Context.Storage}
 		err = json.Unmarshal(byts, key)
 		if err != nil {
 			return err

@@ -20,8 +20,8 @@ func inmemStorage() *in_memory.InMemStore {
 	return in_memory.NewInMemStore()
 }
 
-func key(seed []byte, relativePath string, storage core.Storage) (*core.DerivableKey, error) {
-	key, err := core.BaseKeyFromSeed(seed, storage)
+func key(seed []byte, relativePath string, storage core.Storage) (*core.MasterDerivableKey, error) {
+	key, err := core.MasterKeyFromSeed(seed, storage)
 	if err != nil {
 		return nil, err
 	}

@@ -43,7 +43,7 @@ type KeyVault struct {
 	id          uuid.UUID
 	indexMapper map[string]uuid.UUID
 	Context     *core.PortfolioContext
-	key         *core.DerivableKey
+	key         *core.MasterDerivableKey
 }
 
 type NotExistError struct {
@@ -98,7 +98,7 @@ func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	if err != nil {
 		return nil, err
 	}
-	key, err := core.BaseKeyFromSeed(options.seed, storage)
+	key, err := core.MasterKeyFromSeed(options.seed, storage)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 		return nil, err
 	}
 
-	key, err := core.BaseKeyFromSeed(seed, storage)
+	key, err := core.MasterKeyFromSeed(seed, storage)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	return completeVaultSetup(options, key)
 }
 
-func completeVaultSetup(options *PortfolioOptions, key *core.DerivableKey) (*KeyVault, error) {
+func completeVaultSetup(options *PortfolioOptions, key *core.MasterDerivableKey) (*KeyVault, error) {
 	// portfolio Context
 	context := &core.PortfolioContext{
 		Storage: options.storage.(core.Storage),

@@ -50,7 +50,7 @@ func storage(seed []byte, err error) Storage {
 	return &mockedStorage{seed:seed,err:err}
 }
 
-func TestMarshalingDerivableKey(t *testing.T) {
+func TestMarshalingHDKey(t *testing.T) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
@@ -77,40 +77,36 @@ func TestMarshalingDerivableKey(t *testing.T) {
 			name: "Base account derivation (base path only)",
 			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
 			path:  "", // after basePath
-			err: nil,
+			err: fmt.Errorf("invalid relative path. Example: /1/2/3"),
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			storage := storage(test.seed,test.err)
+			storage := storage(test.seed, nil)
 			err := storage.SecurelySavePortfolioSeed(test.seed)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// create the privKey
-			key,err := BaseKeyFromSeed(test.seed, storage)
-			if err != nil {
-				t.Error(err)
+			key,err := MasterKeyFromSeed(storage)
+			require.NoError(t, err)
+
+			hdKey,err := key.Derive(test.path)
+			if test.err != nil {
+				require.EqualError(t, test.err, err.Error())
 				return
-			}
-			if len(test.path) > 0 {
-				key,err = key.Derive(test.path)
-				if err != nil {
-					t.Error(err)
-					return
-				}
+			} else {
+				require.NoError(t, err)
 			}
 
+
 			// marshal and unmarshal
-			byts,err := json.Marshal(key)
+			byts,err := json.Marshal(hdKey)
 			if err != nil {
 				t.Error(err)
 				return
 			}
-			newKey := &DerivableKey{}
+			newKey := &HDKey{}
 			err = json.Unmarshal(byts,newKey)
 			if err != nil {
 				t.Error(err)
@@ -118,9 +114,9 @@ func TestMarshalingDerivableKey(t *testing.T) {
 			}
 
 			// match
-			require.Equal(t,key.Path(),newKey.Path())
-			require.Equal(t,key.id.String(),newKey.id.String())
-			require.Equal(t,key.PublicKey().Marshal(),newKey.PublicKey().Marshal())
+			require.Equal(t,hdKey.Path(),newKey.Path())
+			require.Equal(t,hdKey.id.String(),newKey.id.String())
+			require.Equal(t,hdKey.PublicKey().Marshal(),newKey.PublicKey().Marshal())
 		})
 	}
 }
@@ -184,13 +180,13 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			storage := storage(test.seed,test.err)
-			key,err := BaseKeyFromSeed(test.seed, storage)
+			key,err := MasterKeyFromSeed(storage)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
-			key,err = key.Derive(test.path)
+			hdKey,err := key.Derive(test.path)
 			if err != nil {
 				if test.err != nil {
 					assert.Equal(t,test.err.Error(),err.Error())
@@ -205,10 +201,10 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 				}
 			}
 
-			assert.Equal(t,basePath + test.path,key.Path())
+			assert.Equal(t,basePath + test.path,hdKey.Path())
 			privkey,err := e2types.BLSPrivateKeyFromBytes(test.expectedKey.Bytes())
 			assert.NoError(t,err)
-			assert.Equal(t,privkey.PublicKey().Marshal(),key.PublicKey().Marshal())
+			assert.Equal(t,privkey.PublicKey().Marshal(),hdKey.PublicKey().Marshal())
 		})
 	}
 }
