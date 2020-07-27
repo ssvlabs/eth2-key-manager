@@ -13,8 +13,6 @@ const (
 type Wallet interface {
 	// ID provides the ID for the wallet.
 	ID() uuid.UUID
-	// Name provides the name for the wallet.
-	Name() string
 	// Type provides the type of the wallet.
 	Type() WalletType
 	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
@@ -34,5 +32,9 @@ type Wallet interface {
 	// should return account = nil if not found (not an error!)
 	AccountByName(name string) (Account, error)
 	//
-	SetContext(ctx *PortfolioContext)
+	SetContext(ctx *WalletContext)
+}
+
+type WalletContext struct {
+	Storage     Storage
 }

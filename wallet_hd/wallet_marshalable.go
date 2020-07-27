@@ -11,10 +11,8 @@ func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
 	data["id"] = wallet.id
-	data["name"] = wallet.name
 	data["type"] = wallet.walletType
 	data["indexMapper"] = wallet.indexMapper
-	data["key"] = wallet.key
 
 	return json.Marshal(data)
 }
@@ -35,11 +33,6 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 		}
 	} else {return fmt.Errorf("could not find var: id")}
 
-	// name
-	if val, exists := v["name"]; exists {
-		wallet.name = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
-
 	// type
 	if val, exists := v["type"]; exists {
 		wallet.walletType = val.(string)
@@ -58,18 +51,7 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 
 
 	// key
-	if val, exists := v["key"]; exists {
-		byts,err := json.Marshal(val)
-		if err != nil {
-			return err
-		}
-		key := &core.DerivableKey{Storage:wallet.context.Storage}
-		err = json.Unmarshal(byts,key)
-		if err != nil {
-			return err
-		}
-		wallet.key = key
-	} else {return fmt.Errorf("could not find var: key")}
+	wallet.key = &core.MasterDerivableKey{Storage: wallet.context.Storage}
 
 	return nil
 }

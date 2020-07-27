@@ -28,10 +28,6 @@ func TestNonExistingWallet(t *testing.T) {
 	stores.TestingNonExistingWallet(getWalletStorage(),t)
 }
 
-func TestWalletListingStorage(t *testing.T) {
-	stores.TestingWalletListing(getWalletStorage(),t)
-}
-
 func TestWalletStorage(t *testing.T) {
 	stores.TestingWalletStorage(getWalletStorage(),t)
 }

@@ -1,7 +1,9 @@
 package KeyVault
 
 import (
+	"encoding/hex"
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -13,6 +15,15 @@ import (
 func _bigInt(input string) *big.Int {
 	res, _ := new(big.Int).SetString(input, 10)
 	return res
+}
+
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
+}
+
+func inmemStorage() *in_memory.InMemStore {
+	return in_memory.NewInMemStore()
 }
 
 func TestNewKeyVault(t *testing.T) {
@@ -33,7 +44,7 @@ func TestNewKeyVault(t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			// setup vault
-			options := &PortfolioOptions{}
+			options := &WalletOptions{}
 			options.SetStorage(test.storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
@@ -66,7 +77,7 @@ func TestImportKeyVault(t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			seed := test.seed
-			options := &PortfolioOptions{}
+			options := &WalletOptions{}
 			options.SetStorage(test.storage)
 			options.SetSeed(seed)
 			options.SetEncryptor(keystorev4.New())
@@ -77,14 +88,14 @@ func TestImportKeyVault(t *testing.T) {
 			// test common tests
 			testVault(t,v)
 
-			// test specific derivation
-			w,err := v.WalletByName("wallet1")
+			wallet,err := v.Wallet()
 			require.NoError(t,err)
-			require.NotNil(t,w)
-			val,err := w.AccountByName("val1")
+
+			// test specific derivation
+			val,err := wallet.AccountByName("val1")
 			require.NoError(t,err)
 			require.NotNil(t,val)
-			with,err := w.GetWithdrawalAccount()
+			with,err := wallet.GetWithdrawalAccount()
 			require.NoError(t,err)
 			require.NotNil(t,with)
 
@@ -124,7 +135,7 @@ func TestOpenKeyVault(t *testing.T) {
 			// options
 			storage := test.storage
 			storage.SetEncryptor(keystorev4.New(), []byte("password"))
-			options := &PortfolioOptions{}
+			options := &WalletOptions{}
 			options.SetStorage(storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
@@ -140,19 +151,14 @@ func TestOpenKeyVault(t *testing.T) {
 			v,err := OpenKeyVault(options)
 			require.NoError(t,err)
 
-			// test imported and opened vaults are the same
-			require.Equal(t,importedVault.ID().String(),v.ID().String())
-			require.Equal(t,len(v.indexMapper),1)
-			require.Equal(t,v.key.PublicKey().Marshal(),importedVault.key.PublicKey().Marshal()) // key
+			wallet,err := v.Wallet()
+			require.NoError(t,err)
 
 			// test specific derivation
-			w,err := v.WalletByName("wallet1")
-			require.NoError(t,err)
-			require.NotNil(t,w)
-			val,err := w.AccountByName("val1")
+			val,err := wallet.AccountByName("val1")
 			require.NoError(t,err)
 			require.NotNil(t,val)
-			with,err := w.GetWithdrawalAccount()
+			with,err := wallet.GetWithdrawalAccount()
 			require.NoError(t,err)
 			require.NotNil(t,with)
 
@@ -170,27 +176,15 @@ func TestOpenKeyVault(t *testing.T) {
 }
 
 func testVault(t *testing.T, v *KeyVault) {
-	// create wallet
-	w,err := v.CreateWallet("wallet1")
+	wallet,err := v.Wallet()
 	require.NoError(t,err)
-	// fetch wallet
-	w1,err := v.WalletByName("wallet1")
-	require.NoError(t,err)
-	w2,err := v.WalletByID(w.ID())
-	require.NoError(t,err)
-	require.NotNil(t,w1)
-	require.NotNil(t,w2)
-	require.Equal(t,w.ID().String(),w1.ID().String())
-	require.Equal(t,w.ID().String(),w2.ID().String())
-	require.Equal(t,w.Name(),w1.Name())
-	require.Equal(t,w.Name(),w2.Name())
 
 	// create and fetch validator account
-	val,err := w.CreateValidatorAccount("val1")
+	val,err := wallet.CreateValidatorAccount("val1")
 	require.NoError(t,err)
-	val1,err := w.AccountByName("val1")
+	val1,err := wallet.AccountByName("val1")
 	require.NoError(t,err)
-	val2,err := w.AccountByID(val.ID())
+	val2,err := wallet.AccountByID(val.ID())
 	require.NoError(t,err)
 	require.NotNil(t,val1)
 	require.NotNil(t,val2)
@@ -200,7 +194,7 @@ func testVault(t *testing.T, v *KeyVault) {
 	require.Equal(t,val.Name(),val2.Name())
 
 	// create and fetch withdrawal account
-	with,err := w.GetWithdrawalAccount()
+	with,err := wallet.GetWithdrawalAccount()
 	require.NoError(t,err)
 	require.NotNil(t,with)
 }

@@ -2,8 +2,8 @@ package KeyVault
 
 import (
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	"log"
 	"sync"
 
@@ -41,9 +41,10 @@ func init() {
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
 	id          uuid.UUID
-	indexMapper map[string]uuid.UUID
-	Context     *core.PortfolioContext
-	key         *core.MasterDerivableKey
+	//indexMapper map[string]uuid.UUID
+	Context     *core.WalletContext
+	//key         *core.MasterDerivableKey
+	walletId 	uuid.UUID
 }
 
 type NotExistError struct {
@@ -54,36 +55,22 @@ func (e *NotExistError) Error() string {
 	return fmt.Sprintf("%s", e.desc)
 }
 
-func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
+func OpenKeyVault(options *WalletOptions) (*KeyVault, error) {
 	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
 		return nil, err
 	}
 
-	bytes, err := storage.OpenPortfolioRaw()
-	if err != nil {
-		return nil, err
-	}
-	if bytes == nil {
-		return nil, &NotExistError{"key vault not found"}
-	}
-
-	// portfolio Context
-	context := &core.PortfolioContext{
-		Storage: options.storage.(core.Storage),
-	}
-
-	ret := &KeyVault{Context: context}
-	err = json.Unmarshal(bytes, &ret)
+	wallet, err := storage.OpenWallet()
 	if err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	return completeVaultSetup(options, wallet)
 }
 
-func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
+func ImportKeyVault(options *WalletOptions) (*KeyVault, error) {
 	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
@@ -98,15 +85,15 @@ func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 	if err != nil {
 		return nil, err
 	}
-	key, err := core.MasterKeyFromSeed(options.seed, storage)
+	key, err := core.MasterKeyFromSeed(storage)
 	if err != nil {
 		return nil, err
 	}
 
-	return completeVaultSetup(options, key)
+	return completeVaultSetup(options, wallet_hd.NewHDWallet(key, nil))
 }
 
-func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
+func NewKeyVault(options *WalletOptions) (*KeyVault, error) {
 	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
@@ -122,34 +109,42 @@ func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
 		return nil, err
 	}
 
-	key, err := core.MasterKeyFromSeed(seed, storage)
+	key, err := core.MasterKeyFromSeed(storage)
 	if err != nil {
 		return nil, err
 	}
 
-	return completeVaultSetup(options, key)
+	return completeVaultSetup(options, wallet_hd.NewHDWallet(key, nil))
 }
 
-func completeVaultSetup(options *PortfolioOptions, key *core.MasterDerivableKey) (*KeyVault, error) {
-	// portfolio Context
-	context := &core.PortfolioContext{
+func (kv *KeyVault) Wallet() (core.Wallet, error) {
+	return kv.Context.Storage.OpenWallet()
+}
+
+func completeVaultSetup(options *WalletOptions, wallet core.Wallet) (*KeyVault, error) {
+	// wallet Context
+	context := &core.WalletContext{
 		Storage: options.storage.(core.Storage),
 	}
 
+	// update wallet context
+	wallet.SetContext(context)
+
 	ret := &KeyVault{
 		id:          uuid.New(),
-		indexMapper: make(map[string]uuid.UUID),
 		Context:     context,
-		key:         key,
+		walletId:    wallet.ID(),
 	}
 
-	// update Context with portfolio id
-	context.PortfolioId = ret.ID()
+	err := options.storage.(core.Storage).SaveWallet(wallet)
+	if err != nil {
+		return nil, err
+	}
 
 	return ret, nil
 }
 
-func setupStorage(options *PortfolioOptions) (core.Storage, error) {
+func setupStorage(options *WalletOptions) (core.Storage, error) {
 	if _, ok := options.storage.(core.Storage); !ok {
 		return nil, fmt.Errorf("storage does not implement core.Storage")
 	} else {

@@ -5,6 +5,7 @@ import (
 	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores"
+	types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
 )
 
@@ -14,9 +15,10 @@ func _byteArray(input string) []byte {
 }
 
 func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
+	types.InitBLS()
 	store := getStorage()
 
-	options := &KeyVault.PortfolioOptions{}
+	options := &KeyVault.WalletOptions{}
 	options.SetStorage(store)
 	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
 	vault,err := KeyVault.NewKeyVault(options)
@@ -24,7 +26,7 @@ func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
 		return nil,nil,err
 	}
 
-	wallet,err := vault.CreateWallet("test")
+	wallet,err := vault.Wallet()
 	if err != nil {
 		return nil,nil,err
 	}

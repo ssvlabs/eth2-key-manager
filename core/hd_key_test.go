@@ -23,15 +23,11 @@ type mockedStorage struct {
 	err error
 }
 func (s *mockedStorage) Name() string {return ""}
-func (s *mockedStorage) SavePortfolio(portfolio Portfolio) error {return nil}
-func (s *mockedStorage) OpenPortfolio() (Portfolio,error) {return nil,nil}
-func (s *mockedStorage) OpenPortfolioRaw() ([]byte,error) {return nil,nil}
-func (s *mockedStorage) ListWallets() ([]Wallet,error) {return nil,nil}
 func (s *mockedStorage) SaveWallet(wallet Wallet) error {return nil}
-func (s *mockedStorage) OpenWallet(uuid uuid.UUID) (Wallet,error) {return nil,nil}
-func (s *mockedStorage) ListAccounts(walletID uuid.UUID) ([]Account,error) {return nil,nil}
+func (s *mockedStorage) OpenWallet() (Wallet,error) {return nil,nil}
+func (s *mockedStorage) ListAccounts() ([]Account,error) {return nil,nil}
 func (s *mockedStorage) SaveAccount(account Account) error {return nil}
-func (s *mockedStorage) OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (Account,error) {return nil,nil}
+func (s *mockedStorage) OpenAccount(accountId uuid.UUID) (Account,error) {return nil,nil}
 func (s *mockedStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
 func (s *mockedStorage) SecurelyFetchPortfolioSeed() ([]byte,error) {return s.seed,nil}
 func (s *mockedStorage) SecurelySavePortfolioSeed(secret []byte) error {return s.err}

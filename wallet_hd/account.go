@@ -12,9 +12,9 @@ type HDAccount struct {
 	name string
 	id uuid.UUID
 	accountType core.AccountType
-	key *core.DerivableKey
+	key *core.HDKey
 	parentWalletId uuid.UUID
-	context *core.PortfolioContext
+	context *core.WalletContext
 }
 
 func (account *HDAccount) MarshalJSON() ([]byte, error) {
@@ -60,7 +60,7 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		key := &core.DerivableKey{Storage:account.context.Storage}
+		key := &core.HDKey{}
 		err = json.Unmarshal(byts,key)
 		if err != nil {
 			return err
@@ -82,8 +82,8 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 func newHDAccount(name string,
 	accountType core.AccountType,
 	walletId uuid.UUID,
-	key *core.DerivableKey,
-	context *core.PortfolioContext) (*HDAccount,error) {
+	key *core.HDKey,
+	context *core.WalletContext) (*HDAccount,error) {
 	return &HDAccount{
 		name:         name,
 		id:           uuid.New(),
@@ -130,6 +130,6 @@ func (account *HDAccount) Sign(data []byte) (e2types.Signature,error) {
 	return account.key.Sign(data)
 }
 
-func (account *HDAccount) SetContext(ctx *core.PortfolioContext) {
+func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/wallet_hd"
 	"github.com/google/uuid"
@@ -30,80 +29,15 @@ func NewHashicorpVaultStore(storage logical.Storage, ctx context.Context) *Hashi
 }
 
 const (
-	PortfolioBasePath = "portfolio/"
-	PortfolioDataPath = PortfolioBasePath + "/data"
-	SeedPath          = PortfolioBasePath + "seed/"
+	SeedPath          	= "wallet/seed/"
+	WalletDataPath     	= "wallet/data"
 
-	WalletBasePath     = PortfolioBasePath + "wallets/"
-	WalletIdsBaseePath = WalletBasePath + "ids/"
-	WalletDataPath     = WalletIdsBaseePath + "%s/data"
-
-	AccountBase = WalletBasePath + "ids/%s/accounts/"
+	AccountBase = "wallet/accounts/"
 	AccountPath = AccountBase + "%s"
 )
 
 func (store *HashicorpVaultStore) Name() string {
 	return "Hashicorp Vault"
-}
-
-func (store *HashicorpVaultStore) SavePortfolio(portfolio core.Portfolio) error {
-	// data
-	data, err := json.Marshal(portfolio)
-	if err != nil {
-		return errors.Wrap(err, "failed to marshal portfolio object")
-	}
-
-	// put wallet data
-	entry := &logical.StorageEntry{
-		Key:      PortfolioDataPath,
-		Value:    data,
-		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
-}
-
-// will return nil,nil if no portfolio was found
-func (store *HashicorpVaultStore) OpenPortfolio() (core.Portfolio, error) {
-	entry, err := store.OpenPortfolioRaw()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to open portfolio raw")
-	}
-
-	// un-marshal
-	ret := &KeyVault.KeyVault{Context: store.freshContext()} // not hardcode KeyVault
-	if err := json.Unmarshal(entry, &ret); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal key vault object")
-	}
-
-	return ret, nil
-}
-
-// used to fetch the raw bytes of a saved portfolio data
-func (store *HashicorpVaultStore) OpenPortfolioRaw() ([]byte, error) {
-	entry, err := store.storage.Get(store.ctx, PortfolioDataPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get record by portfolio data path")
-	}
-
-	// Return nothing if there is no record
-	if entry == nil {
-		return nil, nil
-	}
-
-	return entry.Value, nil
-}
-
-func (store *HashicorpVaultStore) ListWallets() ([]core.Wallet, error) {
-	p, err := store.OpenPortfolio()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to open portfolio raw")
-	}
-
-	ret := make([]core.Wallet, 0)
-	for w := range p.Wallets() {
-		ret = append(ret, w)
-	}
-	return ret, nil
 }
 
 func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
@@ -114,7 +48,7 @@ func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
 	}
 
 	// put wallet data
-	path := fmt.Sprintf(WalletDataPath, wallet.ID().String())
+	path := WalletDataPath
 	entry := &logical.StorageEntry{
 		Key:      path,
 		Value:    data,
@@ -125,8 +59,8 @@ func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
 }
 
 // will return nil,nil if no wallet was found
-func (store *HashicorpVaultStore) OpenWallet(uuid uuid.UUID) (core.Wallet, error) {
-	path := fmt.Sprintf(WalletDataPath, uuid.String())
+func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
+	path := WalletDataPath
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
@@ -148,15 +82,10 @@ func (store *HashicorpVaultStore) OpenWallet(uuid uuid.UUID) (core.Wallet, error
 }
 
 // will return an empty array for no accounts
-func (store *HashicorpVaultStore) ListAccounts(walletID uuid.UUID) ([]core.Account, error) {
-	p, err := store.OpenPortfolio()
+func (store *HashicorpVaultStore) ListAccounts() ([]core.Account, error) {
+	w, err := store.OpenWallet()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to open portfolio raw")
-	}
-
-	w, err := p.WalletByID(walletID)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get wallet by ID '%s'", walletID)
+		return nil, errors.Wrapf(err, "failed to get wallet")
 	}
 
 	ret := make([]core.Account, 0)
@@ -175,7 +104,7 @@ func (store *HashicorpVaultStore) SaveAccount(account core.Account) error {
 	}
 
 	// put wallet data
-	path := fmt.Sprintf(AccountPath, account.WalletID().String(), account.ID().String())
+	path := fmt.Sprintf(AccountPath, account.ID().String())
 	entry := &logical.StorageEntry{
 		Key:      path,
 		Value:    data,
@@ -185,8 +114,8 @@ func (store *HashicorpVaultStore) SaveAccount(account core.Account) error {
 }
 
 // will return nil,nil if no account was found
-func (store *HashicorpVaultStore) OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (core.Account, error) {
-	path := fmt.Sprintf(AccountPath, walletId, accountId)
+func (store *HashicorpVaultStore) OpenAccount(accountId uuid.UUID) (core.Account, error) {
+	path := fmt.Sprintf(AccountPath, accountId)
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
@@ -273,8 +202,8 @@ func (store *HashicorpVaultStore) SecurelySavePortfolioSeed(secret []byte) error
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) freshContext() *core.PortfolioContext {
-	return &core.PortfolioContext{
+func (store *HashicorpVaultStore) freshContext() *core.WalletContext {
+	return &core.WalletContext{
 		Storage: store,
 	}
 }

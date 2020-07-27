@@ -5,6 +5,7 @@ import (
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
 )
 
@@ -29,22 +30,20 @@ func TestAccountMarshaling(t *testing.T) {
 		},
 	}
 
+	types.InitBLS()
+
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			// setup storage
 			storage := inmemStorage()
 			err := storage.SecurelySavePortfolioSeed(test.seed)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// create key and account
-			key,err := key(test.seed,test.path,storage)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			masterKey,err := core.MasterKeyFromSeed(storage)
+			require.NoError(t, err)
+			key,err := masterKey.Derive(test.path)
+			require.NoError(t, err)
 			a := &HDAccount{
 				accountType:test.accountType,
 				name:test.name,
@@ -54,17 +53,11 @@ func TestAccountMarshaling(t *testing.T) {
 
 			// marshal
 			byts,err := json.Marshal(a)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 			//unmarshal
-			a1 := &HDAccount{context:&core.PortfolioContext{Storage:storage}}
+			a1 := &HDAccount{context:&core.WalletContext{Storage: storage}}
 			err = json.Unmarshal(byts,a1)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			require.Equal(t,a.id,a1.id)
 			require.Equal(t,a.name,a1.name)

@@ -18,7 +18,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 	if err != nil {
 		return nil,nil,err
 	}
-	w,err := vault.CreateWallet("test")
+	w,err := vault.Wallet()
 	if err != nil {
 		return nil,nil,err
 	}

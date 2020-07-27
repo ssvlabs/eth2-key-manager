@@ -10,7 +10,7 @@ import (
 )
 
 func TestingOpeningAccount(storage core.Storage, account core.Account, t *testing.T) {
-	a1,err := storage.OpenAccount(account.WalletID(), account.ID())
+	a1,err := storage.OpenAccount(account.ID())
 	if err != nil {
 		t.Error(err)
 		return
@@ -31,7 +31,7 @@ func TestingSavingAccounts(storage core.Storage, accounts []core.Account, t *tes
 			}
 
 			// verify account was added
-			val,err := storage.OpenAccount(account.WalletID(), account.ID())
+			val,err := storage.OpenAccount(account.ID())
 			if err != nil {
 				t.Error(err)
 			}
@@ -45,17 +45,12 @@ func TestingSavingAccounts(storage core.Storage, accounts []core.Account, t *tes
 func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 	t.Run("testing", func(t *testing.T) {
 		// create keyvault and wallet
-		options := &KeyVault.PortfolioOptions{}
+		options := &KeyVault.WalletOptions{}
 		options.SetStorage(storage)
 		options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
-		vault,err := KeyVault.NewKeyVault(options)
-		require.NoError(t,err)
-
-		wallet,err := vault.CreateWallet("test")
-		require.NoError(t,err)
 
 		// fetch non existing account
-		_,err = storage.OpenAccount(wallet.ID(), uuid.New())
+		_,err := storage.OpenAccount(uuid.New())
 		if err != nil {
 			t.Error(fmt.Errorf("should not return error for unknwon account, just nil"))
 		}
@@ -64,19 +59,14 @@ func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 
 func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	// create keyvault and wallet
-	options := &KeyVault.PortfolioOptions{}
+	options := &KeyVault.WalletOptions{}
 	options.SetStorage(storage)
 	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
 	vault,err := KeyVault.NewKeyVault(options)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	wallet,err := vault.CreateWallet("test")
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
+
+	wallet, err := vault.Wallet()
+	require.NoError(t, err)
 
 	// create accounts
 	accounts := map[string]bool{}
@@ -89,10 +79,8 @@ func TestingListingAccounts(storage core.Storage, t *testing.T) {
 		accounts[account.ID().String()] = false
 	}
 
-
-
 	// verify listing
-	fetched,err := storage.ListAccounts(wallet.ID())
+	fetched,err := storage.ListAccounts()
 	if err != nil {
 		t.Error(err)
 		return

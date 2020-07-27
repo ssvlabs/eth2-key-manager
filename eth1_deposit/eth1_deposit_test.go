@@ -33,7 +33,7 @@ func (a *dummyAccount) Name() string                               {return ""}
 func (a *dummyAccount) PublicKey() e2types.PublicKey {return a.priv.PublicKey()}
 func (a *dummyAccount) Path() string {return ""}
 func (a *dummyAccount) Sign(data []byte) (e2types.Signature,error) {return a.priv.Sign(data),nil}
-func (a *dummyAccount) SetContext(ctx *core.PortfolioContext)      {}
+func (a *dummyAccount) SetContext(ctx *core.WalletContext)         {}
 
 func _ignoreErr(a []byte, err error) []byte {
 	return a

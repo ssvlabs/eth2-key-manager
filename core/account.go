@@ -29,5 +29,5 @@ type Account interface {
 	// Sign signs data with the account.
 	Sign(data []byte) (e2types.Signature,error)
 	//
-	SetContext(ctx *PortfolioContext)
+	SetContext(ctx *WalletContext)
 }

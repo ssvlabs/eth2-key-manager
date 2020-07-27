@@ -20,7 +20,7 @@ func store () *in_memory.InMemStore {
 }
 
 func vault() (*KeyVault.KeyVault,error) {
-	options := &KeyVault.PortfolioOptions{}
+	options := &KeyVault.WalletOptions{}
 	options.SetStorage(store())
 	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
 	return KeyVault.NewKeyVault(options)
@@ -36,7 +36,7 @@ func setupProposal() (core.SlashingProtector, []core.Account,error) {
 	if err != nil {
 		return nil,nil,err
 	}
-	w,err := vault.CreateWallet("test")
+	w,err := vault.Wallet()
 	if err != nil {
 		return nil,nil,err
 	}

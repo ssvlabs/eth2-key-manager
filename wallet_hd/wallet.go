@@ -8,24 +8,22 @@ import (
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 const (
-	WithdrawalKeyPath = "/0"
+	WithdrawalKeyPath = "/0/0"
 	WithdrawalKeyName = "wallet_withdrawal_key_unique"
-	ValidatorKeyPath = "/0/%d"
+	ValidatorKeyPath = "/0/0/%d"
 )
 
 // an hierarchical deterministic wallet
 type HDWallet struct {
-	name 		string
 	id 			uuid.UUID
 	walletType 	core.WalletType
-	key 		*core.DerivableKey // the node key from which all accounts are derived
+	key 		*core.MasterDerivableKey // the node key from which all accounts are derived
 	indexMapper map[string]uuid.UUID
-	context 	*core.PortfolioContext
+	context 	*core.WalletContext
 }
 
-func NewHDWallet(name string, key *core.DerivableKey, context *core.PortfolioContext) *HDWallet {
+func NewHDWallet(key *core.MasterDerivableKey, context *core.WalletContext) *HDWallet {
 	return &HDWallet{
-		name:            name,
 		id:              uuid.New(),
 		walletType:      core.HDWallet,
 		key:        	 key,
@@ -37,11 +35,6 @@ func NewHDWallet(name string, key *core.DerivableKey, context *core.PortfolioCon
 // ID provides the ID for the wallet.
 func (wallet *HDWallet) ID() uuid.UUID {
 	return wallet.id
-}
-
-// Name provides the name for the wallet.
-func (wallet *HDWallet) Name() string {
-	return wallet.name
 }
 
 // Type provides the type of the wallet.
@@ -105,7 +98,7 @@ func (wallet *HDWallet) Accounts() <-chan core.Account {
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
-	ret,err := wallet.context.Storage.OpenAccount(wallet.ID(), id)
+	ret,err := wallet.context.Storage.OpenAccount(id)
 	if err != nil {
 		return nil,err
 	}
@@ -116,7 +109,7 @@ func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
 	return ret,nil
 }
 
-func (wallet *HDWallet) SetContext(ctx *core.PortfolioContext) {
+func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
 	wallet.context = ctx
 }
 
