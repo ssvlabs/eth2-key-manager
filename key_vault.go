@@ -16,7 +16,8 @@ import (
 
 const (
 	BaseEIP2334Path = "m/12381/3600"
-	ValidatorKeyPath = "/0/%d"
+	//TODO change to /0/%d when remove portfolio from the path
+	ValidatorKeyPath = "/0/0/%d"
 )
 var initBLSOnce sync.Once
 
@@ -216,7 +217,7 @@ func CreateAccount(seed []byte, index int) ([]byte, error) {
 	path := BaseEIP2334Path + relativePath
 	key, err := util.PrivateKeyFromSeedAndPath(seed, path)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	return key.Marshal(), nil

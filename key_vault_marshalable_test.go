@@ -27,7 +27,7 @@ func key(seed []byte, relativePath string, storage core.Storage) (*core.Derivabl
 	}
 
 	if len(relativePath) > 0 {
-		return key.Derive(relativePath)
+		return key.Derive(relativePath, nil)
 	} else {
 		return key, nil
 	}

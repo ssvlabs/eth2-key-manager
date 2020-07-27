@@ -97,7 +97,7 @@ func TestMarshalingDerivableKey(t *testing.T) {
 				return
 			}
 			if len(test.path) > 0 {
-				key,err = key.Derive(test.path)
+				key,err = key.Derive(test.path, nil)
 				if err != nil {
 					t.Error(err)
 					return
@@ -190,7 +190,7 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 				return
 			}
 
-			key,err = key.Derive(test.path)
+			key,err = key.Derive(test.path, nil)
 			if err != nil {
 				if test.err != nil {
 					assert.Equal(t,test.err.Error(),err.Error())

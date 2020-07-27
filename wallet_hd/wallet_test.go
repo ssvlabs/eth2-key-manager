@@ -32,7 +32,7 @@ func key(seed []byte, relativePath string, storage core.Storage) (*core.Derivabl
 	}
 
 	if len(relativePath) >0 {
-		return key.Derive(relativePath)
+		return key.Derive(relativePath, nil)
 	} else {
 		return key,nil
 	}
@@ -83,7 +83,7 @@ func TestCreateAccounts(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			_,err := w.CreateValidatorAccount(test.newAccounttName)
+			_,err := w.CreateValidatorAccount(test.newAccounttName, nil)
 			if test.expectedErr != "" {
 				require.Errorf(t,err,test.expectedErr)
 			} else {

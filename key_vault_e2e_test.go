@@ -186,7 +186,7 @@ func testVault(t *testing.T, v *KeyVault) {
 	require.Equal(t,w.Name(),w2.Name())
 
 	// create and fetch validator account
-	val,err := w.CreateValidatorAccount("val1")
+	val,err := w.CreateValidatorAccount("val1", nil)
 	require.NoError(t,err)
 	val1,err := w.AccountByName("val1")
 	require.NoError(t,err)

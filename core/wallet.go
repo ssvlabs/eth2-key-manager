@@ -19,7 +19,7 @@ type Wallet interface {
 	Type() WalletType
 	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 	// This will error if an account with the name already exists.
-	CreateValidatorAccount(name string) (Account, error)
+	CreateValidatorAccount(name string, privateKey []byte) (Account, error)
 	// GetWithdrawalAccount returns this wallet's withdrawal key pair in the wallet as described in EIP-2334.
 	// This will error if an account with the name already exists.
 	GetWithdrawalAccount() (Account, error)

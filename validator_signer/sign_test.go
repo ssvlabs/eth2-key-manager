@@ -56,7 +56,7 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet,error) {
 		return nil,err
 	}
 
-	_,err = wallet.CreateValidatorAccount("1")
+	_,err = wallet.CreateValidatorAccount("1", nil)
 	if err != nil {
 		return nil,err
 	}

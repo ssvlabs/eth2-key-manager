@@ -29,7 +29,7 @@ func (portfolio *KeyVault) CreateWallet(name string) (core.Wallet, error) {
 	// create wallet
 	id := len(portfolio.indexMapper)
 	path := fmt.Sprintf("/%d",id)
-	key,err := portfolio.key.Derive(path)
+	key,err := portfolio.key.Derive(path, nil)
 	if err != nil {
 		return nil,err
 	}
