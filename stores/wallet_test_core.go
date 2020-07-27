@@ -29,24 +29,6 @@ func keyVault(storage core.Storage) (*KeyVault.KeyVault,error) {
 	return KeyVault.ImportKeyVault(options)
 }
 
-func TestingWithdrawalAccount(storage core.Storage, t *testing.T) {
-	kv,err := keyVault(storage)
-	require.NoError(t, err)
-
-	wallet, err := kv.Wallet()
-	require.NoError(t, err)
-
-	a,err := wallet.GetWithdrawalAccount()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	require.Equal(t,"wallet_withdrawal_key_unique",a.Name())
-	require.Equal(t,"m/12381/3600/0/0",a.Path())
-	require.Equal(t,"b08033f01d0c71f63a46117915791187e3257a95552b3701fef80124c492eabe1f10795e684055895b887220460e5f24",hex.EncodeToString(a.PublicKey().Marshal()))
-}
-
 func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 	kv,err := keyVault(storage)
 	require.NoError(t, err)
@@ -78,11 +60,11 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 			}
 
 			// verify
-			for _,fetchedAccount := range []core.Account{a1,a2} {
+			for _,fetchedAccount := range []core.ValidatorAccount{a1,a2} {
 				require.Equal(t,a.ID().String(),fetchedAccount.ID().String())
 				require.Equal(t,a.Name(),fetchedAccount.Name())
-				require.Equal(t,a.PublicKey().Marshal(),fetchedAccount.PublicKey().Marshal())
-				require.Equal(t,fmt.Sprintf("m/12381/3600/0/0/%d",i),fetchedAccount.Path())
+				require.Equal(t,a.ValidatorPublicKey().Marshal(),fetchedAccount.ValidatorPublicKey().Marshal())
+				require.Equal(t,a.WithdrawalPublicKey().Marshal(),fetchedAccount.WithdrawalPublicKey().Marshal())
 			}
 		})
 	}

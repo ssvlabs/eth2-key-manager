@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func setupAttestation() (core.SlashingProtector, []core.Account,error) {
+func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
@@ -32,7 +32,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 	}
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.AttestationData{
@@ -49,7 +49,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 			},
 		},
 	})
-	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.AttestationData{
@@ -66,7 +66,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 			},
 		},
 	})
-	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.AttestationData{
@@ -83,7 +83,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 			},
 		},
 	})
-	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.AttestationData{
@@ -100,7 +100,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 			},
 		},
 	})
-	protector.SaveAttestation(account1, &pb.SignBeaconAttestationRequest{
+	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.AttestationData{
@@ -117,7 +117,7 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 			},
 		},
 	})
-	return protector, []core.Account{account1,account2},nil
+	return protector, []core.ValidatorAccount{account1,account2},nil
 }
 
 func TestSurroundingVote(t *testing.T) {
@@ -128,7 +128,7 @@ func TestSurroundingVote(t *testing.T) {
 	}
 
 	t.Run("1 Surrounded vote",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -161,7 +161,7 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("2 Surrounded votes",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -194,7 +194,7 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("1 Surrounding vote",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -226,7 +226,7 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("2 Surrounding vote",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -266,7 +266,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	}
 
 	t.Run("Different committee index, should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -296,7 +296,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("Different block root, should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -326,7 +326,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("Same attestation, should not error",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{
@@ -350,7 +350,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("new attestation, should not error",func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0], &pb.SignBeaconAttestationRequest{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.AttestationData{

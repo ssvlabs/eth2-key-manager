@@ -82,13 +82,13 @@ func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
 }
 
 // will return an empty array for no accounts
-func (store *HashicorpVaultStore) ListAccounts() ([]core.Account, error) {
+func (store *HashicorpVaultStore) ListAccounts() ([]core.ValidatorAccount, error) {
 	w, err := store.OpenWallet()
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get wallet")
 	}
 
-	ret := make([]core.Account, 0)
+	ret := make([]core.ValidatorAccount, 0)
 	for a := range w.Accounts() {
 		ret = append(ret, a)
 	}
@@ -96,7 +96,7 @@ func (store *HashicorpVaultStore) ListAccounts() ([]core.Account, error) {
 	return ret, nil
 }
 
-func (store *HashicorpVaultStore) SaveAccount(account core.Account) error {
+func (store *HashicorpVaultStore) SaveAccount(account core.ValidatorAccount) error {
 	// data
 	data, err := json.Marshal(account)
 	if err != nil {
@@ -114,7 +114,7 @@ func (store *HashicorpVaultStore) SaveAccount(account core.Account) error {
 }
 
 // will return nil,nil if no account was found
-func (store *HashicorpVaultStore) OpenAccount(accountId uuid.UUID) (core.Account, error) {
+func (store *HashicorpVaultStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
 	path := fmt.Sprintf(AccountPath, accountId)
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {

@@ -1,8 +1,10 @@
 package hashicorp
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
@@ -17,8 +19,8 @@ const (
 	WalletProposalsPath         = "proposals/%s/%d/"                // account/proposal
 )
 
-func (store *HashicorpVaultStore) SaveAttestation(account core.Account, req *core.BeaconAttestation) error {
-	path := fmt.Sprintf(WalletAttestationPath, account.ID().String(), req.Target.Epoch)
+func (store *HashicorpVaultStore) SaveAttestation(key e2types.PublicKey, req *core.BeaconAttestation) error {
+	path := fmt.Sprintf(WalletAttestationPath, store.identfierFromKey(key), req.Target.Epoch)
 	data, err := json.Marshal(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal attestation request")
@@ -32,8 +34,8 @@ func (store *HashicorpVaultStore) SaveAttestation(account core.Account, req *cor
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) RetrieveAttestation(account core.Account, epoch uint64) (*core.BeaconAttestation, error) {
-	path := fmt.Sprintf(WalletAttestationPath, account.ID().String(), epoch)
+func (store *HashicorpVaultStore) RetrieveAttestation(key e2types.PublicKey, epoch uint64) (*core.BeaconAttestation, error) {
+	path := fmt.Sprintf(WalletAttestationPath, store.identfierFromKey(key), epoch)
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record from storage with path '%s'", path)
@@ -53,11 +55,11 @@ func (store *HashicorpVaultStore) RetrieveAttestation(account core.Account, epoc
 }
 
 // both epochStart and epochEnd reflect saved attestations by their target epoch
-func (store *HashicorpVaultStore) ListAttestations(account core.Account, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {
+func (store *HashicorpVaultStore) ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {
 	ret := make([]*core.BeaconAttestation, 0)
 
 	for epoch := epochStart; epoch <= epochEnd; epoch++ {
-		att, err := store.RetrieveAttestation(account, epoch)
+		att, err := store.RetrieveAttestation(key, epoch)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to retrieve attestation with epoch %d", epoch)
 		}
@@ -70,8 +72,8 @@ func (store *HashicorpVaultStore) ListAttestations(account core.Account, epochSt
 	return ret, nil
 }
 
-func (store *HashicorpVaultStore) SaveProposal(account core.Account, req *core.BeaconBlockHeader) error {
-	path := fmt.Sprintf(WalletProposalsPath, account.ID().String(), req.Slot)
+func (store *HashicorpVaultStore) SaveProposal(key e2types.PublicKey, req *core.BeaconBlockHeader) error {
+	path := fmt.Sprintf(WalletProposalsPath, store.identfierFromKey(key), req.Slot)
 	data, err := json.Marshal(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal proposal request")
@@ -85,8 +87,8 @@ func (store *HashicorpVaultStore) SaveProposal(account core.Account, req *core.B
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) RetrieveProposal(account core.Account, slot uint64) (*core.BeaconBlockHeader, error) {
-	path := fmt.Sprintf(WalletProposalsPath, account.ID().String(), slot)
+func (store *HashicorpVaultStore) RetrieveProposal(key e2types.PublicKey, slot uint64) (*core.BeaconBlockHeader, error) {
+	path := fmt.Sprintf(WalletProposalsPath, store.identfierFromKey(key), slot)
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
@@ -105,8 +107,8 @@ func (store *HashicorpVaultStore) RetrieveProposal(account core.Account, slot ui
 	return ret, nil
 }
 
-func (store *HashicorpVaultStore) SaveLatestAttestation(account core.Account, req *core.BeaconAttestation) error {
-	path := fmt.Sprintf(WalletLatestAttestationPath, account.ID().String())
+func (store *HashicorpVaultStore) SaveLatestAttestation(key e2types.PublicKey, req *core.BeaconAttestation) error {
+	path := fmt.Sprintf(WalletLatestAttestationPath, store.identfierFromKey(key))
 	data, err := json.Marshal(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal beacon attestation object")
@@ -120,8 +122,8 @@ func (store *HashicorpVaultStore) SaveLatestAttestation(account core.Account, re
 	return store.storage.Put(store.ctx, entry)
 }
 
-func (store *HashicorpVaultStore) RetrieveLatestAttestation(account core.Account) (*core.BeaconAttestation, error) {
-	path := fmt.Sprintf(WalletLatestAttestationPath, account.ID().String())
+func (store *HashicorpVaultStore) RetrieveLatestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
+	path := fmt.Sprintf(WalletLatestAttestationPath, store.identfierFromKey(key))
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
@@ -138,4 +140,8 @@ func (store *HashicorpVaultStore) RetrieveLatestAttestation(account core.Account
 	}
 
 	return ret, nil
+}
+
+func (store *HashicorpVaultStore) identfierFromKey(key e2types.PublicKey) string {
+	return hex.EncodeToString(key.Marshal())
 }

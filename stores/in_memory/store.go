@@ -55,28 +55,28 @@ func (store *InMemStore) OpenWallet() (core.Wallet,error) {
 }
 
 // will return an empty array for no accounts
-func (store *InMemStore) ListAccounts() ([]core.Account,error) {
+func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount,error) {
 	w,err := store.OpenWallet()
 	if err != nil {
 		return nil,err
 	}
 
-	ret := make([]core.Account,0)
+	ret := make([]core.ValidatorAccount,0)
 	for a := range w.Accounts() {
 		ret = append(ret,a)
 	}
 	return ret,nil
 }
 
-func (store *InMemStore) SaveAccount(account core.Account) error {
+func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
 	store.memory[account.ID().String()] = account
 	return nil
 }
 
 // will return nil,nil if no account was found
-func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.Account,error) {
+func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount,error) {
 	if val := store.memory[accountId.String()]; val != nil {
-		return val.(core.Account),nil
+		return val.(core.ValidatorAccount),nil
 	} else {
 		return nil,nil
 	}

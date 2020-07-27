@@ -24,7 +24,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}()
 
 	// 3. check we can even sign this
-	if val, err := signer.slashingProtector.IsSlashableProposal(account, req); err != nil || val != nil {
+	if val, err := signer.slashingProtector.IsSlashableProposal(account.ValidatorPublicKey(), req); err != nil || val != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -32,7 +32,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	}
 
 	// 4. add to protection storage
-	if err := signer.slashingProtector.SaveProposal(account, req); err != nil {
+	if err := signer.slashingProtector.SaveProposal(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 
@@ -41,7 +41,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	if err != nil {
 		return nil, err
 	}
-	sig, err := account.Sign(forSig)
+	sig, err := account.ValidationKeySign(forSig)
 	if err != nil {
 		return nil, err
 	}

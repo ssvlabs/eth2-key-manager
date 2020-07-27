@@ -26,7 +26,7 @@ func vault() (*KeyVault.KeyVault,error) {
 	return KeyVault.NewKeyVault(options)
 }
 
-func setupProposal() (core.SlashingProtector, []core.Account,error) {
+func setupProposal() (core.SlashingProtector, []core.ValidatorAccount,error) {
 	if err := e2types.InitBLS(); err != nil { // very important!
 		return nil,nil,err
 	}
@@ -50,7 +50,7 @@ func setupProposal() (core.SlashingProtector, []core.Account,error) {
 	}
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	protector.SaveProposal(account1, &pb.SignBeaconProposalRequest{
+	protector.SaveProposal(account1.ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.BeaconBlockHeader{
@@ -61,7 +61,7 @@ func setupProposal() (core.SlashingProtector, []core.Account,error) {
 			BodyRoot:             []byte("A"),
 		},
 	})
-	protector.SaveProposal(account1, &pb.SignBeaconProposalRequest{
+	protector.SaveProposal(account1.ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.BeaconBlockHeader{
@@ -72,7 +72,7 @@ func setupProposal() (core.SlashingProtector, []core.Account,error) {
 			BodyRoot:             []byte("B"),
 		},
 	})
-	protector.SaveProposal(account1, &pb.SignBeaconProposalRequest{
+	protector.SaveProposal(account1.ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 		Id:                   nil,
 		Domain:               []byte("domain"),
 		Data:                 &pb.BeaconBlockHeader{
@@ -84,7 +84,7 @@ func setupProposal() (core.SlashingProtector, []core.Account,error) {
 		},
 	})
 
-	return protector,[]core.Account{account1,account2},nil
+	return protector,[]core.ValidatorAccount{account1,account2},nil
 }
 
 
@@ -96,7 +96,7 @@ func TestDoubleProposal(t *testing.T) {
 	}
 
 	t.Run("New proposal, should not slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -119,7 +119,7 @@ func TestDoubleProposal(t *testing.T) {
 	})
 
 	t.Run("different proposer index, should not slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[1], &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[1].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -142,7 +142,7 @@ func TestDoubleProposal(t *testing.T) {
 	})
 
 	t.Run("double proposal (different body root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -169,7 +169,7 @@ func TestDoubleProposal(t *testing.T) {
 	})
 
 	t.Run("double proposal (different state root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -196,7 +196,7 @@ func TestDoubleProposal(t *testing.T) {
 	})
 
 	t.Run("double proposal (different state and body root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0], &pb.SignBeaconProposalRequest{
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{

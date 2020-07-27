@@ -16,10 +16,6 @@ func getWalletStorage() core.Storage {
 	return NewHashicorpVaultStore(getStorage(),context.Background())
 }
 
-func TestWithdrawalAccount(t *testing.T) {
-	stores.TestingWithdrawalAccount(getWalletStorage(),t)
-}
-
 func TestOpeningAccounts(t *testing.T) {
 	stores.TestingOpenAccounts(getWalletStorage(),t)
 }

@@ -17,20 +17,17 @@ type Wallet interface {
 	Type() WalletType
 	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 	// This will error if an account with the name already exists.
-	CreateValidatorAccount(name string) (Account, error)
-	// GetWithdrawalAccount returns this wallet's withdrawal key pair in the wallet as described in EIP-2334.
-	// This will error if an account with the name already exists.
-	GetWithdrawalAccount() (Account, error)
+	CreateValidatorAccount(name string) (ValidatorAccount, error)
 	// Accounts provides all accounts in the wallet.
-	Accounts() <-chan Account
+	Accounts() <-chan ValidatorAccount
 	// AccountByID provides a single account from the wallet given its ID.
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
-	AccountByID(id uuid.UUID) (Account, error)
+	AccountByID(id uuid.UUID) (ValidatorAccount, error)
 	// AccountByName provides a single account from the wallet given its name.
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
-	AccountByName(name string) (Account, error)
+	AccountByName(name string) (ValidatorAccount, error)
 	//
 	SetContext(ctx *WalletContext)
 }

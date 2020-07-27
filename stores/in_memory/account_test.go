@@ -14,7 +14,7 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
+func getPopulatedWalletStorage() (core.Storage,[]core.ValidatorAccount,error) {
 	types.InitBLS()
 	store := getStorage()
 
@@ -48,7 +48,7 @@ func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
 		return nil,nil,err
 	}
 
-	return store,[]core.Account{a1,a2,a3,a4},nil
+	return store,[]core.ValidatorAccount{a1,a2,a3,a4},nil
 }
 
 func TestOpeningAccount (t *testing.T) {

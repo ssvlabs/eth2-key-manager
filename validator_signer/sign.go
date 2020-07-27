@@ -25,7 +25,7 @@ func (signer *SimpleSigner) Sign(req *pb.SignRequest) (*pb.SignResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	sig, err := account.Sign(forSig[:])
+	sig, err := account.ValidationKeySign(forSig[:])
 	if err != nil {
 		return nil, err
 	}

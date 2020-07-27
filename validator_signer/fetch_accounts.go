@@ -9,7 +9,7 @@ func (signer *SimpleSigner) ListAccounts(req *pb.ListAccountsRequest) (*pb.ListA
 	for account := range signer.wallet.Accounts() {
 		ret = append(ret, &pb.Account{
 			Name:                 account.Name(),
-			PublicKey:            account.PublicKey().Marshal(),
+			PublicKey:            account.ValidatorPublicKey().Marshal(),
 		})
 	}
 

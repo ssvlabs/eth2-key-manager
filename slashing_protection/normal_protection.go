@@ -3,6 +3,7 @@ package slashing_protection
 import (
 	"github.com/bloxapp/KeyVault/core"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 type NormalProtection struct {
@@ -20,14 +21,14 @@ func NewNormalProtection(store core.SlashingStore) *NormalProtection {
 const epochLookback = 128
 
 // will detect double, surround and surrounded slashable events
-func (protector *NormalProtection) IsSlashableAttestation(account core.Account, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus, error) {
+func (protector *NormalProtection) IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus, error) {
 	data := core.ToCoreAttestationData(req)
 
 	lookupStartEpoch := lookupEpochSub(data.Source.Epoch, epochLookback)
 	lookupEndEpoch := req.Data.Target.Epoch
 
 	// lookupEndEpoch should be the latest written attestation, if not than req.Data.Target.Epoch
-	latestAtt, err := protector.RetrieveLatestAttestation(account)
+	latestAtt, err := protector.RetrieveLatestAttestation(key)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +36,7 @@ func (protector *NormalProtection) IsSlashableAttestation(account core.Account, 
 		lookupEndEpoch = latestAtt.Target.Epoch
 	}
 
-	history, err := protector.store.ListAttestations(account, lookupStartEpoch, lookupEndEpoch)
+	history, err := protector.store.ListAttestations(key, lookupStartEpoch, lookupEndEpoch)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +44,8 @@ func (protector *NormalProtection) IsSlashableAttestation(account core.Account, 
 	return data.SlashesAttestations(history), nil
 }
 
-func (protector *NormalProtection) IsSlashableProposal(account core.Account, req *pb.SignBeaconProposalRequest) (*core.ProposalSlashStatus, error) {
-	matchedProposal, err := protector.store.RetrieveProposal(account, req.Data.Slot)
+func (protector *NormalProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) (*core.ProposalSlashStatus, error) {
+	matchedProposal, err := protector.store.RetrieveProposal(key, req.Data.Slot)
 	if err != nil && err.Error() != "proposal not found" {
 		return nil, err
 	}
@@ -67,39 +68,39 @@ func (protector *NormalProtection) IsSlashableProposal(account core.Account, req
 	}, nil
 }
 
-func (protector *NormalProtection) SaveAttestation(account core.Account, req *pb.SignBeaconAttestationRequest) error {
+func (protector *NormalProtection) SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
 	data := core.ToCoreAttestationData(req)
-	err := protector.store.SaveAttestation(account, data)
+	err := protector.store.SaveAttestation(key, data)
 	if err != nil {
 		return err
 	}
-	return protector.SaveLatestAttestation(account, req)
+	return protector.SaveLatestAttestation(key, req)
 }
 
-func (protector *NormalProtection) SaveProposal(account core.Account, req *pb.SignBeaconProposalRequest) error {
+func (protector *NormalProtection) SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error {
 	data := core.ToCoreBlockData(req)
-	return protector.store.SaveProposal(account, data)
+	return protector.store.SaveProposal(key, data)
 }
 
-func (protector *NormalProtection) SaveLatestAttestation(account core.Account, req *pb.SignBeaconAttestationRequest) error {
-	val, err := protector.store.RetrieveLatestAttestation(account)
+func (protector *NormalProtection) SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
+	val, err := protector.store.RetrieveLatestAttestation(key)
 	if err != nil {
 		return nil
 	}
 
 	data := core.ToCoreAttestationData(req)
 	if val == nil {
-		return protector.store.SaveLatestAttestation(account, data)
+		return protector.store.SaveLatestAttestation(key, data)
 	}
 	if val.Target.Epoch < req.Data.Target.Epoch { // only write newer
-		return protector.store.SaveLatestAttestation(account, data)
+		return protector.store.SaveLatestAttestation(key, data)
 	}
 
 	return nil
 }
 
-func (protector *NormalProtection) RetrieveLatestAttestation(account core.Account) (*core.BeaconAttestation, error) {
-	return protector.store.RetrieveLatestAttestation(account)
+func (protector *NormalProtection) RetrieveLatestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
+	return protector.store.RetrieveLatestAttestation(key)
 }
 
 // specialized func that will prevent overflow for lookup epochs for uint64

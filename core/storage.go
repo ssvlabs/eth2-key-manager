@@ -16,14 +16,14 @@ type Storage interface {
 	// will return nil,nil if no wallet was found
 	OpenWallet() (Wallet,error)
 	// will return an empty array for no accounts
-	ListAccounts() ([]Account,error)
+	ListAccounts() ([]ValidatorAccount,error)
 
 	///*
 	//	Account specific
 	// */
-	SaveAccount(account Account) error
+	SaveAccount(account ValidatorAccount) error
 	// will return nil,nil if no account was found
-	OpenAccount(accountId uuid.UUID) (Account,error)
+	OpenAccount(accountId uuid.UUID) (ValidatorAccount,error)
 
 	// could also bee set to nil
 	SetEncryptor(encryptor types.Encryptor, password []byte)

@@ -92,22 +92,17 @@ func TestImportKeyVault(t *testing.T) {
 			require.NoError(t,err)
 
 			// test specific derivation
-			val,err := wallet.AccountByName("val1")
+			account,err := wallet.AccountByName("val1")
 			require.NoError(t,err)
-			require.NotNil(t,val)
-			with,err := wallet.GetWithdrawalAccount()
-			require.NoError(t,err)
-			require.NotNil(t,with)
+			require.NotNil(t,account)
 
 			expectedValKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218").Bytes())
 			require.NoError(t,err)
 			expectedWithdrawalKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358").Bytes())
 			require.NoError(t,err)
 
-			assert.Equal(t,expectedValKey.PublicKey().Marshal(),val.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0/0",val.Path())
-			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(),with.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0",with.Path())
+			assert.Equal(t,expectedValKey.PublicKey().Marshal(),account.ValidatorPublicKey().Marshal())
+			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
 		})
 	}
 }
@@ -155,22 +150,17 @@ func TestOpenKeyVault(t *testing.T) {
 			require.NoError(t,err)
 
 			// test specific derivation
-			val,err := wallet.AccountByName("val1")
+			account,err := wallet.AccountByName("val1")
 			require.NoError(t,err)
-			require.NotNil(t,val)
-			with,err := wallet.GetWithdrawalAccount()
-			require.NoError(t,err)
-			require.NotNil(t,with)
+			require.NotNil(t,account)
 
 			expectedValKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218").Bytes())
 			require.NoError(t,err)
 			expectedWithdrawalKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358").Bytes())
 			require.NoError(t,err)
 
-			assert.Equal(t,expectedValKey.PublicKey().Marshal(),val.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0/0",val.Path())
-			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(),with.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0",with.Path())
+			assert.Equal(t,expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
+			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
 		})
 	}
 }
@@ -192,9 +182,4 @@ func testVault(t *testing.T, v *KeyVault) {
 	require.Equal(t,val.ID().String(),val2.ID().String())
 	require.Equal(t,val.Name(),val1.Name())
 	require.Equal(t,val.Name(),val2.Name())
-
-	// create and fetch withdrawal account
-	with,err := wallet.GetWithdrawalAccount()
-	require.NoError(t,err)
-	require.NotNil(t,with)
 }

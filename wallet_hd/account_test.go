@@ -2,6 +2,7 @@ package wallet_hd
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -13,20 +14,20 @@ func TestAccountMarshaling(t *testing.T) {
 	tests := []struct{
 		id uuid.UUID
 		testName string
-		accountType core.AccountType
+		//accountType core.AccountType
 		parentWalletId uuid.UUID
 		name string
 		seed []byte
-		path string
+		accountIndex string
 	}{
 		{
 			testName:"simple account",
 			id:uuid.New(),
-			accountType:core.ValidatorAccount,
+			//accountType:core.ValidatorAccount,
 			parentWalletId:uuid.New(),
 			name: "account1",
 			seed:  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			path: "/0/0",
+			accountIndex: "0",
 		},
 	}
 
@@ -42,13 +43,16 @@ func TestAccountMarshaling(t *testing.T) {
 			// create key and account
 			masterKey,err := core.MasterKeyFromSeed(storage)
 			require.NoError(t, err)
-			key,err := masterKey.Derive(test.path)
+			validationKey,err := masterKey.Derive(fmt.Sprintf("/%s/0/0", test.accountIndex))
+			require.NoError(t, err)
+			withdrawalKey,err := masterKey.Derive(fmt.Sprintf("/%s/0", test.accountIndex))
 			require.NoError(t, err)
 			a := &HDAccount{
-				accountType:test.accountType,
+				//accountType:test.accountType,
 				name:test.name,
 				id:test.id,
-				key:key,
+				validationKey: validationKey,
+				withdrawalKey:withdrawalKey,
 			}
 
 			// marshal
@@ -61,9 +65,10 @@ func TestAccountMarshaling(t *testing.T) {
 
 			require.Equal(t,a.id,a1.id)
 			require.Equal(t,a.name,a1.name)
-			require.Equal(t,a.accountType,a1.accountType)
-			require.Equal(t,a.WalletID().String(),a1.WalletID().String())
-			require.Equal(t,a.key.PublicKey().Marshal(),a1.key.PublicKey().Marshal())
+			//require.Equal(t,a.accountType,a1.accountType)
+			//require.Equal(t,a.WalletID().String(),a1.WalletID().String())
+			require.Equal(t,a.validationKey.PublicKey().Marshal(),a1.validationKey.PublicKey().Marshal())
+			require.Equal(t,a.withdrawalKey.PublicKey().Marshal(),a1.withdrawalKey.PublicKey().Marshal())
 		})
 	}
 }

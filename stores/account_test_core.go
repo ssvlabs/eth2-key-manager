@@ -9,18 +9,19 @@ import (
 	"testing"
 )
 
-func TestingOpeningAccount(storage core.Storage, account core.Account, t *testing.T) {
+func TestingOpeningAccount(storage core.Storage, account core.ValidatorAccount, t *testing.T) {
 	a1,err := storage.OpenAccount(account.ID())
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	require.Equal(t,account.ID().String(),a1.ID().String())
-	require.Equal(t,account.PublicKey().Marshal(),a1.PublicKey().Marshal())
+	require.Equal(t,account.ValidatorPublicKey().Marshal(),a1.ValidatorPublicKey().Marshal())
+	require.Equal(t,account.WithdrawalPublicKey().Marshal(),a1.WithdrawalPublicKey().Marshal())
 	require.Equal(t,account.Name(),a1.Name())
 }
 
-func TestingSavingAccounts(storage core.Storage, accounts []core.Account, t *testing.T) {
+func TestingSavingAccounts(storage core.Storage, accounts []core.ValidatorAccount, t *testing.T) {
 	for _,account := range accounts {
 		testname := fmt.Sprintf("adding account %s",account.Name())
 		t.Run(testname, func(t *testing.T) {
@@ -37,7 +38,8 @@ func TestingSavingAccounts(storage core.Storage, accounts []core.Account, t *tes
 			}
 			require.Equal(t,account.ID(), val.ID())
 			require.Equal(t,account.Name(), val.Name())
-			require.Equal(t,account.PublicKey().Marshal(), val.PublicKey().Marshal())
+			require.Equal(t,account.ValidatorPublicKey().Marshal(), val.ValidatorPublicKey().Marshal())
+			require.Equal(t,account.WithdrawalPublicKey().Marshal(), val.WithdrawalPublicKey().Marshal())
 		})
 	}
 }

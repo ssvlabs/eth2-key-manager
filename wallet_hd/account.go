@@ -11,9 +11,8 @@ import (
 type HDAccount struct {
 	name string
 	id uuid.UUID
-	accountType core.AccountType
-	key *core.HDKey
-	parentWalletId uuid.UUID
+	validationKey *core.HDKey
+	withdrawalKey *core.HDKey
 	context *core.WalletContext
 }
 
@@ -22,9 +21,8 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 
 	data["id"] = account.id
 	data["name"] = account.name
-	data["type"] = account.accountType
-	data["key"] = account.key
-	data["parentWalletId"] = account.parentWalletId
+	data["validationKey"] = account.validationKey
+	data["withdrawalKey"] = account.withdrawalKey
 	return json.Marshal(data)
 }
 
@@ -49,13 +47,8 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		account.name = val.(string)
 	} else {return fmt.Errorf("could not find var: id")}
 
-	// type
-	if val, exists := v["type"]; exists {
-		account.accountType = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
-
-	// key
-	if val, exists := v["key"]; exists {
+	// validation key
+	if val, exists := v["validationKey"]; exists {
 		byts,err := json.Marshal(val)
 		if err != nil {
 			return err
@@ -65,32 +58,36 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		account.key = key
+		account.validationKey = key
 	} else {return fmt.Errorf("could not find var: key")}
 
-	// type
-	if val, exists := v["parentWalletId"]; exists {
-		account.parentWalletId,err = uuid.Parse(val.(string))
+	// withdrawal Key
+	if val, exists := v["withdrawalKey"]; exists {
+		byts,err := json.Marshal(val)
 		if err != nil {
 			return err
 		}
-	} else {return fmt.Errorf("could not find var: id")}
+		key := &core.HDKey{}
+		err = json.Unmarshal(byts,key)
+		if err != nil {
+			return err
+		}
+		account.withdrawalKey = key
+	} else {return fmt.Errorf("could not find var: key")}
 
 	return nil
 }
 
-func newHDAccount(name string,
-	accountType core.AccountType,
-	walletId uuid.UUID,
-	key *core.HDKey,
+func NewValidatorAccount(name string,
+	validationKey *core.HDKey,
+	withdrawalKey *core.HDKey,
 	context *core.WalletContext) (*HDAccount,error) {
 	return &HDAccount{
-		name:         name,
-		id:           uuid.New(),
-		accountType:  accountType,
-		parentWalletId:walletId,
-		key:    	  key,
-		context:	  context,
+		name:         	 name,
+		id:          	 uuid.New(),
+		validationKey:	 validationKey,
+		withdrawalKey:	 withdrawalKey,
+		context:	  	 context,
 	},nil
 }
 
@@ -99,36 +96,34 @@ func (account *HDAccount) ID() uuid.UUID {
 	return account.id
 }
 
-// WalletID provides the ID for the wallet holding this account.
-func (account *HDAccount) WalletID() uuid.UUID {
-	return account.parentWalletId
-}
-
-// ID provides the ID for the account.
-func (account *HDAccount) Type() core.AccountType {
-	return account.accountType
-}
-
 // Name provides the name for the account.
 func (account *HDAccount) Name() string {
 	return account.name
 }
 
-// PublicKey provides the public key for the account.
-func (account *HDAccount) PublicKey() e2types.PublicKey {
-	return account.key.PublicKey()
+// ValidatorPublicKey provides the public key for the account.
+func (account *HDAccount) ValidatorPublicKey() e2types.PublicKey {
+	return account.validationKey.PublicKey()
 }
 
-// Path provides the path for the account.
-// Can be empty if the account is not derived from a path.
-func (account *HDAccount) Path() string {
-	return account.key.Path()
+// WithdrawalPublicKey provides the public key for the account.
+func (account *HDAccount) WithdrawalPublicKey() e2types.PublicKey {
+	return account.withdrawalKey.PublicKey()
 }
 
 // Sign signs data with the account.
-func (account *HDAccount) Sign(data []byte) (e2types.Signature,error) {
-	return account.key.Sign(data)
+func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature,error) {
+	return account.validationKey.Sign(data)
 }
+
+// Sign signs data with the withdrawal key.
+func (account *HDAccount) WithdrawalKeySign(data []byte) (e2types.Signature,error) {
+	if account.withdrawalKey == nil {
+		return nil, fmt.Errorf("withdrawal key not present")
+	}
+	return account.withdrawalKey.Sign(data)
+}
+
 
 func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx

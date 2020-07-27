@@ -28,7 +28,6 @@ func newDummyAccount(privKey []byte) *dummyAccount {
 }
 func (a *dummyAccount) ID() uuid.UUID {return uuid.New()}
 func (a *dummyAccount) WalletID() uuid.UUID                        {return uuid.New()}
-func (a *dummyAccount) Type() core.AccountType                     {return core.ValidatorAccount }
 func (a *dummyAccount) Name() string                               {return ""}
 func (a *dummyAccount) PublicKey() e2types.PublicKey {return a.priv.PublicKey()}
 func (a *dummyAccount) Path() string {return ""}
@@ -57,10 +56,14 @@ func TestDepositData(t *testing.T) {
 		},
 	}
 
+	e2types.InitBLS()
+
 	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
-			val := newDummyAccount(test.validatorPrivKey)
-			withd := newDummyAccount(test.withdrawalPrivKey)
+			val,err := core.NewHDKeyFromPrivateKey(test.validatorPrivKey, "")
+			require.NoError(t,err)
+			withd,err := core.NewHDKeyFromPrivateKey(test.withdrawalPrivKey, "")
+			require.NoError(t,err)
 
 			// create data
 			depositData,root,err := DepositData(val,withd, MaxEffectiveBalanceInGwei)

@@ -5,27 +5,35 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+	"math/big"
 	"testing"
 )
 
+func _bigInt(input string) *big.Int {
+	res, _ := new(big.Int).SetString(input, 10)
+	return res
+}
+
 type mockAccount struct {
 	id uuid.UUID
-	walletid uuid.UUID
+	validationKey *big.Int
 }
 func (a *mockAccount) ID() uuid.UUID {return a.id}
-func (a *mockAccount) WalletID() uuid.UUID {return a.walletid}
-func (a *mockAccount) Type() core.AccountType {return core.ValidatorAccount}
 func (a *mockAccount) Name() string {return ""}
-func (a *mockAccount) PublicKey() e2types.PublicKey {return nil}
-func (a *mockAccount) Path() string {return ""}
-func (a *mockAccount) Sign(data []byte) (e2types.Signature,error) {return nil,nil}
+func (a *mockAccount) ValidatorPublicKey() e2types.PublicKey {
+	priv,_ := e2types.BLSPrivateKeyFromBytes(a.validationKey.Bytes())
+	return priv.PublicKey()
+}
+func (a *mockAccount) WithdrawalPublicKey() e2types.PublicKey {return nil}
+func (a *mockAccount) ValidationKeySign(data []byte) (e2types.Signature,error) {return nil,nil}
+func (a *mockAccount) WithdrawalKeySign(data []byte) (e2types.Signature,error) {return nil,nil}
 func (a *mockAccount) SetContext(ctx *core.WalletContext)         {}
 
 func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		proposal *core.BeaconBlockHeader
-		account core.Account
+		account core.ValidatorAccount
 	}{
 		{
 			name:"simple save",
@@ -38,7 +46,7 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 			},
 			account: &mockAccount{
 				id:       uuid.New(),
-				walletid: uuid.New(),
+				validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 			},
 		},
 	}
@@ -46,14 +54,14 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveProposal(test.account,test.proposal)
+			err := storage.SaveProposal(test.account.ValidatorPublicKey(),test.proposal)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
 			// fetch
-			proposal,err := storage.RetrieveProposal(test.account,test.proposal.Slot)
+			proposal,err := storage.RetrieveProposal(test.account.ValidatorPublicKey(),test.proposal.Slot)
 			if err != nil {
 				t.Error(err)
 				return
@@ -74,7 +82,7 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		att *core.BeaconAttestation
-		account core.Account
+		account core.ValidatorAccount
 	}{
 		{
 			name:"simple save",
@@ -93,7 +101,7 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 			},
 			account: &mockAccount{
 				id:       uuid.New(),
-				walletid: uuid.New(),
+				validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 			},
 		},
 		{
@@ -113,7 +121,7 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 			},
 			account: &mockAccount{
 				id:       uuid.New(),
-				walletid: uuid.New(),
+				validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 			},
 		},
 	}
@@ -121,14 +129,14 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveAttestation(test.account,test.att)
+			err := storage.SaveAttestation(test.account.ValidatorPublicKey(),test.att)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
 			// fetch
-			att,err := storage.RetrieveAttestation(test.account,test.att.Target.Epoch)
+			att,err := storage.RetrieveAttestation(test.account.ValidatorPublicKey(),test.att.Target.Epoch)
 			if err != nil {
 				t.Error(err)
 				return
@@ -148,10 +156,10 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 func TestingRetrieveEmptyLatestAttestation(storage core.SlashingStore, t *testing.T) {
 	account := &mockAccount{
 		id:       uuid.New(),
-		walletid: uuid.New(),
+		validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 	}
 
-	att,err := storage.RetrieveLatestAttestation(account)
+	att,err := storage.RetrieveLatestAttestation(account.ValidatorPublicKey())
 	require.NoError(t,err)
 	if att != nil {
 		t.Errorf("latest attestation should be nil")
@@ -163,7 +171,7 @@ func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name string
 		att *core.BeaconAttestation
-		account core.Account
+		account core.ValidatorAccount
 	}{
 		{
 			name:"simple save",
@@ -182,7 +190,7 @@ func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 			},
 			account: &mockAccount{
 				id:       uuid.New(),
-				walletid: uuid.New(),
+				validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 			},
 		},
 		{
@@ -202,7 +210,7 @@ func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 			},
 			account: &mockAccount{
 				id:       uuid.New(),
-				walletid: uuid.New(),
+				validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 			},
 		},
 	}
@@ -210,14 +218,14 @@ func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveLatestAttestation(test.account,test.att)
+			err := storage.SaveLatestAttestation(test.account.ValidatorPublicKey(),test.att)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
 			// fetch
-			att,err := storage.RetrieveLatestAttestation(test.account)
+			att,err := storage.RetrieveLatestAttestation(test.account.ValidatorPublicKey())
 			if err != nil {
 				t.Error(err)
 				return
@@ -278,12 +286,12 @@ func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 	}
 	account := &mockAccount{
 		id:       uuid.New(),
-		walletid: uuid.New(),
+		validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
 	}
 
 	// save
 	for _,att := range attestations {
-		err := storage.SaveAttestation(account,att)
+		err := storage.SaveAttestation(account.ValidatorPublicKey(),att)
 		if err != nil {
 			t.Error(err)
 			return
@@ -331,7 +339,7 @@ func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// list
-			atts,err := storage.ListAttestations(account,test.start,test.end)
+			atts,err := storage.ListAttestations(account.ValidatorPublicKey(),test.start,test.end)
 			if err != nil {
 				t.Error(err)
 				return

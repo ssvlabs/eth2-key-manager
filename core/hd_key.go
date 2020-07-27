@@ -15,6 +15,19 @@ type HDKey struct {
 	path    string
 }
 
+func NewHDKeyFromPrivateKey(priv []byte, path string) (*HDKey, error) {
+	key,err := e2types.BLSPrivateKeyFromBytes(priv)
+	if err != nil {
+		return nil,err
+	}
+
+	return &HDKey{
+		id:      uuid.New(),
+		privKey: key,
+		path:    path,
+	}, nil
+}
+
 func (key *HDKey) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
