@@ -19,7 +19,7 @@ func (key *HDKey) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
 	data["id"] = key.id
-	data["pubkey"] = hex.EncodeToString(key.privKey.Marshal())
+	data["privKey"] = hex.EncodeToString(key.privKey.Marshal())
 	data["path"] = key.path
 
 	return json.Marshal(data)
@@ -48,7 +48,7 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 
 
 	// pubkey
-	if val, exists := v["pubkey"]; exists {
+	if val, exists := v["privKey"]; exists {
 		byts,err := hex.DecodeString(val.(string))
 		if err != nil {
 			return err

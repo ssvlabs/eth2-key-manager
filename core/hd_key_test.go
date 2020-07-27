@@ -112,6 +112,7 @@ func TestMarshalingHDKey(t *testing.T) {
 			// match
 			require.Equal(t,hdKey.Path(),newKey.Path())
 			require.Equal(t,hdKey.id.String(),newKey.id.String())
+			require.Equal(t,hdKey.privKey.Marshal(), newKey.privKey.Marshal())
 			require.Equal(t,hdKey.PublicKey().Marshal(),newKey.PublicKey().Marshal())
 		})
 	}
