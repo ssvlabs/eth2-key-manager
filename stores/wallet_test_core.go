@@ -56,7 +56,7 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			// create
 			accountName := fmt.Sprintf("%d",i)
-			a,err := w.CreateValidatorAccount(accountName)
+			a,err := w.CreateValidatorAccount(accountName, nil)
 			if err != nil {
 				t.Error(err)
 				return

@@ -22,11 +22,11 @@ func setupAttestation() (core.SlashingProtector, []core.Account,error) {
 	if err != nil {
 		return nil,nil,err
 	}
-	account1,err := w.CreateValidatorAccount("1")
+	account1,err := w.CreateValidatorAccount("1", nil)
 	if err != nil {
 		return nil,nil,err
 	}
-	account2,err := w.CreateValidatorAccount("2")
+	account2,err := w.CreateValidatorAccount("2", nil)
 	if err != nil {
 		return nil,nil,err
 	}

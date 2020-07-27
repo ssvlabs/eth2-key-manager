@@ -58,7 +58,7 @@ func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
 	}
 
 	if account == nil { // create on the fly
-		created, err := wallet.createKey(WithdrawalKeyName, WithdrawalKeyPath, core.WithdrawalAccount)
+		created, err := wallet.createKey(WithdrawalKeyName, WithdrawalKeyPath, nil, core.WithdrawalAccount)
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +70,7 @@ func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
 
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 // This will error if an account with the name already exists.
-func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error) {
+func (wallet *HDWallet) CreateValidatorAccount(name string, privateKey []byte) (core.Account, error) {
 	if len(name) == 0 {
 		return nil, fmt.Errorf("account name is empty")
 	}
@@ -80,8 +80,8 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.Account, error
 	if exists {
 		return nil, fmt.Errorf("account %q already exists", name)
 	}
-	path := fmt.Sprintf(ValidatorKeyPath,len(wallet.indexMapper))
-	return wallet.createKey(name,path,core.ValidatorAccount)
+	path := fmt.Sprintf(ValidatorKeyPath, len(wallet.indexMapper))
+	return wallet.createKey(name, path, privateKey, core.ValidatorAccount)
 }
 
 // Accounts provides all accounts in the wallet.
@@ -130,11 +130,11 @@ func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
 	return wallet.AccountByID(id)
 }
 
-func (wallet *HDWallet) createKey(name string, path string, accountType core.AccountType) (core.Account, error) {
+func (wallet *HDWallet) createKey(name string, path string, privateKey []byte, accountType core.AccountType) (core.Account, error) {
 	var retAccount *HDAccount
 
 	// create account
-	key,err := wallet.key.Derive(path)
+	key,err := wallet.key.Derive(path, privateKey)
 	if err != nil {
 		return nil,err
 	}

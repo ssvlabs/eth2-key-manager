@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 	"regexp"
@@ -88,27 +89,36 @@ func BaseKeyFromSeed(seed []byte, storage Storage) (*DerivableKey,error) {
 	},nil
 }
 
-func (baseKey *DerivableKey) Derive(relativePath string) (*DerivableKey,error) {
+func (baseKey *DerivableKey) Derive(relativePath string, privateKey []byte) (*DerivableKey, error) {
+	var key *e2types.BLSPrivateKey
+	var err error
+
 	if !validateRelativePath(relativePath) {
 		return nil, fmt.Errorf("invalid relative path. Example: /1/2/3")
 	}
 
-	// fetch priv key
-	seed,err := baseKey.tempFetchSeed()
-	if err != nil {
-		return nil,err
-	}
-	if seed == nil {
-		return nil,fmt.Errorf("seed is nil")
-	}
-
 	//derive
 	path := baseKey.path + relativePath
-	key,err := util.PrivateKeyFromSeedAndPath(seed,path)
-	if err != nil {
-		return nil,err
-	}
+	if privateKey != nil {
+		key, err = e2types.BLSPrivateKeyFromBytes(privateKey)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to BLS private key from bytes")
+		}
+	} else {
+		// fetch priv key
+		seed, err := baseKey.tempFetchSeed()
+		if err != nil {
+			return nil, err
+		}
+		if seed == nil {
+			return nil, fmt.Errorf("seed is nil")
+		}
 
+		key, err = util.PrivateKeyFromSeedAndPath(seed, path)
+		if err != nil {
+			return nil, err
+		}
+	}
 	// new id
 	id := uuid.New()
 
@@ -117,7 +127,7 @@ func (baseKey *DerivableKey) Derive(relativePath string) (*DerivableKey,error) {
 		id:      id,
 		pubKey:  key.PublicKey(),
 		path:    path,
-	},nil
+	}, nil
 }
 
 func (key *DerivableKey) PublicKey() e2types.PublicKey {

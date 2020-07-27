@@ -81,7 +81,7 @@ func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	// create accounts
 	accounts := map[string]bool{}
 	for i := 0 ; i < 10 ; i++ {
-		account,err := wallet.CreateValidatorAccount(fmt.Sprintf("%d",i))
+		account,err := wallet.CreateValidatorAccount(fmt.Sprintf("%d",i), nil)
 		if err != nil {
 			t.Error(err)
 			return

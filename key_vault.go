@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	util "github.com/wealdtech/go-eth2-util"
 	"log"
 	"sync"
 
@@ -13,6 +14,11 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
+const (
+	BaseEIP2334Path = "m/12381/3600"
+	//TODO change to /0/%d when remove portfolio from the path
+	ValidatorKeyPath = "/0/0/%d"
+)
 var initBLSOnce sync.Once
 
 // initBLS initializes BLS ONLY ONCE!
@@ -200,4 +206,19 @@ func SeedFromMnemonic(mnemonic string) ([]byte, error) {
 	}
 
 	return seed, nil
+}
+
+func CreateAccount(seed []byte, index int) ([]byte, error) {
+	if seed == nil {
+		return nil, fmt.Errorf("no seed was provided")
+	}
+	relativePath := fmt.Sprintf(ValidatorKeyPath, index)
+	// TODO Validate relative path
+	path := BaseEIP2334Path + relativePath
+	key, err := util.PrivateKeyFromSeedAndPath(seed, path)
+	if err != nil {
+		return nil, err
+	}
+
+	return key.Marshal(), nil
 }
