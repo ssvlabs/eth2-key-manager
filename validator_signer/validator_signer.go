@@ -9,7 +9,7 @@ import (
 )
 
 type ValidatorSigner interface {
-	ListAccounts(req *pb.ListAccountsRequest) (*pb.ListAccountsResponse, error)
+	ListAccounts() (*pb.ListAccountsResponse, error)
 	SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error)
 	SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error)
 	Sign(req *pb.SignRequest) (*pb.SignResponse, error)

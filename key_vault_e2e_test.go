@@ -165,6 +165,7 @@ func TestOpenKeyVault(t *testing.T) {
 	}
 }
 
+
 func testVault(t *testing.T, v *KeyVault) {
 	wallet,err := v.Wallet()
 	require.NoError(t,err)

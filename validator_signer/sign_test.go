@@ -166,11 +166,3 @@ func TestSignatures(t *testing.T) {
 	}
 }
 
-
-func TestWalletLocked(t *testing.T) {
-
-}
-
-func TestAccountLocked(t *testing.T) {
-
-}

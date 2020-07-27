@@ -80,15 +80,15 @@ func (att *BeaconAttestation) SlashesAttestations (history []*BeaconAttestation)
 		if val := detectSurroundingVote(att,history_att); val != nil {
 			ret = append(ret,&AttestationSlashStatus{
 				Attestation: val,
-				Status:      SurroundedVote,
+				Status:      SurroundingVote,
 			})
 		}
 
 		// Surrounded vote
-		if val := detectSurroundingVote(history_att, att); val != nil {
+		if val := detectSurroundedVote(att,history_att); val != nil {
 			ret = append(ret,&AttestationSlashStatus{
 				Attestation: val,
-				Status:      SurroundingVote,
+				Status:      SurroundedVote,
 			})
 		}
 	}
@@ -112,4 +112,8 @@ func detectSurroundingVote(att *BeaconAttestation, other *BeaconAttestation) *Be
 		return other
 	}
 	return nil
+}
+
+func detectSurroundedVote (att *BeaconAttestation, other *BeaconAttestation) *BeaconAttestation {
+	return detectSurroundingVote(other, att)
 }
