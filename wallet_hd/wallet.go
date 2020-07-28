@@ -68,7 +68,7 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.ValidatorAccou
 	}
 
 	// create ret account
-	ret, err := NewValidatorAccount(name, validatorKey, withdrawalKey, wallet.context)
+	ret, err := NewValidatorAccount(name, validatorKey, withdrawalKey.PublicKey(), wallet.context)
 	if err != nil {
 		return nil, err
 	}

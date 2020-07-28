@@ -1,6 +1,7 @@
 package wallet_hd
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
@@ -12,7 +13,7 @@ type HDAccount struct {
 	name string
 	id uuid.UUID
 	validationKey *core.HDKey
-	withdrawalKey *core.HDKey
+	withdrawalPubKey e2types.PublicKey
 	context *core.WalletContext
 }
 
@@ -22,7 +23,7 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	data["id"] = account.id
 	data["name"] = account.name
 	data["validationKey"] = account.validationKey
-	data["withdrawalKey"] = account.withdrawalKey
+	data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey.Marshal())
 	return json.Marshal(data)
 }
 
@@ -61,18 +62,16 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		account.validationKey = key
 	} else {return fmt.Errorf("could not find var: key")}
 
-	// withdrawal Key
-	if val, exists := v["withdrawalKey"]; exists {
-		byts,err := json.Marshal(val)
+	// withdrawal pub Key
+	if val, exists := v["withdrawalPubKey"]; exists {
+		byts, err := hex.DecodeString(val.(string))
 		if err != nil {
 			return err
 		}
-		key := &core.HDKey{}
-		err = json.Unmarshal(byts,key)
+		account.withdrawalPubKey,err = e2types.BLSPublicKeyFromBytes(byts)
 		if err != nil {
 			return err
 		}
-		account.withdrawalKey = key
 	} else {return fmt.Errorf("could not find var: key")}
 
 	return nil
@@ -80,14 +79,14 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 
 func NewValidatorAccount(name string,
 	validationKey *core.HDKey,
-	withdrawalKey *core.HDKey,
+	withdrawalPubKey e2types.PublicKey,
 	context *core.WalletContext) (*HDAccount,error) {
 	return &HDAccount{
-		name:         	 name,
-		id:          	 uuid.New(),
-		validationKey:	 validationKey,
-		withdrawalKey:	 withdrawalKey,
-		context:	  	 context,
+		name:         	  name,
+		id:          	  uuid.New(),
+		validationKey:	  validationKey,
+		withdrawalPubKey: withdrawalPubKey,
+		context:	  	  context,
 	},nil
 }
 
@@ -108,7 +107,7 @@ func (account *HDAccount) ValidatorPublicKey() e2types.PublicKey {
 
 // WithdrawalPublicKey provides the public key for the account.
 func (account *HDAccount) WithdrawalPublicKey() e2types.PublicKey {
-	return account.withdrawalKey.PublicKey()
+	return account.withdrawalPubKey
 }
 
 // Sign signs data with the account.
@@ -116,13 +115,13 @@ func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature,erro
 	return account.validationKey.Sign(data)
 }
 
-// Sign signs data with the withdrawal key.
-func (account *HDAccount) WithdrawalKeySign(data []byte) (e2types.Signature,error) {
-	if account.withdrawalKey == nil {
-		return nil, fmt.Errorf("withdrawal key not present")
-	}
-	return account.withdrawalKey.Sign(data)
-}
+//// Sign signs data with the withdrawal key.
+//func (account *HDAccount) WithdrawalKeySign(data []byte) (e2types.Signature,error) {
+//	if account.withdrawalKey == nil {
+//		return nil, fmt.Errorf("withdrawal key not present")
+//	}
+//	return account.withdrawalKey.Sign(data)
+//}
 
 
 func (account *HDAccount) SetContext(ctx *core.WalletContext) {

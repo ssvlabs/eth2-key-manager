@@ -41,9 +41,7 @@ func init() {
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
 	id          uuid.UUID
-	//indexMapper map[string]uuid.UUID
 	Context     *core.WalletContext
-	//key         *core.MasterDerivableKey
 	walletId 	uuid.UUID
 }
 

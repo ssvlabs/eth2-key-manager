@@ -26,8 +26,8 @@ type ValidatorAccount interface {
 	WithdrawalPublicKey() e2types.PublicKey
 	// Sign signs data with the validation key.
 	ValidationKeySign(data []byte) (e2types.Signature,error)
-	// Sign signs data with the withdrawal key.
-	WithdrawalKeySign(data []byte) (e2types.Signature,error)
+	//// Sign signs data with the withdrawal key.
+	//WithdrawalKeySign(data []byte) (e2types.Signature,error)
 	//
 	SetContext(ctx *WalletContext)
 }

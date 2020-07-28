@@ -52,7 +52,7 @@ func TestAccountMarshaling(t *testing.T) {
 				name:test.name,
 				id:test.id,
 				validationKey: validationKey,
-				withdrawalKey:withdrawalKey,
+				withdrawalPubKey:withdrawalKey.PublicKey(),
 			}
 
 			// marshal
@@ -68,7 +68,7 @@ func TestAccountMarshaling(t *testing.T) {
 			//require.Equal(t,a.accountType,a1.accountType)
 			//require.Equal(t,a.WalletID().String(),a1.WalletID().String())
 			require.Equal(t,a.validationKey.PublicKey().Marshal(),a1.validationKey.PublicKey().Marshal())
-			require.Equal(t,a.withdrawalKey.PublicKey().Marshal(),a1.withdrawalKey.PublicKey().Marshal())
+			require.Equal(t,a.withdrawalPubKey.Marshal(),a1.withdrawalPubKey.Marshal())
 		})
 	}
 }
