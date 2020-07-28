@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/bloxapp/KeyVault/stores/in_memory"
 
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/wallet_hd"
@@ -34,6 +35,53 @@ const (
 	AccountBase = "wallet/accounts/"
 	AccountPath = AccountBase + "%s"
 )
+
+func FromInMemoryStore(inMem *in_memory.InMemStore, storage logical.Storage, ctx context.Context) (*HashicorpVaultStore,error) {
+	// first delete old data
+	// delete all accounts
+	res,err := storage.List(ctx,AccountBase)
+	if err != nil {
+		return nil, err
+	}
+	for _,accountId := range res {
+		path := fmt.Sprintf(AccountPath, accountId)
+		err = storage.Delete(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = storage.Delete(ctx,WalletDataPath)
+	if err != nil {
+		return nil, err
+	}
+	err = storage.Delete(ctx,AccountBase)
+	if err != nil {
+		return nil, err
+	}
+
+	// get new store
+	newStore := NewHashicorpVaultStore(storage, ctx)
+
+	// save wallet
+	wallet,err := inMem.OpenWallet()
+	if err != nil {
+		return nil, err
+	}
+	err = newStore.SaveWallet(wallet)
+	if err != nil {
+		return nil, err
+	}
+
+	// save accounts
+	for acc := range wallet.Accounts() {
+		err = newStore.SaveAccount(acc)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return newStore, nil
+}
 
 func (store *HashicorpVaultStore) Name() string {
 	return "Hashicorp Vault"
