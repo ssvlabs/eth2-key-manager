@@ -8,7 +8,8 @@ import (
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 const (
-	WithdrawalKeyPath = "/%d/0"
+	BaseAccountPath = "/%d"
+	WithdrawalKeyPath = BaseAccountPath + "/0"
 	ValidatorKeyPath = WithdrawalKeyPath + "/0"
 )
 
@@ -54,6 +55,7 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.ValidatorAccou
 		return nil, fmt.Errorf("account %q already exists", name)
 	}
 
+	baseAccountPath := fmt.Sprintf(BaseAccountPath,len(wallet.indexMapper))
 	// validator key
 	validatorPath := fmt.Sprintf(ValidatorKeyPath,len(wallet.indexMapper))
 	validatorKey,err := wallet.key.Derive(validatorPath)
@@ -68,7 +70,13 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.ValidatorAccou
 	}
 
 	// create ret account
-	ret, err := NewValidatorAccount(name, validatorKey, withdrawalKey.PublicKey(), wallet.context)
+	ret, err := NewValidatorAccount(
+			name,
+			validatorKey,
+			withdrawalKey.PublicKey(),
+			baseAccountPath,
+			wallet.context,
+		)
 	if err != nil {
 		return nil, err
 	}
