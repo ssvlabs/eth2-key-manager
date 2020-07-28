@@ -5,6 +5,7 @@ import (
 	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
+	"github.com/stretchr/testify/require"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
@@ -96,7 +97,7 @@ func TestDoubleProposal(t *testing.T) {
 	}
 
 	t.Run("New proposal, should not slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -107,19 +108,11 @@ func TestDoubleProposal(t *testing.T) {
 				BodyRoot:             []byte("Z"),
 			},
 		})
-
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if res != nil {
-			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 1,0)
-			return
-		}
+		require.Equal(t, res.Status, core.ValidProposal)
 	})
 
 	t.Run("different proposer index, should not slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[1].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
+		res := protector.IsSlashableProposal(accounts[1].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -130,19 +123,11 @@ func TestDoubleProposal(t *testing.T) {
 				BodyRoot:             []byte("A"),
 			},
 		})
-
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if res != nil {
-			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 1,0)
-			return
-		}
+		require.Equal(t, res.Status, core.ValidProposal)
 	})
 
 	t.Run("double proposal (different body root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -153,23 +138,11 @@ func TestDoubleProposal(t *testing.T) {
 				BodyRoot:             []byte("B"),
 			},
 		})
-
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if res == nil {
-			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 0,1)
-			return
-		}
-		if res.Status != core.DoubleProposal {
-			t.Errorf("wrong proposal status returned, expected DoubleProposal")
-			return
-		}
+		require.Equal(t, res.Status, core.DoubleProposal)
 	})
 
 	t.Run("double proposal (different state root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -180,23 +153,11 @@ func TestDoubleProposal(t *testing.T) {
 				BodyRoot:             []byte("A"),
 			},
 		})
-
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if res == nil {
-			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 0,1)
-			return
-		}
-		if res.Status != core.DoubleProposal {
-			t.Errorf("wrong proposal status returned, expected DoubleProposal")
-			return
-		}
+		require.Equal(t, res.Status, core.DoubleProposal)
 	})
 
 	t.Run("double proposal (different state and body root), should slash",func(t *testing.T) {
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
 			Id:                   nil,
 			Domain:               []byte("domain"),
 			Data:                 &pb.BeaconBlockHeader{
@@ -207,18 +168,6 @@ func TestDoubleProposal(t *testing.T) {
 				BodyRoot:             []byte("B"),
 			},
 		})
-
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if res == nil {
-			t.Errorf("found too many/few slashed proposals: %d, expected: %d", 0,1)
-			return
-		}
-		if res.Status != core.DoubleProposal {
-			t.Errorf("wrong proposal status returned, expected DoubleProposal")
-			return
-		}
+		require.Equal(t, res.Status, core.DoubleProposal)
 	})
 }

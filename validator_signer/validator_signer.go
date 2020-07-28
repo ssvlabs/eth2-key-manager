@@ -37,14 +37,19 @@ func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtecto
 // if already locked, will lock until released
 func (signer *SimpleSigner) lock (accountId uuid.UUID, operation string) {
 	k := accountId.String() + "_" + operation
-	signer.signLocks[k] = &sync.RWMutex{}
-	signer.signLocks[k].Lock()
+	if val, ok := signer.signLocks[k]; ok {
+		val.Lock()
+	} else {
+		signer.signLocks[k] = &sync.RWMutex{}
+		signer.signLocks[k].Lock()
+	}
 }
 
-func (signer *SimpleSigner) unlockAndDelete (accountId uuid.UUID, operation string) {
+func (signer *SimpleSigner) unlock(accountId uuid.UUID, operation string) {
 	k := accountId.String() + "_" + operation
-	signer.signLocks[k].Unlock()
-	delete(signer.signLocks,k)
+	if val, ok := signer.signLocks[k]; ok {
+		val.Unlock()
+	}
 }
 
 func prepareForSig(data interface{}, domain []byte) ([32]byte,error) {

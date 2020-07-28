@@ -44,28 +44,38 @@ func (protector *NormalProtection) IsSlashableAttestation(key e2types.PublicKey,
 	return data.SlashesAttestations(history), nil
 }
 
-func (protector *NormalProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) (*core.ProposalSlashStatus, error) {
+func (protector *NormalProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *core.ProposalSlashStatus {
 	matchedProposal, err := protector.store.RetrieveProposal(key, req.Data.Slot)
 	if err != nil && err.Error() != "proposal not found" {
-		return nil, err
+		return &core.ProposalSlashStatus{
+			Proposal: nil,
+			Status:   core.Error,
+			Error: err,
+		}
 	}
 
 	if matchedProposal == nil {
-		return nil, nil
+		return &core.ProposalSlashStatus{
+			Proposal: nil,
+			Status:   core.ValidProposal,
+		}
 	}
 
 	data := core.ToCoreBlockData(req)
 
 	// if it's the same
 	if data.Compare(matchedProposal) {
-		return nil, nil
+		return &core.ProposalSlashStatus{
+			Proposal: data,
+			Status:   core.ValidProposal,
+		}
 	}
 
 	// slashable
 	return &core.ProposalSlashStatus{
 		Proposal: data,
 		Status:   core.DoubleProposal,
-	}, nil
+	}
 }
 
 func (protector *NormalProtection) SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {

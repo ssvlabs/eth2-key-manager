@@ -20,7 +20,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	// 2. lock for current account
 	signer.lock(account.ID(), "attestation")
 	defer func() {
-		signer.unlockAndDelete(account.ID(), "attestation")
+		signer.unlock(account.ID(), "attestation")
 	}()
 
 	// 3. check we can even sign this

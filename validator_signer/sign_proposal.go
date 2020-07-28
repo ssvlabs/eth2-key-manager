@@ -19,24 +19,22 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 
 	// 2. lock for current account
 	signer.lock(account.ID(), "proposal")
-	defer func() {
-		signer.unlockAndDelete(account.ID(), "proposal")
-	}()
+	defer signer.unlock(account.ID(), "proposal")
 
-	// 3. check we can even sign this
-	if val, err := signer.slashingProtector.IsSlashableProposal(account.ValidatorPublicKey(), req); err != nil || val != nil {
-		if err != nil {
-			return nil, err
+	// 2. check we can even sign this
+	if status := signer.slashingProtector.IsSlashableProposal(account.ValidatorPublicKey(), req); status.Status != core.ValidProposal {
+		if status.Error != nil {
+			return nil, status.Error
 		}
-		return nil, fmt.Errorf("slashable proposal, not signing")
+		return nil, fmt.Errorf("err, slashable proposal: %s", status.Status)
 	}
 
-	// 4. add to protection storage
+	// 3. add to protection storage
 	if err := signer.slashingProtector.SaveProposal(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 
-	// 5. generate ssz root hash and sign
+	// 4. generate ssz root hash and sign
 	forSig, err := PrepareProposalReqForSigning(req)
 	if err != nil {
 		return nil, err

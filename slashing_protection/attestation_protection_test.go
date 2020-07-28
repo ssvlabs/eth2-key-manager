@@ -154,7 +154,7 @@ func TestSurroundingVote(t *testing.T) {
 			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
 			return
 		}
-		if res[0].Status != core.SurroundedVote {
+		if res[0].Status != core.SurroundingVote {
 			t.Errorf("wrong attestation status returned, expected SurroundingVote")
 			return
 		}
@@ -187,7 +187,7 @@ func TestSurroundingVote(t *testing.T) {
 			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),2)
 			return
 		}
-		if res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote {
+		if res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote {
 			t.Errorf("wrong attestation status returned, expected SurroundingVote")
 			return
 		}
@@ -219,7 +219,7 @@ func TestSurroundingVote(t *testing.T) {
 			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),1)
 			return
 		}
-		if res[0].Status != core.SurroundingVote {
+		if res[0].Status != core.SurroundedVote {
 			t.Errorf("wrong attestation status returned, expected SurroundedVote")
 			return
 		}
@@ -251,7 +251,7 @@ func TestSurroundingVote(t *testing.T) {
 			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res),2)
 			return
 		}
-		if res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote {
+		if res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote {
 			t.Errorf("wrong attestation status returned, expected SurroundedVote")
 			return
 		}

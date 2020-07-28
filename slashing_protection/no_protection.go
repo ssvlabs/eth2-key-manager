@@ -14,8 +14,11 @@ func (p *NoProtection)IsSlashableAttestation(key e2types.PublicKey, req *pb.Sign
 	return make([]*core.AttestationSlashStatus,0),nil
 }
 
-func (p *NoProtection)IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) (*core.ProposalSlashStatus,error) {
-	return nil,nil
+func (p *NoProtection)IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *core.ProposalSlashStatus {
+	return &core.ProposalSlashStatus{
+		Proposal: nil,
+		Status:   core.ValidProposal,
+	}
 }
 
 func (p *NoProtection)SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
