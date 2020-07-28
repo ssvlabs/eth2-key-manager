@@ -6,9 +6,9 @@ import (
 
 type KeyVaultOptions struct {
 	encryptor wtypes.Encryptor
-	password []byte
-	storage interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
-	seed []byte
+	password  []byte
+	storage   interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
+	seed      []byte
 }
 
 func (options *KeyVaultOptions) SetEncryptor(encryptor wtypes.Encryptor) *KeyVaultOptions {

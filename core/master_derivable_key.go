@@ -19,25 +19,25 @@ type MasterDerivableKey struct {
 }
 
 // base privKey is m / purpose / coin_type / as EIP 2334 defines
-func MasterKeyFromSeed(seed []byte) (*MasterDerivableKey,error) {
+func MasterKeyFromSeed(seed []byte) (*MasterDerivableKey, error) {
 	if seed == nil || len(seed) != 32 {
 		return nil, fmt.Errorf("seed can't be nil or of length different than 32")
 	}
 	return &MasterDerivableKey{
 		seed: seed,
-	},nil
+	}, nil
 }
 
-func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey,error) {
+func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 	if !validateRelativePath(relativePath) {
 		return nil, fmt.Errorf("invalid relative path. Example: /1/2/3")
 	}
 
 	//derive
 	path := BaseEIP2334Path + relativePath
-	key,err := util.PrivateKeyFromSeedAndPath(master.seed,path)
+	key, err := util.PrivateKeyFromSeedAndPath(master.seed, path)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// new id
@@ -45,9 +45,9 @@ func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey,error) {
 
 	return &HDKey{
 		id:      id,
-		privKey:  key,
+		privKey: key,
 		path:    path,
-	},nil
+	}, nil
 }
 
 func validateRelativePath(relativePath string) bool {

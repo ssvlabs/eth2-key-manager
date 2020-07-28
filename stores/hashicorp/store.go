@@ -29,7 +29,7 @@ func NewHashicorpVaultStore(storage logical.Storage, ctx context.Context) *Hashi
 }
 
 const (
-	WalletDataPath     	= "wallet/data"
+	WalletDataPath = "wallet/data"
 
 	AccountBase = "wallet/accounts/"
 	AccountPath = AccountBase + "%s"
