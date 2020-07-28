@@ -12,39 +12,30 @@ const (
 )
 
 // MasterDerivableKey is responsible for managing privKey derivation, signing and  encryption.
-// the private key or the seed are never held in memory but rather fetched ad-hoc from Storage.
-// how secure the Storage is for saving the seed (including encryption) is on the Storage implementation
 // follows EIP 2333,2334
-//
 // MasterDerivableKey is not intended to be used a signing key, just as a medium for managing keys
 type MasterDerivableKey struct {
-	Storage Storage
+	seed []byte
 }
 
 // base privKey is m / purpose / coin_type / as EIP 2334 defines
-func MasterKeyFromSeed(storage Storage) (*MasterDerivableKey,error) {
+func MasterKeyFromSeed(seed []byte) (*MasterDerivableKey,error) {
+	if seed == nil || len(seed) != 32 {
+		return nil, fmt.Errorf("seed can't be nil or of length different than 32")
+	}
 	return &MasterDerivableKey{
-		Storage: storage,
+		seed: seed,
 	},nil
 }
 
-func (baseKey *MasterDerivableKey) Derive(relativePath string) (*HDKey,error) {
+func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey,error) {
 	if !validateRelativePath(relativePath) {
 		return nil, fmt.Errorf("invalid relative path. Example: /1/2/3")
 	}
 
-	// fetch priv key
-	seed,err := baseKey.tempFetchSeed()
-	if err != nil {
-		return nil,err
-	}
-	if seed == nil {
-		return nil,fmt.Errorf("seed is nil")
-	}
-
 	//derive
 	path := BaseEIP2334Path + relativePath
-	key,err := util.PrivateKeyFromSeedAndPath(seed,path)
+	key,err := util.PrivateKeyFromSeedAndPath(master.seed,path)
 	if err != nil {
 		return nil,err
 	}
@@ -57,11 +48,6 @@ func (baseKey *MasterDerivableKey) Derive(relativePath string) (*HDKey,error) {
 		privKey:  key,
 		path:    path,
 	},nil
-}
-
-// TODO - this is a limitation of the util library that we use as it can't derive relative path but only absolute from the seed.
-func (key *MasterDerivableKey) tempFetchSeed() ([]byte,error) {
-	return key.Storage.SecurelyFetchPortfolioSeed()
 }
 
 func validateRelativePath(relativePath string) bool {

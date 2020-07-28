@@ -37,11 +37,9 @@ func TestAccountMarshaling(t *testing.T) {
 		t.Run(test.testName, func(t *testing.T) {
 			// setup storage
 			storage := inmemStorage()
-			err := storage.SecurelySavePortfolioSeed(test.seed)
-			require.NoError(t, err)
 
 			// create key and account
-			masterKey,err := core.MasterKeyFromSeed(storage)
+			masterKey,err := core.MasterKeyFromSeed(test.seed)
 			require.NoError(t, err)
 			validationKey,err := masterKey.Derive(fmt.Sprintf("/%s/0/0", test.accountIndex))
 			require.NoError(t, err)

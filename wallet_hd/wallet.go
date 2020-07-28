@@ -17,16 +17,14 @@ const (
 type HDWallet struct {
 	id 			uuid.UUID
 	walletType 	core.WalletType
-	key 		*core.MasterDerivableKey // the node key from which all accounts are derived
 	indexMapper map[string]uuid.UUID
 	context 	*core.WalletContext
 }
 
-func NewHDWallet(key *core.MasterDerivableKey, context *core.WalletContext) *HDWallet {
+func NewHDWallet(context *core.WalletContext) *HDWallet {
 	return &HDWallet{
 		id:              uuid.New(),
 		walletType:      core.HDWallet,
-		key:        	 key,
 		indexMapper: 	 make(map[string]uuid.UUID),
 		context:		 context,
 	}
@@ -44,7 +42,7 @@ func (wallet *HDWallet) Type() core.WalletType {
 
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 // This will error if an account with the name already exists.
-func (wallet *HDWallet) CreateValidatorAccount(name string) (core.ValidatorAccount, error) {
+func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.ValidatorAccount, error) {
 	if len(name) == 0 {
 		return nil, fmt.Errorf("account name is empty")
 	}
@@ -55,16 +53,22 @@ func (wallet *HDWallet) CreateValidatorAccount(name string) (core.ValidatorAccou
 		return nil, fmt.Errorf("account %q already exists", name)
 	}
 
+	// create the master key
+	key,err := core.MasterKeyFromSeed(seed)
+	if err != nil {
+		return nil, err
+	}
+
 	baseAccountPath := fmt.Sprintf(BaseAccountPath,len(wallet.indexMapper))
 	// validator key
 	validatorPath := fmt.Sprintf(ValidatorKeyPath,len(wallet.indexMapper))
-	validatorKey,err := wallet.key.Derive(validatorPath)
+	validatorKey,err := key.Derive(validatorPath)
 	if err != nil {
 		return nil, err
 	}
 	// withdrawal key
 	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath,len(wallet.indexMapper))
-	withdrawalKey,err := wallet.key.Derive(withdrawalPath)
+	withdrawalKey,err := key.Derive(withdrawalPath)
 	if err != nil {
 		return nil, err
 	}

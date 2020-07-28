@@ -47,7 +47,7 @@ func TestingSavingAccounts(storage core.Storage, accounts []core.ValidatorAccoun
 func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 	t.Run("testing", func(t *testing.T) {
 		// create keyvault and wallet
-		options := &KeyVault.WalletOptions{}
+		options := &KeyVault.KeyVaultOptions{}
 		options.SetStorage(storage)
 		options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
 
@@ -60,10 +60,11 @@ func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 }
 
 func TestingListingAccounts(storage core.Storage, t *testing.T) {
+	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	// create keyvault and wallet
-	options := &KeyVault.WalletOptions{}
+	options := &KeyVault.KeyVaultOptions{}
 	options.SetStorage(storage)
-	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
+	options.SetSeed(seed)
 	vault,err := KeyVault.NewKeyVault(options)
 	require.NoError(t, err)
 
@@ -73,7 +74,7 @@ func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	// create accounts
 	accounts := map[string]bool{}
 	for i := 0 ; i < 10 ; i++ {
-		account,err := wallet.CreateValidatorAccount(fmt.Sprintf("%d",i))
+		account,err := wallet.CreateValidatorAccount(seed, fmt.Sprintf("%d",i))
 		if err != nil {
 			t.Error(err)
 			return

@@ -3,7 +3,6 @@ package wallet_hd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 )
 
@@ -48,10 +47,6 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 			}
 		}
 	} else {return fmt.Errorf("could not find var: indexMapper")}
-
-
-	// key
-	wallet.key = &core.MasterDerivableKey{Storage: wallet.context.Storage}
 
 	return nil
 }

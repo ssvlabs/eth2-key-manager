@@ -23,10 +23,10 @@ func keyVault(storage core.Storage) (*KeyVault.KeyVault,error) {
 		os.Exit(1)
 	}
 
-	options := &KeyVault.WalletOptions{}
+	options := &KeyVault.KeyVaultOptions{}
 	options.SetStorage(storage)
 	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"))
-	return KeyVault.ImportKeyVault(options)
+	return KeyVault.NewKeyVault(options)
 }
 
 func TestingOpenAccounts(storage core.Storage, t *testing.T) {
@@ -36,12 +36,14 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 	wallet, err := kv.Wallet()
 	require.NoError(t, err)
 
+	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
+
 	for i := 0 ; i < 10 ; i ++ {
 		testName := fmt.Sprintf("adding and fetching account: %d", i)
 		t.Run(testName, func(t *testing.T) {
 			// create
 			accountName := fmt.Sprintf("%d",i)
-			a,err := wallet.CreateValidatorAccount(accountName)
+			a,err := wallet.CreateValidatorAccount(seed, accountName)
 			if err != nil {
 				t.Error(err)
 				return

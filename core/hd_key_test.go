@@ -59,19 +59,19 @@ func TestMarshalingHDKey(t *testing.T) {
 	} {
 		{
 			name: "validation account derivation",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "/0/0/0", // after basePath
 			err: nil,
 		},
 		{
 			name: "withdrawal account derivation",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "/0/0", // after basePath
 			err: nil,
 		},
 		{
 			name: "Base account derivation (base path only)",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "", // after basePath
 			err: fmt.Errorf("invalid relative path. Example: /1/2/3"),
 		},
@@ -79,12 +79,12 @@ func TestMarshalingHDKey(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			storage := storage(test.seed, nil)
-			err := storage.SecurelySavePortfolioSeed(test.seed)
-			require.NoError(t, err)
+			//storage := storage(test.seed, nil)
+			//err := storage.SecurelySavePortfolioSeed(test.seed)
+			//require.NoError(t, err)
 
 			// create the privKey
-			key,err := MasterKeyFromSeed(storage)
+			key,err := MasterKeyFromSeed(test.seed)
 			require.NoError(t, err)
 
 			hdKey,err := key.Derive(test.path)
@@ -188,28 +188,28 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 		},
 		{
 			name: "Base account derivation (big index)",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "/100/0", // after basePath
 			err: nil,
-			expectedKey: _bigInt("40407741422272659004469348930958444733127038589615463764403690368629477657256"),
+			expectedKey: _bigInt("32144101621348914818367240707612216812424606921220230979223912693973502345535"),
 		},
 		{
 			name: "bad path",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "0/0", // after basePath
 			err: fmt.Errorf("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name: "too large of an index, bad path",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "/1000/0", // after basePath
 			err: fmt.Errorf("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name: "not a relative path",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:  "m/0/0", // after basePath
 			err: fmt.Errorf("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
@@ -218,8 +218,7 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			storage := storage(test.seed,test.err)
-			key,err := MasterKeyFromSeed(storage)
+			key,err := MasterKeyFromSeed(test.seed)
 			if err != nil {
 				t.Error(err)
 				return

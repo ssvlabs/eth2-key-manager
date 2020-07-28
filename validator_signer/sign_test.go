@@ -43,10 +43,10 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet,error) {
 	}
 
 
-	options := &KeyVault.WalletOptions{}
+	options := &KeyVault.KeyVaultOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault,err := KeyVault.ImportKeyVault(options)
+	vault,err := KeyVault.NewKeyVault(options)
 	if err != nil {
 		return nil,err
 	}
@@ -56,7 +56,7 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet,error) {
 		return nil,err
 	}
 
-	_,err = wallet.CreateValidatorAccount("1")
+	_,err = wallet.CreateValidatorAccount(seed,"1")
 	if err != nil {
 		return nil,err
 	}

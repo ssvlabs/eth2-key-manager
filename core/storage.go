@@ -27,8 +27,4 @@ type Storage interface {
 
 	// could also bee set to nil
 	SetEncryptor(encryptor types.Encryptor, password []byte)
-	//
-	SecurelyFetchPortfolioSeed() ([]byte,error)
-	//
-	SecurelySavePortfolioSeed(secret []byte) error
 }

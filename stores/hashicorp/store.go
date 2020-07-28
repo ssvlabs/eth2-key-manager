@@ -29,7 +29,6 @@ func NewHashicorpVaultStore(storage logical.Storage, ctx context.Context) *Hashi
 }
 
 const (
-	SeedPath          	= "wallet/seed/"
 	WalletDataPath     	= "wallet/data"
 
 	AccountBase = "wallet/accounts/"
@@ -139,67 +138,6 @@ func (store *HashicorpVaultStore) OpenAccount(accountId uuid.UUID) (core.Validat
 func (store *HashicorpVaultStore) SetEncryptor(encryptor types.Encryptor, password []byte) {
 	store.encryptor = encryptor
 	store.encryptionPassword = password
-}
-
-//
-func (store *HashicorpVaultStore) SecurelyFetchPortfolioSeed() ([]byte, error) {
-	// get data
-	entry, err := store.storage.Get(store.ctx, SeedPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get record with seed path")
-	}
-
-	// Return nothing if there is no record
-	if entry == nil {
-		return nil, nil
-	}
-
-	// decrypt and return
-	var data []byte
-	if store.canEncrypt() {
-		var input map[string]interface{}
-		if err := json.Unmarshal(entry.Value, &input); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal data")
-		}
-		if input == nil {
-			return nil, nil
-		}
-
-		if data, err = store.encryptor.Decrypt(input, store.encryptionPassword); err != nil {
-			return nil, errors.Wrap(err, "failed to decrypt password")
-		}
-	} else {
-		data = entry.Value
-	}
-
-	return data, nil
-}
-
-//
-func (store *HashicorpVaultStore) SecurelySavePortfolioSeed(secret []byte) error {
-	// data
-	var data []byte
-	if store.canEncrypt() {
-		encrypted, err := store.encryptor.Encrypt(secret, store.encryptionPassword)
-		if err != nil {
-			return errors.Wrap(err, "failed to encrypt password")
-		}
-
-		if data, err = json.Marshal(encrypted); err != nil {
-			return errors.Wrap(err, "failed to marshal encrypted data")
-		}
-	} else {
-		data = secret
-	}
-
-	// save
-	path := fmt.Sprintf(SeedPath)
-	entry := &logical.StorageEntry{
-		Key:      path,
-		Value:    data,
-		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
 }
 
 func (store *HashicorpVaultStore) freshContext() *core.WalletContext {

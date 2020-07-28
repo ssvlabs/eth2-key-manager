@@ -17,7 +17,7 @@ type Wallet interface {
 	Type() WalletType
 	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 	// This will error if an account with the name already exists.
-	CreateValidatorAccount(name string) (ValidatorAccount, error)
+	CreateValidatorAccount(seed []byte, name string) (ValidatorAccount, error)
 	// Accounts provides all accounts in the wallet.
 	Accounts() <-chan ValidatorAccount
 	// AccountByID provides a single account from the wallet given its ID.

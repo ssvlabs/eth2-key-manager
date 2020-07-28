@@ -18,9 +18,12 @@ func getPopulatedWalletStorage() (core.Storage,[]core.ValidatorAccount,error) {
 	types.InitBLS()
 	store := getStorage()
 
-	options := &KeyVault.WalletOptions{}
+	// seed
+	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
+
+	options := &KeyVault.KeyVaultOptions{}
 	options.SetStorage(store)
-	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
+	options.SetSeed(seed)
 	vault,err := KeyVault.NewKeyVault(options)
 	if err != nil {
 		return nil,nil,err
@@ -31,19 +34,19 @@ func getPopulatedWalletStorage() (core.Storage,[]core.ValidatorAccount,error) {
 		return nil,nil,err
 	}
 
-	a1,err := wallet.CreateValidatorAccount("1")
+	a1,err := wallet.CreateValidatorAccount(seed,"1")
 	if err != nil {
 		return nil,nil,err
 	}
-	a2,err := wallet.CreateValidatorAccount("2")
+	a2,err := wallet.CreateValidatorAccount(seed,"2")
 	if err != nil {
 		return nil,nil,err
 	}
-	a3,err := wallet.CreateValidatorAccount("3")
+	a3,err := wallet.CreateValidatorAccount(seed,"3")
 	if err != nil {
 		return nil,nil,err
 	}
-	a4,err := wallet.CreateValidatorAccount("4")
+	a4,err := wallet.CreateValidatorAccount(seed,"4")
 	if err != nil {
 		return nil,nil,err
 	}

@@ -9,6 +9,7 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	"math/big"
+	"strings"
 	"testing"
 )
 
@@ -44,14 +45,18 @@ func TestNewKeyVault(t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			// setup vault
-			options := &WalletOptions{}
+			options := &KeyVaultOptions{}
 			options.SetStorage(test.storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
 			v,err := NewKeyVault(options)
 			require.NoError(t,err)
 
-			testVault(t,v)
+			// generate new seed
+			seed,err := GenerateNewSeed()
+			require.NoError(t,err)
+
+			testVault(t,v, seed)
 		})
 	}
 }
@@ -77,16 +82,16 @@ func TestImportKeyVault(t *testing.T) {
 	for _,test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			seed := test.seed
-			options := &WalletOptions{}
+			options := &KeyVaultOptions{}
 			options.SetStorage(test.storage)
 			options.SetSeed(seed)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
-			v,err := ImportKeyVault(options)
+			v,err := NewKeyVault(options)
 			require.NoError(t,err)
 
 			// test common tests
-			testVault(t,v)
+			testVault(t,v, seed)
 
 			wallet,err := v.Wallet()
 			require.NoError(t,err)
@@ -130,16 +135,16 @@ func TestOpenKeyVault(t *testing.T) {
 			// options
 			storage := test.storage
 			storage.SetEncryptor(keystorev4.New(), []byte("password"))
-			options := &WalletOptions{}
+			options := &KeyVaultOptions{}
 			options.SetStorage(storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
 
 			// import keyvault
 			options.SetSeed(test.seed)
-			importedVault,err := ImportKeyVault(options)
+			importedVault,err := NewKeyVault(options)
 			// test common tests
-			testVault(t,importedVault) // this will create some wallets and accounts
+			testVault(t,importedVault, test.seed) // this will create some wallets and accounts
 
 			// open vault
 			options.SetSeed(nil) // important
@@ -161,17 +166,32 @@ func TestOpenKeyVault(t *testing.T) {
 
 			assert.Equal(t,expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
 			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			assert.Equal(t, importedVault.walletId, v.walletId)
 		})
 	}
 }
 
+func TestMnemonic(t *testing.T) {
+	seed,err := GenerateNewSeed()
+	require.NoError(t,err)
 
-func testVault(t *testing.T, v *KeyVault) {
+	mnemonic,err := SeedToMnemonic(seed)
+	require.NoError(t,err)
+	require.Len(t, strings.Split(mnemonic, " "), 24)
+
+	fromMnemonic,err := SeedFromMnemonic(mnemonic)
+	require.NoError(t,err)
+
+	require.Equal(t, seed, fromMnemonic)
+}
+
+
+func testVault(t *testing.T, v *KeyVault, seed []byte) {
 	wallet,err := v.Wallet()
 	require.NoError(t,err)
 
 	// create and fetch validator account
-	val,err := wallet.CreateValidatorAccount("val1")
+	val,err := wallet.CreateValidatorAccount(seed,"val1")
 	require.NoError(t,err)
 	val1,err := wallet.AccountByName("val1")
 	require.NoError(t,err)

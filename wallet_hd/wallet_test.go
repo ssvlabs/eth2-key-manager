@@ -27,26 +27,22 @@ func inmemStorage() *in_memory.InMemStore {
 	return in_memory.NewInMemStore()
 }
 
-func key(storage core.Storage) (*core.MasterDerivableKey,error) {
+func key(seed []byte) (*core.MasterDerivableKey,error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
-	return core.MasterKeyFromSeed(storage)
+	return core.MasterKeyFromSeed(seed)
 }
 
 func TestAccountDerivation(t *testing.T) {
 	// create wallet
 	storage := inmemStorage()
 	seed :=  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	err := storage.SecurelySavePortfolioSeed(seed)
-	require.NoError(t,err)
-	key,err := key(storage)
-	require.NoError(t,err)
 	w := &HDWallet{
 		id:uuid.New(),
 		indexMapper:make(map[string]uuid.UUID),
-		key:key,
+		//key:key,
 		context:&core.WalletContext{
 			Storage:     storage,
 		},
@@ -85,7 +81,7 @@ func TestAccountDerivation(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			account,err := w.CreateValidatorAccount(test.accountName)
+			account,err := w.CreateValidatorAccount(seed, test.accountName)
 			require.NoError(t, err)
 
 			val, err := e2types.BLSPrivateKeyFromBytes(test.expectedValidationKey.Bytes())
@@ -125,14 +121,11 @@ func TestCreateAccounts(t *testing.T) {
 	// create key and wallet
 	storage := inmemStorage()
 	seed :=  _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	err := storage.SecurelySavePortfolioSeed(seed)
-	require.NoError(t,err)
-	key,err := key(storage)
-	require.NoError(t,err)
+
 	w := &HDWallet{
 		id:uuid.New(),
 		indexMapper:make(map[string]uuid.UUID),
-		key:key,
+		//key:key,
 		context:&core.WalletContext{
 			Storage:     storage,
 		},
@@ -140,7 +133,7 @@ func TestCreateAccounts(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			_,err := w.CreateValidatorAccount(test.newAccounttName)
+			_,err := w.CreateValidatorAccount(seed, test.newAccounttName)
 			if test.expectedErr != "" {
 				require.Errorf(t,err,test.expectedErr)
 			} else {
@@ -183,23 +176,12 @@ func TestWalletMarshaling(t *testing.T) {
 		t.Run(test.testName, func(t *testing.T) {
 			// setup storage
 			storage := inmemStorage()
-			err := storage.SecurelySavePortfolioSeed(test.seed)
-			if err != nil {
-				t.Error(err)
-				return
-			}
 
-			// create key and wallet
-			key,err := key(storage)
-			if err != nil {
-				t.Error(err)
-				return
-			}
 			w := &HDWallet{
 				walletType:test.walletType,
 				id:test.id,
 				indexMapper:test.indexMapper,
-				key:key,
+				//key:key,
 			}
 
 			// marshal

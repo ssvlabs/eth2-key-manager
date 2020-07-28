@@ -1,7 +1,6 @@
 package KeyVault
 
 import (
-	"crypto/rand"
 	"fmt"
 	"github.com/bloxapp/KeyVault/wallet_hd"
 	"log"
@@ -40,101 +39,60 @@ func init() {
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
-	id          uuid.UUID
 	Context     *core.WalletContext
 	walletId 	uuid.UUID
-}
-
-type NotExistError struct {
-	desc string
-}
-
-func (e *NotExistError) Error() string {
-	return fmt.Sprintf("%s", e.desc)
-}
-
-func OpenKeyVault(options *WalletOptions) (*KeyVault, error) {
-	// storage
-	storage, err := setupStorage(options)
-	if err != nil {
-		return nil, err
-	}
-
-	wallet, err := storage.OpenWallet()
-	if err != nil {
-		return nil, err
-	}
-
-	return completeVaultSetup(options, wallet)
-}
-
-func ImportKeyVault(options *WalletOptions) (*KeyVault, error) {
-	// storage
-	storage, err := setupStorage(options)
-	if err != nil {
-		return nil, err
-	}
-
-	// key
-	if options.seed == nil {
-		return nil, fmt.Errorf("no seed was provided")
-	}
-	err = storage.SecurelySavePortfolioSeed(options.seed)
-	if err != nil {
-		return nil, err
-	}
-	key, err := core.MasterKeyFromSeed(storage)
-	if err != nil {
-		return nil, err
-	}
-
-	return completeVaultSetup(options, wallet_hd.NewHDWallet(key, nil))
-}
-
-func NewKeyVault(options *WalletOptions) (*KeyVault, error) {
-	// storage
-	storage, err := setupStorage(options)
-	if err != nil {
-		return nil, err
-	}
-
-	// key
-	seed, err := storage.SecurelyFetchPortfolioSeed()
-	if err != nil || len(seed) == 0 {
-		seed, err = saveNewSeed(storage)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	key, err := core.MasterKeyFromSeed(storage)
-	if err != nil {
-		return nil, err
-	}
-
-	return completeVaultSetup(options, wallet_hd.NewHDWallet(key, nil))
 }
 
 func (kv *KeyVault) Wallet() (core.Wallet, error) {
 	return kv.Context.Storage.OpenWallet()
 }
 
-func completeVaultSetup(options *WalletOptions, wallet core.Wallet) (*KeyVault, error) {
+// wil try and open an existing KeyVault (and wallet) from memory
+func OpenKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
+	storage,err := setupStorage(options)
+	if err != nil {
+		return nil,err
+	}
+
 	// wallet Context
 	context := &core.WalletContext{
-		Storage: options.storage.(core.Storage),
+		Storage: storage,
+	}
+
+	// try and open a wallet
+	wallet, err := storage.OpenWallet()
+	if err != nil {
+		return nil, err
+	}
+
+	return  &KeyVault{
+		Context:     context,
+		walletId:    wallet.ID(),
+	}, nil
+}
+
+// New KeyVault will create a new wallet (with new ids) and will save it to storage
+// Import and New are the same action.
+func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
+	storage,err := setupStorage(options)
+	if err != nil {
+		return nil,err
+	}
+
+	// wallet Context
+	context := &core.WalletContext{
+		Storage: storage,
 	}
 
 	// update wallet context
-	wallet.SetContext(context)
+	wallet := wallet_hd.NewHDWallet(context)
 
 	ret := &KeyVault{
-		id:          uuid.New(),
 		Context:     context,
 		walletId:    wallet.ID(),
 	}
 
-	err := options.storage.(core.Storage).SaveWallet(wallet)
+	err = options.storage.(core.Storage).SaveWallet(wallet)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +100,7 @@ func completeVaultSetup(options *WalletOptions, wallet core.Wallet) (*KeyVault, 
 	return ret, nil
 }
 
-func setupStorage(options *WalletOptions) (core.Storage, error) {
+func setupStorage(options *KeyVaultOptions) (core.Storage, error) {
 	if _, ok := options.storage.(core.Storage); !ok {
 		return nil, fmt.Errorf("storage does not implement core.Storage")
 	} else {
@@ -152,20 +110,6 @@ func setupStorage(options *WalletOptions) (core.Storage, error) {
 	}
 
 	return options.storage.(core.Storage), nil
-}
-
-func saveNewSeed(storage core.Storage) ([]byte, error) {
-	seed := make([]byte, 32)
-	_, err := rand.Read(seed)
-	if err != nil {
-		return nil, err
-	}
-	err = storage.SecurelySavePortfolioSeed(seed)
-	if err != nil {
-		return nil, err
-	}
-
-	return seed, nil
 }
 
 func GenerateNewSeed() ([]byte, error) {

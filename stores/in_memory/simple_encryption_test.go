@@ -6,5 +6,5 @@ import (
 )
 
 func TestStoringWithEncryption (t *testing.T) {
-	stores.TestingPortfolioStorageWithEncryption(getStorage(),t)
+	stores.TestingWalletStorageWithEncryption(getStorage(),t)
 }
