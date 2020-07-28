@@ -3,9 +3,10 @@ package core
 import "github.com/google/uuid"
 
 type WalletType = string
+
 const (
 	HDWallet WalletType = "HD" // hierarchical deterministic wallet
-	ND		 WalletType = "ND" // non - deterministic
+	ND       WalletType = "ND" // non - deterministic
 )
 
 // A wallet is a container of accounts.
@@ -33,5 +34,5 @@ type Wallet interface {
 }
 
 type WalletContext struct {
-	Storage     Storage
+	Storage Storage
 }

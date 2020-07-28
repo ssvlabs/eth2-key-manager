@@ -8,25 +8,25 @@ import (
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 const (
-	BaseAccountPath = "/%d"
+	BaseAccountPath   = "/%d"
 	WithdrawalKeyPath = BaseAccountPath + "/0"
-	ValidatorKeyPath = WithdrawalKeyPath + "/0"
+	ValidatorKeyPath  = WithdrawalKeyPath + "/0"
 )
 
 // an hierarchical deterministic wallet
 type HDWallet struct {
-	id 			uuid.UUID
-	walletType 	core.WalletType
+	id          uuid.UUID
+	walletType  core.WalletType
 	indexMapper map[string]uuid.UUID
-	context 	*core.WalletContext
+	context     *core.WalletContext
 }
 
 func NewHDWallet(context *core.WalletContext) *HDWallet {
 	return &HDWallet{
-		id:              uuid.New(),
-		walletType:      core.HDWallet,
-		indexMapper: 	 make(map[string]uuid.UUID),
-		context:		 context,
+		id:          uuid.New(),
+		walletType:  core.HDWallet,
+		indexMapper: make(map[string]uuid.UUID),
+		context:     context,
 	}
 }
 
@@ -54,51 +54,51 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 	}
 
 	// create the master key
-	key,err := core.MasterKeyFromSeed(seed)
+	key, err := core.MasterKeyFromSeed(seed)
 	if err != nil {
 		return nil, err
 	}
 
-	baseAccountPath := fmt.Sprintf(BaseAccountPath,len(wallet.indexMapper))
+	baseAccountPath := fmt.Sprintf(BaseAccountPath, len(wallet.indexMapper))
 	// validator key
-	validatorPath := fmt.Sprintf(ValidatorKeyPath,len(wallet.indexMapper))
-	validatorKey,err := key.Derive(validatorPath)
+	validatorPath := fmt.Sprintf(ValidatorKeyPath, len(wallet.indexMapper))
+	validatorKey, err := key.Derive(validatorPath)
 	if err != nil {
 		return nil, err
 	}
 	// withdrawal key
-	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath,len(wallet.indexMapper))
-	withdrawalKey,err := key.Derive(withdrawalPath)
+	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, len(wallet.indexMapper))
+	withdrawalKey, err := key.Derive(withdrawalPath)
 	if err != nil {
 		return nil, err
 	}
 
 	// create ret account
 	ret, err := NewValidatorAccount(
-			name,
-			validatorKey,
-			withdrawalKey.PublicKey(),
-			baseAccountPath,
-			wallet.context,
-		)
+		name,
+		validatorKey,
+		withdrawalKey.PublicKey(),
+		baseAccountPath,
+		wallet.context,
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	// register new wallet and save portfolio
 	reset := func() {
-		delete(wallet.indexMapper,name)
+		delete(wallet.indexMapper, name)
 	}
 	wallet.indexMapper[name] = ret.ID()
 	err = wallet.context.Storage.SaveAccount(ret)
 	if err != nil {
 		reset()
-		return nil,err
+		return nil, err
 	}
 	err = wallet.context.Storage.SaveWallet(wallet)
 	if err != nil {
 		reset()
-		return nil,err
+		return nil, err
 	}
 
 	return ret, nil
@@ -106,11 +106,11 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 
 // Accounts provides all accounts in the wallet.
 func (wallet *HDWallet) Accounts() <-chan core.ValidatorAccount {
-	ch := make (chan core.ValidatorAccount,1024) // TODO - handle more? change from chan?
+	ch := make(chan core.ValidatorAccount, 1024) // TODO - handle more? change from chan?
 	go func() {
 		for name := range wallet.indexMapper {
 			id := wallet.indexMapper[name]
-			account,err := wallet.AccountByID(id)
+			account, err := wallet.AccountByID(id)
 			if err != nil {
 				continue
 			}
@@ -125,15 +125,15 @@ func (wallet *HDWallet) Accounts() <-chan core.ValidatorAccount {
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
-	ret,err := wallet.context.Storage.OpenAccount(id)
+	ret, err := wallet.context.Storage.OpenAccount(id)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	if ret == nil {
-		return nil,nil
+		return nil, nil
 	}
 	ret.SetContext(wallet.context)
-	return ret,nil
+	return ret, nil
 }
 
 func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
