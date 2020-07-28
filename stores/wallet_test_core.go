@@ -18,7 +18,7 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func keyVault(storage core.Storage) (*KeyVault.KeyVault,error) {
+func keyVault(storage core.Storage) (*KeyVault.KeyVault, error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
@@ -30,7 +30,7 @@ func keyVault(storage core.Storage) (*KeyVault.KeyVault,error) {
 }
 
 func TestingOpenAccounts(storage core.Storage, t *testing.T) {
-	kv,err := keyVault(storage)
+	kv, err := keyVault(storage)
 	require.NoError(t, err)
 
 	wallet, err := kv.Wallet()
@@ -38,35 +38,35 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 
-	for i := 0 ; i < 10 ; i ++ {
+	for i := 0; i < 10; i++ {
 		testName := fmt.Sprintf("adding and fetching account: %d", i)
 		t.Run(testName, func(t *testing.T) {
 			// create
-			accountName := fmt.Sprintf("%d",i)
-			a,err := wallet.CreateValidatorAccount(seed, accountName)
+			accountName := fmt.Sprintf("%d", i)
+			a, err := wallet.CreateValidatorAccount(seed, accountName)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
 			// open
-			a1,err := wallet.AccountByName(accountName)
+			a1, err := wallet.AccountByName(accountName)
 			if err != nil {
 				t.Error(err)
 				return
 			}
-			a2,err := wallet.AccountByID(a.ID())
+			a2, err := wallet.AccountByID(a.ID())
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
 			// verify
-			for _,fetchedAccount := range []core.ValidatorAccount{a1,a2} {
-				require.Equal(t,a.ID().String(),fetchedAccount.ID().String())
-				require.Equal(t,a.Name(),fetchedAccount.Name())
-				require.Equal(t,a.ValidatorPublicKey().Marshal(),fetchedAccount.ValidatorPublicKey().Marshal())
-				require.Equal(t,a.WithdrawalPublicKey().Marshal(),fetchedAccount.WithdrawalPublicKey().Marshal())
+			for _, fetchedAccount := range []core.ValidatorAccount{a1, a2} {
+				require.Equal(t, a.ID().String(), fetchedAccount.ID().String())
+				require.Equal(t, a.Name(), fetchedAccount.Name())
+				require.Equal(t, a.ValidatorPublicKey().Marshal(), fetchedAccount.ValidatorPublicKey().Marshal())
+				require.Equal(t, a.WithdrawalPublicKey().Marshal(), fetchedAccount.WithdrawalPublicKey().Marshal())
 			}
 		})
 	}
@@ -86,26 +86,26 @@ func TestingNonExistingWallet(storage core.Storage, t *testing.T) {
 }
 
 func TestingWalletStorage(storage core.Storage, t *testing.T) {
-	tests := []struct{
-		name string
+	tests := []struct {
+		name       string
 		walletName string
-		encryptor types.Encryptor
-		password []byte
+		encryptor  types.Encryptor
+		password   []byte
 		error
 	}{
 		{
-			name:"serialization and fetching",
-			walletName:"test1",
+			name:       "serialization and fetching",
+			walletName: "test1",
 		},
 		{
-			name:"serialization and fetching with encryptor",
-			walletName:"test2",
-			encryptor: keystorev4.New(),
-			password: []byte("password"),
+			name:       "serialization and fetching with encryptor",
+			walletName: "test2",
+			encryptor:  keystorev4.New(),
+			password:   []byte("password"),
 		},
 	}
 
-	kv,err := keyVault(storage)
+	kv, err := keyVault(storage)
 	require.NoError(t, err)
 
 	wallet, err := kv.Wallet()
@@ -115,15 +115,15 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// set encryptor
 			if test.encryptor != nil {
-				storage.SetEncryptor(test.encryptor,test.password)
+				storage.SetEncryptor(test.encryptor, test.password)
 			} else {
-				storage.SetEncryptor(nil,nil)
+				storage.SetEncryptor(nil, nil)
 			}
 
 			err = storage.SaveWallet(wallet)
 			if err != nil {
 				if test.error != nil {
-					require.Equal(t,test.error.Error(),err.Error())
+					require.Equal(t, test.error.Error(), err.Error())
 				} else {
 					t.Error(err)
 				}
@@ -134,7 +134,7 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 			fetched, err := storage.OpenWallet()
 			if err != nil {
 				if test.error != nil {
-					require.Equal(t,test.error.Error(),err.Error())
+					require.Equal(t, test.error.Error(), err.Error())
 				} else {
 					t.Error(err)
 				}
@@ -151,11 +151,11 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 			}
 
 			// assert
-			require.Equal(t,wallet.ID(),fetched.ID())
-			require.Equal(t,wallet.Type(),fetched.Type())
+			require.Equal(t, wallet.ID(), fetched.ID())
+			require.Equal(t, wallet.Type(), fetched.Type())
 		})
 	}
 
 	// reset
-	storage.SetEncryptor(nil,nil)
+	storage.SetEncryptor(nil, nil)
 }

@@ -7,32 +7,31 @@ import (
 )
 
 type NoProtection struct {
-
 }
 
-func (p *NoProtection)IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus,error) {
-	return make([]*core.AttestationSlashStatus,0),nil
+func (p *NoProtection) IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus, error) {
+	return make([]*core.AttestationSlashStatus, 0), nil
 }
 
-func (p *NoProtection)IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *core.ProposalSlashStatus {
+func (p *NoProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *core.ProposalSlashStatus {
 	return &core.ProposalSlashStatus{
 		Proposal: nil,
 		Status:   core.ValidProposal,
 	}
 }
 
-func (p *NoProtection)SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
+func (p *NoProtection) SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
 	return nil
 }
 
-func (p *NoProtection)SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error {
+func (p *NoProtection) SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error {
 	return nil
 }
 
-func (p *NoProtection)SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
+func (p *NoProtection) SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
 	return nil
 }
 
-func (p *NoProtection)RetrieveLatestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
-	return nil,nil
+func (p *NoProtection) RetrieveLatestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
+	return nil, nil
 }

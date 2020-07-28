@@ -39,8 +39,8 @@ func init() {
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
-	Context     *core.WalletContext
-	walletId 	uuid.UUID
+	Context  *core.WalletContext
+	walletId uuid.UUID
 }
 
 func (kv *KeyVault) Wallet() (core.Wallet, error) {
@@ -49,9 +49,9 @@ func (kv *KeyVault) Wallet() (core.Wallet, error) {
 
 // wil try and open an existing KeyVault (and wallet) from memory
 func OpenKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
-	storage,err := setupStorage(options)
+	storage, err := setupStorage(options)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// wallet Context
@@ -65,18 +65,18 @@ func OpenKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
 		return nil, err
 	}
 
-	return  &KeyVault{
-		Context:     context,
-		walletId:    wallet.ID(),
+	return &KeyVault{
+		Context:  context,
+		walletId: wallet.ID(),
 	}, nil
 }
 
 // New KeyVault will create a new wallet (with new ids) and will save it to storage
 // Import and New are the same action.
 func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
-	storage,err := setupStorage(options)
+	storage, err := setupStorage(options)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// wallet Context
@@ -88,8 +88,8 @@ func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
 	wallet := wallet_hd.NewHDWallet(context)
 
 	ret := &KeyVault{
-		Context:     context,
-		walletId:    wallet.ID(),
+		Context:  context,
+		walletId: wallet.ID(),
 	}
 
 	err = options.storage.(core.Storage).SaveWallet(wallet)

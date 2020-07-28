@@ -34,14 +34,15 @@ func ToCoreBlockData(req *pb.SignBeaconProposalRequest) *BeaconBlockHeader {
 }
 
 type ProposalDetectionType string
+
 const (
-	DoubleProposal 	ProposalDetectionType = "DoubleProposal"
-	ValidProposal	ProposalDetectionType = "Valid"
-	Error			ProposalDetectionType = "Error"
+	DoubleProposal ProposalDetectionType = "DoubleProposal"
+	ValidProposal  ProposalDetectionType = "Valid"
+	Error          ProposalDetectionType = "Error"
 )
 
 type ProposalSlashStatus struct {
 	Proposal *BeaconBlockHeader
 	Status   ProposalDetectionType
-	Error 	 error
+	Error    error
 }

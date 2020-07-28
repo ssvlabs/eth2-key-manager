@@ -50,7 +50,7 @@ func (protector *NormalProtection) IsSlashableProposal(key e2types.PublicKey, re
 		return &core.ProposalSlashStatus{
 			Proposal: nil,
 			Status:   core.Error,
-			Error: err,
+			Error:    err,
 		}
 	}
 

@@ -13,11 +13,11 @@ type HDAccount struct {
 	name string
 	// holds the base path from which the account was dervied
 	// for eip2334 should be m/12381/3600/<index>
-	BasePath string
-	id uuid.UUID
-	validationKey *core.HDKey
+	BasePath         string
+	id               uuid.UUID
+	validationKey    *core.HDKey
 	withdrawalPubKey e2types.PublicKey
-	context *core.WalletContext
+	context          *core.WalletContext
 }
 
 func (account *HDAccount) MarshalJSON() ([]byte, error) {
@@ -41,35 +41,43 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 
 	// id
 	if val, exists := v["id"]; exists {
-		account.id,err = uuid.Parse(val.(string))
+		account.id, err = uuid.Parse(val.(string))
 		if err != nil {
 			return err
 		}
-	} else {return fmt.Errorf("could not find var: id")}
+	} else {
+		return fmt.Errorf("could not find var: id")
+	}
 
 	// name
 	if val, exists := v["name"]; exists {
 		account.name = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
+	} else {
+		return fmt.Errorf("could not find var: id")
+	}
 
 	// base path
 	if val, exists := v["baseAccountPath"]; exists {
 		account.BasePath = val.(string)
-	} else {return fmt.Errorf("could not find var: baseAccountPath")}
+	} else {
+		return fmt.Errorf("could not find var: baseAccountPath")
+	}
 
 	// validation key
 	if val, exists := v["validationKey"]; exists {
-		byts,err := json.Marshal(val)
+		byts, err := json.Marshal(val)
 		if err != nil {
 			return err
 		}
 		key := &core.HDKey{}
-		err = json.Unmarshal(byts,key)
+		err = json.Unmarshal(byts, key)
 		if err != nil {
 			return err
 		}
 		account.validationKey = key
-	} else {return fmt.Errorf("could not find var: key")}
+	} else {
+		return fmt.Errorf("could not find var: key")
+	}
 
 	// withdrawal pub Key
 	if val, exists := v["withdrawalPubKey"]; exists {
@@ -77,11 +85,13 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		account.withdrawalPubKey,err = e2types.BLSPublicKeyFromBytes(byts)
+		account.withdrawalPubKey, err = e2types.BLSPublicKeyFromBytes(byts)
 		if err != nil {
 			return err
 		}
-	} else {return fmt.Errorf("could not find var: key")}
+	} else {
+		return fmt.Errorf("could not find var: key")
+	}
 
 	return nil
 }
@@ -90,15 +100,15 @@ func NewValidatorAccount(name string,
 	validationKey *core.HDKey,
 	withdrawalPubKey e2types.PublicKey,
 	basePath string,
-	context *core.WalletContext) (*HDAccount,error) {
+	context *core.WalletContext) (*HDAccount, error) {
 	return &HDAccount{
-		name:         	  name,
-		id:          	  uuid.New(),
-		validationKey:	  validationKey,
+		name:             name,
+		id:               uuid.New(),
+		validationKey:    validationKey,
 		withdrawalPubKey: withdrawalPubKey,
-		BasePath:		  basePath,
-		context:	  	  context,
-	},nil
+		BasePath:         basePath,
+		context:          context,
+	}, nil
 }
 
 // ID provides the ID for the account.
@@ -122,7 +132,7 @@ func (account *HDAccount) WithdrawalPublicKey() e2types.PublicKey {
 }
 
 // Sign signs data with the account.
-func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature,error) {
+func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature, error) {
 	return account.validationKey.Sign(data)
 }
 
@@ -133,7 +143,6 @@ func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature,erro
 //	}
 //	return account.withdrawalKey.Sign(data)
 //}
-
 
 func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx

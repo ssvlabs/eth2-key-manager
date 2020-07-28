@@ -6,7 +6,7 @@ import (
 )
 
 type SlashingProtector interface {
-	IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*AttestationSlashStatus,error)
+	IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*AttestationSlashStatus, error)
 	IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *ProposalSlashStatus
 	SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
 	SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error
