@@ -13,7 +13,7 @@ type Storage interface {
 	//	Wallet specific
 	// */
 	SaveWallet(wallet Wallet) error
-	// will return nil,nil if no wallet was found
+	// will return nil,err if no wallet was found
 	OpenWallet() (Wallet, error)
 	// will return an empty array for no accounts
 	ListAccounts() ([]ValidatorAccount, error)

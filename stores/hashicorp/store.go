@@ -110,12 +110,12 @@ func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
 	path := WalletDataPath
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
+		return nil, err
 	}
 
 	// Return nothing if there is no record
 	if entry == nil {
-		return nil, nil
+		return nil, fmt.Errorf("wallet not found")
 	}
 
 	// un-marshal

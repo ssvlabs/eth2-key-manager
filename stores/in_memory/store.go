@@ -1,6 +1,7 @@
 package in_memory
 
 import (
+	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
@@ -49,7 +50,7 @@ func (store *InMemStore) OpenWallet() (core.Wallet,error) {
 		ret.SetContext(store.freshContext())
 		return ret,nil
 	} else {
-		return nil,nil
+		return nil, fmt.Errorf("wallet not found")
 	}
 }
 

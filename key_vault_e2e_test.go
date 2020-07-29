@@ -27,6 +27,34 @@ func inmemStorage() *in_memory.InMemStore {
 	return in_memory.NewInMemStore()
 }
 
+func TestNoKeyVault(t *testing.T) {
+	tests := []struct {
+		testname string
+		storage  core.Storage
+	}{
+		{
+			testname: "In-memory storage",
+			storage:  inmemStorage(),
+		},
+		{
+			testname: "Hashicorp Vault storage",
+			storage:  inmemStorage(),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.testname, func(t *testing.T) {
+			options := &KeyVaultOptions{}
+			options.SetStorage(test.storage)
+
+			kv,err := OpenKeyVault(options)
+			require.NotNil(t, err)
+			require.EqualError(t, err, "wallet not found")
+			require.Nil(t, kv)
+		})
+	}
+}
+
 func TestNewKeyVault(t *testing.T) {
 	tests := []struct {
 		testname string

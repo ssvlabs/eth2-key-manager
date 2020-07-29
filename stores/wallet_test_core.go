@@ -75,14 +75,9 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 
 func TestingNonExistingWallet(storage core.Storage, t *testing.T) {
 	w, err := storage.OpenWallet()
-	if err != nil {
-		t.Error("returned an error for a non existing wallet, should not return an error but rather a nil wallet")
-		return
-	}
-
-	if w != nil {
-		t.Error("returned a wallet for a non existing uuid")
-	}
+	require.NotNil(t, err)
+	require.EqualError(t, err, "wallet not found")
+	require.Nil(t, w)
 }
 
 func TestingWalletStorage(storage core.Storage, t *testing.T) {

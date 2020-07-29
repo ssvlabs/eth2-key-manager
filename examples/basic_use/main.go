@@ -19,7 +19,6 @@ func main() {
 
 	// create options
 	options := &KeyVault.KeyVaultOptions{}
-	options.SetSeed(seed)
 	options.SetStorage(store)
 
 	// instantiate KeyVaul
