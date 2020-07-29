@@ -3,12 +3,14 @@ package in_memory
 import (
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type InMemStore struct {
-	memory         		map[string]interface{}
+	wallet 				*wallet_hd.HDWallet
+	accounts			map[string]*wallet_hd.HDAccount
 	attMemory      		map[string]*core.BeaconAttestation
 	proposalMemory 		map[string]*core.BeaconBlockHeader
 	encryptor	   		types.Encryptor
@@ -25,7 +27,7 @@ func NewInMemStoreWithEncryptor(
 	password []byte,
 	) *InMemStore {
 	return &InMemStore{
-		memory:         	make(map[string]interface{}),
+		accounts:         	make(map[string]*wallet_hd.HDAccount),
 		attMemory:      	make(map[string]*core.BeaconAttestation),
 		proposalMemory: 	make(map[string]*core.BeaconBlockHeader),
 		encryptor:			encryptor,
@@ -39,19 +41,17 @@ func (store *InMemStore) Name() string {
 }
 
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
-	store.memory["wallet"] = wallet
+	store.wallet = wallet.(*wallet_hd.HDWallet)
 	return nil
 }
 
 // will return nil,nil if no wallet was found
 func (store *InMemStore) OpenWallet() (core.Wallet,error) {
-	if val := store.memory["wallet"]; val != nil {
-		ret := val.(core.Wallet)
-		ret.SetContext(store.freshContext())
-		return ret,nil
-	} else {
-		return nil, fmt.Errorf("wallet not found")
+	if store.wallet != nil {
+		store.wallet.SetContext(store.freshContext())
+		return store.wallet, nil
 	}
+	return nil, fmt.Errorf("wallet not found")
 }
 
 // will return an empty array for no accounts
@@ -69,14 +69,14 @@ func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount,error) {
 }
 
 func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
-	store.memory[account.ID().String()] = account
+	store.accounts[account.ID().String()] = account.(*wallet_hd.HDAccount)
 	return nil
 }
 
 // will return nil,nil if no account was found
 func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount,error) {
-	if val := store.memory[accountId.String()]; val != nil {
-		return val.(core.ValidatorAccount),nil
+	if val := store.accounts[accountId.String()]; val != nil {
+		return val,nil
 	} else {
 		return nil,nil
 	}

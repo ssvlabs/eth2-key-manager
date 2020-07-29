@@ -4,14 +4,23 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 	"math/big"
 	"os"
 	"testing"
 )
+
+type dummyStorage struct {}
+func (s * dummyStorage) Name() string { return "" }
+func (s * dummyStorage) SaveWallet(wallet core.Wallet) error { return nil }
+func (s * dummyStorage) OpenWallet() (core.Wallet, error) { return nil,nil }
+func (s * dummyStorage) ListAccounts() ([]core.ValidatorAccount, error) { return nil,nil }
+func (s * dummyStorage) SaveAccount(account core.ValidatorAccount) error { return nil }
+func (s * dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) { return nil,nil }
+func (s * dummyStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -23,8 +32,8 @@ func _bigInt(input string) *big.Int {
 	return res
 }
 
-func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore()
+func storage() core.Storage {
+	return &dummyStorage{}
 }
 
 func key(seed []byte) (*core.MasterDerivableKey, error) {
@@ -36,13 +45,14 @@ func key(seed []byte) (*core.MasterDerivableKey, error) {
 }
 
 func TestAccountDerivation(t *testing.T) {
+	e2types.InitBLS()
+
 	// create wallet
-	storage := inmemStorage()
+	storage := storage()
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	w := &HDWallet{
 		id:          uuid.New(),
 		indexMapper: make(map[string]uuid.UUID),
-		//key:key,
 		context: &core.WalletContext{
 			Storage: storage,
 		},
@@ -119,7 +129,7 @@ func TestCreateAccounts(t *testing.T) {
 	}
 
 	// create key and wallet
-	storage := inmemStorage()
+	storage := storage()
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 
 	w := &HDWallet{
@@ -175,7 +185,7 @@ func TestWalletMarshaling(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			// setup storage
-			storage := inmemStorage()
+			storage := storage()
 
 			w := &HDWallet{
 				walletType:  test.walletType,

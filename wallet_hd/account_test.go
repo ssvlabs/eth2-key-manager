@@ -36,7 +36,7 @@ func TestAccountMarshaling(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			// setup storage
-			storage := inmemStorage()
+			storage := storage()
 
 			// create key and account
 			masterKey, err := core.MasterKeyFromSeed(test.seed)
