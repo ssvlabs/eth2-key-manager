@@ -108,7 +108,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 			},
 		})
 		require.NotNil(t, err)
-		require.EqualError(t, err, "slashable attestation, not signing")
+		require.EqualError(t, err, "slashable attestation (DoubleVote), not signing")
 	})
 
 	t.Run("same vote with different domain, should sign", func(t *testing.T) {
@@ -223,7 +223,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 			},
 		})
 		require.NotNil(t, err)
-		require.EqualError(t, err, "slashable attestation, not signing")
+		require.EqualError(t, err, "slashable attestation (SurroundingVote), not signing")
 	})
 
 	t.Run("surrounded vote, should err", func(t *testing.T) {
@@ -292,7 +292,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 			},
 		})
 		require.NotNil(t, err)
-		require.EqualError(t, err, "slashable attestation, not signing")
+		require.EqualError(t, err, "slashable attestation (SurroundedVote), not signing")
 	})
 }
 

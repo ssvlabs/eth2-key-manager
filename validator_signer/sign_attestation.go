@@ -28,7 +28,10 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("slashable attestation, not signing")
+		if len(val) > 0 {
+
+		}
+		return nil, fmt.Errorf("slashable attestation (%s), not signing", val[0].Status)
 	}
 
 	// 4. add to protection storage

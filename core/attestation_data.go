@@ -25,12 +25,12 @@ type BeaconAttestation struct {
 	Target          *Checkpoint
 }
 
-type VoteDetectionType uint8
+type VoteDetectionType string
 
 const (
-	DoubleVote      VoteDetectionType = 0
-	SurroundingVote VoteDetectionType = 1
-	SurroundedVote  VoteDetectionType = 2
+	DoubleVote      VoteDetectionType = "DoubleVote"
+	SurroundingVote VoteDetectionType = "SurroundingVote"
+	SurroundedVote  VoteDetectionType = "SurroundedVote"
 )
 
 type AttestationSlashStatus struct {
