@@ -251,7 +251,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		})
 
 		// add another attestation building on the base
-		// 8877 <- 8878 <- 8879 <----------------------9000
+		// 8877 <- 8878 <----------------------9000
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
 			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
@@ -260,7 +260,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 				CommitteeIndex:  2,
 				BeaconBlockRoot: ignoreError(hex.DecodeString("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e")).([]byte),
 				Source: &pb.Checkpoint{
-					Epoch: 8879,
+					Epoch: 8878,
 					Root:  ignoreError(hex.DecodeString("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0")).([]byte),
 				},
 				Target: &pb.Checkpoint{
