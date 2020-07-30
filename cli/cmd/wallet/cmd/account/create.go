@@ -1,15 +1,15 @@
-package seed
+package account
 
 import (
 	"github.com/spf13/cobra"
 
 	rootcmd "github.com/bloxapp/KeyVault/cli/cmd"
-	"github.com/bloxapp/KeyVault/cli/cmd/portfolio/cmd/account/flag"
-	"github.com/bloxapp/KeyVault/cli/cmd/portfolio/cmd/account/handler"
+	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
+	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/handler"
 )
 
 // generateCmd represents the create account command.
-var generateCmd = &cobra.Command{
+var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates a wallet account.",
 	Long:  `This command creates an account using seed and index.`,
@@ -21,8 +21,9 @@ var generateCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(generateCmd)
-	flag.AddSeedFlag(generateCmd)
+	flag.AddNameFlag(createCmd)
+	flag.AddSeedFlag(createCmd)
+	flag.AddStorageFlag(createCmd)
 
-	Command.AddCommand(generateCmd)
+	Command.AddCommand(createCmd)
 }

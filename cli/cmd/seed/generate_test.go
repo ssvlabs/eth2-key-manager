@@ -15,7 +15,6 @@ func TestSeedGenerate(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
-			"portfolio",
 			"seed",
 			"generate",
 		})
@@ -29,7 +28,6 @@ func TestSeedGenerate(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
-			"portfolio",
 			"seed",
 			"generate",
 			"--mnemonic",
@@ -44,7 +42,6 @@ func TestSeedGenerate(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
-			"portfolio",
 			"seed",
 			"generate",
 			"--mnemonic",
@@ -60,7 +57,6 @@ func TestSeedGenerate(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
-			"portfolio",
 			"seed",
 			"generate",
 			"--mnemonic=false",
