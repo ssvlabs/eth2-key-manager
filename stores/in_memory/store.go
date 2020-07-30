@@ -9,29 +9,25 @@ import (
 )
 
 type InMemStore struct {
-	wallet 				*wallet_hd.HDWallet
-	accounts			map[string]*wallet_hd.HDAccount
-	attMemory      		map[string]*core.BeaconAttestation
-	proposalMemory 		map[string]*core.BeaconBlockHeader
-	encryptor	   		types.Encryptor
-	encryptionPassword 	[]byte
+	wallet             *wallet_hd.HDWallet
+	accounts           map[string]*wallet_hd.HDAccount
+	attMemory          map[string]*core.BeaconAttestation
+	proposalMemory     map[string]*core.BeaconBlockHeader
+	encryptor          types.Encryptor
+	encryptionPassword []byte
 }
 
-func NewInMemStore(
-	) *InMemStore {
-	return NewInMemStoreWithEncryptor(nil,nil)
+func NewInMemStore() *InMemStore {
+	return NewInMemStoreWithEncryptor(nil, nil)
 }
 
-func NewInMemStoreWithEncryptor(
-	encryptor types.Encryptor,
-	password []byte,
-	) *InMemStore {
+func NewInMemStoreWithEncryptor(encryptor types.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
-		accounts:         	make(map[string]*wallet_hd.HDAccount),
-		attMemory:      	make(map[string]*core.BeaconAttestation),
-		proposalMemory: 	make(map[string]*core.BeaconBlockHeader),
-		encryptor:			encryptor,
-		encryptionPassword:	password,
+		accounts:           make(map[string]*wallet_hd.HDAccount),
+		attMemory:          make(map[string]*core.BeaconAttestation),
+		proposalMemory:     make(map[string]*core.BeaconBlockHeader),
+		encryptor:          encryptor,
+		encryptionPassword: password,
 	}
 }
 
@@ -46,7 +42,7 @@ func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
 }
 
 // will return nil,nil if no wallet was found
-func (store *InMemStore) OpenWallet() (core.Wallet,error) {
+func (store *InMemStore) OpenWallet() (core.Wallet, error) {
 	if store.wallet != nil {
 		store.wallet.SetContext(store.freshContext())
 		return store.wallet, nil
@@ -55,17 +51,17 @@ func (store *InMemStore) OpenWallet() (core.Wallet,error) {
 }
 
 // will return an empty array for no accounts
-func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount,error) {
-	w,err := store.OpenWallet()
+func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
+	w, err := store.OpenWallet()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	ret := make([]core.ValidatorAccount,0)
+	ret := make([]core.ValidatorAccount, 0)
 	for a := range w.Accounts() {
-		ret = append(ret,a)
+		ret = append(ret, a)
 	}
-	return ret,nil
+	return ret, nil
 }
 
 func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
@@ -74,11 +70,11 @@ func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
 }
 
 // will return nil,nil if no account was found
-func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount,error) {
+func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
 	if val := store.accounts[accountId.String()]; val != nil {
-		return val,nil
+		return val, nil
 	} else {
-		return nil,nil
+		return nil, nil
 	}
 }
 
@@ -89,7 +85,7 @@ func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte
 
 func (store *InMemStore) freshContext() *core.WalletContext {
 	return &core.WalletContext{
-		Storage:     store,
+		Storage: store,
 	}
 }
 

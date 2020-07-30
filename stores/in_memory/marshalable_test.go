@@ -12,12 +12,12 @@ func TestMarshaling(t *testing.T) {
 	store := NewInMemStore()
 
 	// wallet
-	wallet := wallet_hd.NewHDWallet(&core.WalletContext{Storage:store})
+	wallet := wallet_hd.NewHDWallet(&core.WalletContext{Storage: store})
 	err := store.SaveWallet(wallet)
 	require.NoError(t, err)
 
 	// account
-	acc,err := wallet.CreateValidatorAccount(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"), "acc")
+	acc, err := wallet.CreateValidatorAccount(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"), "acc")
 	require.NoError(t, err)
 	err = store.SaveAccount(acc)
 	require.NoError(t, err)
@@ -27,11 +27,11 @@ func TestMarshaling(t *testing.T) {
 		Slot:            1,
 		CommitteeIndex:  1,
 		BeaconBlockRoot: []byte("A"),
-		Source:          &core.Checkpoint{
+		Source: &core.Checkpoint{
 			Epoch: 1,
 			Root:  []byte("A"),
 		},
-		Target:          &core.Checkpoint{
+		Target: &core.Checkpoint{
 			Epoch: 2,
 			Root:  []byte("A"),
 		},
@@ -48,9 +48,8 @@ func TestMarshaling(t *testing.T) {
 	}
 	store.SaveProposal(acc.ValidatorPublicKey(), prop)
 
-
 	// marshal
-	byts,err := json.Marshal(store)
+	byts, err := json.Marshal(store)
 	require.NoError(t, err)
 
 	// un-marshal

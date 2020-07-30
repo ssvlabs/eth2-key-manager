@@ -47,7 +47,7 @@ func TestNoKeyVault(t *testing.T) {
 			options := &KeyVaultOptions{}
 			options.SetStorage(test.storage)
 
-			kv,err := OpenKeyVault(options)
+			kv, err := OpenKeyVault(options)
 			require.NotNil(t, err)
 			require.EqualError(t, err, "wallet not found")
 			require.Nil(t, kv)
