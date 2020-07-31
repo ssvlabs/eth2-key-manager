@@ -7,10 +7,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/KeyVault/cli/cmd/portfolio/cmd/seed/flag"
+	"github.com/bloxapp/KeyVault/cli/cmd/seed/flag"
 )
 
-// Seed generates a new portfolio seed and prints it.
+// Seed generates a new key-vault seed and prints it.
 func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
 	var seed []byte
 	var mnemonic string

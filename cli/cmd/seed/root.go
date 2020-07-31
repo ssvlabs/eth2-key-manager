@@ -1,4 +1,4 @@
-package portfolio
+package seed
 
 import (
 	"github.com/spf13/cobra"
@@ -6,10 +6,10 @@ import (
 	keyvaultcmd "github.com/bloxapp/KeyVault/cli/cmd"
 )
 
-// Command represents the portfolio-related command.
+// Command represents the key-vault seed related command.
 var Command = &cobra.Command{
-	Use:   "portfolio",
-	Short: "Manage portfolio",
+	Use:   "seed",
+	Short: "Manage key-vault seed",
 }
 
 func init() {

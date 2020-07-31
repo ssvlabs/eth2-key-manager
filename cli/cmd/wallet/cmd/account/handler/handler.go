@@ -2,7 +2,7 @@ package handler
 
 import "github.com/bloxapp/KeyVault/cli/util/printer"
 
-// Account contains handler functions of the CLI commands related to portfolio account.
+// Account contains handler functions of the CLI commands related to wallet account.
 type Account struct {
 	printer printer.Printer
 }

@@ -1,17 +1,17 @@
-package seed
+package account
 
 import (
 	"github.com/spf13/cobra"
 
-	portfoliocmd "github.com/bloxapp/KeyVault/cli/cmd/portfolio"
+	walletcmd "github.com/bloxapp/KeyVault/cli/cmd/wallet"
 )
 
 // Command represents the portfolio account related command.
 var Command = &cobra.Command{
 	Use:   "account",
-	Short: "Manage portfolio account",
+	Short: "Manage wallet account",
 }
 
 func init() {
-	portfoliocmd.Command.AddCommand(Command)
+	walletcmd.Command.AddCommand(Command)
 }

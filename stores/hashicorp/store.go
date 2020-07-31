@@ -36,25 +36,25 @@ const (
 	AccountPath = AccountBase + "%s"
 )
 
-func FromInMemoryStore(inMem *in_memory.InMemStore, storage logical.Storage, ctx context.Context) (*HashicorpVaultStore,error) {
+func FromInMemoryStore(inMem *in_memory.InMemStore, storage logical.Storage, ctx context.Context) (*HashicorpVaultStore, error) {
 	// first delete old data
 	// delete all accounts
-	res,err := storage.List(ctx,AccountBase)
+	res, err := storage.List(ctx, AccountBase)
 	if err != nil {
 		return nil, err
 	}
-	for _,accountId := range res {
+	for _, accountId := range res {
 		path := fmt.Sprintf(AccountPath, accountId)
 		err = storage.Delete(ctx, path)
 		if err != nil {
 			return nil, err
 		}
 	}
-	err = storage.Delete(ctx,WalletDataPath)
+	err = storage.Delete(ctx, WalletDataPath)
 	if err != nil {
 		return nil, err
 	}
-	err = storage.Delete(ctx,AccountBase)
+	err = storage.Delete(ctx, AccountBase)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func FromInMemoryStore(inMem *in_memory.InMemStore, storage logical.Storage, ctx
 	newStore := NewHashicorpVaultStore(storage, ctx)
 
 	// save wallet
-	wallet,err := inMem.OpenWallet()
+	wallet, err := inMem.OpenWallet()
 	if err != nil {
 		return nil, err
 	}

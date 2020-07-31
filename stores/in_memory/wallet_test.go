@@ -11,14 +11,13 @@ func getStorage() core.Storage {
 }
 
 func TestOpeningAccounts(t *testing.T) {
-	stores.TestingOpenAccounts(getStorage(),t)
+	stores.TestingOpenAccounts(getStorage(), t)
 }
 
 func TestNonExistingWallet(t *testing.T) {
-	stores.TestingNonExistingWallet(getStorage(),t)
+	stores.TestingNonExistingWallet(getStorage(), t)
 }
 
 func TestWalletStorage(t *testing.T) {
-	stores.TestingWalletStorage(getStorage(),t)
+	stores.TestingWalletStorage(getStorage(), t)
 }
-

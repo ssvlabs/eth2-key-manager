@@ -10,27 +10,27 @@ func (store *InMemStore) MarshalJSON() ([]byte, error) {
 	var err error
 	data := make(map[string]interface{})
 
-	data["wallet"],err = json.Marshal(store.wallet)
+	data["wallet"], err = json.Marshal(store.wallet)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	data["wallet"] = hex.EncodeToString(data["wallet"].([]byte))
 
-	data["accounts"],err = json.Marshal(store.accounts)
+	data["accounts"], err = json.Marshal(store.accounts)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	data["accounts"] = hex.EncodeToString(data["accounts"].([]byte))
 
-	data["attMemory"],err = json.Marshal(store.attMemory)
+	data["attMemory"], err = json.Marshal(store.attMemory)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	data["attMemory"] = hex.EncodeToString(data["attMemory"].([]byte))
 
-	data["proposalMemory"],err = json.Marshal(store.proposalMemory)
+	data["proposalMemory"], err = json.Marshal(store.proposalMemory)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	data["proposalMemory"] = hex.EncodeToString(data["proposalMemory"].([]byte))
 

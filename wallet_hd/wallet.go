@@ -44,7 +44,7 @@ func (wallet *HDWallet) Type() core.WalletType {
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.ValidatorAccount, error) {
 	if len(name) == 0 {
-		return nil, fmt.Errorf("account name is empty")
+		name = fmt.Sprintf("account-%d", len(wallet.indexMapper))
 	}
 
 	// Check if an account with the name already exists
