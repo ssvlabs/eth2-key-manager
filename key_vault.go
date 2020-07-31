@@ -27,7 +27,7 @@ func initBLS() error {
 	return err
 }
 
-func init() {
+func InitCrypto() {
 	// !!!VERY IMPORTANT!!!
 	if err := initBLS(); err != nil {
 		log.Fatal(err)
@@ -49,6 +49,8 @@ func (kv *KeyVault) Wallet() (core.Wallet, error) {
 
 // wil try and open an existing KeyVault (and wallet) from memory
 func OpenKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
+	InitCrypto()
+
 	storage, err := setupStorage(options)
 	if err != nil {
 		return nil, err
@@ -74,6 +76,8 @@ func OpenKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
 // New KeyVault will create a new wallet (with new ids) and will save it to storage
 // Import and New are the same action.
 func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
+	InitCrypto()
+
 	storage, err := setupStorage(options)
 	if err != nil {
 		return nil, err
