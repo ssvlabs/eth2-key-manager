@@ -124,7 +124,7 @@ func TestImportKeyVault(t *testing.T) {
 			require.NoError(t, err)
 
 			// test specific derivation
-			account, err := wallet.AccountByName("val1")
+			account, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
@@ -182,7 +182,7 @@ func TestOpenKeyVault(t *testing.T) {
 			require.NoError(t, err)
 
 			// test specific derivation
-			account, err := wallet.AccountByName("val1")
+			account, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
@@ -205,7 +205,7 @@ func testVault(t *testing.T, v *KeyVault, seed []byte) {
 	// create and fetch validator account
 	val, err := wallet.CreateValidatorAccount(seed, "val1")
 	require.NoError(t, err)
-	val1, err := wallet.AccountByName("val1")
+	val1, err := wallet.AccountByPublicKey(hex.EncodeToString(val.ValidatorPublicKey().Marshal()))
 	require.NoError(t, err)
 	val2, err := wallet.AccountByID(val.ID())
 	require.NoError(t, err)

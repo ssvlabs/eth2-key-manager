@@ -25,10 +25,10 @@ type Wallet interface {
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
 	AccountByID(id uuid.UUID) (ValidatorAccount, error)
-	// AccountByName provides a single account from the wallet given its name.
+	// AccountByPublicKey provides a single account from the wallet given its public key.
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
-	AccountByName(name string) (ValidatorAccount, error)
+	AccountByPublicKey(pubKey string) (ValidatorAccount, error)
 	//
 	SetContext(ctx *WalletContext)
 }

@@ -50,7 +50,7 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 			}
 
 			// open
-			a1, err := wallet.AccountByName(accountName)
+			a1, err := wallet.AccountByPublicKey(hex.EncodeToString(a.ValidatorPublicKey().Marshal()))
 			if err != nil {
 				t.Error(err)
 				return

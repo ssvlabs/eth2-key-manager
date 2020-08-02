@@ -1,6 +1,7 @@
 package wallet_hd
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
@@ -47,12 +48,6 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 		name = fmt.Sprintf("account-%d", len(wallet.indexMapper))
 	}
 
-	// Check if an account with the name already exists
-	_, exists := wallet.indexMapper[name]
-	if exists {
-		return nil, fmt.Errorf("account %q already exists", name)
-	}
-
 	// create the master key
 	key, err := core.MasterKeyFromSeed(seed)
 	if err != nil {
@@ -85,11 +80,12 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 		return nil, err
 	}
 
+	validatorPublicKey := hex.EncodeToString(ret.ValidatorPublicKey().Marshal())
 	// register new wallet and save portfolio
 	reset := func() {
-		delete(wallet.indexMapper, name)
+		delete(wallet.indexMapper, validatorPublicKey)
 	}
-	wallet.indexMapper[name] = ret.ID()
+	wallet.indexMapper[validatorPublicKey] = ret.ID()
 	err = wallet.context.Storage.SaveAccount(ret)
 	if err != nil {
 		reset()
@@ -108,8 +104,8 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 func (wallet *HDWallet) Accounts() <-chan core.ValidatorAccount {
 	ch := make(chan core.ValidatorAccount, 1024) // TODO - handle more? change from chan?
 	go func() {
-		for name := range wallet.indexMapper {
-			id := wallet.indexMapper[name]
+		for pubKey := range wallet.indexMapper {
+			id := wallet.indexMapper[pubKey]
 			account, err := wallet.AccountByID(id)
 			if err != nil {
 				continue
@@ -140,10 +136,10 @@ func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
 	wallet.context = ctx
 }
 
-// AccountByName provides a single account from the wallet given its name.
+// AccountByPublicKey provides a single account from the wallet given its public key.
 // This will error if the account is not found.
-func (wallet *HDWallet) AccountByName(name string) (core.ValidatorAccount, error) {
-	id, exists := wallet.indexMapper[name]
+func (wallet *HDWallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
+	id, exists := wallet.indexMapper[pubKey]
 	if !exists {
 		return nil, fmt.Errorf("account not found")
 	}

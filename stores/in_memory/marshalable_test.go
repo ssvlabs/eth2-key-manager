@@ -65,7 +65,7 @@ func TestMarshaling(t *testing.T) {
 	t.Run("verify acc", func(t *testing.T) {
 		wallet2, err := store2.OpenWallet()
 		require.NoError(t, err)
-		acc2, err := wallet2.AccountByName("acc")
+		acc2, err := wallet2.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
 		require.NoError(t, err)
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})

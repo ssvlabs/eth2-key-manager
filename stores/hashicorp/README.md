@@ -47,7 +47,7 @@ options.EnableSimpleSigner(true) // false by default. if false, signer will not 
 // key management in one place
 vault, _ := NewKeyVault(options)
 account, _ := vault.wallet.CreateAccount("account","unlock_password")
-account, _ = vault.wallet.AccountByName("account")
+account, _ = vault.wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
 
 // manage all validator duty signatures
 // pb package is [what used in prysm](github.com/wealdtech/eth2-signer-api/pb/v1)

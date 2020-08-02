@@ -86,7 +86,7 @@ func TestSignatures(t *testing.T) {
 		{
 			name: "simple sign",
 			req: &pb.SignRequest{
-				Id:     &pb.SignRequest_Account{Account: "1"},
+				Id:     &pb.SignRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4b")},
 				Data:   []byte("data"),
 				Domain: []byte("domain"),
 			},
@@ -97,7 +97,7 @@ func TestSignatures(t *testing.T) {
 		{
 			name: "unknown account, should error",
 			req: &pb.SignRequest{
-				Id:     &pb.SignRequest_Account{Account: "10"},
+				Id:     &pb.SignRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c")},
 				Data:   []byte("data"),
 				Domain: []byte("domain"),
 			},

@@ -16,12 +16,12 @@ func _byteArray(input string) []byte {
 }
 
 func TestAttestationSlashingSignatures(t *testing.T) {
-	t.Run("valid attestation, sign using account name", func(t *testing.T) {
+	t.Run("valid attestation, sign using public key", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 		signer, err := setupWithSlashingProtection(seed)
 		require.NoError(t, err)
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -40,12 +40,12 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("valid attestation, sign using pub key. Should error", func(t *testing.T) {
+	t.Run("valid attestation, sign using account name. Should error", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 		signer, err := setupWithSlashingProtection(seed)
 		require.NoError(t, err)
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("a279033cc76667b4d083a605b7656ee48629c9e22032fb2a631b8e2c025c7000b87fc9fa5df47e107b51f436749d38ab")},
+			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -72,7 +72,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// first
 		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -91,7 +91,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// second
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("A")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -118,7 +118,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// first
 		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -137,7 +137,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// second
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01100000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -163,7 +163,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// first
 		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -184,7 +184,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		// add another attestation building on the base
 		// 8877 <- 8878 <- 8879
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284116,
@@ -206,7 +206,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		// 8877 <- 8878 <- 8879
 		// 	<- 8880
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284117,
@@ -253,7 +253,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		// add another attestation building on the base
 		// 8877 <- 8878 <----------------------9000
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284116,
@@ -275,7 +275,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		// 8877 <- 8878 <- 8879 <----------------------9000
 		// 								8900 <- 8901
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284117,
@@ -319,7 +319,7 @@ func TestAttestationSignatures(t *testing.T) {
 		{
 			name: "correct request",
 			req: &pb.SignBeaconAttestationRequest{
-				Id:     &pb.SignBeaconAttestationRequest_Account{Account: "1"},
+				Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 				Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 				Data: &pb.AttestationData{
 					Slot:            284115,
@@ -342,7 +342,7 @@ func TestAttestationSignatures(t *testing.T) {
 		{
 			name: "unknown account, should error",
 			req: &pb.SignBeaconAttestationRequest{
-				Id:     &pb.SignBeaconAttestationRequest_Account{Account: "10"},
+				Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3270")},
 				Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 				Data: &pb.AttestationData{
 					Slot:            284115,

@@ -160,16 +160,6 @@ func TestCreateAccounts(t *testing.T) {
 			newAccounttName: "account1",
 			expectedErr:     "",
 		},
-		{
-			testName:        "Add duplicate account, should error",
-			newAccounttName: "account1",
-			expectedErr:     "account account1 already exists",
-		},
-		{
-			testName:        "Add account with no name, should error",
-			newAccounttName: "account1",
-			expectedErr:     "account name is empty",
-		},
 	}
 
 	// create key and wallet
@@ -219,7 +209,7 @@ func TestWalletMarshaling(t *testing.T) {
 			id:         uuid.New(),
 			walletType: core.HDWallet,
 			indexMapper: map[string]uuid.UUID{
-				"account1": uuid.New(),
+				"ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279": uuid.New(),
 			},
 			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "/0/0",

@@ -1,6 +1,7 @@
 package validator_signer
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/bloxapp/KeyVault/core"
@@ -9,10 +10,10 @@ import (
 
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
 	// 1. get the account
-	if req.GetAccount() == "" { // TODO by public key
+	if req.GetPublicKey() == nil {
 		return nil, fmt.Errorf("account was not supplied")
 	}
-	account, err := signer.wallet.AccountByName(req.GetAccount())
+	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
 	if err != nil {
 		return nil, err
 	}
