@@ -8,7 +8,6 @@ import (
 
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
-	"github.com/tyler-smith/go-bip39"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -114,31 +113,4 @@ func setupStorage(options *KeyVaultOptions) (core.Storage, error) {
 	}
 
 	return options.storage.(core.Storage), nil
-}
-
-func GenerateNewSeed() ([]byte, error) {
-	seed, err := bip39.NewEntropy(256)
-	if err != nil {
-		return nil, err
-	}
-
-	return seed, nil
-}
-
-func SeedToMnemonic(seed []byte) (string, error) {
-	mnemonic, err := bip39.NewMnemonic(seed)
-	if err != nil {
-		return "", err
-	}
-
-	return mnemonic, nil
-}
-
-func SeedFromMnemonic(mnemonic string) ([]byte, error) {
-	seed, err := bip39.EntropyFromMnemonic(mnemonic)
-	if err != nil {
-		return nil, err
-	}
-
-	return seed, nil
 }

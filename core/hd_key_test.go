@@ -43,10 +43,6 @@ func _bigInt(input string) *big.Int {
 	return res
 }
 
-func storage(seed []byte, err error) Storage {
-	return &mockedStorage{seed: seed, err: err}
-}
-
 func TestMarshalingHDKey(t *testing.T) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
@@ -135,63 +131,63 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/0/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
+			expectedKey: _bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398"),
 		},
 		{
 			name:        "validation account 1 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/1/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("22295543756806915021696580341385697374834805500065673451566881420621123341007"),
+			expectedKey: _bigInt("22772506560955906640840029020628554414154538440282401807772339666252999598733"),
 		},
 		{
 			name:        "validation account 2 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/2/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("43442610958028244518598118443083802862055489983359071059993155323547905350874"),
+			expectedKey: _bigInt("39196384482644522441983190042722076264169843386078553516164086198183513560637"),
 		},
 		{
 			name:        "validation account 3 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/3/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("4448413729621370906608934836012354998323947125552823486758689486871003717293"),
+			expectedKey: _bigInt("28093661633617073106051830080274606181076423213304176144286257209925213345002"),
 		},
 		{
 			name:        "withdrawal account 0 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358"),
+			expectedKey: _bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836"),
 		},
 		{
 			name:        "withdrawal account 1 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/1/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("19211358943475501217006127435996279333633291783393046900803879394346849035913"),
+			expectedKey: _bigInt("35957947454275682122989949668683794518020231276710636838205992785623169821803"),
 		},
 		{
 			name:        "withdrawal account 2 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/2/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("23909010000215292098635609623453075881965979294359727509549907878193079139650"),
+			expectedKey: _bigInt("8862394884593725153617163219481465667794938944832130820949251394547028786321"),
 		},
 		{
 			name:        "withdrawal account 3 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/3/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("37328169013635701905066231905928437636499300152882617419715404470232404314068"),
+			expectedKey: _bigInt("24013488102538647731381570745201628464138315555327292772724806156501038782887"),
 		},
 		{
 			name:        "Base account derivation (big index)",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/100/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("32144101621348914818367240707612216812424606921220230979223912693973502345535"),
+			expectedKey: _bigInt("14004582289918763639923763455218870137436565566857894891588947000864308096613"),
 		},
 		{
 			name:        "bad path",

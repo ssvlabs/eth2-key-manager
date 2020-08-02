@@ -9,7 +9,6 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	"math/big"
-	"strings"
 	"testing"
 )
 
@@ -81,7 +80,7 @@ func TestNewKeyVault(t *testing.T) {
 			require.NoError(t, err)
 
 			// generate new seed
-			seed, err := GenerateNewSeed()
+			seed, err := core.GenerateNewEntropy()
 			require.NoError(t, err)
 
 			testVault(t, v, seed)
@@ -129,9 +128,9 @@ func TestImportKeyVault(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
-			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218").Bytes())
+			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398").Bytes())
 			require.NoError(t, err)
-			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358").Bytes())
+			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
 			require.NoError(t, err)
 
 			assert.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
@@ -187,9 +186,9 @@ func TestOpenKeyVault(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
-			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218").Bytes())
+			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398").Bytes())
 			require.NoError(t, err)
-			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358").Bytes())
+			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
 			require.NoError(t, err)
 
 			assert.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
@@ -197,20 +196,6 @@ func TestOpenKeyVault(t *testing.T) {
 			assert.Equal(t, importedVault.walletId, v.walletId)
 		})
 	}
-}
-
-func TestMnemonic(t *testing.T) {
-	seed, err := GenerateNewSeed()
-	require.NoError(t, err)
-
-	mnemonic, err := SeedToMnemonic(seed)
-	require.NoError(t, err)
-	require.Len(t, strings.Split(mnemonic, " "), 24)
-
-	fromMnemonic, err := SeedFromMnemonic(mnemonic)
-	require.NoError(t, err)
-
-	require.Equal(t, seed, fromMnemonic)
 }
 
 func testVault(t *testing.T, v *KeyVault, seed []byte) {

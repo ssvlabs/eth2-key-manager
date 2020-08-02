@@ -6,12 +6,15 @@ import (
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 )
 
 // Account creates a new wallet account and prints prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
+	types.InitBLS()
+
 	// Get seed flag.
 	nameFlagValue, err := flag.GetNameFlagValue(cmd)
 	if err != nil {

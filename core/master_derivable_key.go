@@ -20,8 +20,8 @@ type MasterDerivableKey struct {
 
 // base privKey is m / purpose / coin_type / as EIP 2334 defines
 func MasterKeyFromSeed(seed []byte) (*MasterDerivableKey, error) {
-	if seed == nil || len(seed) != 32 {
-		return nil, fmt.Errorf("seed can't be nil or of length different than 32")
+	if seed == nil || len(seed) == 0 {
+		return nil, fmt.Errorf("seed can't be nil or length 0")
 	}
 	return &MasterDerivableKey{
 		seed: seed,

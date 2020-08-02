@@ -38,14 +38,14 @@ func TestSeedGenerate(t *testing.T) {
 		require.NotNil(t, actualOutput)
 	})
 
-	t.Run("Successfully Generate Mnemonic from seed", func(t *testing.T) {
+	t.Run("Successfully Generate Mnemonic from entropy", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
 			"seed",
 			"generate",
 			"--mnemonic",
-			"--seed=a42b2d973095bb518e45ae5b372dbff9a3aec572ff74b1c8c54749d34b4479eb",
+			"--entropy=a42b2d973095bb518e45ae5b372dbff9a3aec572ff74b1c8c54749d34b4479eb",
 		})
 		err := cmd.RootCmd.Execute()
 		require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestSeedGenerate(t *testing.T) {
 			"seed",
 			"generate",
 			"--mnemonic=false",
-			"--seed=a42b2d973095bb518e45ae5b372dbff9a3aec572ff74b1c8c54749d34b4479eb",
+			"--entropy=a42b2d973095bb518e45ae5b372dbff9a3aec572ff74b1c8c54749d34b4479eb",
 		})
 		err := cmd.RootCmd.Execute()
 		require.NoError(t, err)

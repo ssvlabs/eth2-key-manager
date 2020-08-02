@@ -9,7 +9,7 @@ import (
 // Flag names.
 const (
 	mnemonicFlag = "mnemonic"
-	seedFlag = "seed"
+	entropyFlag  = "entropy"
 )
 
 // AddMnemonicFlag adds the mnemonic flag to the command
@@ -22,12 +22,12 @@ func GetMnemonicFlagValue(c *cobra.Command) (bool, error) {
 	return c.Flags().GetBool(mnemonicFlag)
 }
 
-// AddSeedFlag adds the seed flag to the command
-func AddSeedFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, seedFlag, "", "Seed to mnemonic phrase", false)
+// AddEntropyFlag adds the seed flag to the command
+func AddEntropyFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, entropyFlag, "", "Seed to mnemonic phrase", false)
 }
 
-// GetSeedFlagValue gets the seed flag from the command
-func GetSeedFlagValue(c *cobra.Command) (string, error) {
-	return c.Flags().GetString(seedFlag)
+// GetEntropyFlagValue gets the seed flag from the command
+func GetEntropyFlagValue(c *cobra.Command) (string, error) {
+	return c.Flags().GetString(entropyFlag)
 }

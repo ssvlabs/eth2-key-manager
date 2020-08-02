@@ -4,15 +4,19 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/bloxapp/KeyVault"
+	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 )
 
 func main() {
-	seed, _ := KeyVault.GenerateNewSeed()
+	entropy, _ := core.GenerateNewEntropy()
 
 	// print out mnemonic
-	mnemonic, _ := KeyVault.SeedToMnemonic(seed)
+	mnemonic, _ := core.EntropyToMnemonic(entropy)
 	fmt.Printf("Generated mnemonic: %s\n", mnemonic)
+
+	// generate seed
+	seed,_ := core.SeedFromEntropy(entropy, "")
 
 	// create storage
 	store := in_memory.NewInMemStore()

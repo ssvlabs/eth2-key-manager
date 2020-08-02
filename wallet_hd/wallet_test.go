@@ -3,6 +3,7 @@ package wallet_hd
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -44,6 +45,49 @@ func key(seed []byte) (*core.MasterDerivableKey, error) {
 	return core.MasterKeyFromSeed(seed)
 }
 
+// ethereum foundation launched a launchpad for making deposits.
+// this test compares the launchpad results and KeyVault
+func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
+	e2types.InitBLS()
+
+	tests := []struct{
+		mnemonic string
+		password string
+		validatorPubKey string
+	} {
+		{
+			mnemonic: "vocal differ audit mom unique physical evolve cave retire design achieve pupil odor hockey drive animal habit fluid belt height vintage crack rigid sphere",
+			password: "",
+			validatorPubKey: "aa6e59b378b905a7454cf3a7a57e07ce89d5410fb3f96610aba0a8036984d7a6a2e1398fceb85611bc576cd349d7dcd2",
+		},
+		{
+			mnemonic: "magnet burden popular race night clown moral sorry situate worth sorry solution live custom message finger soon month invest battle fade funny bright basket",
+			password: "",
+			validatorPubKey: "98ee5f5107f72bef05f59dee8de08223cd0db04be9f142806743cad44366f44184f0957935dc8e4994e038ad1fd5d821",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("test vector: %d", i), func(t *testing.T) {
+			seed,err := core.SeedFromMnemonic(test.mnemonic, test.password)
+			require.NoError(t, err)
+
+			//
+			storage := storage()
+			w := &HDWallet{
+				id:          uuid.New(),
+				indexMapper: make(map[string]uuid.UUID),
+				context: &core.WalletContext{
+					Storage: storage,
+				},
+			}
+			account, err := w.CreateValidatorAccount(seed, "name")
+			require.NoError(t, err)
+			require.Equal(t, test.validatorPubKey, hex.EncodeToString(account.ValidatorPublicKey().Marshal()))
+		})
+	}
+}
+
 func TestAccountDerivation(t *testing.T) {
 	e2types.InitBLS()
 
@@ -67,26 +111,26 @@ func TestAccountDerivation(t *testing.T) {
 		{
 			testName:              "account 0",
 			accountName:           "account 0",
-			expectedValidationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
-			expectedWithdrawalKey: _bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358"),
+			expectedValidationKey: _bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398"),
+			expectedWithdrawalKey: _bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836"),
 		},
 		{
 			testName:              "account 1",
 			accountName:           "account 1",
-			expectedValidationKey: _bigInt("22295543756806915021696580341385697374834805500065673451566881420621123341007"),
-			expectedWithdrawalKey: _bigInt("19211358943475501217006127435996279333633291783393046900803879394346849035913"),
+			expectedValidationKey: _bigInt("22772506560955906640840029020628554414154538440282401807772339666252999598733"),
+			expectedWithdrawalKey: _bigInt("35957947454275682122989949668683794518020231276710636838205992785623169821803"),
 		},
 		{
 			testName:              "account 2",
 			accountName:           "account 2",
-			expectedValidationKey: _bigInt("43442610958028244518598118443083802862055489983359071059993155323547905350874"),
-			expectedWithdrawalKey: _bigInt("23909010000215292098635609623453075881965979294359727509549907878193079139650"),
+			expectedValidationKey: _bigInt("39196384482644522441983190042722076264169843386078553516164086198183513560637"),
+			expectedWithdrawalKey: _bigInt("8862394884593725153617163219481465667794938944832130820949251394547028786321"),
 		},
 		{
 			testName:              "account 3",
 			accountName:           "account 3",
-			expectedValidationKey: _bigInt("4448413729621370906608934836012354998323947125552823486758689486871003717293"),
-			expectedWithdrawalKey: _bigInt("37328169013635701905066231905928437636499300152882617419715404470232404314068"),
+			expectedValidationKey: _bigInt("28093661633617073106051830080274606181076423213304176144286257209925213345002"),
+			expectedWithdrawalKey: _bigInt("24013488102538647731381570745201628464138315555327292772724806156501038782887"),
 		},
 	}
 	for _, test := range tests {

@@ -2,8 +2,8 @@ package handler
 
 import (
 	"encoding/hex"
+	"github.com/bloxapp/KeyVault/core"
 
-	"github.com/bloxapp/KeyVault"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -13,6 +13,7 @@ import (
 // Seed generates a new key-vault seed and prints it.
 func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
 	var seed []byte
+	var entropy []byte
 	var mnemonic string
 
 	// Get mnemonic flag.
@@ -22,19 +23,24 @@ func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get seed flag.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	entropyFlagValue, err := flag.GetEntropyFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the seed flag value")
 	}
 
 	// Generate seed if seed flag is not provided.
-	if len(seedFlagValue) == 0 {
-		seed, err = KeyVault.GenerateNewSeed()
+	if len(entropyFlagValue) == 0 {
+		entropy, err = core.GenerateNewEntropy()
+		if err != nil {
+			return errors.Wrap(err, "failed to generate entropy")
+		}
+
+		seed, err = core.SeedFromEntropy(entropy, "")
 		if err != nil {
 			return errors.Wrap(err, "failed to generate new seed")
 		}
 	} else if mnemonicFlagValue {
-		seed, err = hex.DecodeString(seedFlagValue)
+		entropy, err = hex.DecodeString(entropyFlagValue)
 		if err != nil {
 			return errors.Wrap(err, "failed to hex decode the seed flag value")
 		}
@@ -42,13 +48,13 @@ func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
 
 	// Generate mnemonic
 	if mnemonicFlagValue {
-		mnemonic, err = KeyVault.SeedToMnemonic(seed)
+		mnemonic, err = core.EntropyToMnemonic(entropy)
 		if err != nil {
 			return errors.Wrap(err, "failed to generate mnemonic from seed")
 		}
 		h.printer.Text(mnemonic)
-	} else if len(seedFlagValue) > 0 {
-		h.printer.Text(seedFlagValue)
+	} else if len(entropyFlagValue) > 0 {
+		h.printer.Text(entropyFlagValue)
 	} else {
 		h.printer.Text(hex.EncodeToString(seed))
 	}

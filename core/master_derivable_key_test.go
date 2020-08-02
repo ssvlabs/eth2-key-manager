@@ -14,20 +14,15 @@ func TestNew(t *testing.T) {
 		{
 			testName:      "seed length 0",
 			seed:          _byteArray(""),
-			expectedError: "seed can't be nil or of length different than 32",
-		},
-		{
-			testName:      "seed length 29",
-			seed:          _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1"),
-			expectedError: "seed can't be nil or of length different than 32",
+			expectedError: "seed can't be nil or length 0",
 		},
 		{
 			testName:      "seed nil",
 			seed:          nil,
-			expectedError: "seed can't be nil or of length different than 32",
+			expectedError: "seed can't be nil or length 0",
 		},
 		{
-			testName:      "seed nil",
+			testName:      "seed ok",
 			seed:          _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			expectedError: "",
 		},
