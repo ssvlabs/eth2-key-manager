@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -11,7 +10,7 @@ import (
 	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 )
 
-// Account creates a new wallet account and prints prints the storage.
+// Account creates a new wallet account and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	types.InitBLS()
 
@@ -32,7 +31,6 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to HEX decode seed")
 	}
 
-
 	// Get storage flag.
 	storageFlagValue, err := flag.GetStorageFlagValue(cmd)
 	if err != nil {
@@ -44,9 +42,8 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to HEX decode storage")
 	}
 
-
 	var store in_memory.InMemStore
-	err = json.Unmarshal(storageBytes, &store)
+	err = store.UnmarshalJSON(storageBytes)
 	if err != nil {
 		return errors.Wrap(err, "failed to JSON un-marshal storage")
 	}

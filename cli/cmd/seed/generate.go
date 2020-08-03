@@ -22,7 +22,6 @@ var generateCmd = &cobra.Command{
 func init() {
 	// Define flags for the command.
 	flag.AddMnemonicFlag(generateCmd)
-	flag.AddEntropyFlag(generateCmd)
 
 	Command.AddCommand(generateCmd)
 }
