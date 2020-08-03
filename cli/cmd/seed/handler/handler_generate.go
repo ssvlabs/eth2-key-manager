@@ -13,8 +13,6 @@ import (
 // Seed generates a new key-vault seed and prints it.
 func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
 	var seed []byte
-	var entropy []byte
-	var mnemonic string
 
 	// Get mnemonic flag.
 	mnemonicFlagValue, err := flag.GetMnemonicFlagValue(cmd)
@@ -22,42 +20,22 @@ func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to retrieve the mnemonic flag value")
 	}
 
-	// Get seed flag.
-	entropyFlagValue, err := flag.GetEntropyFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the seed flag value")
-	}
-
-	// Generate seed if seed flag is not provided.
-	if len(entropyFlagValue) == 0 {
-		entropy, err = core.GenerateNewEntropy()
+	if len(mnemonicFlagValue) > 0 {
+		seed, err = core.SeedFromMnemonic(mnemonicFlagValue, "")
+		if err != nil {
+			return errors.Wrap(err, "failed to retrieve seed from mnemonic")
+		}
+	} else {
+		entropy, err := core.GenerateNewEntropy()
 		if err != nil {
 			return errors.Wrap(err, "failed to generate entropy")
 		}
-
 		seed, err = core.SeedFromEntropy(entropy, "")
 		if err != nil {
-			return errors.Wrap(err, "failed to generate new seed")
-		}
-	} else if mnemonicFlagValue {
-		entropy, err = hex.DecodeString(entropyFlagValue)
-		if err != nil {
-			return errors.Wrap(err, "failed to hex decode the seed flag value")
+			return errors.Wrap(err, "failed to generate seed from entropy")
 		}
 	}
 
-	// Generate mnemonic
-	if mnemonicFlagValue {
-		mnemonic, err = core.EntropyToMnemonic(entropy)
-		if err != nil {
-			return errors.Wrap(err, "failed to generate mnemonic from seed")
-		}
-		h.printer.Text(mnemonic)
-	} else if len(entropyFlagValue) > 0 {
-		h.printer.Text(entropyFlagValue)
-	} else {
-		h.printer.Text(hex.EncodeToString(seed))
-	}
-
+	h.printer.Text(hex.EncodeToString(seed))
 	return nil
 }
