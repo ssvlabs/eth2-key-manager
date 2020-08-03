@@ -1,36 +1,33 @@
 package in_memory
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type InMemStore struct {
-	memory         		map[string]interface{}
-	attMemory      		map[string]*core.BeaconAttestation
-	proposalMemory 		map[string]*core.BeaconBlockHeader
-	encryptor	   		types.Encryptor
-	encryptionPassword 	[]byte
+	wallet             *wallet_hd.HDWallet
+	accounts           map[string]*wallet_hd.HDAccount
+	attMemory          map[string]*core.BeaconAttestation
+	proposalMemory     map[string]*core.BeaconBlockHeader
+	encryptor          types.Encryptor
+	encryptionPassword []byte
 }
 
-func NewInMemStore(
-	) *InMemStore {
-	return NewInMemStoreWithEncryptor(nil,nil)
+func NewInMemStore() *InMemStore {
+	return NewInMemStoreWithEncryptor(nil, nil)
 }
 
-func NewInMemStoreWithEncryptor(
-	encryptor types.Encryptor,
-	password []byte,
-	) *InMemStore {
+func NewInMemStoreWithEncryptor(encryptor types.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
-		memory:         	make(map[string]interface{}),
-		attMemory:      	make(map[string]*core.BeaconAttestation),
-		proposalMemory: 	make(map[string]*core.BeaconBlockHeader),
-		encryptor:			encryptor,
-		encryptionPassword:	password,
+		accounts:           make(map[string]*wallet_hd.HDAccount),
+		attMemory:          make(map[string]*core.BeaconAttestation),
+		proposalMemory:     make(map[string]*core.BeaconBlockHeader),
+		encryptor:          encryptor,
+		encryptionPassword: password,
 	}
 }
 
@@ -39,88 +36,45 @@ func (store *InMemStore) Name() string {
 	return "in-memory"
 }
 
-func (store *InMemStore) SavePortfolio(portfolio core.Portfolio) error {
-	raw,err := json.Marshal(portfolio)
-	if err != nil {
-		return err
-	}
-
-	store.memory["portfolio"] = portfolio
-	store.memory["portfolio_raw"] = raw
-	return nil
-}
-
-// will return nil,nil if no portfolio was found
-func (store *InMemStore) OpenPortfolio() (core.Portfolio,error) {
-	if val := store.memory["portfolio"]; val != nil {
-		return val.(core.Portfolio),nil
-	} else {
-		return nil,nil
-	}
-}
-
-// used to fetch the raw bytes of a saved portfolio data
-func (store *InMemStore) OpenPortfolioRaw() ([]byte,error) {
-	return store.memory["portfolio_raw"].([]byte),nil
-}
-
-func (store *InMemStore) ListWallets() ([]core.Wallet,error) {
-	p,err := store.OpenPortfolio()
-	if err != nil {
-		return nil,err
-	}
-
-	ret := make([]core.Wallet,0)
-	for w := range p.Wallets() {
-		ret = append(ret,w)
-	}
-	return ret,nil
-}
-
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
-	store.memory[wallet.ID().String()] = wallet
+	store.wallet = wallet.(*wallet_hd.HDWallet)
 	return nil
 }
 
 // will return nil,nil if no wallet was found
-func (store *InMemStore) OpenWallet(uuid uuid.UUID) (core.Wallet,error) {
-	if val := store.memory[uuid.String()]; val != nil {
-		return val.(core.Wallet),nil
-	} else {
-		return nil,nil
+func (store *InMemStore) OpenWallet() (core.Wallet, error) {
+	if store.wallet != nil {
+		store.wallet.SetContext(store.freshContext())
+		return store.wallet, nil
 	}
+	return nil, fmt.Errorf("wallet not found")
 }
 
 // will return an empty array for no accounts
-func (store *InMemStore) ListAccounts(walletID uuid.UUID) ([]core.Account,error) {
-	p,err := store.OpenPortfolio()
+func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
+	w, err := store.OpenWallet()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	w,err := p.WalletByID(walletID)
-	if err != nil {
-		return nil,err
-	}
-
-	ret := make([]core.Account,0)
+	ret := make([]core.ValidatorAccount, 0)
 	for a := range w.Accounts() {
-		ret = append(ret,a)
+		ret = append(ret, a)
 	}
-	return ret,nil
+	return ret, nil
 }
 
-func (store *InMemStore) SaveAccount(account core.Account) error {
-	store.memory[account.ID().String()] = account
+func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
+	store.accounts[account.ID().String()] = account.(*wallet_hd.HDAccount)
 	return nil
 }
 
 // will return nil,nil if no account was found
-func (store *InMemStore) OpenAccount(walletId uuid.UUID, accountId uuid.UUID) (core.Account,error) {
-	if val := store.memory[accountId.String()]; val != nil {
-		return val.(core.Account),nil
+func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
+	if val := store.accounts[accountId.String()]; val != nil {
+		return val, nil
 	} else {
-		return nil,nil
+		return nil, nil
 	}
 }
 
@@ -129,46 +83,9 @@ func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte
 	store.encryptionPassword = password
 }
 
-func (store *InMemStore) SecurelyFetchPortfolioSeed() ([]byte,error) {
-	if val := store.memory["portfolio_seed"]; val != nil {
-		if store.canEncrypt() {
-			if encrypted,ok := val.(map[string]interface{}); ok {
-				decrypted,err := store.encryptor.Decrypt(encrypted,store.encryptionPassword)
-				if err != nil {
-					return nil,err
-				}
-				return decrypted,nil
-			} else {
-				return nil,fmt.Errorf("no encrypted data exists")
-			}
-
-		} else {
-			return val.([]byte),nil
-		}
-	} else {
-		return nil,nil
-	}
-}
-
-func (store *InMemStore) SecurelySavePortfolioSeed(secret []byte) error {
-	if len(secret) != 32 {
-		return fmt.Errorf("secret can be only 32 bytes (not %d bytes)",len(secret))
-	}
-	if store.canEncrypt() {
-		encrypted,err := store.encryptor.Encrypt(secret,store.encryptionPassword)
-		if err != nil {
-			return err
-		}
-		store.memory["portfolio_seed"] = encrypted
-	} else {
-		store.memory["portfolio_seed"] = secret
-	}
-	return nil
-}
-
-func (store *InMemStore) freshContext() *core.PortfolioContext {
-	return &core.PortfolioContext {
-		Storage:     store,
+func (store *InMemStore) freshContext() *core.WalletContext {
+	return &core.WalletContext{
+		Storage: store,
 	}
 }
 

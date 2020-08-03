@@ -1,6 +1,7 @@
 package validator_signer
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/prysmaticlabs/go-ssz"
@@ -12,10 +13,10 @@ func (signer *SimpleSigner) Sign(req *pb.SignRequest) (*pb.SignResponse, error) 
 	// TODO - should we?
 
 	// 2. get the account
-	if req.GetAccount() == "" { // TODO by public key
+	if req.GetPublicKey() == nil {
 		return nil, fmt.Errorf("account was not supplied")
 	}
-	account, error := signer.wallet.AccountByName(req.GetAccount())
+	account, error := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
 	if error != nil {
 		return nil, error
 	}
@@ -25,7 +26,7 @@ func (signer *SimpleSigner) Sign(req *pb.SignRequest) (*pb.SignResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	sig, err := account.Sign(forSig[:])
+	sig, err := account.ValidationKeySign(forSig[:])
 	if err != nil {
 		return nil, err
 	}

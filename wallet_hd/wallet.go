@@ -1,6 +1,7 @@
 package wallet_hd
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
@@ -8,29 +9,25 @@ import (
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 const (
-	WithdrawalKeyPath = "/0"
-	WithdrawalKeyName = "wallet_withdrawal_key_unique"
-	ValidatorKeyPath = "/0/%d"
+	BaseAccountPath   = "/%d"
+	WithdrawalKeyPath = BaseAccountPath + "/0"
+	ValidatorKeyPath  = WithdrawalKeyPath + "/0"
 )
 
 // an hierarchical deterministic wallet
 type HDWallet struct {
-	name 		string
-	id 			uuid.UUID
-	walletType 	core.WalletType
-	key 		*core.DerivableKey // the node key from which all accounts are derived
+	id          uuid.UUID
+	walletType  core.WalletType
 	indexMapper map[string]uuid.UUID
-	context 	*core.PortfolioContext
+	context     *core.WalletContext
 }
 
-func NewHDWallet(name string, key *core.DerivableKey, context *core.PortfolioContext) *HDWallet {
+func NewHDWallet(context *core.WalletContext) *HDWallet {
 	return &HDWallet{
-		name:            name,
-		id:              uuid.New(),
-		walletType:      core.HDWallet,
-		key:        	 key,
-		indexMapper: 	 make(map[string]uuid.UUID),
-		context:		 context,
+		id:          uuid.New(),
+		walletType:  core.HDWallet,
+		indexMapper: make(map[string]uuid.UUID),
+		context:     context,
 	}
 }
 
@@ -39,58 +36,77 @@ func (wallet *HDWallet) ID() uuid.UUID {
 	return wallet.id
 }
 
-// Name provides the name for the wallet.
-func (wallet *HDWallet) Name() string {
-	return wallet.name
-}
-
 // Type provides the type of the wallet.
 func (wallet *HDWallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
-// GetWithdrawalAccount returns this wallet's withdrawal key pair in the wallet as described in EIP-2334.
+// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 // This will error if an account with the name already exists.
-func (wallet *HDWallet) GetWithdrawalAccount() (core.Account, error) {
-	account, err := wallet.AccountByName(WithdrawalKeyName)
-	if err != nil && err.Error() != "account not found" {
+func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.ValidatorAccount, error) {
+	if len(name) == 0 {
+		name = fmt.Sprintf("account-%d", len(wallet.indexMapper))
+	}
+
+	// create the master key
+	key, err := core.MasterKeyFromSeed(seed)
+	if err != nil {
 		return nil, err
 	}
 
-	if account == nil { // create on the fly
-		created, err := wallet.createKey(WithdrawalKeyName, WithdrawalKeyPath, nil, core.WithdrawalAccount)
-		if err != nil {
-			return nil, err
-		}
-		return created, nil
+	baseAccountPath := fmt.Sprintf(BaseAccountPath, len(wallet.indexMapper))
+	// validator key
+	validatorPath := fmt.Sprintf(ValidatorKeyPath, len(wallet.indexMapper))
+	validatorKey, err := key.Derive(validatorPath)
+	if err != nil {
+		return nil, err
+	}
+	// withdrawal key
+	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, len(wallet.indexMapper))
+	withdrawalKey, err := key.Derive(withdrawalPath)
+	if err != nil {
+		return nil, err
 	}
 
-	return wallet.AccountByName(WithdrawalKeyName)
-}
-
-// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
-// This will error if an account with the name already exists.
-func (wallet *HDWallet) CreateValidatorAccount(name string, privateKey []byte) (core.Account, error) {
-	if len(name) == 0 {
-		return nil, fmt.Errorf("account name is empty")
+	// create ret account
+	ret, err := NewValidatorAccount(
+		name,
+		validatorKey,
+		withdrawalKey.PublicKey(),
+		baseAccountPath,
+		wallet.context,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	// Check if an account with the name already exists
-	_, exists := wallet.indexMapper[name]
-	if exists {
-		return nil, fmt.Errorf("account %q already exists", name)
+	validatorPublicKey := hex.EncodeToString(ret.ValidatorPublicKey().Marshal())
+	// register new wallet and save portfolio
+	reset := func() {
+		delete(wallet.indexMapper, validatorPublicKey)
 	}
-	path := fmt.Sprintf(ValidatorKeyPath, len(wallet.indexMapper))
-	return wallet.createKey(name, path, privateKey, core.ValidatorAccount)
+	wallet.indexMapper[validatorPublicKey] = ret.ID()
+	err = wallet.context.Storage.SaveAccount(ret)
+	if err != nil {
+		reset()
+		return nil, err
+	}
+	err = wallet.context.Storage.SaveWallet(wallet)
+	if err != nil {
+		reset()
+		return nil, err
+	}
+
+	return ret, nil
 }
 
 // Accounts provides all accounts in the wallet.
-func (wallet *HDWallet) Accounts() <-chan core.Account {
-	ch := make (chan core.Account,1024) // TODO - handle more? change from chan?
+func (wallet *HDWallet) Accounts() <-chan core.ValidatorAccount {
+	ch := make(chan core.ValidatorAccount, 1024) // TODO - handle more? change from chan?
 	go func() {
-		for name := range wallet.indexMapper {
-			id := wallet.indexMapper[name]
-			account,err := wallet.AccountByID(id)
+		for pubKey := range wallet.indexMapper {
+			id := wallet.indexMapper[pubKey]
+			account, err := wallet.AccountByID(id)
 			if err != nil {
 				continue
 			}
@@ -104,63 +120,28 @@ func (wallet *HDWallet) Accounts() <-chan core.Account {
 
 // AccountByID provides a single account from the wallet given its ID.
 // This will error if the account is not found.
-func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.Account, error) {
-	ret,err := wallet.context.Storage.OpenAccount(wallet.ID(), id)
+func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
+	ret, err := wallet.context.Storage.OpenAccount(id)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	if ret == nil {
-		return nil,nil
+		return nil, nil
 	}
 	ret.SetContext(wallet.context)
-	return ret,nil
+	return ret, nil
 }
 
-func (wallet *HDWallet) SetContext(ctx *core.PortfolioContext) {
+func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
 	wallet.context = ctx
 }
 
-// AccountByName provides a single account from the wallet given its name.
+// AccountByPublicKey provides a single account from the wallet given its public key.
 // This will error if the account is not found.
-func (wallet *HDWallet) AccountByName(name string) (core.Account, error) {
-	id, exists := wallet.indexMapper[name]
+func (wallet *HDWallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
+	id, exists := wallet.indexMapper[pubKey]
 	if !exists {
 		return nil, fmt.Errorf("account not found")
 	}
 	return wallet.AccountByID(id)
-}
-
-func (wallet *HDWallet) createKey(name string, path string, privateKey []byte, accountType core.AccountType) (core.Account, error) {
-	var retAccount *HDAccount
-
-	// create account
-	key,err := wallet.key.Derive(path, privateKey)
-	if err != nil {
-		return nil,err
-	}
-	retAccount,err = newHDAccount(
-		name,
-		accountType,
-		wallet.id,
-		key,
-		wallet.context,
-	)
-
-	// register new wallet and save portfolio
-	reset := func() {
-		delete(wallet.indexMapper,name)
-	}
-	wallet.indexMapper[name] = retAccount.ID()
-	err = wallet.context.Storage.SaveAccount(retAccount)
-	if err != nil {
-		reset()
-		return nil,err
-	}
-	err = wallet.context.Storage.SaveWallet(wallet)
-	if err != nil {
-		reset()
-		return nil,err
-	}
-
-	return retAccount,nil
 }

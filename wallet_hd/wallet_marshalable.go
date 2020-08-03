@@ -3,7 +3,6 @@ package wallet_hd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 )
 
@@ -11,10 +10,8 @@ func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
 	data["id"] = wallet.id
-	data["name"] = wallet.name
 	data["type"] = wallet.walletType
 	data["indexMapper"] = wallet.indexMapper
-	data["key"] = wallet.key
 
 	return json.Marshal(data)
 }
@@ -29,47 +26,33 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 
 	// id
 	if val, exists := v["id"]; exists {
-		wallet.id,err = uuid.Parse(val.(string))
+		wallet.id, err = uuid.Parse(val.(string))
 		if err != nil {
 			return err
 		}
-	} else {return fmt.Errorf("could not find var: id")}
-
-	// name
-	if val, exists := v["name"]; exists {
-		wallet.name = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
+	} else {
+		return fmt.Errorf("could not find var: id")
+	}
 
 	// type
 	if val, exists := v["type"]; exists {
 		wallet.walletType = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
+	} else {
+		return fmt.Errorf("could not find var: id")
+	}
 
 	// indexMapper
 	if val, exists := v["indexMapper"]; exists {
 		wallet.indexMapper = make(map[string]uuid.UUID)
-		for k,v := range val.(map[string]interface{}) {
-			wallet.indexMapper[k],err = uuid.Parse(v.(string))
+		for k, v := range val.(map[string]interface{}) {
+			wallet.indexMapper[k], err = uuid.Parse(v.(string))
 			if err != nil {
 				return err
 			}
 		}
-	} else {return fmt.Errorf("could not find var: indexMapper")}
-
-
-	// key
-	if val, exists := v["key"]; exists {
-		byts,err := json.Marshal(val)
-		if err != nil {
-			return err
-		}
-		key := &core.DerivableKey{Storage:wallet.context.Storage}
-		err = json.Unmarshal(byts,key)
-		if err != nil {
-			return err
-		}
-		wallet.key = key
-	} else {return fmt.Errorf("could not find var: key")}
+	} else {
+		return fmt.Errorf("could not find var: indexMapper")
+	}
 
 	return nil
 }

@@ -14,10 +14,10 @@ const (
 )
 
 // this is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
-func DepositData(validationAccount core.Account, withdrawalAccount core.Account, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+func DepositData(validationKey *core.HDKey, withdrawalKey *core.HDKey, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
 	di := &ethpb.Deposit_Data{
-		PublicKey:             validationAccount.PublicKey().Marshal(),
-		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalAccount),
+		PublicKey:             validationKey.PublicKey().Marshal(),
+		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalKey),
 		Amount:                amount,
 	}
 
@@ -42,7 +42,7 @@ func DepositData(validationAccount core.Account, withdrawalAccount core.Account,
 	}
 
 	// sign
-	sig,err := validationAccount.Sign(root[:])
+	sig,err := validationKey.Sign(root[:])
 	if err != nil {
 		return nil, [32]byte{}, err
 	}
@@ -64,7 +64,7 @@ func DepositData(validationAccount core.Account, withdrawalAccount core.Account,
 //   withdrawal_credentials[:1] == BLS_WITHDRAWAL_PREFIX_BYTE
 //   withdrawal_credentials[1:] == hash(withdrawal_pubkey)[1:]
 // where withdrawal_credentials is of type bytes32.
-func withdrawalCredentialsHash(withdrawalAccount core.Account) []byte {
-	h := util.SHA256(withdrawalAccount.PublicKey().Marshal())
+func withdrawalCredentialsHash(withdrawalKey *core.HDKey) []byte {
+	h := util.SHA256(withdrawalKey.PublicKey().Marshal())
 	return append([]byte{BLSWithdrawalPrefixByte}, h[1:]...)[:32]
 }

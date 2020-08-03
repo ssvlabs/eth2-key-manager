@@ -5,6 +5,7 @@ import (
 	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/bloxapp/KeyVault/stores"
+	types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
 )
 
@@ -13,49 +14,53 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func getPopulatedWalletStorage() (core.Storage,[]core.Account,error) {
+func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) {
+	types.InitBLS()
 	store := getStorage()
 
-	options := &KeyVault.PortfolioOptions{}
+	// seed
+	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
+
+	options := &KeyVault.KeyVaultOptions{}
 	options.SetStorage(store)
-	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
-	vault,err := KeyVault.NewKeyVault(options)
+	options.SetSeed(seed)
+	vault, err := KeyVault.NewKeyVault(options)
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
-	wallet,err := vault.CreateWallet("test")
+	wallet, err := vault.Wallet()
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
-	a1,err := wallet.CreateValidatorAccount("1", nil)
+	a1, err := wallet.CreateValidatorAccount(seed, "1")
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
-	a2,err := wallet.CreateValidatorAccount("2", nil)
+	a2, err := wallet.CreateValidatorAccount(seed, "2")
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
-	a3,err := wallet.CreateValidatorAccount("3", nil)
+	a3, err := wallet.CreateValidatorAccount(seed, "3")
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
-	a4,err := wallet.CreateValidatorAccount("4", nil)
+	a4, err := wallet.CreateValidatorAccount(seed, "4")
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
-	return store,[]core.Account{a1,a2,a3,a4},nil
+	return store, []core.ValidatorAccount{a1, a2, a3, a4}, nil
 }
 
-func TestOpeningAccount (t *testing.T) {
+func TestOpeningAccount(t *testing.T) {
 	storage, accounts, err := getPopulatedWalletStorage()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	stores.TestingOpeningAccount(storage, accounts[0],t)
+	stores.TestingOpeningAccount(storage, accounts[0], t)
 }
 
 func TestAddingAccountsToWallet(t *testing.T) {

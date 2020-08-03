@@ -1,6 +1,7 @@
 package validator_signer
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/bloxapp/KeyVault/core"
@@ -9,39 +10,37 @@ import (
 
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
 	// 1. get the account
-	if req.GetAccount() == "" { // TODO by public key
+	if req.GetPublicKey() == nil {
 		return nil, fmt.Errorf("account was not supplied")
 	}
-	account, err := signer.wallet.AccountByName(req.GetAccount())
+	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. lock for current account
 	signer.lock(account.ID(), "proposal")
-	defer func() {
-		signer.unlockAndDelete(account.ID(), "proposal")
-	}()
+	defer signer.unlock(account.ID(), "proposal")
 
-	// 3. check we can even sign this
-	if val, err := signer.slashingProtector.IsSlashableProposal(account, req); err != nil || val != nil {
-		if err != nil {
-			return nil, err
+	// 2. check we can even sign this
+	if status := signer.slashingProtector.IsSlashableProposal(account.ValidatorPublicKey(), req); status.Status != core.ValidProposal {
+		if status.Error != nil {
+			return nil, status.Error
 		}
-		return nil, fmt.Errorf("slashable proposal, not signing")
+		return nil, fmt.Errorf("err, slashable proposal: %s", status.Status)
 	}
 
-	// 4. add to protection storage
-	if err := signer.slashingProtector.SaveProposal(account, req); err != nil {
+	// 3. add to protection storage
+	if err := signer.slashingProtector.SaveProposal(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 
-	// 5. generate ssz root hash and sign
+	// 4. generate ssz root hash and sign
 	forSig, err := PrepareProposalReqForSigning(req)
 	if err != nil {
 		return nil, err
 	}
-	sig, err := account.Sign(forSig)
+	sig, err := account.ValidationKeySign(forSig)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package validator_signer
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/bloxapp/KeyVault/core"
@@ -9,10 +10,10 @@ import (
 
 func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error) {
 	// 1. get the account
-	if req.GetAccount() == "" { // TODO by public key
+	if req.GetPublicKey() == nil {
 		return nil, fmt.Errorf("account was not supplied")
 	}
-	account, err := signer.wallet.AccountByName(req.GetAccount())
+	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
 	if err != nil {
 		return nil, err
 	}
@@ -20,19 +21,22 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	// 2. lock for current account
 	signer.lock(account.ID(), "attestation")
 	defer func() {
-		signer.unlockAndDelete(account.ID(), "attestation")
+		signer.unlock(account.ID(), "attestation")
 	}()
 
 	// 3. check we can even sign this
-	if val, err := signer.slashingProtector.IsSlashableAttestation(account, req); err != nil || len(val) != 0 {
+	if val, err := signer.slashingProtector.IsSlashableAttestation(account.ValidatorPublicKey(), req); err != nil || len(val) != 0 {
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("slashable attestation, not signing")
+		if len(val) > 0 {
+
+		}
+		return nil, fmt.Errorf("slashable attestation (%s), not signing", val[0].Status)
 	}
 
 	// 4. add to protection storage
-	if err := signer.slashingProtector.SaveAttestation(account, req); err != nil {
+	if err := signer.slashingProtector.SaveAttestation(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 
@@ -41,7 +45,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	if err != nil {
 		return nil, err
 	}
-	sig, err := account.Sign(forSig)
+	sig, err := account.ValidationKeySign(forSig)
 	if err != nil {
 		return nil, err
 	}

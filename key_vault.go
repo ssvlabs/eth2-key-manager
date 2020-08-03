@@ -1,24 +1,16 @@
 package KeyVault
 
 import (
-	"crypto/rand"
-	"encoding/json"
 	"fmt"
-	util "github.com/wealdtech/go-eth2-util"
+	"github.com/bloxapp/KeyVault/wallet_hd"
 	"log"
 	"sync"
 
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
-	"github.com/tyler-smith/go-bip39"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
-const (
-	BaseEIP2334Path = "m/12381/3600"
-	//TODO change to /0/%d when remove portfolio from the path
-	ValidatorKeyPath = "/0/0/%d"
-)
 var initBLSOnce sync.Once
 
 // initBLS initializes BLS ONLY ONCE!
@@ -34,7 +26,7 @@ func initBLS() error {
 	return err
 }
 
-func init() {
+func InitCrypto() {
 	// !!!VERY IMPORTANT!!!
 	if err := initBLS(); err != nil {
 		log.Fatal(err)
@@ -46,116 +38,72 @@ func init() {
 //https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 //https://eips.ethereum.org/EIPS/eip-2335
 type KeyVault struct {
-	id          uuid.UUID
-	indexMapper map[string]uuid.UUID
-	Context     *core.PortfolioContext
-	key         *core.DerivableKey
+	Context  *core.WalletContext
+	walletId uuid.UUID
 }
 
-type NotExistError struct {
-	desc string
+func (kv *KeyVault) Wallet() (core.Wallet, error) {
+	return kv.Context.Storage.OpenWallet()
 }
 
-func (e *NotExistError) Error() string {
-	return fmt.Sprintf("%s", e.desc)
-}
+// wil try and open an existing KeyVault (and wallet) from memory
+func OpenKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
+	InitCrypto()
 
-func OpenKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	// storage
 	storage, err := setupStorage(options)
 	if err != nil {
 		return nil, err
 	}
 
-	bytes, err := storage.OpenPortfolioRaw()
-	if err != nil {
-		return nil, err
-	}
-	if bytes == nil {
-		return nil, &NotExistError{"key vault not found"}
+	// wallet Context
+	context := &core.WalletContext{
+		Storage: storage,
 	}
 
-	// portfolio Context
-	context := &core.PortfolioContext{
-		Storage: options.storage.(core.Storage),
-	}
-
-	ret := &KeyVault{Context: context}
-	err = json.Unmarshal(bytes, &ret)
+	// try and open a wallet
+	wallet, err := storage.OpenWallet()
 	if err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	return &KeyVault{
+		Context:  context,
+		walletId: wallet.ID(),
+	}, nil
 }
 
-func ImportKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	// storage
+// New KeyVault will create a new wallet (with new ids) and will save it to storage
+// Import and New are the same action.
+func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
+	InitCrypto()
+
 	storage, err := setupStorage(options)
 	if err != nil {
 		return nil, err
 	}
 
-	// key
-	if options.seed == nil {
-		return nil, fmt.Errorf("no seed was provided")
-	}
-	err = storage.SecurelySavePortfolioSeed(options.seed)
-	if err != nil {
-		return nil, err
-	}
-	key, err := core.BaseKeyFromSeed(options.seed, storage)
-	if err != nil {
-		return nil, err
+	// wallet Context
+	context := &core.WalletContext{
+		Storage: storage,
 	}
 
-	return completeVaultSetup(options, key)
-}
-
-func NewKeyVault(options *PortfolioOptions) (*KeyVault, error) {
-	// storage
-	storage, err := setupStorage(options)
-	if err != nil {
-		return nil, err
-	}
-
-	// key
-	seed, err := storage.SecurelyFetchPortfolioSeed()
-	if err != nil || len(seed) == 0 {
-		seed, err = saveNewSeed(storage)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	key, err := core.BaseKeyFromSeed(seed, storage)
-	if err != nil {
-		return nil, err
-	}
-
-	return completeVaultSetup(options, key)
-}
-
-func completeVaultSetup(options *PortfolioOptions, key *core.DerivableKey) (*KeyVault, error) {
-	// portfolio Context
-	context := &core.PortfolioContext{
-		Storage: options.storage.(core.Storage),
-	}
+	// update wallet context
+	wallet := wallet_hd.NewHDWallet(context)
 
 	ret := &KeyVault{
-		id:          uuid.New(),
-		indexMapper: make(map[string]uuid.UUID),
-		Context:     context,
-		key:         key,
+		Context:  context,
+		walletId: wallet.ID(),
 	}
 
-	// update Context with portfolio id
-	context.PortfolioId = ret.ID()
+	err = options.storage.(core.Storage).SaveWallet(wallet)
+	if err != nil {
+		return nil, err
+	}
 
 	return ret, nil
 }
 
-func setupStorage(options *PortfolioOptions) (core.Storage, error) {
+func setupStorage(options *KeyVaultOptions) (core.Storage, error) {
 	if _, ok := options.storage.(core.Storage); !ok {
 		return nil, fmt.Errorf("storage does not implement core.Storage")
 	} else {
@@ -165,60 +113,4 @@ func setupStorage(options *PortfolioOptions) (core.Storage, error) {
 	}
 
 	return options.storage.(core.Storage), nil
-}
-
-func saveNewSeed(storage core.Storage) ([]byte, error) {
-	seed := make([]byte, 32)
-	_, err := rand.Read(seed)
-	if err != nil {
-		return nil, err
-	}
-	err = storage.SecurelySavePortfolioSeed(seed)
-	if err != nil {
-		return nil, err
-	}
-
-	return seed, nil
-}
-
-func GenerateNewSeed() ([]byte, error) {
-	seed, err := bip39.NewEntropy(256)
-	if err != nil {
-		return nil, err
-	}
-
-	return seed, nil
-}
-
-func SeedToMnemonic(seed []byte) (string, error) {
-	mnemonic, err := bip39.NewMnemonic(seed)
-	if err != nil {
-		return "", err
-	}
-
-	return mnemonic, nil
-}
-
-func SeedFromMnemonic(mnemonic string) ([]byte, error) {
-	seed, err := bip39.EntropyFromMnemonic(mnemonic)
-	if err != nil {
-		return nil, err
-	}
-
-	return seed, nil
-}
-
-func CreateAccount(seed []byte, index int) ([]byte, error) {
-	if seed == nil {
-		return nil, fmt.Errorf("no seed was provided")
-	}
-	relativePath := fmt.Sprintf(ValidatorKeyPath, index)
-	// TODO Validate relative path
-	path := BaseEIP2334Path + relativePath
-	key, err := util.PrivateKeyFromSeedAndPath(seed, path)
-	if err != nil {
-		return nil, err
-	}
-
-	return key.Marshal(), nil
 }

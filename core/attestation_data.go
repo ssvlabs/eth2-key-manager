@@ -12,7 +12,7 @@ type Checkpoint struct {
 }
 
 // returns true if equal, false if not
-func (checkpoint *Checkpoint) compare (other *Checkpoint) bool {
+func (checkpoint *Checkpoint) compare(other *Checkpoint) bool {
 	return checkpoint.Epoch == other.Epoch && bytes.Compare(checkpoint.Root, other.Root) == 0
 }
 
@@ -25,16 +25,17 @@ type BeaconAttestation struct {
 	Target          *Checkpoint
 }
 
-type VoteDetectionType uint8
+type VoteDetectionType string
+
 const (
-	DoubleVote 		VoteDetectionType = 0
-	SurroundingVote VoteDetectionType = 1
-	SurroundedVote 	VoteDetectionType = 2
+	DoubleVote      VoteDetectionType = "DoubleVote"
+	SurroundingVote VoteDetectionType = "SurroundingVote"
+	SurroundedVote  VoteDetectionType = "SurroundedVote"
 )
 
 type AttestationSlashStatus struct {
 	Attestation *BeaconAttestation
-	Status VoteDetectionType
+	Status      VoteDetectionType
 }
 
 func ToCoreAttestationData(req *pb.SignBeaconAttestationRequest) *BeaconAttestation {
@@ -65,30 +66,30 @@ func (att *BeaconAttestation) Compare(other *BeaconAttestation) bool {
 
 // will return an array of attestations that this attestation will slash based on a provided history
 // will detect double, surround and surrounded slashable events
-func (att *BeaconAttestation) SlashesAttestations (history []*BeaconAttestation) []*AttestationSlashStatus {
-	ret := make ([]*AttestationSlashStatus,0)
+func (att *BeaconAttestation) SlashesAttestations(history []*BeaconAttestation) []*AttestationSlashStatus {
+	ret := make([]*AttestationSlashStatus, 0)
 
-	for _,history_att := range history {
-		if val := detectDoubleVote(att,history_att); val != nil {
-			ret = append(ret,&AttestationSlashStatus{
+	for _, history_att := range history {
+		if val := detectDoubleVote(att, history_att); val != nil {
+			ret = append(ret, &AttestationSlashStatus{
 				Attestation: val,
 				Status:      DoubleVote,
 			})
 		}
 
 		// Surrounding vote
-		if val := detectSurroundingVote(att,history_att); val != nil {
-			ret = append(ret,&AttestationSlashStatus{
+		if val := detectSurroundingVote(att, history_att); val != nil {
+			ret = append(ret, &AttestationSlashStatus{
 				Attestation: val,
-				Status:      SurroundedVote,
+				Status:      SurroundingVote,
 			})
 		}
 
 		// Surrounded vote
-		if val := detectSurroundingVote(history_att, att); val != nil {
-			ret = append(ret,&AttestationSlashStatus{
+		if val := detectSurroundedVote(att, history_att); val != nil {
+			ret = append(ret, &AttestationSlashStatus{
 				Attestation: val,
-				Status:      SurroundingVote,
+				Status:      SurroundedVote,
 			})
 		}
 	}
@@ -112,4 +113,8 @@ func detectSurroundingVote(att *BeaconAttestation, other *BeaconAttestation) *Be
 		return other
 	}
 	return nil
+}
+
+func detectSurroundedVote(att *BeaconAttestation, other *BeaconAttestation) *BeaconAttestation {
+	return detectSurroundingVote(other, att)
 }

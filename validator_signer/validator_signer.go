@@ -9,7 +9,7 @@ import (
 )
 
 type ValidatorSigner interface {
-	ListAccounts(req *pb.ListAccountsRequest) (*pb.ListAccountsResponse, error)
+	ListAccounts() (*pb.ListAccountsResponse, error)
 	SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error)
 	SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error)
 	Sign(req *pb.SignRequest) (*pb.SignResponse, error)
@@ -17,7 +17,7 @@ type ValidatorSigner interface {
 
 type signingRoot struct {
 	Hash   [32]byte `ssz-size:"32"`
-	Domain []byte `ssz-size:"32"`
+	Domain []byte   `ssz-size:"32"`
 }
 
 type SimpleSigner struct {
@@ -30,24 +30,29 @@ func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtecto
 	return &SimpleSigner{
 		wallet:            wallet,
 		slashingProtector: slashingProtector,
-		signLocks: map[string]*sync.RWMutex{},
+		signLocks:         map[string]*sync.RWMutex{},
 	}
 }
 
 // if already locked, will lock until released
-func (signer *SimpleSigner) lock (accountId uuid.UUID, operation string) {
+func (signer *SimpleSigner) lock(accountId uuid.UUID, operation string) {
 	k := accountId.String() + "_" + operation
-	signer.signLocks[k] = &sync.RWMutex{}
-	signer.signLocks[k].Lock()
+	if val, ok := signer.signLocks[k]; ok {
+		val.Lock()
+	} else {
+		signer.signLocks[k] = &sync.RWMutex{}
+		signer.signLocks[k].Lock()
+	}
 }
 
-func (signer *SimpleSigner) unlockAndDelete (accountId uuid.UUID, operation string) {
+func (signer *SimpleSigner) unlock(accountId uuid.UUID, operation string) {
 	k := accountId.String() + "_" + operation
-	signer.signLocks[k].Unlock()
-	delete(signer.signLocks,k)
+	if val, ok := signer.signLocks[k]; ok {
+		val.Unlock()
+	}
 }
 
-func prepareForSig(data interface{}, domain []byte) ([32]byte,error) {
+func prepareForSig(data interface{}, domain []byte) ([32]byte, error) {
 	root, err := ssz.HashTreeRoot(data)
 	if err != nil {
 		return [32]byte{}, err
@@ -56,13 +61,10 @@ func prepareForSig(data interface{}, domain []byte) ([32]byte,error) {
 		Hash:   root,
 		Domain: domain,
 	}
-	forsig,err := ssz.HashTreeRoot(signingRoot)
+	forsig, err := ssz.HashTreeRoot(signingRoot)
 	if err != nil {
 		return [32]byte{}, err
 	}
 
-	return forsig,nil
+	return forsig, nil
 }
-
-
-

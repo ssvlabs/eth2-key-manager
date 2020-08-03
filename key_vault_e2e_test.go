@@ -1,7 +1,9 @@
 package KeyVault
 
 import (
+	"encoding/hex"
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -15,192 +17,202 @@ func _bigInt(input string) *big.Int {
 	return res
 }
 
-func TestNewKeyVault(t *testing.T) {
-	tests := []struct{
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
+}
+
+func inmemStorage() *in_memory.InMemStore {
+	return in_memory.NewInMemStore()
+}
+
+func TestNoKeyVault(t *testing.T) {
+	tests := []struct {
 		testname string
-		storage core.Storage
+		storage  core.Storage
 	}{
 		{
-			testname:"In-memory storage",
-			storage:inmemStorage(),
+			testname: "In-memory storage",
+			storage:  inmemStorage(),
 		},
 		{
-			testname:"Hashicorp Vault storage",
-			storage:inmemStorage(),
+			testname: "Hashicorp Vault storage",
+			storage:  inmemStorage(),
 		},
 	}
 
-	for _,test := range tests {
+	for _, test := range tests {
+		t.Run(test.testname, func(t *testing.T) {
+			options := &KeyVaultOptions{}
+			options.SetStorage(test.storage)
+
+			kv, err := OpenKeyVault(options)
+			require.NotNil(t, err)
+			require.EqualError(t, err, "wallet not found")
+			require.Nil(t, kv)
+		})
+	}
+}
+
+func TestNewKeyVault(t *testing.T) {
+	tests := []struct {
+		testname string
+		storage  core.Storage
+	}{
+		{
+			testname: "In-memory storage",
+			storage:  inmemStorage(),
+		},
+		{
+			testname: "Hashicorp Vault storage",
+			storage:  inmemStorage(),
+		},
+	}
+
+	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			// setup vault
-			options := &PortfolioOptions{}
+			options := &KeyVaultOptions{}
 			options.SetStorage(test.storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
-			v,err := NewKeyVault(options)
-			require.NoError(t,err)
+			v, err := NewKeyVault(options)
+			require.NoError(t, err)
 
-			testVault(t,v)
+			// generate new seed
+			seed, err := core.GenerateNewEntropy()
+			require.NoError(t, err)
+
+			testVault(t, v, seed)
 		})
 	}
 }
 
 func TestImportKeyVault(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		testname string
-		seed []byte
-		storage core.Storage
+		seed     []byte
+		storage  core.Storage
 	}{
 		{
-			testname:"In-memory storage",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			storage:inmemStorage(),
+			testname: "In-memory storage",
+			seed:     _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			storage:  inmemStorage(),
 		},
 		{
-			testname:"Hashicorp Vault storage",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			storage:inmemStorage(),
+			testname: "Hashicorp Vault storage",
+			seed:     _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			storage:  inmemStorage(),
 		},
 	}
 
-	for _,test := range tests {
+	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			seed := test.seed
-			options := &PortfolioOptions{}
+			options := &KeyVaultOptions{}
 			options.SetStorage(test.storage)
 			options.SetSeed(seed)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
-			v,err := ImportKeyVault(options)
-			require.NoError(t,err)
+			v, err := NewKeyVault(options)
+			require.NoError(t, err)
 
 			// test common tests
-			testVault(t,v)
+			testVault(t, v, seed)
+
+			wallet, err := v.Wallet()
+			require.NoError(t, err)
 
 			// test specific derivation
-			w,err := v.WalletByName("wallet1")
-			require.NoError(t,err)
-			require.NotNil(t,w)
-			val,err := w.AccountByName("val1")
-			require.NoError(t,err)
-			require.NotNil(t,val)
-			with,err := w.GetWithdrawalAccount()
-			require.NoError(t,err)
-			require.NotNil(t,with)
+			account, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+			require.NoError(t, err)
+			require.NotNil(t, account)
 
-			expectedValKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218").Bytes())
-			require.NoError(t,err)
-			expectedWithdrawalKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358").Bytes())
-			require.NoError(t,err)
+			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398").Bytes())
+			require.NoError(t, err)
+			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
+			require.NoError(t, err)
 
-			assert.Equal(t,expectedValKey.PublicKey().Marshal(),val.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0/0",val.Path())
-			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(),with.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0",with.Path())
+			assert.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
+			assert.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
 		})
 	}
 }
 
 func TestOpenKeyVault(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		testname string
-		seed []byte
-		storage core.Storage
+		seed     []byte
+		storage  core.Storage
 	}{
 		{
-			testname:"In-memory storage",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			storage:inmemStorage(),
+			testname: "In-memory storage",
+			seed:     _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			storage:  inmemStorage(),
 		},
 		{
-			testname:"Hashicorp Vault storage",
-			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			storage:inmemStorage(),
+			testname: "Hashicorp Vault storage",
+			seed:     _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			storage:  inmemStorage(),
 		},
 	}
 
-	for _,test := range tests {
+	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
 			// options
 			storage := test.storage
 			storage.SetEncryptor(keystorev4.New(), []byte("password"))
-			options := &PortfolioOptions{}
+			options := &KeyVaultOptions{}
 			options.SetStorage(storage)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
 
 			// import keyvault
 			options.SetSeed(test.seed)
-			importedVault,err := ImportKeyVault(options)
+			importedVault, err := NewKeyVault(options)
 			// test common tests
-			testVault(t,importedVault) // this will create some wallets and accounts
+			testVault(t, importedVault, test.seed) // this will create some wallets and accounts
 
 			// open vault
 			options.SetSeed(nil) // important
-			v,err := OpenKeyVault(options)
-			require.NoError(t,err)
+			v, err := OpenKeyVault(options)
+			require.NoError(t, err)
 
-			// test imported and opened vaults are the same
-			require.Equal(t,importedVault.ID().String(),v.ID().String())
-			require.Equal(t,len(v.indexMapper),1)
-			require.Equal(t,v.key.PublicKey().Marshal(),importedVault.key.PublicKey().Marshal()) // key
+			wallet, err := v.Wallet()
+			require.NoError(t, err)
 
 			// test specific derivation
-			w,err := v.WalletByName("wallet1")
-			require.NoError(t,err)
-			require.NotNil(t,w)
-			val,err := w.AccountByName("val1")
-			require.NoError(t,err)
-			require.NotNil(t,val)
-			with,err := w.GetWithdrawalAccount()
-			require.NoError(t,err)
-			require.NotNil(t,with)
+			account, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+			require.NoError(t, err)
+			require.NotNil(t, account)
 
-			expectedValKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218").Bytes())
-			require.NoError(t,err)
-			expectedWithdrawalKey,err := e2types.BLSPrivateKeyFromBytes(_bigInt("51023953445614749789943419502694339066585011438324100967164633618358653841358").Bytes())
-			require.NoError(t,err)
+			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398").Bytes())
+			require.NoError(t, err)
+			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
+			require.NoError(t, err)
 
-			assert.Equal(t,expectedValKey.PublicKey().Marshal(),val.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0/0",val.Path())
-			assert.Equal(t,expectedWithdrawalKey.PublicKey().Marshal(),with.PublicKey().Marshal())
-			assert.Equal(t,"m/12381/3600/0/0",with.Path())
+			assert.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
+			assert.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			assert.Equal(t, importedVault.walletId, v.walletId)
 		})
 	}
 }
 
-func testVault(t *testing.T, v *KeyVault) {
-	// create wallet
-	w,err := v.CreateWallet("wallet1")
-	require.NoError(t,err)
-	// fetch wallet
-	w1,err := v.WalletByName("wallet1")
-	require.NoError(t,err)
-	w2,err := v.WalletByID(w.ID())
-	require.NoError(t,err)
-	require.NotNil(t,w1)
-	require.NotNil(t,w2)
-	require.Equal(t,w.ID().String(),w1.ID().String())
-	require.Equal(t,w.ID().String(),w2.ID().String())
-	require.Equal(t,w.Name(),w1.Name())
-	require.Equal(t,w.Name(),w2.Name())
+func testVault(t *testing.T, v *KeyVault, seed []byte) {
+	wallet, err := v.Wallet()
+	require.NoError(t, err)
 
 	// create and fetch validator account
-	val,err := w.CreateValidatorAccount("val1", nil)
-	require.NoError(t,err)
-	val1,err := w.AccountByName("val1")
-	require.NoError(t,err)
-	val2,err := w.AccountByID(val.ID())
-	require.NoError(t,err)
-	require.NotNil(t,val1)
-	require.NotNil(t,val2)
-	require.Equal(t,val.ID().String(),val1.ID().String())
-	require.Equal(t,val.ID().String(),val2.ID().String())
-	require.Equal(t,val.Name(),val1.Name())
-	require.Equal(t,val.Name(),val2.Name())
-
-	// create and fetch withdrawal account
-	with,err := w.GetWithdrawalAccount()
-	require.NoError(t,err)
-	require.NotNil(t,with)
+	val, err := wallet.CreateValidatorAccount(seed, "val1")
+	require.NoError(t, err)
+	val1, err := wallet.AccountByPublicKey(hex.EncodeToString(val.ValidatorPublicKey().Marshal()))
+	require.NoError(t, err)
+	val2, err := wallet.AccountByID(val.ID())
+	require.NoError(t, err)
+	require.NotNil(t, val1)
+	require.NotNil(t, val2)
+	require.Equal(t, val.ID().String(), val1.ID().String())
+	require.Equal(t, val.ID().String(), val2.ID().String())
+	require.Equal(t, val.Name(), val1.Name())
+	require.Equal(t, val.Name(), val2.Name())
 }

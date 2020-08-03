@@ -1,6 +1,7 @@
 package wallet_hd
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/bloxapp/KeyVault/core"
@@ -10,11 +11,13 @@ import (
 
 type HDAccount struct {
 	name string
-	id uuid.UUID
-	accountType core.AccountType
-	key *core.DerivableKey
-	parentWalletId uuid.UUID
-	context *core.PortfolioContext
+	// holds the base path from which the account was dervied
+	// for eip2334 should be m/12381/3600/<index>
+	BasePath         string
+	id               uuid.UUID
+	validationKey    *core.HDKey
+	withdrawalPubKey e2types.PublicKey
+	context          *core.WalletContext
 }
 
 func (account *HDAccount) MarshalJSON() ([]byte, error) {
@@ -22,9 +25,9 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 
 	data["id"] = account.id
 	data["name"] = account.name
-	data["type"] = account.accountType
-	data["key"] = account.key
-	data["parentWalletId"] = account.parentWalletId
+	data["validationKey"] = account.validationKey
+	data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey.Marshal())
+	data["baseAccountPath"] = account.BasePath
 	return json.Marshal(data)
 }
 
@@ -38,60 +41,74 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 
 	// id
 	if val, exists := v["id"]; exists {
-		account.id,err = uuid.Parse(val.(string))
+		account.id, err = uuid.Parse(val.(string))
 		if err != nil {
 			return err
 		}
-	} else {return fmt.Errorf("could not find var: id")}
+	} else {
+		return fmt.Errorf("could not find var: id")
+	}
 
 	// name
 	if val, exists := v["name"]; exists {
 		account.name = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
+	} else {
+		return fmt.Errorf("could not find var: id")
+	}
 
-	// type
-	if val, exists := v["type"]; exists {
-		account.accountType = val.(string)
-	} else {return fmt.Errorf("could not find var: id")}
+	// base path
+	if val, exists := v["baseAccountPath"]; exists {
+		account.BasePath = val.(string)
+	} else {
+		return fmt.Errorf("could not find var: baseAccountPath")
+	}
 
-	// key
-	if val, exists := v["key"]; exists {
-		byts,err := json.Marshal(val)
+	// validation key
+	if val, exists := v["validationKey"]; exists {
+		byts, err := json.Marshal(val)
 		if err != nil {
 			return err
 		}
-		key := &core.DerivableKey{Storage:account.context.Storage}
-		err = json.Unmarshal(byts,key)
+		key := &core.HDKey{}
+		err = json.Unmarshal(byts, key)
 		if err != nil {
 			return err
 		}
-		account.key = key
-	} else {return fmt.Errorf("could not find var: key")}
+		account.validationKey = key
+	} else {
+		return fmt.Errorf("could not find var: key")
+	}
 
-	// type
-	if val, exists := v["parentWalletId"]; exists {
-		account.parentWalletId,err = uuid.Parse(val.(string))
+	// withdrawal pub Key
+	if val, exists := v["withdrawalPubKey"]; exists {
+		byts, err := hex.DecodeString(val.(string))
 		if err != nil {
 			return err
 		}
-	} else {return fmt.Errorf("could not find var: id")}
+		account.withdrawalPubKey, err = e2types.BLSPublicKeyFromBytes(byts)
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("could not find var: key")
+	}
 
 	return nil
 }
 
-func newHDAccount(name string,
-	accountType core.AccountType,
-	walletId uuid.UUID,
-	key *core.DerivableKey,
-	context *core.PortfolioContext) (*HDAccount,error) {
+func NewValidatorAccount(name string,
+	validationKey *core.HDKey,
+	withdrawalPubKey e2types.PublicKey,
+	basePath string,
+	context *core.WalletContext) (*HDAccount, error) {
 	return &HDAccount{
-		name:         name,
-		id:           uuid.New(),
-		accountType:  accountType,
-		parentWalletId:walletId,
-		key:    	  key,
-		context:	  context,
-	},nil
+		name:             name,
+		id:               uuid.New(),
+		validationKey:    validationKey,
+		withdrawalPubKey: withdrawalPubKey,
+		BasePath:         basePath,
+		context:          context,
+	}, nil
 }
 
 // ID provides the ID for the account.
@@ -99,37 +116,34 @@ func (account *HDAccount) ID() uuid.UUID {
 	return account.id
 }
 
-// WalletID provides the ID for the wallet holding this account.
-func (account *HDAccount) WalletID() uuid.UUID {
-	return account.parentWalletId
-}
-
-// ID provides the ID for the account.
-func (account *HDAccount) Type() core.AccountType {
-	return account.accountType
-}
-
 // Name provides the name for the account.
 func (account *HDAccount) Name() string {
 	return account.name
 }
 
-// PublicKey provides the public key for the account.
-func (account *HDAccount) PublicKey() e2types.PublicKey {
-	return account.key.PublicKey()
+// ValidatorPublicKey provides the public key for the account.
+func (account *HDAccount) ValidatorPublicKey() e2types.PublicKey {
+	return account.validationKey.PublicKey()
 }
 
-// Path provides the path for the account.
-// Can be empty if the account is not derived from a path.
-func (account *HDAccount) Path() string {
-	return account.key.Path()
+// WithdrawalPublicKey provides the public key for the account.
+func (account *HDAccount) WithdrawalPublicKey() e2types.PublicKey {
+	return account.withdrawalPubKey
 }
 
 // Sign signs data with the account.
-func (account *HDAccount) Sign(data []byte) (e2types.Signature,error) {
-	return account.key.Sign(data)
+func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature, error) {
+	return account.validationKey.Sign(data)
 }
 
-func (account *HDAccount) SetContext(ctx *core.PortfolioContext) {
+//// Sign signs data with the withdrawal key.
+//func (account *HDAccount) WithdrawalKeySign(data []byte) (e2types.Signature,error) {
+//	if account.withdrawalKey == nil {
+//		return nil, fmt.Errorf("withdrawal key not present")
+//	}
+//	return account.withdrawalKey.Sign(data)
+//}
+
+func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx
 }
