@@ -11,7 +11,10 @@ import (
 
 // Account list wallet accounts and prints the accounts.
 func (h *Account) List(cmd *cobra.Command, args []string) error {
-	types.InitBLS()
+	err := types.InitBLS()
+	if err != nil {
+		return errors.Wrap(err, "failed to init BLS")
+	}
 
 	// Get storage flag.
 	storageFlagValue, err := flag.GetStorageFlagValue(cmd)
