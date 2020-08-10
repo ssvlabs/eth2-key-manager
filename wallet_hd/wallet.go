@@ -42,7 +42,7 @@ func (wallet *HDWallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
-// CreateWithdrawalKey creates a private key
+// CreatePrivateKey creates a private key
 func CreatePrivateKey(seed []byte, path string, index int) (*core.HDKey, error) {
 	// create the master key
 	masterKey, err := core.MasterKeyFromSeed(seed)
