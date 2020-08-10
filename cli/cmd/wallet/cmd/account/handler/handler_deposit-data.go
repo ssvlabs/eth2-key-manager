@@ -3,14 +3,14 @@ package handler
 import (
 	"encoding/hex"
 	"fmt"
+
+	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/KeyVault/eth1_deposit"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/bloxapp/KeyVault/wallet_hd"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
-
-	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 )
 
 // Account DepositData generates account deposit-data and prints it.
