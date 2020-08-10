@@ -10,13 +10,13 @@ import (
 
 const (
 	MaxEffectiveBalanceInGwei uint64 = 32000000000
-	BLSWithdrawalPrefixByte byte = byte(0)
+	BLSWithdrawalPrefixByte   byte   = byte(0)
 )
 
 // this is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
-func DepositData(validationKey *core.HDKey, withdrawalKey *core.HDKey, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+func DepositData(account core.ValidatorAccount, withdrawalKey *core.HDKey, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
 	di := &ethpb.Deposit_Data{
-		PublicKey:             validationKey.PublicKey().Marshal(),
+		PublicKey:             account.ValidatorPublicKey().Marshal(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalKey),
 		Amount:                amount,
 	}
@@ -26,35 +26,35 @@ func DepositData(validationKey *core.HDKey, withdrawalKey *core.HDKey, amount ui
 		return nil, [32]byte{}, err
 	}
 
-	domain := types.Domain(types.DomainDeposit,nil /*forkVersion*/, nil /*genesisValidatorsRoot*/)
+	domain := types.Domain(types.DomainDeposit, nil /*forkVersion*/, nil /*genesisValidatorsRoot*/)
 
 	// prepare for sig
 	signingContainer := struct {
 		Root   []byte `json:"object_root,omitempty" ssz-size:"32"`
 		Domain []byte `json:"domain,omitempty" ssz-size:"32"`
 	}{
-		Root:sr[:],
-		Domain:domain,
+		Root:   sr[:],
+		Domain: domain,
 	}
-	root,err := ssz.HashTreeRoot(signingContainer)
+	root, err := ssz.HashTreeRoot(signingContainer)
 	if err != nil {
 		return nil, [32]byte{}, err
 	}
 
 	// sign
-	sig,err := validationKey.Sign(root[:])
+	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
 		return nil, [32]byte{}, err
 	}
 	di.Signature = sig.Marshal()
 
 	// root with sig
-	dr,err := ssz.HashTreeRoot(di)
+	dr, err := ssz.HashTreeRoot(di)
 	if err != nil {
 		return nil, [32]byte{}, err
 	}
 
-	return di,dr,nil
+	return di, dr, nil
 }
 
 // withdrawalCredentialsHash forms a 32 byte hash of the withdrawal public

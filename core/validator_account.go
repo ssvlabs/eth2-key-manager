@@ -18,6 +18,8 @@ import (
 type ValidatorAccount interface {
 	// ID provides the ID for the account.
 	ID() uuid.UUID
+	// BasePath provides the basePath of the account.
+	BasePath() string
 	// Name provides the name for the account.
 	Name() string
 	// ValidatorPublicKey provides the public key for the validation key.

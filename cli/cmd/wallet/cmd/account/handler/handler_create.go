@@ -12,9 +12,12 @@ import (
 
 // Account creates a new wallet account and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
-	types.InitBLS()
+	err := types.InitBLS()
+	if err != nil {
+		return errors.Wrap(err, "failed to init BLS")
+	}
 
-	// Get seed flag.
+	// Get name flag.
 	nameFlagValue, err := flag.GetNameFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the name flag value")
@@ -50,7 +53,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 	wallet, err := store.OpenWallet()
 	if err != nil {
-		return errors.Wrap(err, "failed to open key wallet")
+		return errors.Wrap(err, "failed to open wallet")
 	}
 
 	_, err = wallet.CreateValidatorAccount(seedBytes, nameFlagValue)

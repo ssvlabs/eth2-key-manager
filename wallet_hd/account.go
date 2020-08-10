@@ -13,7 +13,7 @@ type HDAccount struct {
 	name string
 	// holds the base path from which the account was dervied
 	// for eip2334 should be m/12381/3600/<index>
-	BasePath         string
+	basePath         string
 	id               uuid.UUID
 	validationKey    *core.HDKey
 	withdrawalPubKey e2types.PublicKey
@@ -27,7 +27,7 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	data["name"] = account.name
 	data["validationKey"] = account.validationKey
 	data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey.Marshal())
-	data["baseAccountPath"] = account.BasePath
+	data["baseAccountPath"] = account.basePath
 	return json.Marshal(data)
 }
 
@@ -58,7 +58,7 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 
 	// base path
 	if val, exists := v["baseAccountPath"]; exists {
-		account.BasePath = val.(string)
+		account.basePath = val.(string)
 	} else {
 		return fmt.Errorf("could not find var: baseAccountPath")
 	}
@@ -106,7 +106,7 @@ func NewValidatorAccount(name string,
 		id:               uuid.New(),
 		validationKey:    validationKey,
 		withdrawalPubKey: withdrawalPubKey,
-		BasePath:         basePath,
+		basePath:         basePath,
 		context:          context,
 	}, nil
 }
@@ -114,6 +114,11 @@ func NewValidatorAccount(name string,
 // ID provides the ID for the account.
 func (account *HDAccount) ID() uuid.UUID {
 	return account.id
+}
+
+// BasePath provides the basePth of the account.
+func (account *HDAccount) BasePath() string {
+	return account.basePath
 }
 
 // Name provides the name for the account.

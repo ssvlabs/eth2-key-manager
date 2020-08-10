@@ -3,8 +3,10 @@ package wallet_hd
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
@@ -41,6 +43,22 @@ func (wallet *HDWallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
+// CreatePrivateKey creates a private key
+func CreatePrivateKey(seed []byte, path string, index int) (*core.HDKey, error) {
+	// create the master key
+	masterKey, err := core.MasterKeyFromSeed(seed)
+	if err != nil {
+		return nil, err
+	}
+
+	keyPath := fmt.Sprintf(path, index)
+	key, err := masterKey.Derive(keyPath)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
+
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 // This will error if an account with the name already exists.
 func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.ValidatorAccount, error) {
@@ -48,25 +66,15 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 		name = fmt.Sprintf("account-%d", len(wallet.indexMapper))
 	}
 
-	// create the master key
-	key, err := core.MasterKeyFromSeed(seed)
+	validatorKey, err := CreatePrivateKey(seed, ValidatorKeyPath, len(wallet.indexMapper))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create validator key")
 	}
-
+	withdrawalKey, err := CreatePrivateKey(seed, WithdrawalKeyPath, len(wallet.indexMapper))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create withdrawal key")
+	}
 	baseAccountPath := fmt.Sprintf(BaseAccountPath, len(wallet.indexMapper))
-	// validator key
-	validatorPath := fmt.Sprintf(ValidatorKeyPath, len(wallet.indexMapper))
-	validatorKey, err := key.Derive(validatorPath)
-	if err != nil {
-		return nil, err
-	}
-	// withdrawal key
-	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, len(wallet.indexMapper))
-	withdrawalKey, err := key.Derive(withdrawalPath)
-	if err != nil {
-		return nil, err
-	}
 
 	// create ret account
 	ret, err := NewValidatorAccount(
