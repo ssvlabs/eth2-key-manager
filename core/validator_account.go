@@ -28,6 +28,8 @@ type ValidatorAccount interface {
 	WithdrawalPublicKey() e2types.PublicKey
 	// Sign signs data with the validation key.
 	ValidationKeySign(data []byte) (e2types.Signature, error)
+	// Get Deposit Data
+	GetDepositData() (map[string]interface{}, error)
 	//// Sign signs data with the withdrawal key.
 	//WithdrawalKeySign(data []byte) (e2types.Signature,error)
 	//

@@ -4,7 +4,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/KeyVault/eth1_deposit"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -141,13 +143,20 @@ func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature, err
 	return account.validationKey.Sign(data)
 }
 
-//// Sign signs data with the withdrawal key.
-//func (account *HDAccount) WithdrawalKeySign(data []byte) (e2types.Signature,error) {
-//	if account.withdrawalKey == nil {
-//		return nil, fmt.Errorf("withdrawal key not present")
-//	}
-//	return account.withdrawalKey.Sign(data)
-//}
+// Get Deposit Data
+func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
+	depositData, root, err := eth1_deposit.DepositData(account.validationKey, account.withdrawalPubKey.Marshal(), eth1_deposit.MaxEffectiveBalanceInGwei)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"amount":                depositData.GetAmount(),
+		"publicKey":             hex.EncodeToString(depositData.GetPublicKey()),
+		"signature":             hex.EncodeToString(depositData.GetSignature()),
+		"withdrawalCredentials": hex.EncodeToString(depositData.GetWithdrawalCredentials()),
+		"depositDataRoot":       hex.EncodeToString(root[:]),
+	}, nil
+}
 
 func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx
