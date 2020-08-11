@@ -1,7 +1,6 @@
 package core
 
 import (
-	"encoding/hex"
 	"fmt"
 	"github.com/google/uuid"
 	util "github.com/wealdtech/go-eth2-util"
@@ -43,8 +42,6 @@ func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 
 	// new id
 	id := uuid.New()
-
-	println(hex.EncodeToString(key.PublicKey().Marshal()))
 
 	return &HDKey{
 		id:      id,
