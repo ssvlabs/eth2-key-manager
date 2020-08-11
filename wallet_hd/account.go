@@ -118,11 +118,6 @@ func (account *HDAccount) ID() uuid.UUID {
 	return account.id
 }
 
-// BasePath provides the basePth of the account.
-func (account *HDAccount) BasePath() string {
-	return account.basePath
-}
-
 // Name provides the name for the account.
 func (account *HDAccount) Name() string {
 	return account.name
