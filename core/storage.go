@@ -22,6 +22,8 @@ type Storage interface {
 	//	Account specific
 	// */
 	SaveAccount(account ValidatorAccount) error
+	// Delete account by uuid
+	DeleteAccount(accountId uuid.UUID) error
 	// will return nil,nil if no account was found
 	OpenAccount(accountId uuid.UUID) (ValidatorAccount, error)
 

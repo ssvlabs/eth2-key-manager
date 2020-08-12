@@ -7,22 +7,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bloxapp/KeyVault"
 	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
 
 type dummyAccount struct {
 	priv *e2types.BLSPrivateKey
-}
-
-func _byteArray(input string) []byte {
-	res, _ := hex.DecodeString(input)
-	return res
 }
 
 func newDummyAccount(privKey []byte) *dummyAccount {
@@ -51,20 +43,18 @@ func _ignoreErr(a []byte, err error) []byte {
 func TestDepositData(t *testing.T) {
 	tests := []struct {
 		testname                      string
-		seed                          []byte
 		validatorPrivKey              []byte
-		withdrawalPrivKey             []byte
+		withdrawalPubKey              []byte
 		expectedWithdrawalCredentials []byte
 		expectedSig                   []byte
 		expectedRoot                  []byte
 	}{
 		{
-			seed:                          _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			validatorPrivKey:              _ignoreErr(hex.DecodeString("2ca74ab9c41ec9cacdd5f1543633104d272d24a64aeaf9bf200a79653b446333")),
-			withdrawalPrivKey:             _ignoreErr(hex.DecodeString("03beaaad608afa088f459be520985b4f67796c0ffda51b2c6301a50bb74d131b")),
-			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("0080e08282d1bf1182645774610d621f77f03ae4f9e692202cf896b1914eed28")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("acfdf9926446f691f88926a6ce2f4534d00b10dce3f44cfb7ec9138424b56f40db884962484ea20b704591fad57a5b8513ebf13ed11235d4fa23dcccd33ab7312c864a750e1bda4d91cd1cd4ad20b5ac6e96aacdce34b775af6a7ddeaf44341e")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("0a65fff5cac97ec7a2a170b81aa07a0cc04c7a3e198d55c3e5f254115465cb08")),
+			validatorPrivKey:              _ignoreErr(hex.DecodeString("23fd464c122d7fa8c9c8e46d710ae478ab920c8c0587e86556aa968191d5210e")),
+			withdrawalPubKey:              _ignoreErr(hex.DecodeString("b323537b2867d9f2bae068f93e75a9e2e1c8d594e3696c34dc8010dc403eaeeaf43756a440fc82e1c6f45c6e8348343f")),
+			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("00ea056bfaa692b4e12bb1c3f59049dabcfb0b63f427025c718f5e3b81fdb945")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("91c8dddcbd882d409e5b0eca4bf096decf349edf4bd118cf32bcee73acd698a436f8a4ff1fe16f041df963d712bed4d916dd00a8bd13f3087369fe199086d46a1c788633d8fda2ba4ace3e2ece56dc66b947fb6d83941bd2568cd2fcfd03c298")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("7155ceb606f46c5102003121bd19935590a58fb28ec2efe345c66db622008874")),
 		},
 	}
 
@@ -72,28 +62,14 @@ func TestDepositData(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
-			seed := test.seed
-			options := &KeyVault.KeyVaultOptions{}
-			options.SetStorage(in_memory.NewInMemStore())
-			options.SetSeed(seed)
-			options.SetEncryptor(keystorev4.New())
-			options.SetPassword("password")
-			kv, err := KeyVault.NewKeyVault(options)
-			require.NoError(t, err)
-			wallet, err := kv.Wallet()
-			require.NoError(t, err)
-
-			// create and fetch validator account
-			val, err := wallet.CreateValidatorAccount(seed, "val1")
-			require.NoError(t, err)
-			withd, err := core.NewHDKeyFromPrivateKey(test.withdrawalPrivKey, "")
+			val, err := core.NewHDKeyFromPrivateKey(test.validatorPrivKey, "")
 			require.NoError(t, err)
 
 			// create data
-			depositData, root, err := DepositData(val, withd, MaxEffectiveBalanceInGwei)
+			depositData, root, err := DepositData(val, test.withdrawalPubKey, MaxEffectiveBalanceInGwei)
 			require.NoError(t, err)
 
-			require.Equal(t, val.ValidatorPublicKey().Marshal(), depositData.PublicKey)
+			require.Equal(t, val.PublicKey().Marshal(), depositData.PublicKey)
 			require.True(t, bytes.Equal(test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials))
 			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
 			require.True(t, bytes.Equal(test.expectedRoot, root[:]))

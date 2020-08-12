@@ -12,7 +12,7 @@ import (
 var depositDataCmd = &cobra.Command{
 	Use:   "deposit-data",
 	Short: "Returns an account deposit-data.",
-	Long:  `This command returns an account deposit-data using seed, public key and storage.`,
+	Long:  `This command returns an account deposit-data using public key and storage.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		handler := handler.New(rootcmd.ResultPrinter)
 		return handler.DepositData(cmd, args)
@@ -21,7 +21,6 @@ var depositDataCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddSeedFlag(depositDataCmd)
 	flag.AddPublicKeyFlag(depositDataCmd)
 	flag.AddStorageFlag(depositDataCmd)
 

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/hex"
+	"sort"
 
 	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
@@ -10,17 +11,11 @@ import (
 	types "github.com/wealdtech/go-eth2-types/v2"
 )
 
-// Account DepositData generates account deposit-data and prints it.
-func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
+// Account deletes a last indexed account and prints the storage.
+func (h *Account) Delete(cmd *cobra.Command, args []string) error {
 	err := types.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
-	}
-
-	// Get public key flag.
-	publicKeyFlagValue, err := flag.GetPublicKeyFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the public key flag value")
 	}
 
 	// Get storage flag.
@@ -45,19 +40,35 @@ func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	account, err := wallet.AccountByPublicKey(publicKeyFlagValue)
-	if err != nil {
-		return errors.Wrap(err, "failed to get account by public key")
+	var accounts []map[string]string
+	for account := range wallet.Accounts() {
+		accObj := map[string]string{
+			"validationPubKey": hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
+			"basePath":         account.BasePath(),
+		}
+		accounts = append(accounts, accObj)
 	}
 
-	depositData, err := account.GetDepositData()
-	if err != nil {
-		return errors.Wrap(err, "failed to get deposit data")
+	if len(accounts) == 0 {
+		h.printer.Text(storageFlagValue)
+		return nil
 	}
 
-	err = h.printer.JSON(depositData)
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i]["basePath"] > accounts[j]["basePath"]
+	})
+
+	err = wallet.DeleteAccountByPublicKey(accounts[0]["validationPubKey"])
 	if err != nil {
-		return errors.Wrap(err, "failed to print deposit-data JSON")
+		return errors.Wrap(err, "failed to delete account")
 	}
+
+	// marshal storage
+	bytes, err := store.MarshalJSON()
+	if err != nil {
+		return errors.Wrap(err, "failed to JSON marshal storage")
+	}
+
+	h.printer.Text(hex.EncodeToString(bytes))
 	return nil
 }

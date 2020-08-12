@@ -25,7 +25,6 @@ func (a *mockAccount) ValidatorPublicKey() e2types.PublicKey {
 	priv, _ := e2types.BLSPrivateKeyFromBytes(a.validationKey.Bytes())
 	return priv.PublicKey()
 }
-func (a *mockAccount) BasePath() string { return "" }
 func (a *mockAccount) WithdrawalPublicKey() e2types.PublicKey                   { return nil }
 func (a *mockAccount) ValidationKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
 func (a *mockAccount) WithdrawalKeySign(data []byte) (e2types.Signature, error) { return nil, nil }

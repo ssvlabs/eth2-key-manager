@@ -18,16 +18,18 @@ import (
 type ValidatorAccount interface {
 	// ID provides the ID for the account.
 	ID() uuid.UUID
-	// BasePath provides the basePath of the account.
-	BasePath() string
 	// Name provides the name for the account.
 	Name() string
+	// BasePath provides the basePath of the account.
+	BasePath() string
 	// ValidatorPublicKey provides the public key for the validation key.
 	ValidatorPublicKey() e2types.PublicKey
 	// WithdrawalPublicKey provides the public key for the withdrawal key.
 	WithdrawalPublicKey() e2types.PublicKey
 	// Sign signs data with the validation key.
 	ValidationKeySign(data []byte) (e2types.Signature, error)
+	// Get Deposit Data
+	GetDepositData() (map[string]interface{}, error)
 	//// Sign signs data with the withdrawal key.
 	//WithdrawalKeySign(data []byte) (e2types.Signature,error)
 	//
