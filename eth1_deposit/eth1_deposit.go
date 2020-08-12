@@ -2,6 +2,7 @@ package eth1_deposit
 
 import (
 	"github.com/bloxapp/KeyVault/core"
+	"github.com/pkg/errors"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/go-ssz"
 	types "github.com/wealdtech/go-eth2-types/v2"
@@ -14,47 +15,57 @@ const (
 )
 
 // this is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
-func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, amount uint64) (*ethpb.Deposit_Data, [32]byte, error) {
-	di := &ethpb.Deposit_Data{
+func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, amountInGwei uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+	depositData := struct {
+		PublicKey             []byte `ssz-size:"48"`
+		WithdrawalCredentials []byte `ssz-size:"32"`
+		Amount                uint64
+	}{
 		PublicKey:             validationKey.PublicKey().Marshal(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
-		Amount:                amount,
+		Amount:                amountInGwei,
 	}
-
-	sr, err := ssz.SigningRoot(di)
+	objRoot, err := ssz.HashTreeRoot(depositData)
 	if err != nil {
-		return nil, [32]byte{}, err
+		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
 
-	domain := types.Domain(types.DomainDeposit, nil /*forkVersion*/, nil /*genesisValidatorsRoot*/)
+	// TODO Get it from BeaconConfig - "GenesisForkVersion"
+	forkVersion := []byte{0, 0, 0, 1}
+	domain := types.Domain(types.DomainDeposit, forkVersion, types.ZeroGenesisValidatorsRoot)
 
 	// prepare for sig
 	signingContainer := struct {
 		Root   []byte `json:"object_root,omitempty" ssz-size:"32"`
 		Domain []byte `json:"domain,omitempty" ssz-size:"32"`
 	}{
-		Root:   sr[:],
+		Root:   objRoot[:],
 		Domain: domain,
 	}
 	root, err := ssz.HashTreeRoot(signingContainer)
 	if err != nil {
-		return nil, [32]byte{}, err
+		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of signing container")
 	}
 
 	// sign
 	sig, err := validationKey.Sign(root[:])
 	if err != nil {
-		return nil, [32]byte{}, err
+		return nil, [32]byte{}, errors.Wrap(err, "failed to sign the root")
 	}
-	di.Signature = sig.Marshal()
 
-	// root with sig
-	dr, err := ssz.HashTreeRoot(di)
+	signedDepositData := &ethpb.Deposit_Data{
+		PublicKey:             validationKey.PublicKey().Marshal(),
+		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
+		Amount:                amountInGwei,
+		Signature:             sig.Marshal(),
+	}
+
+	depositDataRoot, err := ssz.HashTreeRoot(signedDepositData)
 	if err != nil {
-		return nil, [32]byte{}, err
+		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
 
-	return di, dr, nil
+	return signedDepositData, depositDataRoot, nil
 }
 
 // withdrawalCredentialsHash forms a 32 byte hash of the withdrawal public
