@@ -30,7 +30,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, amountInGwe
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
 
-	// TODO Get it from BeaconConfig - "GenesisForkVersion"
+	// TODO Get it from beaconClient GetBeaconConfig - "GenesisForkVersion"
 	forkVersion := []byte{0, 0, 0, 1}
 	domain := types.Domain(types.DomainDeposit, forkVersion, types.ZeroGenesisValidatorsRoot)
 
