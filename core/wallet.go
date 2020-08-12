@@ -29,7 +29,10 @@ type Wallet interface {
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
 	AccountByPublicKey(pubKey string) (ValidatorAccount, error)
-	//
+	// DeleteAccountByPublicKey delete an account from the wallet given its public key.
+	// This will error if the account is not found.
+	// should return nil if not error otherwise the error
+	DeleteAccountByPublicKey(pubKey string) error
 	SetContext(ctx *WalletContext)
 }
 

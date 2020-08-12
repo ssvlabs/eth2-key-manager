@@ -123,6 +123,11 @@ func (account *HDAccount) Name() string {
 	return account.name
 }
 
+// BasePath provides the basePth of the account.
+func (account *HDAccount) BasePath() string {
+	return account.basePath
+}
+
 // ValidatorPublicKey provides the public key for the account.
 func (account *HDAccount) ValidatorPublicKey() e2types.PublicKey {
 	return account.validationKey.PublicKey()

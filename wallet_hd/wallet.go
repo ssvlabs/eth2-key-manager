@@ -3,9 +3,9 @@ package wallet_hd
 import (
 	"encoding/hex"
 	"fmt"
-
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
@@ -99,6 +99,24 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 	}
 
 	return ret, nil
+}
+
+func (wallet *HDWallet) DeleteAccountByPublicKey(pubKey string) error {
+	account, err := wallet.AccountByPublicKey(pubKey)
+	if err != nil {
+		return errors.Wrap(err, "failed to get account by public key")
+	}
+
+	err = wallet.context.Storage.DeleteAccount(account.ID())
+	if err != nil {
+		return errors.Wrap(err, "failed to delete account from store")
+	}
+	delete(wallet.indexMapper, pubKey)
+	err = wallet.context.Storage.SaveWallet(wallet)
+	if err != nil {
+		return errors.Wrap(err, "failed to save wallet")
+	}
+	return nil
 }
 
 // Accounts provides all accounts in the wallet.

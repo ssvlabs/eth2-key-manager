@@ -20,6 +20,8 @@ type ValidatorAccount interface {
 	ID() uuid.UUID
 	// Name provides the name for the account.
 	Name() string
+	// BasePath provides the basePath of the account.
+	BasePath() string
 	// ValidatorPublicKey provides the public key for the validation key.
 	ValidatorPublicKey() e2types.PublicKey
 	// WithdrawalPublicKey provides the public key for the withdrawal key.
