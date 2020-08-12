@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
+	"sort"
 )
 
 // Account list wallet accounts and prints the accounts.
@@ -49,6 +50,13 @@ func (h *Account) List(cmd *cobra.Command, args []string) error {
 		accounts = append(accounts, accObj)
 	}
 
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i]["name"] > accounts[j]["name"]
+	})
+
 	err = h.printer.JSON(accounts)
+	if err != nil {
+		return errors.Wrap(err, "failed to print accounts JSON")
+	}
 	return nil
 }
