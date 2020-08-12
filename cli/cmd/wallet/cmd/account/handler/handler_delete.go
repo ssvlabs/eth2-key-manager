@@ -2,13 +2,13 @@ package handler
 
 import (
 	"encoding/hex"
+	"sort"
+
+	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
-	"sort"
-
-	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
 )
 
 // Account deletes a last indexed account and prints the storage.

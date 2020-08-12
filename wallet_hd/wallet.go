@@ -3,6 +3,7 @@ package wallet_hd
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
