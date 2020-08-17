@@ -16,6 +16,12 @@ const (
 	ValidatorKeyPath  = WithdrawalKeyPath + "/0"
 )
 
+// Predefined errors
+var (
+	// ErrAccountNotFound is the error when account not found
+	ErrAccountNotFound = errors.New("account not found")
+)
+
 // an hierarchical deterministic wallet
 type HDWallet struct {
 	id          uuid.UUID
@@ -161,7 +167,7 @@ func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
 func (wallet *HDWallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
 	id, exists := wallet.indexMapper[pubKey]
 	if !exists {
-		return nil, fmt.Errorf("account not found")
+		return nil, ErrAccountNotFound
 	}
 	return wallet.AccountByID(id)
 }
