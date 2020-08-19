@@ -20,8 +20,9 @@ type mockAccount struct {
 	validationKey *big.Int
 }
 
-func (a *mockAccount) ID() uuid.UUID { return a.id }
-func (a *mockAccount) Name() string  { return "" }
+func (a *mockAccount) ID() uuid.UUID    { return a.id }
+func (a *mockAccount) Name() string     { return "" }
+func (a *mockAccount) BasePath() string { return "" }
 func (a *mockAccount) ValidatorPublicKey() e2types.PublicKey {
 	priv, _ := e2types.BLSPrivateKeyFromBytes(a.validationKey.Bytes())
 	return priv.PublicKey()
@@ -29,8 +30,8 @@ func (a *mockAccount) ValidatorPublicKey() e2types.PublicKey {
 func (a *mockAccount) WithdrawalPublicKey() e2types.PublicKey                   { return nil }
 func (a *mockAccount) ValidationKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
 func (a *mockAccount) WithdrawalKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
+func (a *mockAccount) GetDepositData() (map[string]interface{}, error)          { return nil, nil }
 func (a *mockAccount) SetContext(ctx *core.WalletContext)                       {}
-func (a *mockAccount) BasePath() string                                         { return "" }
 
 func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
