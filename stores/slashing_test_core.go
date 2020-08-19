@@ -1,12 +1,13 @@
 package stores
 
 import (
+	"math/big"
+	"testing"
+
 	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	"math/big"
-	"testing"
 )
 
 func _bigInt(input string) *big.Int {
@@ -29,6 +30,7 @@ func (a *mockAccount) WithdrawalPublicKey() e2types.PublicKey                   
 func (a *mockAccount) ValidationKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
 func (a *mockAccount) WithdrawalKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
 func (a *mockAccount) SetContext(ctx *core.WalletContext)                       {}
+func (a *mockAccount) BasePath() string                                         { return "" }
 
 func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
