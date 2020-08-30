@@ -1,10 +1,10 @@
-# Blox KeyVault
+# Blox Eth Key Manager
 :hammer_and_wrench: UNDER HEAVY CONSTRUCTION :hammer_and_wrench:
 
 
 [![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
 
-Blox KeyVault is a library wrapping all major functionality an eth 2.0 validator will need:
+Blox Eth Key Manager is a library wrapping all major functionality an eth 2.0 validator will need:
   - [Multi storage implementations](https://github.com/bloxapp/eth-key-manager/tree/master/stores)
   - [Signer](https://github.com/bloxapp/eth-key-manager/tree/master/validator_signer)
   - [Slashing protection](https://github.com/bloxapp/eth-key-manager/tree/master/slashing_protection)
@@ -18,8 +18,8 @@ go get github.com/bloxapp/eth-key-manager
    ```
 
 ### Security and Architecture
-KeyVault is the entry point to manage all operations, in it sits a unique wallet and accounts.<br/> 
-KeyVault <- Wallet <- [Accounts]
+`ethkeymanager` is the entry point to manage all operations, in it sits a unique wallet and accounts.<br/> 
+`ethkeymanager` <- Wallet <- [Accounts]
 
 
 An account is the entity that ultimately signs transactions.<br/> 

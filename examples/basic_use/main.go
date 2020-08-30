@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bloxapp/eth-key-manager"
+	ethkeymanager "github.com/bloxapp/eth-key-manager"
 	"github.com/bloxapp/eth-key-manager/core"
 	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
@@ -23,11 +23,11 @@ func main() {
 	store := in_memory.NewInMemStore()
 
 	// create options
-	options := &KeyVault.KeyVaultOptions{}
+	options := &ethkeymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
 	// instantiate KeyVaul
-	vault, _ := KeyVault.NewKeyVault(options)
+	vault, _ := ethkeymanager.NewKeyVault(options)
 
 	// create account
 	wallet, _ := vault.Wallet()

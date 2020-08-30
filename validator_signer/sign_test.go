@@ -9,7 +9,7 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 
-	"github.com/bloxapp/eth-key-manager"
+	ethkeymanager "github.com/bloxapp/eth-key-manager"
 	"github.com/bloxapp/eth-key-manager/core"
 	prot "github.com/bloxapp/eth-key-manager/slashing_protection"
 	"github.com/bloxapp/eth-key-manager/stores/in_memory"
@@ -44,10 +44,10 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 		return nil, err
 	}
 
-	options := &KeyVault.KeyVaultOptions{}
+	options := &ethkeymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault, err := KeyVault.NewKeyVault(options)
+	vault, err := ethkeymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, err
 	}

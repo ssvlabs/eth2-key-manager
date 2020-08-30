@@ -1,4 +1,4 @@
-package KeyVault
+package ethkeymanager
 
 import (
 	"encoding/hex"

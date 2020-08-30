@@ -1,4 +1,4 @@
-# Blox KeyVault - ETH 1 Deposit 
+# Blox Eth Key Manager - ETH 1 Deposit 
 
 
 [![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)

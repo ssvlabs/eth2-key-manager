@@ -1,4 +1,4 @@
-# Blox KeyVault - Slashing Protector
+# Blox Eth Key Manager - Slashing Protector
 
 
 [![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)

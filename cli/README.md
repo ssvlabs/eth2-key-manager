@@ -1,4 +1,4 @@
-# KeyVault CLI
+# Eth Key Manager CLI
 
 This is the CLI for using KeyVault functionality through command line interface.
 
