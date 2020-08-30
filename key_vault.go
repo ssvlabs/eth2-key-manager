@@ -1,14 +1,15 @@
-package KeyVault
+package ethkeymanager
 
 import (
 	"fmt"
-	"github.com/bloxapp/KeyVault/wallet_hd"
 	"log"
 	"sync"
 
-	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/wallet_hd"
 )
 
 var initBLSOnce sync.Once

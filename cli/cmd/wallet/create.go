@@ -3,8 +3,8 @@ package wallet
 import (
 	"github.com/spf13/cobra"
 
-	rootcmd "github.com/bloxapp/KeyVault/cli/cmd"
-	"github.com/bloxapp/KeyVault/cli/cmd/wallet/handler"
+	rootcmd "github.com/bloxapp/eth-key-manager/cli/cmd"
+	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/handler"
 )
 
 // createCmd represents the create wallet command.

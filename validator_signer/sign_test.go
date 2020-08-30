@@ -3,14 +3,16 @@ package validator_signer
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
-	prot "github.com/bloxapp/KeyVault/slashing_protection"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
+	"testing"
+
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
-	"testing"
+
+	ethkeymanager "github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
+	prot "github.com/bloxapp/eth-key-manager/slashing_protection"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 func inmemStorage() *in_memory.InMemStore {
@@ -42,10 +44,10 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 		return nil, err
 	}
 
-	options := &KeyVault.KeyVaultOptions{}
+	options := &ethkeymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault, err := KeyVault.NewKeyVault(options)
+	vault, err := ethkeymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +160,7 @@ func TestSignatures(t *testing.T) {
 					return
 				}
 				if !sig.Verify(msgBytes, test.accountPriv.PublicKey()) {
-					t.Errorf("signature does not verify against pubkey", )
+					t.Errorf("signature does not verify against pubkey")
 				}
 			}
 		})

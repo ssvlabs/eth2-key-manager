@@ -1,9 +1,10 @@
 package in_memory
 
 import (
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores"
 	"testing"
+
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/stores"
 )
 
 func getSlashingStorage() core.SlashingStore {

@@ -1,11 +1,13 @@
 package validator_signer
 
 import (
-	"github.com/bloxapp/KeyVault/core"
+	"sync"
+
 	"github.com/google/uuid"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-	"sync"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 type ValidatorSigner interface {

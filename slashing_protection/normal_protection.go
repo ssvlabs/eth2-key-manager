@@ -1,9 +1,10 @@
 package slashing_protection
 
 import (
-	"github.com/bloxapp/KeyVault/core"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 type NormalProtection struct {

@@ -3,13 +3,13 @@ package flag
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/KeyVault/cli/util/cliflag"
+	"github.com/bloxapp/eth-key-manager/cli/util/cliflag"
 )
 
 // Flag names.
 const (
-	nameFlag = "name"
-	seedFlag = "seed"
+	nameFlag    = "name"
+	seedFlag    = "seed"
 	storageFlag = "storage"
 )
 

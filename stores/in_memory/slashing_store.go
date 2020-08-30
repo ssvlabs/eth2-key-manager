@@ -3,8 +3,10 @@ package in_memory
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
+
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 func (store *InMemStore) SaveAttestation(key e2types.PublicKey, req *core.BeaconAttestation) error {

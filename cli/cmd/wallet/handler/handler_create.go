@@ -2,19 +2,21 @@ package handler
 
 import (
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	ethkeymanager "github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 // Wallet creates a new wallet and prints the storage
 func (h *Wallet) Create(cmd *cobra.Command, args []string) error {
 	store := in_memory.NewInMemStore()
-	options := &KeyVault.KeyVaultOptions{}
+	options := &ethkeymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
-	_, err := KeyVault.NewKeyVault(options)
+	_, err := ethkeymanager.NewKeyVault(options)
 	if err != nil {
 		return errors.Wrap(err, "failed to create key vault.")
 	}

@@ -1,4 +1,4 @@
-# Blox KeyVault - Slashing Protector
+# Blox Eth Key Manager - Slashing Protector
 
 
 [![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
@@ -11,7 +11,7 @@ Slashing can occur for validators proposing a block or signing attestations whic
 #### Attestation - Double Vote
 Description: Do not sign 2 attestations for the same block height. [eth 2 spec](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/validator.md#attester-slashing).
 
-![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protection/images/Screen%20Shot%202020-06-01%20at%208.51.17.png?raw=true)
+![](https://github.com/bloxapp/eth-key-manager/blob/master/slashing_protection/images/Screen%20Shot%202020-06-01%20at%208.51.17.png?raw=true)
 
  ```python
 def is_slashable_attestation_data(data_1: AttestationData, data_2: AttestationData) -> bool:
@@ -29,12 +29,12 @@ Description: Do not surround an already existing attestation/s, a.k.a do not for
 
 Surrounded:
 
-![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protection/images/Screen%20Shot%202020-06-01%20at%208.51.21.png?raw=true)
+![](https://github.com/bloxapp/eth-key-manager/blob/master/slashing_protection/images/Screen%20Shot%202020-06-01%20at%208.51.21.png?raw=true)
 
 
 Surrounding:
 
-![](https://github.com/bloxapp/KeyVault/blob/master/slashing_protection/images/Screen%20Shot%202020-06-01%20at%208.51.27.png?raw=true)
+![](https://github.com/bloxapp/eth-key-manager/blob/master/slashing_protection/images/Screen%20Shot%202020-06-01%20at%208.51.27.png?raw=true)
 
 
  ```python

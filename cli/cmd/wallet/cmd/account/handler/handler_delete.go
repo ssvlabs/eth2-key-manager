@@ -4,11 +4,12 @@ import (
 	"encoding/hex"
 	"sort"
 
-	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
+
+	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/cmd/account/flag"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 // Account deletes a last indexed account and prints the storage.

@@ -2,11 +2,13 @@ package in_memory
 
 import (
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores"
-	types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
+
+	types "github.com/wealdtech/go-eth2-types/v2"
+
+	ethkeymanager "github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/stores"
 )
 
 func _byteArray(input string) []byte {
@@ -21,10 +23,10 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 	// seed
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 
-	options := &KeyVault.KeyVaultOptions{}
+	options := &ethkeymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault, err := KeyVault.NewKeyVault(options)
+	vault, err := ethkeymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, nil, err
 	}

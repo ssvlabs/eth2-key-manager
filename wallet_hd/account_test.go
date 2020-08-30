@@ -3,11 +3,13 @@ package wallet_hd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	types "github.com/wealdtech/go-eth2-types/v2"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 func TestAccountMarshaling(t *testing.T) {

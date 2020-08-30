@@ -2,10 +2,12 @@ package in_memory
 
 import (
 	"encoding/json"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/wallet_hd"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/wallet_hd"
 )
 
 func TestMarshaling(t *testing.T) {

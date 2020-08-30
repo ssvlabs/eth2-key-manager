@@ -1,4 +1,4 @@
-module github.com/bloxapp/KeyVault
+module github.com/bloxapp/eth-key-manager
 
 go 1.13
 

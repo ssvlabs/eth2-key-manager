@@ -1,4 +1,4 @@
-# Blox KeyVault - Stores
+# Blox Eth Key Manager - Stores
 
 
 [![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
@@ -13,7 +13,7 @@ Currently there are the following implementations:
 
 #### Develop you own store
 You could develop you own store, for example saving it to an S3, local file system and so on.
-To implement a store, simple override the methods below from [here](https://github.com/bloxapp/KeyVault/blob/master/core/storage.go)
+To implement a store, simple override the methods below from [here](https://github.com/bloxapp/eth-key-manager/blob/master/core/storage.go)
 ```go
 // Implements methods to store and retrieve data
 // Any encryption is done on the implementation level but is not obligatory

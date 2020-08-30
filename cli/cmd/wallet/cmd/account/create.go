@@ -3,9 +3,9 @@ package account
 import (
 	"github.com/spf13/cobra"
 
-	rootcmd "github.com/bloxapp/KeyVault/cli/cmd"
-	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/flag"
-	"github.com/bloxapp/KeyVault/cli/cmd/wallet/cmd/account/handler"
+	rootcmd "github.com/bloxapp/eth-key-manager/cli/cmd"
+	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/cmd/account/flag"
+	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/cmd/account/handler"
 )
 
 // createCmd represents the create account command.

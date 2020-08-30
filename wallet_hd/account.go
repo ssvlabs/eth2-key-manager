@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/eth1_deposit"
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
+
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/eth1_deposit"
 )
 
 type HDAccount struct {

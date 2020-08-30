@@ -1,4 +1,4 @@
-package KeyVault
+package ethkeymanager
 
 import (
 	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
