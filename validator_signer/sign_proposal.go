@@ -4,8 +4,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bloxapp/KeyVault/core"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {

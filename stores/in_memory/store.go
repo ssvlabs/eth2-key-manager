@@ -2,10 +2,12 @@ package in_memory
 
 import (
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/wallet_hd"
+
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/wallet_hd"
 )
 
 type InMemStore struct {

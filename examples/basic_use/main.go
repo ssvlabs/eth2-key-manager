@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
+
+	"github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	fmt.Printf("Generated mnemonic: %s\n", mnemonic)
 
 	// generate seed
-	seed,_ := core.SeedFromEntropy(entropy, "")
+	seed, _ := core.SeedFromEntropy(entropy, "")
 
 	// create storage
 	store := in_memory.NewInMemStore()

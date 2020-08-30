@@ -2,13 +2,15 @@ package slashing_protection
 
 import (
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 func _byteArray(input string) []byte {

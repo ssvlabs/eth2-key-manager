@@ -1,6 +1,6 @@
 package handler
 
-import "github.com/bloxapp/KeyVault/cli/util/printer"
+import "github.com/bloxapp/eth-key-manager/cli/util/printer"
 
 // Wallet contains handler functions of the CLI commands related to wallet.
 type Wallet struct {

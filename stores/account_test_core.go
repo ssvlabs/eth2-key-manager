@@ -2,11 +2,13 @@ package stores
 
 import (
 	"fmt"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 func TestingOpeningAccount(storage core.Storage, account core.ValidatorAccount, t *testing.T) {

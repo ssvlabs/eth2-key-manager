@@ -2,11 +2,13 @@ package in_memory
 
 import (
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/stores"
-	types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
+
+	types "github.com/wealdtech/go-eth2-types/v2"
+
+	"github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/stores"
 )
 
 func _byteArray(input string) []byte {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/KeyVault/cli/cmd"
-	"github.com/bloxapp/KeyVault/cli/util/printer"
+	"github.com/bloxapp/eth-key-manager/cli/cmd"
+	"github.com/bloxapp/eth-key-manager/cli/util/printer"
 )
 
 func TestMnemonicGenerate(t *testing.T) {

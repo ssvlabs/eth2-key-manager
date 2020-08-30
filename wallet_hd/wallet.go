@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bloxapp/KeyVault/core"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md

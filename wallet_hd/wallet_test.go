@@ -4,24 +4,29 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
+	"math/big"
+	"os"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-	"math/big"
-	"os"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
-type dummyStorage struct {}
-func (s * dummyStorage) Name() string { return "" }
-func (s * dummyStorage) SaveWallet(wallet core.Wallet) error { return nil }
-func (s * dummyStorage) OpenWallet() (core.Wallet, error) { return nil,nil }
-func (s * dummyStorage) ListAccounts() ([]core.ValidatorAccount, error) { return nil,nil }
-func (s * dummyStorage) SaveAccount(account core.ValidatorAccount) error { return nil }
-func (s * dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) { return nil,nil }
-func (s * dummyStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
+type dummyStorage struct{}
+
+func (s *dummyStorage) Name() string                                    { return "" }
+func (s *dummyStorage) SaveWallet(wallet core.Wallet) error             { return nil }
+func (s *dummyStorage) OpenWallet() (core.Wallet, error)                { return nil, nil }
+func (s *dummyStorage) ListAccounts() ([]core.ValidatorAccount, error)  { return nil, nil }
+func (s *dummyStorage) SaveAccount(account core.ValidatorAccount) error { return nil }
+func (s *dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
+	return nil, nil
+}
+func (s *dummyStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -50,26 +55,26 @@ func key(seed []byte) (*core.MasterDerivableKey, error) {
 func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 	e2types.InitBLS()
 
-	tests := []struct{
-		mnemonic string
-		password string
+	tests := []struct {
+		mnemonic        string
+		password        string
 		validatorPubKey string
-	} {
+	}{
 		{
-			mnemonic: "vocal differ audit mom unique physical evolve cave retire design achieve pupil odor hockey drive animal habit fluid belt height vintage crack rigid sphere",
-			password: "",
+			mnemonic:        "vocal differ audit mom unique physical evolve cave retire design achieve pupil odor hockey drive animal habit fluid belt height vintage crack rigid sphere",
+			password:        "",
 			validatorPubKey: "aa6e59b378b905a7454cf3a7a57e07ce89d5410fb3f96610aba0a8036984d7a6a2e1398fceb85611bc576cd349d7dcd2",
 		},
 		{
-			mnemonic: "magnet burden popular race night clown moral sorry situate worth sorry solution live custom message finger soon month invest battle fade funny bright basket",
-			password: "",
+			mnemonic:        "magnet burden popular race night clown moral sorry situate worth sorry solution live custom message finger soon month invest battle fade funny bright basket",
+			password:        "",
 			validatorPubKey: "98ee5f5107f72bef05f59dee8de08223cd0db04be9f142806743cad44366f44184f0957935dc8e4994e038ad1fd5d821",
 		},
 	}
 
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test vector: %d", i), func(t *testing.T) {
-			seed,err := core.SeedFromMnemonic(test.mnemonic, test.password)
+			seed, err := core.SeedFromMnemonic(test.mnemonic, test.password)
 			require.NoError(t, err)
 
 			//

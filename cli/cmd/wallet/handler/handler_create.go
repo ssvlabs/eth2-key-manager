@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 // Wallet creates a new wallet and prints the storage

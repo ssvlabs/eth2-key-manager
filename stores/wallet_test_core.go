@@ -3,14 +3,16 @@ package stores
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
+	"os"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-	"os"
-	"testing"
+
+	KeyVault "github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 func _byteArray(input string) []byte {

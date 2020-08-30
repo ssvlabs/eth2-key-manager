@@ -3,7 +3,7 @@ package account
 import (
 	"github.com/spf13/cobra"
 
-	walletcmd "github.com/bloxapp/KeyVault/cli/cmd/wallet"
+	walletcmd "github.com/bloxapp/eth-key-manager/cli/cmd/wallet"
 )
 
 // Command represents the portfolio account related command.

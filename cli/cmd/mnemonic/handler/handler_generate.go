@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/bloxapp/KeyVault/core"
+	"github.com/bloxapp/eth-key-manager/core"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

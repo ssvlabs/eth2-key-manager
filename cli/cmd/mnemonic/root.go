@@ -3,7 +3,7 @@ package mnemonic
 import (
 	"github.com/spf13/cobra"
 
-	keyvaultcmd "github.com/bloxapp/KeyVault/cli/cmd"
+	keyvaultcmd "github.com/bloxapp/eth-key-manager/cli/cmd"
 )
 
 // Command represents the key-vault mnemonic related command.

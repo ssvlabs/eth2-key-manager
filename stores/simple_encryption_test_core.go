@@ -2,12 +2,14 @@ package stores
 
 import (
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
-	"github.com/bloxapp/KeyVault/wallet_hd"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth-key-manager/wallet_hd"
 )
 
 func encryptor() types.Encryptor {

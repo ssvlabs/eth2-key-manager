@@ -1,8 +1,9 @@
 package in_memory
 
 import (
-	"github.com/bloxapp/KeyVault/stores"
 	"testing"
+
+	"github.com/bloxapp/eth-key-manager/stores"
 )
 
 func TestStoringWithEncryption(t *testing.T) {

@@ -2,10 +2,12 @@ package slashing_protection
 
 import (
 	"fmt"
-	"github.com/bloxapp/KeyVault/core"
+	"testing"
+
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error) {

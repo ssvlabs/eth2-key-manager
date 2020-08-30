@@ -2,12 +2,12 @@ package handler
 
 import (
 	"encoding/hex"
-	"github.com/bloxapp/KeyVault/core"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/KeyVault/cli/cmd/seed/flag"
+	"github.com/bloxapp/eth-key-manager/cli/cmd/seed/flag"
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 // Seed generates a new key-vault seed and prints it.

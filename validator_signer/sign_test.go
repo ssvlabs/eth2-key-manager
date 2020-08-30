@@ -3,14 +3,16 @@ package validator_signer
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/bloxapp/KeyVault"
-	"github.com/bloxapp/KeyVault/core"
-	prot "github.com/bloxapp/KeyVault/slashing_protection"
-	"github.com/bloxapp/KeyVault/stores/in_memory"
+	"testing"
+
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
-	"testing"
+
+	"github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/core"
+	prot "github.com/bloxapp/eth-key-manager/slashing_protection"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 func inmemStorage() *in_memory.InMemStore {
@@ -158,7 +160,7 @@ func TestSignatures(t *testing.T) {
 					return
 				}
 				if !sig.Verify(msgBytes, test.accountPriv.PublicKey()) {
-					t.Errorf("signature does not verify against pubkey", )
+					t.Errorf("signature does not verify against pubkey")
 				}
 			}
 		})

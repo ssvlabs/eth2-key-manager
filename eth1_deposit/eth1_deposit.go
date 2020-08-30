@@ -1,12 +1,13 @@
 package eth1_deposit
 
 import (
-	"github.com/bloxapp/KeyVault/core"
 	"github.com/pkg/errors"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/go-ssz"
 	types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
+
+	"github.com/bloxapp/eth-key-manager/core"
 )
 
 const (
