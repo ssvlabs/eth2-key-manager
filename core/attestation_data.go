@@ -2,13 +2,14 @@ package core
 
 import (
 	"bytes"
+
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
 // copy from prysm
 type Checkpoint struct {
-	Epoch uint64
-	Root  []byte `ssz-size:"32"`
+	Epoch uint64 `json:"epoch"`
+	Root  []byte `ssz-size:"32" json:"root"`
 }
 
 // returns true if equal, false if not
@@ -18,11 +19,11 @@ func (checkpoint *Checkpoint) compare(other *Checkpoint) bool {
 
 // copy from prysm
 type BeaconAttestation struct {
-	Slot            uint64
-	CommitteeIndex  uint64
-	BeaconBlockRoot []byte `ssz-size:"32"`
-	Source          *Checkpoint
-	Target          *Checkpoint
+	Slot            uint64      `json:"slot"`
+	CommitteeIndex  uint64      `json:"committee_index"`
+	BeaconBlockRoot []byte      `ssz-size:"32" json:"beacon_block_root"`
+	Source          *Checkpoint `json:"source"`
+	Target          *Checkpoint `json:"target"`
 }
 
 type VoteDetectionType string
