@@ -2,16 +2,17 @@ package core
 
 import (
 	"bytes"
+
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
 // copy from prysm https://github.com/prysmaticlabs/prysm/blob/master/validator/client/validator_propose.go#L220-L226
 type BeaconBlockHeader struct {
-	Slot          uint64
-	ProposerIndex uint64
-	ParentRoot    []byte `ssz-size:"32"`
-	StateRoot     []byte `ssz-size:"32"`
-	BodyRoot      []byte `ssz-size:"32"`
+	Slot          uint64 `json:"slot"`
+	ProposerIndex uint64 `json:"proposer_index"`
+	ParentRoot    []byte `ssz-size:"32" json:"parent_root"`
+	StateRoot     []byte `ssz-size:"32" json:"state_root"`
+	BodyRoot      []byte `ssz-size:"32" json:"body_root"`
 }
 
 func (proposal *BeaconBlockHeader) Compare(other *BeaconBlockHeader) bool {
