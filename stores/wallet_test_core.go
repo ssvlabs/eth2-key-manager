@@ -44,8 +44,7 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 		testName := fmt.Sprintf("adding and fetching account: %d", i)
 		t.Run(testName, func(t *testing.T) {
 			// create
-			accountName := fmt.Sprintf("%d", i)
-			a, err := wallet.CreateValidatorAccount(seed, accountName)
+			a, err := wallet.CreateValidatorAccount(seed, nil)
 			if err != nil {
 				t.Error(err)
 				return

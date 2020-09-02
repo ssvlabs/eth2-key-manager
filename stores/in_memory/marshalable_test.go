@@ -19,7 +19,7 @@ func TestMarshaling(t *testing.T) {
 	require.NoError(t, err)
 
 	// account
-	acc, err := wallet.CreateValidatorAccount(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"), "acc")
+	acc, err := wallet.CreateValidatorAccount(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"), nil)
 	require.NoError(t, err)
 	err = store.SaveAccount(acc)
 	require.NoError(t, err)

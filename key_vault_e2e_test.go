@@ -205,7 +205,7 @@ func testVault(t *testing.T, v *KeyVault, seed []byte) {
 	require.NoError(t, err)
 
 	// create and fetch validator account
-	val, err := wallet.CreateValidatorAccount(seed, "val1")
+	val, err := wallet.CreateValidatorAccount(seed, nil)
 	require.NoError(t, err)
 	val1, err := wallet.AccountByPublicKey(hex.EncodeToString(val.ValidatorPublicKey().Marshal()))
 	require.NoError(t, err)

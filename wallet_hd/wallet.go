@@ -3,6 +3,8 @@ package wallet_hd
 import (
 	"encoding/hex"
 	"fmt"
+	"sort"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -50,12 +52,42 @@ func (wallet *HDWallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
-// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
-// This will error if an account with the name already exists.
-func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.ValidatorAccount, error) {
-	if len(name) == 0 {
-		name = fmt.Sprintf("account-%d", len(wallet.indexMapper))
+// GetNextAccountIndex provides next index to create account at.
+func (wallet *HDWallet) GetNextAccountIndex() (int, error) {
+	if len(wallet.indexMapper) == 0 {
+		return 0, nil
 	}
+
+	var indexes []int
+	for a := range wallet.Accounts() {
+		index, err := strconv.ParseInt(a.BasePath()[1:], 0, 64)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to parse base account path")
+		}
+		indexes = append(indexes, int(index))
+	}
+	sort.Slice(indexes, func(i, j int) bool {
+		return indexes[i] > indexes[j]
+	})
+
+	return indexes[0] + 1, nil
+}
+
+// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
+func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
+	var index int
+	var err error
+
+	// resolve index to create account at
+	if indexPointer != nil {
+		index = *indexPointer
+	} else {
+		index, err = wallet.GetNextAccountIndex()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get latest account index")
+		}
+	}
+	name := fmt.Sprintf("account-%d", index)
 
 	// create the master key
 	key, err := core.MasterKeyFromSeed(seed)
@@ -63,15 +95,15 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, name string) (core.V
 		return nil, err
 	}
 
-	baseAccountPath := fmt.Sprintf(BaseAccountPath, len(wallet.indexMapper))
+	baseAccountPath := fmt.Sprintf(BaseAccountPath, index)
 	// validator key
-	validatorPath := fmt.Sprintf(ValidatorKeyPath, len(wallet.indexMapper))
+	validatorPath := fmt.Sprintf(ValidatorKeyPath, index)
 	validatorKey, err := key.Derive(validatorPath)
 	if err != nil {
 		return nil, err
 	}
 	// withdrawal key
-	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, len(wallet.indexMapper))
+	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, index)
 	withdrawalKey, err := key.Derive(withdrawalPath)
 	if err != nil {
 		return nil, err

@@ -26,6 +26,7 @@ func (s *dummyStorage) SaveAccount(account core.ValidatorAccount) error { return
 func (s *dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
 	return nil, nil
 }
+func (s *dummyStorage) DeleteAccount(accountId uuid.UUID) error                 { return nil }
 func (s *dummyStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
 
 func _byteArray(input string) []byte {
@@ -86,7 +87,7 @@ func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 					Storage: storage,
 				},
 			}
-			account, err := w.CreateValidatorAccount(seed, "name")
+			account, err := w.CreateValidatorAccount(seed, nil)
 			require.NoError(t, err)
 			require.Equal(t, test.validatorPubKey, hex.EncodeToString(account.ValidatorPublicKey().Marshal()))
 		})
@@ -109,38 +110,38 @@ func TestAccountDerivation(t *testing.T) {
 
 	tests := []struct {
 		testName              string
-		accountName           string
+		index                 int
 		expectedValidationKey *big.Int
 		expectedWithdrawalKey *big.Int
 	}{
 		{
 			testName:              "account 0",
-			accountName:           "account 0",
+			index:                 0,
 			expectedValidationKey: _bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398"),
 			expectedWithdrawalKey: _bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836"),
 		},
 		{
 			testName:              "account 1",
-			accountName:           "account 1",
+			index:                 1,
 			expectedValidationKey: _bigInt("22772506560955906640840029020628554414154538440282401807772339666252999598733"),
 			expectedWithdrawalKey: _bigInt("35957947454275682122989949668683794518020231276710636838205992785623169821803"),
 		},
 		{
 			testName:              "account 2",
-			accountName:           "account 2",
+			index:                 2,
 			expectedValidationKey: _bigInt("39196384482644522441983190042722076264169843386078553516164086198183513560637"),
 			expectedWithdrawalKey: _bigInt("8862394884593725153617163219481465667794938944832130820949251394547028786321"),
 		},
 		{
 			testName:              "account 3",
-			accountName:           "account 3",
+			index:                 3,
 			expectedValidationKey: _bigInt("28093661633617073106051830080274606181076423213304176144286257209925213345002"),
 			expectedWithdrawalKey: _bigInt("24013488102538647731381570745201628464138315555327292772724806156501038782887"),
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			account, err := w.CreateValidatorAccount(seed, test.accountName)
+			account, err := w.CreateValidatorAccount(seed, &test.index)
 			require.NoError(t, err)
 
 			val, err := e2types.BLSPrivateKeyFromBytes(test.expectedValidationKey.Bytes())
@@ -182,7 +183,7 @@ func TestCreateAccounts(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			_, err := w.CreateValidatorAccount(seed, test.newAccounttName)
+			_, err := w.CreateValidatorAccount(seed, nil)
 			if test.expectedErr != "" {
 				require.Errorf(t, err, test.expectedErr)
 			} else {
