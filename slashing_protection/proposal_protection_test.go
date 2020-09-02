@@ -43,11 +43,11 @@ func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	account1, err := w.CreateValidatorAccount(seed, "1")
+	account1, err := w.CreateValidatorAccount(seed, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	account2, err := w.CreateValidatorAccount(seed, "2")
+	account2, err := w.CreateValidatorAccount(seed, nil)
 	if err != nil {
 		return nil, nil, err
 	}

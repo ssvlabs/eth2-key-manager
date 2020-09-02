@@ -36,19 +36,19 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 		return nil, nil, err
 	}
 
-	a1, err := wallet.CreateValidatorAccount(seed, "1")
+	a1, err := wallet.CreateValidatorAccount(seed, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	a2, err := wallet.CreateValidatorAccount(seed, "2")
+	a2, err := wallet.CreateValidatorAccount(seed, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	a3, err := wallet.CreateValidatorAccount(seed, "3")
+	a3, err := wallet.CreateValidatorAccount(seed, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	a4, err := wallet.CreateValidatorAccount(seed, "4")
+	a4, err := wallet.CreateValidatorAccount(seed, nil)
 	if err != nil {
 		return nil, nil, err
 	}

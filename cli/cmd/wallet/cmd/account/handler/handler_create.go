@@ -18,10 +18,15 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to init BLS")
 	}
 
-	// Get name flag.
-	nameFlagValue, err := flag.GetNameFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the name flag value")
+	var indexPointer *int
+	// check if indexFlag was assigned
+	if cmd.Flags().Changed(flag.GetIndexFlagName()) {
+		// Get index flag.
+		indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+		if err != nil {
+			return errors.Wrap(err, "failed to retrieve the index flag value")
+		}
+		indexPointer = &indexFlagValue
 	}
 
 	// Get seed flag.
@@ -57,7 +62,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	_, err = wallet.CreateValidatorAccount(seedBytes, nameFlagValue)
+	_, err = wallet.CreateValidatorAccount(seedBytes, indexPointer)
 	if err != nil {
 		return errors.Wrap(err, "failed to create validator account")
 	}

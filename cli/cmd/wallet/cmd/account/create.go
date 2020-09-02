@@ -21,7 +21,7 @@ var createCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddNameFlag(createCmd)
+	flag.AddIndexFlag(createCmd)
 	flag.AddSeedFlag(createCmd)
 	flag.AddStorageFlag(createCmd)
 

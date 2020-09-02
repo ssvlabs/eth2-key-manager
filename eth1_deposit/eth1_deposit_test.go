@@ -54,8 +54,8 @@ func TestDepositData(t *testing.T) {
 			validatorPrivKey:              _ignoreErr(hex.DecodeString("23fd464c122d7fa8c9c8e46d710ae478ab920c8c0587e86556aa968191d5210e")),
 			withdrawalPubKey:              _ignoreErr(hex.DecodeString("b323537b2867d9f2bae068f93e75a9e2e1c8d594e3696c34dc8010dc403eaeeaf43756a440fc82e1c6f45c6e8348343f")),
 			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("00ea056bfaa692b4e12bb1c3f59049dabcfb0b63f427025c718f5e3b81fdb945")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("91c8dddcbd882d409e5b0eca4bf096decf349edf4bd118cf32bcee73acd698a436f8a4ff1fe16f041df963d712bed4d916dd00a8bd13f3087369fe199086d46a1c788633d8fda2ba4ace3e2ece56dc66b947fb6d83941bd2568cd2fcfd03c298")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("7155ceb606f46c5102003121bd19935590a58fb28ec2efe345c66db622008874")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("aac3de8d5d1700e2519da9346625273ded81a4250bd1b98c50e6587acac9545a1d1598472823aea29220cbc45ae9062f09791dc22252efdd3a1531964e4d62a59511e0f332fb3cc5ea7fe0831de696f040fe806f9f22bd29db0466047584cb23")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("5b508bbed40a083809e4d0ee74135c7289020e33e2dbad2e69f41772d09f5a63")),
 		},
 	}
 
