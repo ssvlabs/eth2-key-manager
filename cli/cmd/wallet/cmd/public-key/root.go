@@ -1,8 +1,9 @@
 package public_key
 
 import (
-	walletcmd "github.com/bloxapp/eth-key-manager/cli/cmd/wallet"
 	"github.com/spf13/cobra"
+
+	walletcmd "github.com/bloxapp/eth-key-manager/cli/cmd/wallet"
 )
 
 // Command represents the wallet public-key related command.
