@@ -3,12 +3,13 @@ package handler
 import (
 	"encoding/hex"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/cmd/public-key/flag"
-	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
+
+	ethkeymanager "github.com/bloxapp/eth-key-manager"
+	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/cmd/public-key/flag"
+	"github.com/bloxapp/eth-key-manager/stores/in_memory"
 )
 
 // Account generates a new wallet account at specific index and prints the account.

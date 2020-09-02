@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/bloxapp/eth-key-manager/cli/cmd"
 	"github.com/bloxapp/eth-key-manager/cli/util/printer"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPublicKeyGenerate(t *testing.T) {

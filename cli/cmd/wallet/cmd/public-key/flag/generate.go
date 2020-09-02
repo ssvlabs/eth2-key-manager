@@ -1,14 +1,15 @@
 package flag
 
 import (
-	"github.com/bloxapp/eth-key-manager/cli/util/cliflag"
 	"github.com/spf13/cobra"
+
+	"github.com/bloxapp/eth-key-manager/cli/util/cliflag"
 )
 
 // Flag names.
 const (
-	indexFlag   = "index"
-	seedFlag    = "seed"
+	indexFlag = "index"
+	seedFlag  = "seed"
 )
 
 // AddIndexFlag adds the index flag to the command
