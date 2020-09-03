@@ -6,7 +6,7 @@ import (
 
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 
-	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error) {

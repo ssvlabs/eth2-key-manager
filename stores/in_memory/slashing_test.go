@@ -3,8 +3,8 @@ package in_memory
 import (
 	"testing"
 
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/stores"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores"
 )
 
 func getSlashingStorage() core.SlashingStore {

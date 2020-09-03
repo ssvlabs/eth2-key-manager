@@ -1,4 +1,4 @@
-package ethkeymanager
+package eth2keymanager
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/wallet_hd"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
 var initBLSOnce sync.Once

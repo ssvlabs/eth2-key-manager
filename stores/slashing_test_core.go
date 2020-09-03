@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
-	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func _bigInt(input string) *big.Int {

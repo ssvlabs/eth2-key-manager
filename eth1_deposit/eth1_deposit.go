@@ -7,7 +7,7 @@ import (
 	types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 
-	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 const (

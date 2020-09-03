@@ -9,10 +9,10 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/core"
-	prot "github.com/bloxapp/eth-key-manager/slashing_protection"
-	"github.com/bloxapp/eth-key-manager/stores/in_memory"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/core"
+	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
+	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
 func inmemStorage() *in_memory.InMemStore {
@@ -44,10 +44,10 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 		return nil, err
 	}
 
-	options := &ethkeymanager.KeyVaultOptions{}
+	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault, err := ethkeymanager.NewKeyVault(options)
+	vault, err := eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, err
 	}
