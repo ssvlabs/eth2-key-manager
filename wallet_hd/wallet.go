@@ -53,39 +53,23 @@ func (wallet *HDWallet) Type() core.WalletType {
 }
 
 // GetNextAccountIndex provides next index to create account at.
-func (wallet *HDWallet) GetNextAccountIndex() (int, error) {
+func (wallet *HDWallet) GetNextAccountIndex() int {
 	if len(wallet.indexMapper) == 0 {
-		return 0, nil
+		return 0
 	}
-
-	var indexes []int
-	for a := range wallet.Accounts() {
-		index, err := strconv.ParseInt(a.BasePath()[1:], 0, 64)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to parse base account path")
-		}
-		indexes = append(indexes, int(index))
-	}
-	sort.Slice(indexes, func(i, j int) bool {
-		return indexes[i] > indexes[j]
-	})
-
-	return indexes[0] + 1, nil
+	accounts := wallet.Accounts()
+	index, _ := strconv.ParseInt(accounts[0].BasePath()[1:], 0, 64)
+	return int(index) + 1
 }
 
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
 	var index int
-	var err error
-
 	// resolve index to create account at
 	if indexPointer != nil {
 		index = *indexPointer
 	} else {
-		index, err = wallet.GetNextAccountIndex()
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get latest account index")
-		}
+		index = wallet.GetNextAccountIndex()
 	}
 	name := fmt.Sprintf("account-%d", index)
 
@@ -160,21 +144,22 @@ func (wallet *HDWallet) DeleteAccountByPublicKey(pubKey string) error {
 }
 
 // Accounts provides all accounts in the wallet.
-func (wallet *HDWallet) Accounts() <-chan core.ValidatorAccount {
-	ch := make(chan core.ValidatorAccount, 1024) // TODO - handle more? change from chan?
-	go func() {
-		for pubKey := range wallet.indexMapper {
-			id := wallet.indexMapper[pubKey]
-			account, err := wallet.AccountByID(id)
-			if err != nil {
-				continue
-			}
-			ch <- account
+func (wallet *HDWallet) Accounts() []core.ValidatorAccount {
+	accounts := make([]core.ValidatorAccount, 0)
+	for pubKey := range wallet.indexMapper {
+		id := wallet.indexMapper[pubKey]
+		account, err := wallet.AccountByID(id)
+		if err != nil {
+			continue
 		}
-		close(ch)
-	}()
-
-	return ch
+		accounts = append(accounts, account)
+	}
+	sort.Slice(accounts, func(i, j int) bool {
+		a, _ := strconv.ParseInt(accounts[i].BasePath()[1:], 0, 64)
+		b, _ := strconv.ParseInt(accounts[j].BasePath()[1:], 0, 64)
+		return a > b
+	})
+	return accounts
 }
 
 // AccountByID provides a single account from the wallet given its ID.

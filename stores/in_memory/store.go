@@ -59,11 +59,7 @@ func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
 		return nil, err
 	}
 
-	ret := make([]core.ValidatorAccount, 0)
-	for a := range w.Accounts() {
-		ret = append(ret, a)
-	}
-	return ret, nil
+	return w.Accounts(), nil
 }
 
 func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {

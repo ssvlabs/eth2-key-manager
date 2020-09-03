@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"sort"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -41,25 +40,13 @@ func (h *Account) Delete(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	var accounts []map[string]string
-	for account := range wallet.Accounts() {
-		accObj := map[string]string{
-			"validationPubKey": hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
-			"basePath":         account.BasePath(),
-		}
-		accounts = append(accounts, accObj)
-	}
-
+	accounts := wallet.Accounts()
 	if len(accounts) == 0 {
 		h.printer.Text(storageFlagValue)
 		return nil
 	}
 
-	sort.Slice(accounts, func(i, j int) bool {
-		return accounts[i]["basePath"] > accounts[j]["basePath"]
-	})
-
-	err = wallet.DeleteAccountByPublicKey(accounts[0]["validationPubKey"])
+	err = wallet.DeleteAccountByPublicKey(hex.EncodeToString(accounts[0].ValidatorPublicKey().Marshal()))
 	if err != nil {
 		return errors.Wrap(err, "failed to delete account")
 	}

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"sort"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -42,7 +41,7 @@ func (h *Account) List(cmd *cobra.Command, args []string) error {
 	}
 
 	var accounts []map[string]string
-	for a := range wallet.Accounts() {
+	for _, a := range wallet.Accounts() {
 		accObj := map[string]string{
 			"id":               a.ID().String(),
 			"name":             a.Name(),
@@ -51,11 +50,6 @@ func (h *Account) List(cmd *cobra.Command, args []string) error {
 		}
 		accounts = append(accounts, accObj)
 	}
-
-	sort.Slice(accounts, func(i, j int) bool {
-		return accounts[i]["name"] > accounts[j]["name"]
-	})
-
 	err = h.printer.JSON(accounts)
 	if err != nil {
 		return errors.Wrap(err, "failed to print accounts JSON")
