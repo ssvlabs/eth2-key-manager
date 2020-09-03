@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/core"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func TestingOpeningAccount(storage core.Storage, account core.ValidatorAccount, t *testing.T) {
@@ -49,7 +49,7 @@ func TestingSavingAccounts(storage core.Storage, accounts []core.ValidatorAccoun
 func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 	t.Run("testing", func(t *testing.T) {
 		// create keyvault and wallet
-		options := &ethkeymanager.KeyVaultOptions{}
+		options := &eth2keymanager.KeyVaultOptions{}
 		options.SetStorage(storage)
 		options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
 
@@ -64,10 +64,10 @@ func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	// create keyvault and wallet
-	options := &ethkeymanager.KeyVaultOptions{}
+	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(storage)
 	options.SetSeed(seed)
-	vault, err := ethkeymanager.NewKeyVault(options)
+	vault, err := eth2keymanager.NewKeyVault(options)
 	require.NoError(t, err)
 
 	wallet, err := vault.Wallet()

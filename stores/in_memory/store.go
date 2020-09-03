@@ -6,8 +6,8 @@ import (
 	uuid "github.com/google/uuid"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/wallet_hd"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
 type InMemStore struct {

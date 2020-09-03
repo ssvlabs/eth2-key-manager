@@ -8,9 +8,9 @@ import (
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/stores/in_memory"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
 func _byteArray(input string) []byte {
@@ -22,10 +22,10 @@ func store() *in_memory.InMemStore {
 	return in_memory.NewInMemStore()
 }
 
-func vault() (*ethkeymanager.KeyVault, error) {
-	options := &ethkeymanager.KeyVaultOptions{}
+func vault() (*eth2keymanager.KeyVault, error) {
+	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store())
-	return ethkeymanager.NewKeyVault(options)
+	return eth2keymanager.NewKeyVault(options)
 }
 
 func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {

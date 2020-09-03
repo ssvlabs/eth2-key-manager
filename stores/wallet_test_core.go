@@ -11,8 +11,8 @@ import (
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/core"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func _byteArray(input string) []byte {
@@ -20,15 +20,15 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func keyVault(storage core.Storage) (*ethkeymanager.KeyVault, error) {
+func keyVault(storage core.Storage) (*eth2keymanager.KeyVault, error) {
 	if err := e2types.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
-	options := &ethkeymanager.KeyVaultOptions{}
+	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(storage)
 	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"))
-	return ethkeymanager.NewKeyVault(options)
+	return eth2keymanager.NewKeyVault(options)
 }
 
 func TestingOpenAccounts(storage core.Storage, t *testing.T) {

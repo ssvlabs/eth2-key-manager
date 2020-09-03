@@ -1,6 +1,6 @@
 package handler
 
-import "github.com/bloxapp/eth-key-manager/cli/util/printer"
+import "github.com/bloxapp/eth2-key-manager/cli/util/printer"
 
 // Seed contains handler functions of the CLI commands related to key-vault seed.
 type Seed struct {

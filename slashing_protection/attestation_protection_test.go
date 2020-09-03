@@ -7,7 +7,7 @@ import (
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
-	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error) {

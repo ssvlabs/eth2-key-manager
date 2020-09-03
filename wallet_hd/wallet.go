@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md

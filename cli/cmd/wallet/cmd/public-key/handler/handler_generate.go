@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/cli/cmd/wallet/cmd/public-key/flag"
-	"github.com/bloxapp/eth-key-manager/stores/in_memory"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/public-key/flag"
+	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
 // Account generates a new wallet account at specific index and prints the account.
@@ -41,10 +41,10 @@ func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
 	}
 
 	store := in_memory.NewInMemStore()
-	options := &ethkeymanager.KeyVaultOptions{}
+	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
-	_, err = ethkeymanager.NewKeyVault(options)
+	_, err = eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return errors.Wrap(err, "failed to create key vault.")
 	}

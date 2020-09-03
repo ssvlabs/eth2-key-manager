@@ -1,4 +1,4 @@
-package ethkeymanager
+package eth2keymanager
 
 import (
 	"encoding/hex"
@@ -10,8 +10,8 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
 func _bigInt(input string) *big.Int {

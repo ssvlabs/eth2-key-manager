@@ -6,9 +6,9 @@ import (
 
 	types "github.com/wealdtech/go-eth2-types/v2"
 
-	ethkeymanager "github.com/bloxapp/eth-key-manager"
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/stores"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores"
 )
 
 func _byteArray(input string) []byte {
@@ -23,10 +23,10 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 	// seed
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 
-	options := &ethkeymanager.KeyVaultOptions{}
+	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 	options.SetSeed(seed)
-	vault, err := ethkeymanager.NewKeyVault(options)
+	vault, err := eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, nil, err
 	}

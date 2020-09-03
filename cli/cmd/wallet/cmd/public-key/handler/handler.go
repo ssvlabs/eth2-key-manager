@@ -1,6 +1,6 @@
 package handler
 
-import "github.com/bloxapp/eth-key-manager/cli/util/printer"
+import "github.com/bloxapp/eth2-key-manager/cli/util/printer"
 
 // PublicKey contains handler functions of the CLI commands related to wallet public keys.
 type PublicKey struct {

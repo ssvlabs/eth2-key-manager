@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/eth-key-manager/cli/util/printer"
+	"github.com/bloxapp/eth2-key-manager/cli/util/printer"
 )
 
 // ResultPrinter is the printer used to print command results and errors.

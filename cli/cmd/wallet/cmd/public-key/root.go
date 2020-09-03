@@ -3,7 +3,7 @@ package public_key
 import (
 	"github.com/spf13/cobra"
 
-	walletcmd "github.com/bloxapp/eth-key-manager/cli/cmd/wallet"
+	walletcmd "github.com/bloxapp/eth2-key-manager/cli/cmd/wallet"
 )
 
 // Command represents the wallet public-key related command.

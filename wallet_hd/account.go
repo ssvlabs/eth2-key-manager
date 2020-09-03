@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
-	"github.com/bloxapp/eth-key-manager/core"
-	"github.com/bloxapp/eth-key-manager/eth1_deposit"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
 )
 
 type HDAccount struct {
