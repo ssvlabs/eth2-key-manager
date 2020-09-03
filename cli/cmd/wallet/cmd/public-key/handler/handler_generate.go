@@ -59,9 +59,10 @@ func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to create validator account")
 	}
 
-	publicKey := map[string]string{
+	publicKey := map[string]interface{}{
 		"validationPubKey": hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
 		"withdrawalPubKey": hex.EncodeToString(account.WithdrawalPublicKey().Marshal()),
+		"index": indexFlagValue,
 	}
 
 	err = h.printer.JSON(publicKey)

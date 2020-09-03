@@ -19,7 +19,7 @@ type Wallet interface {
 	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 	CreateValidatorAccount(seed []byte, indexPointer *int) (ValidatorAccount, error)
 	// Accounts provides all accounts in the wallet.
-	Accounts() <-chan ValidatorAccount
+	Accounts() []ValidatorAccount
 	// AccountByID provides a single account from the wallet given its ID.
 	// This will error if the account is not found.
 	// should return account = nil if not found (not an error!)
