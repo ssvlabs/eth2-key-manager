@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"math/big"
+
+	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -60,22 +63,11 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to get web3 address flag value")
 	}
 
-	rpcClient, err := rpc.Dial(web3Addr)
+	// Fetch wallet balance
+	walletBalance, err := h.getWalletBalance(web3Addr, walletAddress)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to get wallet balance")
 	}
-	client := ethclient.NewClient(rpcClient)
-
-	address, err := hex.DecodeString(walletAddress)
-	if err != nil {
-		return errors.Wrap(err, "failed to HEX decode the given wallet address")
-	}
-
-	res, err := client.BalanceAt(context.Background(), common.BytesToAddress(address), nil)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("res %#v\n", res.String())
 
 	store := in_memory.NewInMemStore()
 	options := &eth2keymanager.KeyVaultOptions{}
@@ -88,6 +80,14 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 	wallet, err := store.OpenWallet()
 	if err != nil {
 		return errors.Wrap(err, "failed to open wallet")
+	}
+
+	// Check balance
+	minBalance := big.NewInt(0).
+		SetUint64(eth1_deposit.MaxEffectiveBalanceInGwei * uint64(seedsCount) * uint64(validatorsPerSeed))
+	minBalance.Mul(minBalance, big.NewInt(1000000000))
+	if walletBalance.Cmp(minBalance) < 0 {
+		return errors.New("insufficient funds for transfer")
 	}
 
 	// Generate seed
@@ -129,4 +129,28 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 	h.printer.JSON(seedToAccounts)
 	h.printer.JSON(walletPrivateKey)
 	return nil
+}
+
+func (h *Handler) getWalletBalance(web3Addr, walletAddr string) (*big.Int, error) {
+	rpcClient, err := rpc.Dial(web3Addr)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create connection with web3 API")
+	}
+	defer rpcClient.Close()
+
+	client := ethclient.NewClient(rpcClient)
+
+	address, err := hex.DecodeString(walletAddr)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to HEX decode the given wallet address")
+	}
+
+	res, err := client.BalanceAt(context.Background(), common.BytesToAddress(address), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get balance of the wallet")
+	}
+
+	fmt.Println("res", res)
+
+	return res, nil
 }
