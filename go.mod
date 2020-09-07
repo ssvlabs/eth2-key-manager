@@ -3,6 +3,7 @@ module github.com/bloxapp/eth2-key-manager
 go 1.13
 
 require (
+	github.com/ethereum/go-ethereum v1.9.20
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/prysmaticlabs/ethereumapis v0.0.0-20200608211251-7dafd77461b5
@@ -15,5 +16,4 @@ require (
 	github.com/wealdtech/go-eth2-util v1.5.0
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.0
 	github.com/wealdtech/go-eth2-wallet-types/v2 v2.6.0
-	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0 // indirect
 )
