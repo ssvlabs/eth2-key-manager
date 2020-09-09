@@ -165,4 +165,25 @@ func TestValidatorCreate(t *testing.T) {
 		require.EqualError(t, err, "insufficient funds for transfer")
 		require.Equal(t, 1, getBalanceCalled)
 	})
+
+	t.Run("failed with invalid wallet address", func(t *testing.T) {
+		var resultOut bytes.Buffer
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		validator.ResultFactory = func(name string) (io.Writer, func(), error) {
+			return &resultOut, func() {}, nil
+		}
+		cmd.RootCmd.SetArgs([]string{
+			"validator",
+			"create",
+			"--wallet-private-key", walletPK,
+			"--wallet-addr", "invalidwalletaddr",
+			"--validators-per-seed", "1",
+			"--seeds-count", "1",
+			"--web3-addr", "http://test.test",
+		})
+		err := cmd.RootCmd.Execute()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "failed to HEX decode the given wallet address")
+	})
 }
