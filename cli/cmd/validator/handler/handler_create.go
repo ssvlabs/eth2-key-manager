@@ -285,6 +285,6 @@ func buildTransactionOpts(privateKey string) (*bind.TransactOpts, error) {
 
 	txOps := bind.NewKeyedTransactor(privKey)
 	txOps.Value = new(big.Int).Mul(big.NewInt(int64(eth1_deposit.MaxEffectiveBalanceInGwei)), big.NewInt(1e9))
-	// txOps.GasLimit = 500000
+	txOps.GasLimit = 500000
 	return txOps, nil
 }
