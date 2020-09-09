@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
@@ -260,7 +259,7 @@ func (h *Handler) writeResultToFiles(results []ValidatorConfig) error {
 	// Put results into archive
 	for _, result := range results {
 		// Create file
-		f, err := w.Create(strings.ReplaceAll(result.Mnemonic, " ", "-") + ".json")
+		f, err := w.Create(result.PubKey + ".json")
 		if err != nil {
 			return errors.Wrap(err, "failed to create result file")
 		}
