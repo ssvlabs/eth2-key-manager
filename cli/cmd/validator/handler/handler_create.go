@@ -7,10 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"os"
 	"time"
-
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -20,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	contracts "github.com/prysmaticlabs/prysm/contracts/deposit-contract"
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/spf13/cobra"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
@@ -246,15 +244,15 @@ func (h *Handler) writeResultToFiles(results []ValidatorConfig) error {
 	}
 
 	// Create zip file
-	fileName := fmt.Sprintf("validators_%d_%d.zip", time.Now().Unix(), len(results))
-	outFile, err := os.Create(fileName)
+	fileName := fmt.Sprintf("validators_%d_%d", time.Now().Unix(), len(results))
+	out, cleanup, err := h.resultWriterFactory(fileName)
 	if err != nil {
-		return errors.Wrap(err, "failed to create zip file")
+		return errors.Wrap(err, "failed to create result writer")
 	}
-	defer outFile.Close()
+	defer cleanup()
 
 	// Create a new zip archive.
-	w := zip.NewWriter(outFile)
+	w := zip.NewWriter(out)
 
 	// Put results into archive
 	for _, result := range results {
