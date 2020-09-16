@@ -4,18 +4,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"os"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-	"math/big"
-	"os"
-	"testing"
-)
-
-const (
-	basePath = "m/12381/3600"
 )
 
 type mockedStorage struct {
@@ -81,7 +78,7 @@ func TestMarshalingHDKey(t *testing.T) {
 			//require.NoError(t, err)
 
 			// create the privKey
-			key, err := MasterKeyFromSeed(test.seed)
+			key, err := MasterKeyFromSeed(test.seed, TestNetwork)
 			require.NoError(t, err)
 
 			hdKey, err := key.Derive(test.path)
@@ -214,7 +211,7 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			key, err := MasterKeyFromSeed(test.seed)
+			key, err := MasterKeyFromSeed(test.seed, MainNetwork)
 			if err != nil {
 				t.Error(err)
 				return
@@ -235,7 +232,7 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 				}
 			}
 
-			assert.Equal(t, basePath+test.path, hdKey.Path())
+			assert.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
 			privkey, err := e2types.BLSPrivateKeyFromBytes(test.expectedKey.Bytes())
 			assert.NoError(t, err)
 			assert.Equal(t, privkey.PublicKey().Marshal(), hdKey.PublicKey().Marshal())

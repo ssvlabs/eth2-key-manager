@@ -14,7 +14,7 @@ var generateCmd = &cobra.Command{
 	Short: "Generates a wallet public key.",
 	Long:  `This command generates a public key using seed and index.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.Generate(cmd, args)
 	},
 }

@@ -14,7 +14,7 @@ var depositDataCmd = &cobra.Command{
 	Short: "Returns an account deposit-data.",
 	Long:  `This command returns an account deposit-data using public key and storage.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.DepositData(cmd, args)
 	},
 }

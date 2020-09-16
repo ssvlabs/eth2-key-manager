@@ -14,7 +14,7 @@ var deleteCmd = &cobra.Command{
 	Short: "Deletes last indexed account.",
 	Long:  `This command deletes last indexed account in the wallet using the storage.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.Delete(cmd, args)
 	},
 }

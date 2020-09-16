@@ -13,7 +13,7 @@ var generateCmd = &cobra.Command{
 	Short: "Generates a key-vault mnemonic.",
 	Long:  `This command generates a random mnemonic of the key-vault.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.Generate(cmd, args)
 	},
 }

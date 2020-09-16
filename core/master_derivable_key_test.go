@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
@@ -30,7 +31,7 @@ func TestNew(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			_, err := MasterKeyFromSeed(test.seed)
+			_, err := MasterKeyFromSeed(test.seed, TestNetwork)
 			if len(test.expectedError) != 0 {
 				require.EqualError(t, err, test.expectedError)
 				return

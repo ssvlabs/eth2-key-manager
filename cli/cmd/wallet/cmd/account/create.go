@@ -14,7 +14,7 @@ var createCmd = &cobra.Command{
 	Short: "Creates a wallet account.",
 	Long:  `This command creates an account using seed and storage.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.Create(cmd, args)
 	},
 }

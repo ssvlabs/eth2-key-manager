@@ -3,7 +3,7 @@ package eth1_deposit
 import (
 	"github.com/pkg/errors"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/prysmaticlabs/go-ssz"
+	ssz "github.com/prysmaticlabs/go-ssz"
 	types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 
@@ -15,8 +15,8 @@ const (
 	BLSWithdrawalPrefixByte   byte   = byte(0)
 )
 
-// this is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
-func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, amountInGwei uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+// DepositData is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
+func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network core.Network, amountInGwei uint64) (*ethpb.Deposit_Data, [32]byte, error) {
 	depositData := struct {
 		PublicKey             []byte `ssz-size:"48"`
 		WithdrawalCredentials []byte `ssz-size:"32"`
@@ -31,11 +31,10 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, amountInGwe
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
 
-	// TODO Get it from beaconClient GetBeaconConfig - "GenesisForkVersion"
-	forkVersion := []byte{0, 0, 0, 1}
-	domain := types.Domain(types.DomainDeposit, forkVersion, types.ZeroGenesisValidatorsRoot)
+	// Create domain
+	domain := types.Domain(types.DomainDeposit, network.ForkVersion(), types.ZeroGenesisValidatorsRoot)
 
-	// prepare for sig
+	// Prepare for sig
 	signingContainer := struct {
 		Root   []byte `json:"object_root,omitempty" ssz-size:"32"`
 		Domain []byte `json:"domain,omitempty" ssz-size:"32"`
@@ -48,7 +47,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, amountInGwe
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of signing container")
 	}
 
-	// sign
+	// Sign
 	sig, err := validationKey.Sign(root[:])
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to sign the root")

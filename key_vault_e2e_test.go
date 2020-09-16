@@ -25,7 +25,7 @@ func _byteArray(input string) []byte {
 }
 
 func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore()
+	return in_memory.NewInMemStore(core.MainNetwork)
 }
 
 func TestNoKeyVault(t *testing.T) {

@@ -13,7 +13,7 @@ var createCmd = &cobra.Command{
 	Short: "Creates a wallet.",
 	Long:  `This command creates a wallet.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.Create(cmd, args)
 	},
 }

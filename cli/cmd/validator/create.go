@@ -21,7 +21,7 @@ var createCmd = &cobra.Command{
 	Short: "Creates validator(s).",
 	Long:  `This command creates validator(s).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter, ResultFactory)
+		handler := handler.New(rootcmd.ResultPrinter, ResultFactory, rootcmd.Network)
 		return handler.Create(cmd, args)
 	},
 }

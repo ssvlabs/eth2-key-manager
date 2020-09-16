@@ -14,7 +14,7 @@ var listCmd = &cobra.Command{
 	Short: "List wallet accounts.",
 	Long:  `This command list wallet accounts.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter)
+		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
 		return handler.List(cmd, args)
 	},
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func getStorage() core.Storage {
-	return NewInMemStore()
+	return NewInMemStore(core.MainNetwork)
 }
 
 func TestOpeningAccounts(t *testing.T) {
