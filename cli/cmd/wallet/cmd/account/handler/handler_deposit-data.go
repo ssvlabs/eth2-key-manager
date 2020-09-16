@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/hex"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -45,6 +46,8 @@ func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to open wallet")
 	}
+
+	fmt.Println(hex.EncodeToString(wallet.Accounts()[0].ValidatorPublicKey().Marshal()))
 
 	account, err := wallet.AccountByPublicKey(publicKeyFlagValue)
 	if err != nil {

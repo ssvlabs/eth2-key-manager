@@ -65,9 +65,11 @@ func (wallet *HDWallet) GetNextAccountIndex() int {
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
 	// Resolve index to create account at
-	index := wallet.GetNextAccountIndex()
+	var index int
 	if indexPointer != nil {
 		index = *indexPointer
+	} else {
+		index = wallet.GetNextAccountIndex()
 	}
 	name := fmt.Sprintf("account-%d", index)
 
