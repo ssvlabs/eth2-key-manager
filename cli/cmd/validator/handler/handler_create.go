@@ -88,7 +88,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to get wallet balance")
 	}
 
-	store := in_memory.NewInMemStore(core.TestNetwork)
+	store := in_memory.NewInMemStore(h.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
