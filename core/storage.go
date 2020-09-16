@@ -10,6 +10,20 @@ import (
 // Network represents the network.
 type Network string
 
+// NetworkFromString returns network from the given string value
+func NetworkFromString(n string) Network {
+	switch n {
+	case string(TestNetwork):
+		return TestNetwork
+	case string(LaunchTestNetwork):
+		return LaunchTestNetwork
+	case string(MainNetwork):
+		return MainNetwork
+	default:
+		panic(fmt.Sprintf("undefined network %s", n))
+	}
+}
+
 // ForkVersion returns the fork version of the network.
 func (n Network) ForkVersion() []byte {
 	switch n {

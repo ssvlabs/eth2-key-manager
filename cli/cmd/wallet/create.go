@@ -13,11 +13,18 @@ var createCmd = &cobra.Command{
 	Short: "Creates a wallet.",
 	Long:  `This command creates a wallet.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
+		network, err := rootcmd.GetNetworkFlagValue(cmd)
+		if err != nil {
+			return err
+		}
+
+		handler := handler.New(rootcmd.ResultPrinter, network)
 		return handler.Create(cmd, args)
 	},
 }
 
 func init() {
+	rootcmd.AddNetworkFlag(createCmd)
+
 	Command.AddCommand(createCmd)
 }

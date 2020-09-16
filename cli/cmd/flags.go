@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"errors"
-
 	"github.com/spf13/cobra"
 
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
@@ -26,14 +24,5 @@ func GetNetworkFlagValue(c *cobra.Command) (core.Network, error) {
 		return "", err
 	}
 
-	switch networkValue {
-	case string(core.MainNetwork):
-		return core.MainNetwork, nil
-	case string(core.LaunchTestNetwork):
-		return core.LaunchTestNetwork, nil
-	case string(core.TestNetwork):
-		return core.TestNetwork, nil
-	default:
-		return "", errors.New("undefined network")
-	}
+	return core.NetworkFromString(networkValue), nil
 }

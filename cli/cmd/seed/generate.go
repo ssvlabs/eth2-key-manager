@@ -14,7 +14,7 @@ var generateCmd = &cobra.Command{
 	Short: "Generates a key-vault seed.",
 	Long:  `This command generates a random seed of the key-vault.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter, rootcmd.Network)
+		handler := handler.New(rootcmd.ResultPrinter)
 		return handler.Generate(cmd, args)
 	},
 }
