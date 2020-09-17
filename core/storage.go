@@ -40,16 +40,7 @@ func (n Network) ForkVersion() []byte {
 
 // ForkVersion returns the fork version of the network.
 func (n Network) FullPath(relativePath string) string {
-	switch n {
-	case TestNetwork:
-		return BaseTestEIP2334Path + relativePath
-	case LaunchTestNetwork:
-		return BaseLaunchTestEIP2334Path + relativePath
-	case MainNetwork:
-		return BaseEIP2334Path + relativePath
-	default:
-		panic(fmt.Sprintf("undefined network %s", n))
-	}
+	return BaseEIP2334Path + relativePath
 }
 
 // Available networks.

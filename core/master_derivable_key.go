@@ -10,14 +10,8 @@ import (
 
 // EIP2334 paths.
 const (
-	// BaseEIP2334Path is the base EIP2334 of the Main Net.
+	// BaseEIP2334Path is the base EIP2334 path.
 	BaseEIP2334Path = "m/12381/3600"
-
-	// BaseTestEIP2334Path is the base EIP2334 of the Test Net.
-	BaseTestEIP2334Path = "m/12381/3599"
-
-	// BaseLaunchTestEIP2334Path is the base EIP2334 of the Launch Test Net.
-	BaseLaunchTestEIP2334Path = "m/12381/3598"
 )
 
 // MasterDerivableKey is responsible for managing privKey derivation, signing and  encryption.
