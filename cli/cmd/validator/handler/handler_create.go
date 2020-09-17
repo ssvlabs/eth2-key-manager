@@ -88,7 +88,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to get wallet balance")
 	}
 
-	store := in_memory.NewInMemStore()
+	store := in_memory.NewInMemStore(h.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
@@ -169,7 +169,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 			seedToAccounts[mnemonic] = append(seedToAccounts[mnemonic], ValidatorConfig{
 				UUID:    uuid.New().String(),
 				PubKey:  hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
-				Path:    core.BaseEIP2334Path + account.BasePath(),
+				Path:    store.Network().FullPath(account.BasePath()),
 				Version: encryptor.Version(),
 				Crypto:  cryptoFields,
 			})
@@ -194,7 +194,6 @@ func (h *Handler) getWalletBalance(client *ethclient.Client, walletAddr string) 
 }
 
 func (h *Handler) makeTransaction(depositContract *contracts.DepositContract, txOpts *bind.TransactOpts, account core.ValidatorAccount) error {
-	return nil
 	// Get deposit data for account
 	depositData, err := account.GetDepositData()
 	if err != nil {

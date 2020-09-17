@@ -19,7 +19,7 @@ func _byteArray(input string) []byte {
 }
 
 func store() *in_memory.InMemStore {
-	return in_memory.NewInMemStore()
+	return in_memory.NewInMemStore(core.MainNetwork)
 }
 
 func vault() (*eth2keymanager.KeyVault, error) {

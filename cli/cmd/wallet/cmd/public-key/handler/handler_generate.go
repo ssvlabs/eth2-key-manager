@@ -40,7 +40,7 @@ func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to HEX decode seed")
 	}
 
-	store := in_memory.NewInMemStore()
+	store := in_memory.NewInMemStore(h.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
@@ -62,7 +62,7 @@ func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
 	publicKey := map[string]interface{}{
 		"validationPubKey": hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
 		"withdrawalPubKey": hex.EncodeToString(account.WithdrawalPublicKey().Marshal()),
-		"index": indexFlagValue,
+		"index":            indexFlagValue,
 	}
 
 	err = h.printer.JSON(publicKey)

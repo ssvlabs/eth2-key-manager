@@ -52,8 +52,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	}
 
 	var store in_memory.InMemStore
-	err = store.UnmarshalJSON(storageBytes)
-	if err != nil {
+	if err := store.UnmarshalJSON(storageBytes); err != nil {
 		return errors.Wrap(err, "failed to JSON un-marshal storage")
 	}
 

@@ -16,7 +16,7 @@ import (
 )
 
 func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore()
+	return in_memory.NewInMemStore(core.MainNetwork)
 }
 
 func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {

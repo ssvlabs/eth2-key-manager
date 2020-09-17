@@ -4,11 +4,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func (store *InMemStore) MarshalJSON() ([]byte, error) {
 	var err error
 	data := make(map[string]interface{})
+
+	data["network"] = hex.EncodeToString([]byte(store.network))
 
 	data["wallet"], err = json.Marshal(store.wallet)
 	if err != nil {
@@ -44,6 +48,18 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	// network
+	if val, exists := v["network"]; exists {
+		byts, err := hex.DecodeString(val.(string))
+		if err != nil {
+			return err
+		}
+
+		store.network = core.NetworkFromString(string(byts))
+	} else {
+		return fmt.Errorf("could not find var: network")
+	}
+
 	// wallet
 	if val, exists := v["wallet"]; exists {
 		byts, err := hex.DecodeString(val.(string))
@@ -55,7 +71,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: memory")
+		return fmt.Errorf("could not find var: wallet")
 	}
 
 	// accounts
@@ -69,7 +85,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: memory")
+		return fmt.Errorf("could not find var: accounts")
 	}
 
 	// attMemory

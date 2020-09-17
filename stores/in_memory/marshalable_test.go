@@ -11,7 +11,7 @@ import (
 )
 
 func TestMarshaling(t *testing.T) {
-	store := NewInMemStore()
+	store := NewInMemStore(core.MainNetwork)
 
 	// wallet
 	wallet := wallet_hd.NewHDWallet(&core.WalletContext{Storage: store})

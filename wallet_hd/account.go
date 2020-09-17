@@ -14,7 +14,7 @@ import (
 
 type HDAccount struct {
 	name string
-	// holds the base path from which the account was dervied
+	// holds the base path from which the account was derived
 	// for eip2334 should be m/12381/3600/<index>
 	basePath         string
 	id               uuid.UUID
@@ -99,11 +99,13 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func NewValidatorAccount(name string,
+func NewValidatorAccount(
+	name string,
 	validationKey *core.HDKey,
 	withdrawalPubKey e2types.PublicKey,
 	basePath string,
-	context *core.WalletContext) (*HDAccount, error) {
+	context *core.WalletContext,
+) (*HDAccount, error) {
 	return &HDAccount{
 		name:             name,
 		id:               uuid.New(),
@@ -146,7 +148,12 @@ func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature, err
 
 // Get Deposit Data
 func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
-	depositData, root, err := eth1_deposit.DepositData(account.validationKey, account.withdrawalPubKey.Marshal(), eth1_deposit.MaxEffectiveBalanceInGwei)
+	depositData, root, err := eth1_deposit.DepositData(
+		account.validationKey,
+		account.withdrawalPubKey.Marshal(),
+		account.context.Storage.Network(),
+		eth1_deposit.MaxEffectiveBalanceInGwei,
+	)
 	if err != nil {
 		return nil, err
 	}
