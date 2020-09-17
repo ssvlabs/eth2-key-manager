@@ -64,8 +64,8 @@ func (wallet *HDWallet) GetNextAccountIndex() int {
 
 // CreateValidatorKey creates a new validation (validator) key pair in the wallet.
 func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
+	// Resolve index to create account at
 	var index int
-	// resolve index to create account at
 	if indexPointer != nil {
 		index = *indexPointer
 	} else {
@@ -73,27 +73,29 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	}
 	name := fmt.Sprintf("account-%d", index)
 
-	// create the master key
-	key, err := core.MasterKeyFromSeed(seed)
+	// Create the master key based on the seed and network.
+	key, err := core.MasterKeyFromSeed(seed, wallet.context.Storage.Network())
 	if err != nil {
 		return nil, err
 	}
 
 	baseAccountPath := fmt.Sprintf(BaseAccountPath, index)
-	// validator key
+
+	// Create validator key
 	validatorPath := fmt.Sprintf(ValidatorKeyPath, index)
 	validatorKey, err := key.Derive(validatorPath)
 	if err != nil {
 		return nil, err
 	}
-	// withdrawal key
+
+	// Create withdrawal key
 	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, index)
 	withdrawalKey, err := key.Derive(withdrawalPath)
 	if err != nil {
 		return nil, err
 	}
 
-	// create ret account
+	// Create ret account
 	ret, err := NewValidatorAccount(
 		name,
 		validatorKey,
@@ -106,16 +108,20 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	}
 
 	validatorPublicKey := hex.EncodeToString(ret.ValidatorPublicKey().Marshal())
-	// register new wallet and save portfolio
+
+	// Register new wallet and save portfolio
 	reset := func() {
 		delete(wallet.indexMapper, validatorPublicKey)
 	}
 	wallet.indexMapper[validatorPublicKey] = ret.ID()
-	err = wallet.context.Storage.SaveAccount(ret)
-	if err != nil {
+
+	// Store account
+	if err = wallet.context.Storage.SaveAccount(ret); err != nil {
 		reset()
 		return nil, err
 	}
+
+	// Store wallet
 	err = wallet.context.Storage.SaveWallet(wallet)
 	if err != nil {
 		reset()

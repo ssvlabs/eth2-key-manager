@@ -21,7 +21,12 @@ var createCmd = &cobra.Command{
 	Short: "Creates validator(s).",
 	Long:  `This command creates validator(s).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		handler := handler.New(rootcmd.ResultPrinter, ResultFactory)
+		network, err := rootcmd.GetNetworkFlagValue(cmd)
+		if err != nil {
+			return err
+		}
+
+		handler := handler.New(rootcmd.ResultPrinter, ResultFactory, network)
 		return handler.Create(cmd, args)
 	},
 }
@@ -43,6 +48,7 @@ func init() {
 	flag.AddWalletAddressFlag(createCmd)
 	flag.AddWalletPrivateKeyFlag(createCmd)
 	flag.AddWeb3AddrFlag(createCmd)
+	rootcmd.AddNetworkFlag(createCmd)
 
 	Command.AddCommand(createCmd)
 }

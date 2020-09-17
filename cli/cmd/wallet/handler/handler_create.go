@@ -12,7 +12,7 @@ import (
 
 // Wallet creates a new wallet and prints the storage
 func (h *Wallet) Create(cmd *cobra.Command, args []string) error {
-	store := in_memory.NewInMemStore()
+	store := in_memory.NewInMemStore(h.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -19,6 +18,7 @@ import (
 type dummyStorage struct{}
 
 func (s *dummyStorage) Name() string                                    { return "" }
+func (s *dummyStorage) Network() core.Network                           { return core.MainNetwork }
 func (s *dummyStorage) SaveWallet(wallet core.Wallet) error             { return nil }
 func (s *dummyStorage) OpenWallet() (core.Wallet, error)                { return nil, nil }
 func (s *dummyStorage) ListAccounts() ([]core.ValidatorAccount, error)  { return nil, nil }
@@ -41,14 +41,6 @@ func _bigInt(input string) *big.Int {
 
 func storage() core.Storage {
 	return &dummyStorage{}
-}
-
-func key(seed []byte) (*core.MasterDerivableKey, error) {
-	if err := e2types.InitBLS(); err != nil {
-		os.Exit(1)
-	}
-
-	return core.MasterKeyFromSeed(seed)
 }
 
 // ethereum foundation launched a launchpad for making deposits.

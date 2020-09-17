@@ -8,7 +8,7 @@ import (
 )
 
 func getSlashingStorage() core.SlashingStore {
-	return NewInMemStore()
+	return NewInMemStore(core.MainNetwork)
 }
 
 func TestSavingProposal(t *testing.T) {

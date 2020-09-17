@@ -20,7 +20,7 @@ func main() {
 	seed, _ := core.SeedFromEntropy(entropy, "")
 
 	// create storage
-	store := in_memory.NewInMemStore()
+	store := in_memory.NewInMemStore(core.TestNetwork)
 
 	// create options
 	options := &eth2keymanager.KeyVaultOptions{}

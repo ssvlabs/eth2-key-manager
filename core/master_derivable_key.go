@@ -2,12 +2,15 @@ package core
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/google/uuid"
 	util "github.com/wealdtech/go-eth2-util"
-	"regexp"
 )
 
+// EIP2334 paths.
 const (
+	// BaseEIP2334Path is the base EIP2334 path.
 	BaseEIP2334Path = "m/12381/3600"
 )
 
@@ -15,32 +18,36 @@ const (
 // follows EIP 2333,2334
 // MasterDerivableKey is not intended to be used a signing key, just as a medium for managing keys
 type MasterDerivableKey struct {
-	seed []byte
+	seed    []byte
+	network Network
 }
 
-// base privKey is m / purpose / coin_type / as EIP 2334 defines
-func MasterKeyFromSeed(seed []byte) (*MasterDerivableKey, error) {
+// MasterKeyFromSeed is the constructor of MasterDerivableKey.
+// Base privKey is m / purpose / coin_type / as EIP 2334 defines
+func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error) {
 	if seed == nil || len(seed) == 0 {
 		return nil, fmt.Errorf("seed can't be nil or length 0")
 	}
 	return &MasterDerivableKey{
-		seed: seed,
+		seed:    seed,
+		network: network,
 	}, nil
 }
 
+// Derive derives a HD key based on the given relative path.
 func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 	if !validateRelativePath(relativePath) {
 		return nil, fmt.Errorf("invalid relative path. Example: /1/2/3")
 	}
 
-	//derive
-	path := BaseEIP2334Path + relativePath
+	// Derive key
+	path := master.network.FullPath(relativePath)
 	key, err := util.PrivateKeyFromSeedAndPath(master.seed, path)
 	if err != nil {
 		return nil, err
 	}
 
-	// new id
+	// Create key ID
 	id := uuid.New()
 
 	return &HDKey{

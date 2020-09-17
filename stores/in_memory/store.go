@@ -10,7 +10,9 @@ import (
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
+// InMemStore implements core.Storage using in-memory store.
 type InMemStore struct {
+	network            core.Network
 	wallet             *wallet_hd.HDWallet
 	accounts           map[string]*wallet_hd.HDAccount
 	attMemory          map[string]*core.BeaconAttestation
@@ -19,12 +21,15 @@ type InMemStore struct {
 	encryptionPassword []byte
 }
 
-func NewInMemStore() *InMemStore {
-	return NewInMemStoreWithEncryptor(nil, nil)
+// NewInMemStore is the constructor of InMemStore.
+func NewInMemStore(network core.Network) *InMemStore {
+	return NewInMemStoreWithEncryptor(network, nil, nil)
 }
 
-func NewInMemStoreWithEncryptor(encryptor types.Encryptor, password []byte) *InMemStore {
+// NewInMemStoreWithEncryptor is the constructor of InMemStore.
+func NewInMemStoreWithEncryptor(network core.Network, encryptor types.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
+		network:            network,
 		accounts:           make(map[string]*wallet_hd.HDAccount),
 		attMemory:          make(map[string]*core.BeaconAttestation),
 		proposalMemory:     make(map[string]*core.BeaconBlockHeader),
@@ -33,11 +38,17 @@ func NewInMemStoreWithEncryptor(encryptor types.Encryptor, password []byte) *InM
 	}
 }
 
-// Name provides the name of the store
+// Name provides the name of the store.
 func (store *InMemStore) Name() string {
 	return "in-memory"
 }
 
+// Network returns the network.
+func (store *InMemStore) Network() core.Network {
+	return store.network
+}
+
+// SaveWallet implements core.Storage interface.
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
 	store.wallet = wallet.(*wallet_hd.HDWallet)
 	return nil

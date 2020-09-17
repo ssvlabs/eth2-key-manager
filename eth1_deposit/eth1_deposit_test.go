@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -18,17 +17,6 @@ type dummyAccount struct {
 	priv *e2types.BLSPrivateKey
 }
 
-func newDummyAccount(privKey []byte) *dummyAccount {
-	if err := e2types.InitBLS(); err != nil {
-		os.Exit(1)
-	}
-
-	k, err := e2types.BLSPrivateKeyFromBytes(privKey)
-	if err != nil {
-		return nil
-	}
-	return &dummyAccount{priv: k}
-}
 func (a *dummyAccount) ID() uuid.UUID                               { return uuid.New() }
 func (a *dummyAccount) WalletID() uuid.UUID                         { return uuid.New() }
 func (a *dummyAccount) Name() string                                { return "" }
@@ -67,7 +55,12 @@ func TestDepositData(t *testing.T) {
 			require.NoError(t, err)
 
 			// create data
-			depositData, root, err := DepositData(val, test.withdrawalPubKey, MaxEffectiveBalanceInGwei)
+			depositData, root, err := DepositData(
+				val,
+				test.withdrawalPubKey,
+				core.TestNetwork,
+				MaxEffectiveBalanceInGwei,
+			)
 			require.NoError(t, err)
 
 			require.Equal(t, val.PublicKey().Marshal(), depositData.PublicKey)
