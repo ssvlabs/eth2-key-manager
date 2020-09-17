@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -34,12 +35,11 @@ const (
 
 // ValidatorConfig represents the validator config data
 type ValidatorConfig struct {
-	UUID     string                 `json:"uuid"`
-	Crypto   map[string]interface{} `json:"crypto"`
-	PubKey   string                 `json:"pubkey"`
-	Path     string                 `json:"path"`
-	Version  uint                   `json:"version"`
-	Mnemonic string                 `json:"-"`
+	UUID    string                 `json:"uuid"`
+	Crypto  map[string]interface{} `json:"crypto"`
+	PubKey  string                 `json:"pubkey"`
+	Path    string                 `json:"path"`
+	Version uint                   `json:"version"`
 }
 
 // Create is the handler to create validator(s).
@@ -123,7 +123,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 
 	// Generate seed
 	encryptor := keystorev4.New()
-	var seedToAccounts []ValidatorConfig
+	seedToAccounts := make(map[string][]ValidatorConfig)
 	defer func() {
 		if err := h.writeResultToFiles(seedToAccounts); err != nil {
 			h.printer.Error(err)
@@ -163,13 +163,15 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 				return errors.Wrap(err, "failed to make deposit")
 			}
 
-			seedToAccounts = append(seedToAccounts, ValidatorConfig{
-				UUID:     uuid.New().String(),
-				PubKey:   hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
-				Path:     core.BaseEIP2334Path + account.BasePath(),
-				Version:  encryptor.Version(),
-				Crypto:   cryptoFields,
-				Mnemonic: mnemonic,
+			if _, ok := seedToAccounts[mnemonic]; !ok {
+				seedToAccounts[mnemonic] = []ValidatorConfig{}
+			}
+			seedToAccounts[mnemonic] = append(seedToAccounts[mnemonic], ValidatorConfig{
+				UUID:    uuid.New().String(),
+				PubKey:  hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
+				Path:    core.BaseEIP2334Path + account.BasePath(),
+				Version: encryptor.Version(),
+				Crypto:  cryptoFields,
 			})
 		}
 	}
@@ -192,6 +194,7 @@ func (h *Handler) getWalletBalance(client *ethclient.Client, walletAddr string) 
 }
 
 func (h *Handler) makeTransaction(depositContract *contracts.DepositContract, txOpts *bind.TransactOpts, account core.ValidatorAccount) error {
+	return nil
 	// Get deposit data for account
 	depositData, err := account.GetDepositData()
 	if err != nil {
@@ -238,7 +241,7 @@ func (h *Handler) makeTransaction(depositContract *contracts.DepositContract, tx
 	return nil
 }
 
-func (h *Handler) writeResultToFiles(results []ValidatorConfig) error {
+func (h *Handler) writeResultToFiles(results map[string][]ValidatorConfig) error {
 	if len(results) == 0 {
 		return errors.New("no results to store")
 	}
@@ -255,16 +258,18 @@ func (h *Handler) writeResultToFiles(results []ValidatorConfig) error {
 	w := zip.NewWriter(out)
 
 	// Put results into archive
-	for _, result := range results {
-		// Create file
-		f, err := w.Create(result.PubKey + ".json")
-		if err != nil {
-			return errors.Wrap(err, "failed to create result file")
-		}
+	for mnemonic, validators := range results {
+		for _, validator := range validators {
+			// Create file
+			f, err := w.Create(mnemonic + "/keystore-" + strings.ReplaceAll(validator.Path, "/", "_") + ".json")
+			if err != nil {
+				return errors.Wrap(err, "failed to create result file")
+			}
 
-		// Put result into file
-		if err := json.NewEncoder(f).Encode(result); err != nil {
-			return errors.Wrap(err, "failed to write result into file")
+			// Put result into file
+			if err := json.NewEncoder(f).Encode(validator); err != nil {
+				return errors.Wrap(err, "failed to write result into file")
+			}
 		}
 	}
 
