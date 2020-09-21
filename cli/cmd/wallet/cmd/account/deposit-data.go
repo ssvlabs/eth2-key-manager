@@ -23,6 +23,7 @@ func init() {
 	// Define flags for the command.
 	flag.AddPublicKeyFlag(depositDataCmd)
 	flag.AddStorageFlag(depositDataCmd)
+	rootcmd.AddNetworkFlag(depositDataCmd)
 
 	Command.AddCommand(depositDataCmd)
 }
