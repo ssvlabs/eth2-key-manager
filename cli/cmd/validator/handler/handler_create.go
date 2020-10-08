@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	depositAddress = "0x99F0Ec06548b086E46Cb0019C78D0b9b9F36cD53"
+	depositAddress = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC"
 )
 
 // ValidatorConfig represents the validator config data
