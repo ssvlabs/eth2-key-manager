@@ -15,8 +15,8 @@ func NetworkFromString(n string) Network {
 	switch n {
 	case string(TestNetwork):
 		return TestNetwork
-	case string(LaunchTestNetwork):
-		return LaunchTestNetwork
+	case string(ZinkenNetwork):
+		return ZinkenNetwork
 	case string(MainNetwork):
 		return MainNetwork
 	default:
@@ -29,10 +29,10 @@ func (n Network) ForkVersion() []byte {
 	switch n {
 	case TestNetwork:
 		return []byte{0, 0, 0, 1}
-	case LaunchTestNetwork:
-		return []byte{0, 0, 0, 2}
-	case MainNetwork:
+	case ZinkenNetwork:
 		return []byte{0, 0, 0, 3}
+	case MainNetwork:
+		return []byte{0, 0, 0, 4}
 	default:
 		panic(fmt.Sprintf("undefined network %s", n))
 	}
@@ -48,8 +48,8 @@ const (
 	// TestNetwork represents the test network.
 	TestNetwork Network = "test"
 
-	// LaunchTestNetwork represents Launch Test network.
-	LaunchTestNetwork Network = "launchtest"
+	// ZinkenNetwork represents Zinken network.
+	ZinkenNetwork Network = "zinken"
 
 	// MainNetwork represents the main network.
 	MainNetwork Network = "main"
