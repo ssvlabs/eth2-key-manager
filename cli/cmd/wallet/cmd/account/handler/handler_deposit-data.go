@@ -2,12 +2,13 @@ package handler
 
 import (
 	"encoding/hex"
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
 
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )

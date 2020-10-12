@@ -46,7 +46,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	// Get response-type flag.
 	responseType, err := flag.GetResponseTypeFlagValue(cmd)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the accumulate flag value")
+		return errors.Wrap(err, "failed to retrieve the response type value")
 	}
 
 	// TODO get rid of network
