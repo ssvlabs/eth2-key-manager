@@ -19,8 +19,6 @@ require (
 	golang.org/x/text v0.3.3
 )
 
-replace gopkg.in/urfave/cli.v2 => github.com/urfave/cli/v2 v2.1.1
-
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20200530091827-df74fa9e9621
 
 replace github.com/herumi/bls-eth-go-binary => github.com/herumi/bls-eth-go-binary v0.0.0-20200605082007-3a76b4c6c599
