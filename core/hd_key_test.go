@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 type mockedStorage struct {
@@ -25,7 +24,7 @@ func (s *mockedStorage) OpenWallet() (Wallet, error)                            
 func (s *mockedStorage) ListAccounts() ([]ValidatorAccount, error)                 { return nil, nil }
 func (s *mockedStorage) SaveAccount(account ValidatorAccount) error                { return nil }
 func (s *mockedStorage) OpenAccount(accountId uuid.UUID) (ValidatorAccount, error) { return nil, nil }
-func (s *mockedStorage) SetEncryptor(encryptor types.Encryptor, password []byte)   {}
+func (s *mockedStorage) SetEncryptor(encryptor Encryptor, password []byte)         {}
 func (s *mockedStorage) SecurelyFetchPortfolioSeed() ([]byte, error)               { return s.seed, nil }
 func (s *mockedStorage) SecurelySavePortfolioSeed(secret []byte) error             { return s.err }
 

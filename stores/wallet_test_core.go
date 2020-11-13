@@ -6,13 +6,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/keystorev4"
+	"github.com/stretchr/testify/require"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -77,7 +75,7 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 	tests := []struct {
 		name       string
 		walletName string
-		encryptor  types.Encryptor
+		encryptor  core.Encryptor
 		password   []byte
 		error
 	}{

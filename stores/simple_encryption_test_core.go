@@ -5,14 +5,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
-func encryptor() types.Encryptor {
+func encryptor() core.Encryptor {
 	return keystorev4.New()
 }
 

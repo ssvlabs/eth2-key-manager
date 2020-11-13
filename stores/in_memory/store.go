@@ -1,12 +1,10 @@
 package in_memory
 
 import (
-	uuid "github.com/google/uuid"
-	"github.com/pkg/errors"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
+	uuid "github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // InMemStore implements core.Storage using in-memory store.
@@ -16,7 +14,7 @@ type InMemStore struct {
 	accounts           map[string]*wallet_hd.HDAccount
 	attMemory          map[string]*core.BeaconAttestation
 	proposalMemory     map[string]*core.BeaconBlockHeader
-	encryptor          types.Encryptor
+	encryptor          core.Encryptor
 	encryptionPassword []byte
 }
 
@@ -26,7 +24,7 @@ func NewInMemStore(network core.Network) *InMemStore {
 }
 
 // NewInMemStoreWithEncryptor is the constructor of InMemStore.
-func NewInMemStoreWithEncryptor(network core.Network, encryptor types.Encryptor, password []byte) *InMemStore {
+func NewInMemStoreWithEncryptor(network core.Network, encryptor core.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
 		network:            network,
 		accounts:           make(map[string]*wallet_hd.HDAccount),
@@ -95,7 +93,7 @@ func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount
 	}
 }
 
-func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte) {
+func (store *InMemStore) SetEncryptor(encryptor core.Encryptor, password []byte) {
 	store.encryptor = encryptor
 	store.encryptionPassword = password
 }

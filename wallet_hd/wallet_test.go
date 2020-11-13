@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -26,8 +25,8 @@ func (s *dummyStorage) SaveAccount(account core.ValidatorAccount) error { return
 func (s *dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
 	return nil, nil
 }
-func (s *dummyStorage) DeleteAccount(accountId uuid.UUID) error                 { return nil }
-func (s *dummyStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
+func (s *dummyStorage) DeleteAccount(accountId uuid.UUID) error                { return nil }
+func (s *dummyStorage) SetEncryptor(encryptor core.Encryptor, password []byte) {}
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)

@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 

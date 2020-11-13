@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 // Network represents the network.
@@ -84,5 +83,5 @@ type Storage interface {
 	OpenAccount(accountId uuid.UUID) (ValidatorAccount, error)
 
 	// SetEncryptor sets the given encryptor to the wallet.
-	SetEncryptor(encryptor types.Encryptor, password []byte)
+	SetEncryptor(encryptor Encryptor, password []byte)
 }
