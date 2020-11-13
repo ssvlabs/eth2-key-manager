@@ -92,10 +92,7 @@ func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {
 
 func TestDoubleProposal(t *testing.T) {
 	protector, accounts, err := setupProposal()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 
 	t.Run("New proposal, should not slash", func(t *testing.T) {
 		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{

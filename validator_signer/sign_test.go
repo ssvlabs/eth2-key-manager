@@ -2,9 +2,10 @@ package validator_signer
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
 
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
@@ -68,15 +69,10 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 func TestSignatures(t *testing.T) {
 	seed, _ := hex.DecodeString("f51883a4c56467458c3b47d06cd135f862a6266fabdfb9e9e4702ea5511375d7")
 	signer, err := setupNoSlashingProtection(seed)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
+
 	accountPriv, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0")
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name          string
@@ -103,7 +99,7 @@ func TestSignatures(t *testing.T) {
 				Data:   []byte("data"),
 				Domain: []byte("domain"),
 			},
-			expectedError: fmt.Errorf("account not found"),
+			expectedError: errors.New("account not found"),
 			accountPriv:   nil,
 			msg:           "",
 		},
@@ -114,7 +110,7 @@ func TestSignatures(t *testing.T) {
 				Data:   []byte("data"),
 				Domain: []byte("domain"),
 			},
-			expectedError: fmt.Errorf("account was not supplied"),
+			expectedError: errors.New("account was not supplied"),
 			accountPriv:   nil,
 			msg:           "",
 		},
@@ -125,7 +121,7 @@ func TestSignatures(t *testing.T) {
 				Data:   []byte("data"),
 				Domain: []byte("domain"),
 			},
-			expectedError: fmt.Errorf("account was not supplied"),
+			expectedError: errors.New("account was not supplied"),
 			accountPriv:   nil,
 			msg:           "",
 		},
@@ -136,32 +132,20 @@ func TestSignatures(t *testing.T) {
 			res, err := signer.Sign(test.req)
 			if test.expectedError != nil {
 				if err != nil {
-					if err.Error() != test.expectedError.Error() {
-						t.Errorf("wrong error returned: %s, expected: %s", err.Error(), test.expectedError.Error())
-					}
+					require.Equal(t, test.expectedError.Error(), err.Error())
 				} else {
 					t.Errorf("no error returned, expected: %s", test.expectedError.Error())
 				}
 			} else {
 				// check sign worked
-				if err != nil {
-					t.Error(err)
-					return
-				}
+				require.NoError(t, err)
 
 				sig, err := e2types.BLSSignatureFromBytes(res.Signature)
-				if err != nil {
-					t.Error(err)
-					return
-				}
+				require.NoError(t, err)
+
 				msgBytes, err := hex.DecodeString(test.msg)
-				if err != nil {
-					t.Error(err)
-					return
-				}
-				if !sig.Verify(msgBytes, test.accountPriv.PublicKey()) {
-					t.Errorf("signature does not verify against pubkey")
-				}
+				require.NoError(t, err)
+				require.True(t, sig.Verify(msgBytes, test.accountPriv.PublicKey()))
 			}
 		})
 	}

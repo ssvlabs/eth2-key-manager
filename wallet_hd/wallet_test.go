@@ -228,17 +228,12 @@ func TestWalletMarshaling(t *testing.T) {
 
 			// marshal
 			byts, err := json.Marshal(w)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
+
 			//unmarshal
 			w1 := &HDWallet{context: &core.WalletContext{Storage: storage}}
 			err = json.Unmarshal(byts, w1)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			require.Equal(t, w.id, w1.id)
 			require.Equal(t, w.walletType, w1.walletType)

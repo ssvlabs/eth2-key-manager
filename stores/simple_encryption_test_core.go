@@ -1,9 +1,9 @@
 package stores
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
@@ -27,13 +27,13 @@ func TestingWalletStorageWithEncryption(storage core.Storage, t *testing.T) {
 			testName: "secret smaller than 32 bytes, should error",
 			password: []byte("12345"),
 			secret:   []byte("some seed"),
-			err:      fmt.Errorf("secret can be only 32 bytes (not 9 bytes)"),
+			err:      errors.New("secret can be only 32 bytes (not 9 bytes)"),
 		},
 		{
 			testName: "secret longer than 32 bytes, should error",
 			password: []byte("12345"),
 			secret:   []byte("i am much longer than 32 bytes of data beleive me people!"),
-			err:      fmt.Errorf("secret can be only 32 bytes (not 57 bytes)"),
+			err:      errors.New("secret can be only 32 bytes (not 57 bytes)"),
 		},
 		{
 			testName: "secret exactly 32 bytes",

@@ -3,8 +3,9 @@ package core
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -53,14 +54,14 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: id")
 	}
 
 	// path
 	if val, exists := v["path"]; exists {
 		key.path = val.(string)
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: path")
 	}
 
 	// pubkey
@@ -74,7 +75,7 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: privKey")
 	}
 
 	return nil

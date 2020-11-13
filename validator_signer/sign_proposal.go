@@ -2,8 +2,8 @@ package validator_signer
 
 import (
 	"encoding/hex"
-	"fmt"
 
+	"github.com/pkg/errors"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -12,8 +12,9 @@ import (
 func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error) {
 	// 1. get the account
 	if req.GetPublicKey() == nil {
-		return nil, fmt.Errorf("account was not supplied")
+		return nil, errors.New("account was not supplied")
 	}
+
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 		if status.Error != nil {
 			return nil, status.Error
 		}
-		return nil, fmt.Errorf("err, slashable proposal: %s", status.Status)
+		return nil, errors.Errorf("err, slashable proposal: %s", status.Status)
 	}
 
 	// 3. add to protection storage
@@ -45,12 +46,11 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	if err != nil {
 		return nil, err
 	}
-	res := &pb.SignResponse{
+
+	return &pb.SignResponse{
 		State:     pb.ResponseState_SUCCEEDED,
 		Signature: sig.Marshal(),
-	}
-
-	return res, nil
+	}, nil
 }
 
 // PrepareProposalReqForSigning prepares the given proposal request for signing.

@@ -2,12 +2,13 @@ package validator_signer
 
 import (
 	"encoding/hex"
-	"fmt"
+	"testing"
+
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
-	"testing"
 )
 
 func _byteArray(input string) []byte {
@@ -71,7 +72,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
+		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
 			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
@@ -88,6 +89,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 				},
 			},
 		})
+		require.NoError(t, err)
 
 		// second
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
@@ -117,7 +119,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
+		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
 			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
@@ -134,6 +136,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 				},
 			},
 		})
+		require.NoError(t, err)
 
 		// second
 		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
@@ -162,7 +165,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
+		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
 			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
@@ -179,7 +182,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 				},
 			},
 		})
-
+		require.NoError(t, err)
 
 		// add another attestation building on the base
 		// 8877 <- 8878 <- 8879
@@ -232,8 +235,8 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("a279033cc76667b4d083a605b7656ee48629c9e22032fb2a631b8e2c025c7000b87fc9fa5df47e107b51f436749d38ab")},
+		_, err = signer.SignBeaconAttestation(&pb.SignBeaconAttestationRequest{
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")},
 			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			Data: &pb.AttestationData{
 				Slot:            284115,
@@ -249,6 +252,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 				},
 			},
 		})
+		require.NoError(t, err)
 
 		// add another attestation building on the base
 		// 8877 <- 8878 <----------------------9000
@@ -299,15 +303,10 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 func TestAttestationSignatures(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	signer, err := setupWithSlashingProtection(seed)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
+
 	accountPriv, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0")
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name          string
@@ -358,7 +357,7 @@ func TestAttestationSignatures(t *testing.T) {
 					},
 				},
 			},
-			expectedError: fmt.Errorf("account not found"),
+			expectedError: errors.New("account not found"),
 			accountPriv:   nil,
 			msg:           "",
 		},
@@ -381,7 +380,7 @@ func TestAttestationSignatures(t *testing.T) {
 					},
 				},
 			},
-			expectedError: fmt.Errorf("account was not supplied"),
+			expectedError: errors.New("account was not supplied"),
 			accountPriv:   nil,
 			msg:           "",
 		},
@@ -392,32 +391,20 @@ func TestAttestationSignatures(t *testing.T) {
 			res, err := signer.SignBeaconAttestation(test.req)
 			if test.expectedError != nil {
 				if err != nil {
-					if err.Error() != test.expectedError.Error() {
-						t.Errorf("wrong error returned: %s, expected: %s", err.Error(), test.expectedError.Error())
-					}
+					require.Equal(t, test.expectedError.Error(), err.Error())
 				} else {
 					t.Errorf("no error returned, expected: %s", test.expectedError.Error())
 				}
 			} else {
 				// check sign worked
-				if err != nil {
-					t.Error(err)
-					return
-				}
+				require.NoError(t, err)
 
 				sig, err := e2types.BLSSignatureFromBytes(res.Signature)
-				if err != nil {
-					t.Error(err)
-					return
-				}
+				require.NoError(t, err)
+
 				msgBytes, err := hex.DecodeString(test.msg)
-				if err != nil {
-					t.Error(err)
-					return
-				}
-				if !sig.Verify(msgBytes, test.accountPriv.PublicKey()) {
-					t.Errorf("signature does not verify against pubkey", )
-				}
+				require.NoError(t, err)
+				require.True(t, sig.Verify(msgBytes, test.accountPriv.PublicKey()))
 			}
 		})
 	}

@@ -45,22 +45,14 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			// create
 			a, err := wallet.CreateValidatorAccount(seed, nil)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// open
 			a1, err := wallet.AccountByPublicKey(hex.EncodeToString(a.ValidatorPublicKey().Marshal()))
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
+
 			a2, err := wallet.AccountByID(a.ID())
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// verify
 			for _, fetchedAccount := range []core.ValidatorAccount{a1, a2} {
@@ -136,15 +128,9 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 				}
 				return
 			}
-			if fetched == nil {
-				t.Errorf("wallet could not be fetched by id")
-				return
-			}
 
-			if test.error != nil {
-				t.Errorf("expected error: %s", test.error.Error())
-				return
-			}
+			require.NotNil(t, fetched)
+			require.NoError(t, test.error)
 
 			// assert
 			require.Equal(t, wallet.ID(), fetched.ID())

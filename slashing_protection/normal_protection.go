@@ -7,19 +7,20 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-type NormalProtection struct {
-	store core.SlashingStore
-}
-
-func NewNormalProtection(store core.SlashingStore) *NormalProtection {
-	return &NormalProtection{store: store}
-}
-
 // From prysm:
 // We look back 128 epochs when updating min/max spans
 // for incoming attestations.
 // TODO - verify this is true
 const epochLookback = 128
+
+type NormalProtection struct {
+	store core.SlashingStore
+}
+
+// NewNormalProtection is the constructor of NormalProtection
+func NewNormalProtection(store core.SlashingStore) *NormalProtection {
+	return &NormalProtection{store: store}
+}
 
 // will detect double, surround and surrounded slashable events
 func (protector *NormalProtection) IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*core.AttestationSlashStatus, error) {
