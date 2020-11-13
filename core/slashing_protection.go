@@ -5,6 +5,7 @@ import (
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
+// SlashingProtector represents the behavior of the slashing protector
 type SlashingProtector interface {
 	IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*AttestationSlashStatus, error)
 	IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *ProposalSlashStatus
@@ -14,6 +15,7 @@ type SlashingProtector interface {
 	RetrieveLatestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
 }
 
+// SlashingStore represents the behavior of the slashing store
 type SlashingStore interface {
 	SaveAttestation(key e2types.PublicKey, req *BeaconAttestation) error
 	RetrieveAttestation(key e2types.PublicKey, epoch uint64) (*BeaconAttestation, error)

@@ -83,8 +83,12 @@ func (att *BeaconAttestation) Compare(other *BeaconAttestation) bool {
 func (att *BeaconAttestation) SlashesAttestations(history []*BeaconAttestation) []*AttestationSlashStatus {
 	ret := make([]*AttestationSlashStatus, 0)
 
-	for _, history_att := range history {
-		if val := detectDoubleVote(att, history_att); val != nil {
+	for _, historyAtt := range history {
+		if historyAtt == nil {
+			continue
+		}
+
+		if val := detectDoubleVote(att, historyAtt); val != nil {
 			ret = append(ret, &AttestationSlashStatus{
 				Attestation: val,
 				Status:      DoubleVote,
@@ -92,7 +96,7 @@ func (att *BeaconAttestation) SlashesAttestations(history []*BeaconAttestation) 
 		}
 
 		// Surrounding vote
-		if val := detectSurroundingVote(att, history_att); val != nil {
+		if val := detectSurroundingVote(att, historyAtt); val != nil {
 			ret = append(ret, &AttestationSlashStatus{
 				Attestation: val,
 				Status:      SurroundingVote,
@@ -100,7 +104,7 @@ func (att *BeaconAttestation) SlashesAttestations(history []*BeaconAttestation) 
 		}
 
 		// Surrounded vote
-		if val := detectSurroundedVote(att, history_att); val != nil {
+		if val := detectSurroundedVote(att, historyAtt); val != nil {
 			ret = append(ret, &AttestationSlashStatus{
 				Attestation: val,
 				Status:      SurroundedVote,

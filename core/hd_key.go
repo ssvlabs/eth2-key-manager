@@ -16,6 +16,7 @@ type HDKey struct {
 	path    string
 }
 
+// NewHDKeyFromPrivateKey is the constructor of HDKey
 func NewHDKeyFromPrivateKey(priv []byte, path string) (*HDKey, error) {
 	key, err := e2types.BLSPrivateKeyFromBytes(priv)
 	if err != nil {
@@ -48,8 +49,7 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 
 	if val, exists := v["id"]; exists {
 		var err error
-		key.id, err = uuid.Parse(val.(string))
-		if err != nil {
+		if key.id, err = uuid.Parse(val.(string)); err != nil {
 			return err
 		}
 	} else {
@@ -67,8 +67,8 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		key.privKey, err = e2types.BLSPrivateKeyFromBytes(byts)
-		if err != nil {
+
+		if key.privKey, err = e2types.BLSPrivateKeyFromBytes(byts); err != nil {
 			return err
 		}
 	} else {

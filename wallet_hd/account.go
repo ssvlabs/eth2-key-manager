@@ -72,9 +72,9 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
+
 		key := &core.HDKey{}
-		err = json.Unmarshal(byts, key)
-		if err != nil {
+		if err := json.Unmarshal(byts, key); err != nil {
 			return err
 		}
 		account.validationKey = key
