@@ -5,7 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -72,7 +73,7 @@ func TestEncrypt(t *testing.T) {
 
 func TestInterfaces(t *testing.T) {
 	encryptor := New()
-	require.Implements(t, (*core.Encryptor)(nil), encryptor)
+	require.Implements(t, (*encryptor2.Encryptor)(nil), encryptor)
 }
 
 func TestRoundTrip(t *testing.T) {

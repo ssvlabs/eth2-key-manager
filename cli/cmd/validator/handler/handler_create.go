@@ -24,8 +24,8 @@ import (
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/validator/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
-	"github.com/bloxapp/eth2-key-manager/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 

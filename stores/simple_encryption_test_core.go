@@ -3,15 +3,17 @@ package stores
 import (
 	"testing"
 
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/keystorev4"
+	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
-func encryptor() core.Encryptor {
+func encryptor() encryptor2.Encryptor {
 	return keystorev4.New()
 }
 

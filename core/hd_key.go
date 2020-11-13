@@ -46,7 +46,6 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// id
 	if val, exists := v["id"]; exists {
 		var err error
 		key.id, err = uuid.Parse(val.(string))
@@ -57,14 +56,12 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 		return errors.New("could not find var: id")
 	}
 
-	// path
 	if val, exists := v["path"]; exists {
 		key.path = val.(string)
 	} else {
 		return errors.New("could not find var: path")
 	}
 
-	// pubkey
 	if val, exists := v["privKey"]; exists {
 		byts, err := hex.DecodeString(val.(string))
 		if err != nil {

@@ -40,18 +40,14 @@ func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 		return nil, errors.New("invalid relative path. Example: /1/2/3")
 	}
 
-	// Derive key
 	path := master.network.FullPath(relativePath)
 	key, err := util.PrivateKeyFromSeedAndPath(master.seed, path)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create key ID
-	id := uuid.New()
-
 	return &HDKey{
-		id:      id,
+		id:      uuid.New(),
 		privKey: key,
 		path:    path,
 	}, nil

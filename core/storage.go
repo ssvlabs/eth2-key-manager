@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 
+	"github.com/bloxapp/eth2-key-manager/encryptor"
+
 	"github.com/google/uuid"
 )
 
@@ -83,5 +85,5 @@ type Storage interface {
 	OpenAccount(accountId uuid.UUID) (ValidatorAccount, error)
 
 	// SetEncryptor sets the given encryptor to the wallet.
-	SetEncryptor(encryptor Encryptor, password []byte)
+	SetEncryptor(encryptor encryptor.Encryptor, password []byte)
 }

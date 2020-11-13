@@ -6,9 +6,11 @@ import (
 	"os"
 	"testing"
 
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/keystorev4"
+	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -75,7 +77,7 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 	tests := []struct {
 		name       string
 		walletName string
-		encryptor  core.Encryptor
+		encryptor  encryptor2.Encryptor
 		password   []byte
 		error
 	}{

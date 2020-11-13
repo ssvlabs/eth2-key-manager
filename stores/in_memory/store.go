@@ -2,6 +2,7 @@ package in_memory
 
 import (
 	"github.com/bloxapp/eth2-key-manager/core"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 	uuid "github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -14,7 +15,7 @@ type InMemStore struct {
 	accounts           map[string]*wallet_hd.HDAccount
 	attMemory          map[string]*core.BeaconAttestation
 	proposalMemory     map[string]*core.BeaconBlockHeader
-	encryptor          core.Encryptor
+	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
 }
 
@@ -24,7 +25,7 @@ func NewInMemStore(network core.Network) *InMemStore {
 }
 
 // NewInMemStoreWithEncryptor is the constructor of InMemStore.
-func NewInMemStoreWithEncryptor(network core.Network, encryptor core.Encryptor, password []byte) *InMemStore {
+func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
 		network:            network,
 		accounts:           make(map[string]*wallet_hd.HDAccount),
@@ -93,7 +94,7 @@ func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount
 	}
 }
 
-func (store *InMemStore) SetEncryptor(encryptor core.Encryptor, password []byte) {
+func (store *InMemStore) SetEncryptor(encryptor encryptor2.Encryptor, password []byte) {
 	store.encryptor = encryptor
 	store.encryptionPassword = password
 }

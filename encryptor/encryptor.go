@@ -1,4 +1,4 @@
-package core
+package encryptor
 
 // Encryptor is the interface for encrypting and decrypting sensitive information in wallets.
 type Encryptor interface {
