@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
 
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
@@ -18,32 +20,53 @@ func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to init BLS")
 	}
 
+	// Get index flag.
+	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the index flag value")
+	}
+
+	// Get seed flag.
+	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the seed flag value")
+	}
+
+	seedBytes, err := hex.DecodeString(seedFlagValue)
+	if err != nil {
+		return errors.Wrap(err, "failed to HEX decode seed")
+	}
+
+	// Get network flag
+	network, err := rootcmd.GetNetworkFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the network flag value")
+	}
+
 	// Get public key flag.
 	publicKeyFlagValue, err := flag.GetPublicKeyFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the public key flag value")
 	}
 
-	// Get storage flag.
-	storageFlagValue, err := flag.GetStorageFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the storage flag value")
-	}
+	// TODO get rid of network
+	store := in_memory.NewInMemStore(network)
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store)
 
-	storageBytes, err := hex.DecodeString(storageFlagValue)
+	_, err = eth2keymanager.NewKeyVault(options)
 	if err != nil {
-		return errors.Wrap(err, "failed to HEX decode storage")
-	}
-
-	var store in_memory.InMemStore
-	err = store.UnmarshalJSON(storageBytes)
-	if err != nil {
-		return errors.Wrap(err, "failed to JSON un-marshal storage")
+		return errors.Wrap(err, "failed to create key vault")
 	}
 
 	wallet, err := store.OpenWallet()
 	if err != nil {
 		return errors.Wrap(err, "failed to open wallet")
+	}
+
+	_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
+	if err != nil {
+		return errors.Wrap(err, "failed to create validator account")
 	}
 
 	account, err := wallet.AccountByPublicKey(publicKeyFlagValue)
