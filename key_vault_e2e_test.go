@@ -13,8 +13,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
-func _bigInt(input string) *big.Int {
-	res, _ := new(big.Int).SetString(input, 10)
+func _bigIntFromSkHex(input string) *big.Int {
+	res, _ := new(big.Int).SetString(input, 16)
 	return res
 }
 
@@ -125,17 +125,17 @@ func TestImportKeyVault(t *testing.T) {
 			require.NoError(t, err)
 
 			// test specific derivation
-			account, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+			account, err := wallet.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
-			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398").Bytes())
+			expectedValKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf").Bytes())
 			require.NoError(t, err)
-			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
+			expectedWithdrawalKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6").Bytes())
 			require.NoError(t, err)
 
-			require.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
-			require.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, expectedValKey.Marshal(), account.ValidatorPublicKey().Marshal())
+			require.Equal(t, expectedWithdrawalKey.Marshal(), account.WithdrawalPublicKey().Marshal())
 		})
 	}
 }
@@ -183,17 +183,17 @@ func TestOpenKeyVault(t *testing.T) {
 			require.NoError(t, err)
 
 			// test specific derivation
-			account, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+			account, err := wallet.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
-			expectedValKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398").Bytes())
+			expectedValKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf").Bytes())
 			require.NoError(t, err)
-			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
+			expectedWithdrawalKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6").Bytes())
 			require.NoError(t, err)
 
-			require.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
-			require.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, expectedValKey.Marshal(), account.ValidatorPublicKey().Marshal())
+			require.Equal(t, expectedWithdrawalKey.Marshal(), account.WithdrawalPublicKey().Marshal())
 			require.Equal(t, importedVault.walletId, v.walletId)
 		})
 	}

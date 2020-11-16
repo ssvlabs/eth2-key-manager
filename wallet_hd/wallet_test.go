@@ -35,8 +35,8 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func _bigInt(input string) *big.Int {
-	res, _ := new(big.Int).SetString(input, 10)
+func _bigIntFromSkHex(input string) *big.Int {
+	res, _ := new(big.Int).SetString(input, 16)
 	return res
 }
 
@@ -46,6 +46,7 @@ func storage() core.Storage {
 
 // ethereum foundation launched a launchpad for making deposits.
 // this test compares the launchpad results and KeyVault
+// Updated for V1.0.0 https://github.com/ethereum/eth2.0-deposit-cli/releases/tag/v1.0.0
 func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 	e2types.InitBLS()
 
@@ -57,12 +58,12 @@ func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 		{
 			mnemonic:        "vocal differ audit mom unique physical evolve cave retire design achieve pupil odor hockey drive animal habit fluid belt height vintage crack rigid sphere",
 			password:        "",
-			validatorPubKey: "aa6e59b378b905a7454cf3a7a57e07ce89d5410fb3f96610aba0a8036984d7a6a2e1398fceb85611bc576cd349d7dcd2",
+			validatorPubKey: "858da1ba93ea436c93c8f1aac0d508130da2696f7394f9f88088b35050670f6dbf6a9d491cd386d28420fbef684c48e0",
 		},
 		{
 			mnemonic:        "magnet burden popular race night clown moral sorry situate worth sorry solution live custom message finger soon month invest battle fade funny bright basket",
 			password:        "",
-			validatorPubKey: "98ee5f5107f72bef05f59dee8de08223cd0db04be9f142806743cad44366f44184f0957935dc8e4994e038ad1fd5d821",
+			validatorPubKey: "b784d12bedcb1469200e8b2a0b00bcbe0be4cda19f0d05c307df8c16ec7b3a1f6244e23fc71f5e3d1e24f0c2231a3e03",
 		},
 	}
 
@@ -110,26 +111,26 @@ func TestAccountDerivation(t *testing.T) {
 		{
 			testName:              "account 0",
 			index:                 0,
-			expectedValidationKey: _bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398"),
-			expectedWithdrawalKey: _bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836"),
+			expectedValidationKey: _bigIntFromSkHex("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
+			expectedWithdrawalKey: _bigIntFromSkHex("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6"),
 		},
 		{
 			testName:              "account 1",
 			index:                 1,
-			expectedValidationKey: _bigInt("22772506560955906640840029020628554414154538440282401807772339666252999598733"),
-			expectedWithdrawalKey: _bigInt("35957947454275682122989949668683794518020231276710636838205992785623169821803"),
+			expectedValidationKey: _bigIntFromSkHex("b41df3c322a6fd305fc9425df52501f7f8067dbba551466d82d506c83c6ab287580202aa1a3449f54b9bc464a04b70e6"),
+			expectedWithdrawalKey: _bigIntFromSkHex("858e30df33bfdd613234abc9359ccd924f4807f1ba21de328d361e72f8c9ca94c9b7c225536405141df8239db87bd510"),
 		},
 		{
 			testName:              "account 2",
 			index:                 2,
-			expectedValidationKey: _bigInt("39196384482644522441983190042722076264169843386078553516164086198183513560637"),
-			expectedWithdrawalKey: _bigInt("8862394884593725153617163219481465667794938944832130820949251394547028786321"),
+			expectedValidationKey: _bigIntFromSkHex("9415b51f7996d6872f32c9bf7c259fad10e211d6097ff52ae99520a0ab3b916b3570073abbb83fa87da66936d351010d"),
+			expectedWithdrawalKey: _bigIntFromSkHex("85586894abb77e41ba5dc3cfa2a7506c7584d024f028501da1e766792bcf6cd79ae17ff68eee84315eba9a2a8e7f89fe"),
 		},
 		{
 			testName:              "account 3",
 			index:                 3,
-			expectedValidationKey: _bigInt("28093661633617073106051830080274606181076423213304176144286257209925213345002"),
-			expectedWithdrawalKey: _bigInt("24013488102538647731381570745201628464138315555327292772724806156501038782887"),
+			expectedValidationKey: _bigIntFromSkHex("80b42ed53fe82598d055c2723bce9b1dde249d0497291856ef77fc75b094c60aca9dcc648e414dc9db41f8b8dc2f13e4"),
+			expectedWithdrawalKey: _bigIntFromSkHex("afb22992f52aaf46c461ad1013e88c2c3ca8656c58170a9d08aaaeb9eac404fba839b313150f8f4b2f9fe23e64119c1f"),
 		},
 	}
 	for _, test := range tests {
@@ -137,13 +138,13 @@ func TestAccountDerivation(t *testing.T) {
 			account, err := w.CreateValidatorAccount(seed, &test.index)
 			require.NoError(t, err)
 
-			val, err := e2types.BLSPrivateKeyFromBytes(test.expectedValidationKey.Bytes())
+			val, err := e2types.BLSPublicKeyFromBytes(test.expectedValidationKey.Bytes())
 			require.NoError(t, err)
-			with, err := e2types.BLSPrivateKeyFromBytes(test.expectedWithdrawalKey.Bytes())
+			with, err := e2types.BLSPublicKeyFromBytes(test.expectedWithdrawalKey.Bytes())
 			require.NoError(t, err)
 
-			require.Equal(t, val.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
-			require.Equal(t, with.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, val.Marshal(), account.ValidatorPublicKey().Marshal(), fmt.Sprintf("expceted validation pk: %s\n", hex.EncodeToString(account.ValidatorPublicKey().Marshal())))
+			require.Equal(t, with.Marshal(), account.WithdrawalPublicKey().Marshal(), fmt.Sprintf("expceted withdrawal pk: %s\n", hex.EncodeToString(account.WithdrawalPublicKey().Marshal())))
 		})
 	}
 }

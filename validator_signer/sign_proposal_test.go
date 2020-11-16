@@ -9,13 +9,13 @@ import (
 )
 
 func TestProposalSlashingSignatures(t *testing.T) {
-	seed, _ := hex.DecodeString("f51883a4c56467458c3b47d06cd135f862a6266fabdfb9e9e4702ea5511375d7")
+	seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	signer, err := setupWithSlashingProtection(seed)
 	require.NoError(t, err)
 
 	t.Run("valid proposal", func(t *testing.T) {
 		_, err = signer.SignBeaconProposal(&v1.SignBeaconProposalRequest{
-			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4b")},
+			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
 			Domain: []byte("domain"),
 			Data: &v1.BeaconBlockHeader{
 				Slot:          99,
@@ -46,7 +46,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 
 	t.Run("double proposal, different state root. Should error", func(t *testing.T) {
 		_, err = signer.SignBeaconProposal(&v1.SignBeaconProposalRequest{
-			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4b")},
+			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
 			Domain: []byte("domain"),
 			Data: &v1.BeaconBlockHeader{
 				Slot:          99,
@@ -62,7 +62,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 
 	t.Run("double proposal, different body root. Should error", func(t *testing.T) {
 		_, err = signer.SignBeaconProposal(&v1.SignBeaconProposalRequest{
-			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4b")},
+			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
 			Domain: []byte("domain"),
 			Data: &v1.BeaconBlockHeader{
 				Slot:          99,
@@ -78,7 +78,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 
 	t.Run("double proposal, different parent root. Should error", func(t *testing.T) {
 		_, err = signer.SignBeaconProposal(&v1.SignBeaconProposalRequest{
-			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4b")},
+			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
 			Domain: []byte("domain"),
 			Data: &v1.BeaconBlockHeader{
 				Slot:          99,
@@ -94,7 +94,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 
 	t.Run("double proposal, different proposer index. Should error", func(t *testing.T) {
 		_, err = signer.SignBeaconProposal(&v1.SignBeaconProposalRequest{
-			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4b")},
+			Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
 			Domain: []byte("domain"),
 			Data: &v1.BeaconBlockHeader{
 				Slot:          99,
