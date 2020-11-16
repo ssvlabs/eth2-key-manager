@@ -3,9 +3,9 @@ package wallet_hd
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -49,21 +49,21 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: id")
 	}
 
 	// name
 	if val, exists := v["name"]; exists {
 		account.name = val.(string)
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: name")
 	}
 
 	// base path
 	if val, exists := v["baseAccountPath"]; exists {
 		account.basePath = val.(string)
 	} else {
-		return fmt.Errorf("could not find var: baseAccountPath")
+		return errors.New("could not find var: baseAccountPath")
 	}
 
 	// validation key
@@ -72,14 +72,14 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
+
 		key := &core.HDKey{}
-		err = json.Unmarshal(byts, key)
-		if err != nil {
+		if err := json.Unmarshal(byts, key); err != nil {
 			return err
 		}
 		account.validationKey = key
 	} else {
-		return fmt.Errorf("could not find var: key")
+		return errors.New("could not find var: validationKey")
 	}
 
 	// withdrawal pub Key
@@ -93,7 +93,7 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: key")
+		return errors.New("could not find var: withdrawalPubKey")
 	}
 
 	return nil

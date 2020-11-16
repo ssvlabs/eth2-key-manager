@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
@@ -132,14 +134,11 @@ func TestSignRootComputation(t *testing.T) {
 	reqs, roots := aggreggateFixtures()
 	for i := range reqs {
 		t.Run(fmt.Sprintf("TestRootComputation %d", i), func(t *testing.T) {
-			root, error := PrepareReqForSigning(reqs[i])
-			if error != nil {
-				t.Error(error)
-			}
+			root, err := PrepareReqForSigning(reqs[i])
+			require.NoError(t, err)
+
 			expectedroot := roots[i]
-			if val := hex.EncodeToString(root[:]); val != expectedroot {
-				t.Error(fmt.Errorf("calculateed root: %s not equal to expected root: %s", val, expectedroot))
-			}
+			require.Equal(t, expectedroot, hex.EncodeToString(root[:]))
 		})
 	}
 }
@@ -149,14 +148,11 @@ func TestAttestationRootComputation(t *testing.T) {
 
 	for i := range attestations {
 		t.Run(fmt.Sprintf("TestRootComputation %d", i), func(t *testing.T) {
-			root, error := PrepareAttestationReqForSigning(attestations[i])
-			if error != nil {
-				t.Error(error)
-			}
+			root, err := PrepareAttestationReqForSigning(attestations[i])
+			require.NoError(t, err)
+
 			expectedroot := roots[i]
-			if val := hex.EncodeToString(root); val != expectedroot {
-				t.Error(fmt.Errorf("calculateed root: %s not equal to expected root: %s", val, expectedroot))
-			}
+			require.Equal(t, expectedroot, hex.EncodeToString(root[:]))
 		})
 	}
 }
@@ -165,14 +161,11 @@ func TestProposalRootComputation(t *testing.T) {
 	proposals, roots := proposalFixtures()
 	for i := range proposals {
 		t.Run(fmt.Sprintf("TestRootComputation %d", i), func(t *testing.T) {
-			root, error := PrepareProposalReqForSigning(proposals[i])
-			if error != nil {
-				t.Error(error)
-			}
+			root, err := PrepareProposalReqForSigning(proposals[i])
+			require.NoError(t, err)
+
 			expectedroot := roots[i]
-			if val := hex.EncodeToString(root); val != expectedroot {
-				t.Error(fmt.Errorf("calculateed root: %s not equal to expected root: %s", val, expectedroot))
-			}
+			require.Equal(t, expectedroot, hex.EncodeToString(root[:]))
 		})
 	}
 }

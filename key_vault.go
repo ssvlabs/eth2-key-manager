@@ -1,11 +1,11 @@
 package eth2keymanager
 
 import (
-	"fmt"
 	"log"
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -96,8 +96,12 @@ func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
 		walletId: wallet.ID(),
 	}
 
-	err = options.storage.(core.Storage).SaveWallet(wallet)
-	if err != nil {
+	storage, ok := options.storage.(core.Storage)
+	if !ok {
+		return nil, errors.Errorf("unexpected storage type %T", options.storage)
+	}
+
+	if err := storage.SaveWallet(wallet); err != nil {
 		return nil, err
 	}
 
@@ -105,13 +109,14 @@ func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
 }
 
 func setupStorage(options *KeyVaultOptions) (core.Storage, error) {
-	if _, ok := options.storage.(core.Storage); !ok {
-		return nil, fmt.Errorf("storage does not implement core.Storage")
-	} else {
-		if options.encryptor != nil && options.password != nil {
-			options.storage.(core.Storage).SetEncryptor(options.encryptor, options.password)
-		}
+	storage, ok := options.storage.(core.Storage)
+	if !ok {
+		return nil, errors.New("storage does not implement core.Storage")
 	}
 
-	return options.storage.(core.Storage), nil
+	if options.encryptor != nil && options.password != nil {
+		storage.SetEncryptor(options.encryptor, options.password)
+	}
+
+	return storage, nil
 }

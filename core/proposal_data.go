@@ -6,6 +6,20 @@ import (
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
 
+type ProposalDetectionType string
+
+const (
+	DoubleProposal ProposalDetectionType = "DoubleProposal"
+	ValidProposal  ProposalDetectionType = "Valid"
+	Error          ProposalDetectionType = "Error"
+)
+
+type ProposalSlashStatus struct {
+	Proposal *BeaconBlockHeader
+	Status   ProposalDetectionType
+	Error    error
+}
+
 // copy from prysm https://github.com/prysmaticlabs/prysm/blob/master/validator/client/validator_propose.go#L220-L226
 type BeaconBlockHeader struct {
 	Slot          uint64 `json:"slot"`
@@ -32,18 +46,4 @@ func ToCoreBlockData(req *pb.SignBeaconProposalRequest) *BeaconBlockHeader {
 		StateRoot:     req.Data.StateRoot,
 		BodyRoot:      req.Data.BodyRoot,
 	}
-}
-
-type ProposalDetectionType string
-
-const (
-	DoubleProposal ProposalDetectionType = "DoubleProposal"
-	ValidProposal  ProposalDetectionType = "Valid"
-	Error          ProposalDetectionType = "Error"
-)
-
-type ProposalSlashStatus struct {
-	Proposal *BeaconBlockHeader
-	Status   ProposalDetectionType
-	Error    error
 }

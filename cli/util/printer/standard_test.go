@@ -3,9 +3,9 @@ package printer_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/cli/util/printer"
@@ -15,8 +15,8 @@ func TestText(t *testing.T) {
 	text := "some text"
 
 	var buf bytes.Buffer
-	printer := printer.New(&buf)
-	printer.Text(text)
+	pr := printer.New(&buf)
+	pr.Text(text)
 	require.Equal(t, text+"\n", buf.String())
 }
 
@@ -30,17 +30,17 @@ func TestJSON(t *testing.T) {
 	require.NoError(t, err)
 
 	var buf bytes.Buffer
-	printer := printer.New(&buf)
-	err = printer.JSON(obj)
+	pr := printer.New(&buf)
+	err = pr.JSON(obj)
 	require.NoError(t, err)
 	require.Equal(t, string(expectedData)+"\n", buf.String())
 }
 
 func TestError(t *testing.T) {
-	testError := fmt.Errorf("some error text")
+	testError := errors.New("some error text")
 
 	var buf bytes.Buffer
-	printer := printer.New(&buf)
-	printer.Error(testError)
+	pr := printer.New(&buf)
+	pr.Error(testError)
 	require.Equal(t, "Error: "+testError.Error()+"\n", buf.String())
 }

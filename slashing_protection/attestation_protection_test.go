@@ -1,8 +1,9 @@
 package slashing_protection
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -10,33 +11,27 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
-		return nil, nil, err
-	}
+func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAccount) {
+	err := e2types.InitBLS()
+	require.NoError(t, err)
 
 	// seed
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	// create an account to use
 	vault, err := vault()
-	if err != nil {
-		return nil, nil, err
-	}
+	require.NoError(t, err)
+
 	w, err := vault.Wallet()
-	if err != nil {
-		return nil, nil, err
-	}
+	require.NoError(t, err)
+
 	account1, err := w.CreateValidatorAccount(seed, nil)
-	if err != nil {
-		return nil, nil, err
-	}
+	require.NoError(t, err)
+
 	account2, err := w.CreateValidatorAccount(seed, nil)
-	if err != nil {
-		return nil, nil, err
-	}
+	require.NoError(t, err)
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -53,7 +48,9 @@ func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error)
 			},
 		},
 	})
-	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	require.NoError(t, err)
+
+	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -70,7 +67,9 @@ func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error)
 			},
 		},
 	})
-	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	require.NoError(t, err)
+
+	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -87,7 +86,9 @@ func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error)
 			},
 		},
 	})
-	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	require.NoError(t, err)
+
+	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -104,7 +105,9 @@ func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error)
 			},
 		},
 	})
-	protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	require.NoError(t, err)
+
+	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -121,15 +124,13 @@ func setupAttestation() (core.SlashingProtector, []core.ValidatorAccount, error)
 			},
 		},
 	})
-	return protector, []core.ValidatorAccount{account1, account2}, nil
+	require.NoError(t, err)
+
+	return protector, []core.ValidatorAccount{account1, account2}
 }
 
 func TestSurroundingVote(t *testing.T) {
-	protector, accounts, err := setupAttestation()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	protector, accounts := setupAttestation(t)
 
 	t.Run("1 Surrounded vote", func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
@@ -150,18 +151,9 @@ func TestSurroundingVote(t *testing.T) {
 			},
 		})
 
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if len(res) != 1 {
-			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res), 1)
-			return
-		}
-		if res[0].Status != core.SurroundingVote {
-			t.Errorf("wrong attestation status returned, expected SurroundingVote")
-			return
-		}
+		require.NoError(t, err)
+		require.Len(t, res, 1)
+		require.Equal(t, core.SurroundingVote, res[0].Status)
 	})
 
 	t.Run("2 Surrounded votes", func(t *testing.T) {
@@ -183,18 +175,9 @@ func TestSurroundingVote(t *testing.T) {
 			},
 		})
 
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if len(res) != 2 {
-			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res), 2)
-			return
-		}
-		if res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote {
-			t.Errorf("wrong attestation status returned, expected SurroundingVote")
-			return
-		}
+		require.NoError(t, err)
+		require.Len(t, res, 2)
+		require.False(t, res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote)
 	})
 
 	t.Run("1 Surrounding vote", func(t *testing.T) {
@@ -215,18 +198,9 @@ func TestSurroundingVote(t *testing.T) {
 				},
 			},
 		})
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if len(res) != 1 {
-			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res), 1)
-			return
-		}
-		if res[0].Status != core.SurroundedVote {
-			t.Errorf("wrong attestation status returned, expected SurroundedVote")
-			return
-		}
+		require.NoError(t, err)
+		require.Len(t, res, 1)
+		require.Equal(t, core.SurroundedVote, res[0].Status)
 	})
 
 	t.Run("2 Surrounding vote", func(t *testing.T) {
@@ -247,27 +221,14 @@ func TestSurroundingVote(t *testing.T) {
 				},
 			},
 		})
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		if len(res) != 2 {
-			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res), 2)
-			return
-		}
-		if res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote {
-			t.Errorf("wrong attestation status returned, expected SurroundedVote")
-			return
-		}
+		require.NoError(t, err)
+		require.Len(t, res, 2)
+		require.False(t, res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote)
 	})
 }
 
 func TestDoubleAttestationVote(t *testing.T) {
-	protector, accounts, err := setupAttestation()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	protector, accounts := setupAttestation(t)
 
 	t.Run("Different committee index, should slash", func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
@@ -288,15 +249,9 @@ func TestDoubleAttestationVote(t *testing.T) {
 			},
 		})
 
-		if err != nil {
-			t.Error(err)
-		}
-		if len(res) != 1 {
-			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res), 1)
-		}
-		if res[0].Status != core.DoubleVote {
-			t.Errorf("wrong attestation status returned, expected DoubleVote")
-		}
+		require.NoError(t, err)
+		require.Len(t, res, 1)
+		require.Equal(t, core.DoubleVote, res[0].Status)
 	})
 
 	t.Run("Different block root, should slash", func(t *testing.T) {
@@ -318,15 +273,9 @@ func TestDoubleAttestationVote(t *testing.T) {
 			},
 		})
 
-		if err != nil {
-			t.Error(err)
-		}
-		if len(res) != 1 {
-			t.Errorf("found too many/few slashed attestations: %d, expected: %d", len(res), 1)
-		}
-		if res[0].Status != core.DoubleVote {
-			t.Errorf("wrong attestation status returned, expected DoubleVote")
-		}
+		require.NoError(t, err)
+		require.Len(t, res, 1)
+		require.Equal(t, core.DoubleVote, res[0].Status)
 	})
 
 	t.Run("Same attestation, should not error", func(t *testing.T) {
@@ -347,10 +296,7 @@ func TestDoubleAttestationVote(t *testing.T) {
 				},
 			},
 		})
-
-		if err != nil || len(res) != 0 {
-			t.Error(fmt.Errorf("correct attestation found slashable"))
-		}
+		require.False(t, err != nil || len(res) != 0)
 	})
 
 	t.Run("new attestation, should not error", func(t *testing.T) {
@@ -371,9 +317,6 @@ func TestDoubleAttestationVote(t *testing.T) {
 				},
 			},
 		})
-
-		if err != nil || len(res) != 0 {
-			t.Error(fmt.Errorf("correct attestation found slashable"))
-		}
+		require.False(t, err != nil || len(res) != 0)
 	})
 }

@@ -3,7 +3,8 @@ package in_memory
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -57,7 +58,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 
 		store.network = core.NetworkFromString(string(byts))
 	} else {
-		return fmt.Errorf("could not find var: network")
+		return errors.New("could not find var: network")
 	}
 
 	// wallet
@@ -71,7 +72,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: wallet")
+		return errors.New("could not find var: wallet")
 	}
 
 	// accounts
@@ -85,7 +86,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: accounts")
+		return errors.New("could not find var: accounts")
 	}
 
 	// attMemory
@@ -99,7 +100,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: attMemory")
+		return errors.New("could not find var: attMemory")
 	}
 
 	// proposalMemory
@@ -113,7 +114,7 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: proposalMemory")
+		return errors.New("could not find var: proposalMemory")
 	}
 
 	return nil

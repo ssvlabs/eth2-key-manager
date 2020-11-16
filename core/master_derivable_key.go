@@ -1,10 +1,10 @@
 package core
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	util "github.com/wealdtech/go-eth2-util"
 )
 
@@ -26,7 +26,7 @@ type MasterDerivableKey struct {
 // Base privKey is m / purpose / coin_type / as EIP 2334 defines
 func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error) {
 	if seed == nil || len(seed) == 0 {
-		return nil, fmt.Errorf("seed can't be nil or length 0")
+		return nil, errors.New("seed can't be nil or length 0")
 	}
 	return &MasterDerivableKey{
 		seed:    seed,
@@ -37,21 +37,17 @@ func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error
 // Derive derives a HD key based on the given relative path.
 func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 	if !validateRelativePath(relativePath) {
-		return nil, fmt.Errorf("invalid relative path. Example: /1/2/3")
+		return nil, errors.New("invalid relative path. Example: /1/2/3")
 	}
 
-	// Derive key
 	path := master.network.FullPath(relativePath)
 	key, err := util.PrivateKeyFromSeedAndPath(master.seed, path)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create key ID
-	id := uuid.New()
-
 	return &HDKey{
-		id:      id,
+		id:      uuid.New(),
 		privKey: key,
 		path:    path,
 	}, nil

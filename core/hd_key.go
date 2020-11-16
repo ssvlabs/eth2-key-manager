@@ -3,8 +3,9 @@ package core
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -15,6 +16,7 @@ type HDKey struct {
 	path    string
 }
 
+// NewHDKeyFromPrivateKey is the constructor of HDKey
 func NewHDKeyFromPrivateKey(priv []byte, path string) (*HDKey, error) {
 	key, err := e2types.BLSPrivateKeyFromBytes(priv)
 	if err != nil {
@@ -45,36 +47,32 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// id
 	if val, exists := v["id"]; exists {
 		var err error
-		key.id, err = uuid.Parse(val.(string))
-		if err != nil {
+		if key.id, err = uuid.Parse(val.(string)); err != nil {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: id")
 	}
 
-	// path
 	if val, exists := v["path"]; exists {
 		key.path = val.(string)
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: path")
 	}
 
-	// pubkey
 	if val, exists := v["privKey"]; exists {
 		byts, err := hex.DecodeString(val.(string))
 		if err != nil {
 			return err
 		}
-		key.privKey, err = e2types.BLSPrivateKeyFromBytes(byts)
-		if err != nil {
+
+		if key.privKey, err = e2types.BLSPrivateKeyFromBytes(byts); err != nil {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: privKey")
 	}
 
 	return nil

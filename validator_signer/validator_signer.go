@@ -10,6 +10,7 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
+// ValidatorSigner represents the behavior of the validator signer
 type ValidatorSigner interface {
 	ListAccounts() (*pb.ListAccountsResponse, error)
 	SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error)
@@ -22,12 +23,14 @@ type signingRoot struct {
 	Domain []byte   `ssz-size:"32"`
 }
 
+// SimpleSigner implements ValidatorSigner interface
 type SimpleSigner struct {
 	wallet            core.Wallet
 	slashingProtector core.SlashingProtector
 	signLocks         map[string]*sync.RWMutex
 }
 
+// NewSimpleSigner is the constructor of SimpleSigner
 func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtector) *SimpleSigner {
 	return &SimpleSigner{
 		wallet:            wallet,
@@ -36,7 +39,7 @@ func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtecto
 	}
 }
 
-// if already locked, will lock until released
+// lock locks signer
 func (signer *SimpleSigner) lock(accountId uuid.UUID, operation string) {
 	k := accountId.String() + "_" + operation
 	if val, ok := signer.signLocks[k]; ok {
@@ -59,14 +62,14 @@ func prepareForSig(data interface{}, domain []byte) ([32]byte, error) {
 	if err != nil {
 		return [32]byte{}, err
 	}
-	signingRoot := &signingRoot{
+
+	forSig, err := ssz.HashTreeRoot(&signingRoot{
 		Hash:   root,
 		Domain: domain,
-	}
-	forsig, err := ssz.HashTreeRoot(signingRoot)
+	})
 	if err != nil {
 		return [32]byte{}, err
 	}
 
-	return forsig, nil
+	return forSig, nil
 }

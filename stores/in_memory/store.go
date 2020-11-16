@@ -1,13 +1,11 @@
 package in_memory
 
 import (
-	"fmt"
-
-	uuid "github.com/google/uuid"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
+	uuid "github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // InMemStore implements core.Storage using in-memory store.
@@ -17,7 +15,7 @@ type InMemStore struct {
 	accounts           map[string]*wallet_hd.HDAccount
 	attMemory          map[string]*core.BeaconAttestation
 	proposalMemory     map[string]*core.BeaconBlockHeader
-	encryptor          types.Encryptor
+	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
 }
 
@@ -27,7 +25,7 @@ func NewInMemStore(network core.Network) *InMemStore {
 }
 
 // NewInMemStoreWithEncryptor is the constructor of InMemStore.
-func NewInMemStoreWithEncryptor(network core.Network, encryptor types.Encryptor, password []byte) *InMemStore {
+func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
 		network:            network,
 		accounts:           make(map[string]*wallet_hd.HDAccount),
@@ -60,7 +58,7 @@ func (store *InMemStore) OpenWallet() (core.Wallet, error) {
 		store.wallet.SetContext(store.freshContext())
 		return store.wallet, nil
 	}
-	return nil, fmt.Errorf("wallet not found")
+	return nil, errors.New("wallet not found")
 }
 
 // will return an empty array for no accounts
@@ -81,7 +79,7 @@ func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
 func (store *InMemStore) DeleteAccount(accountId uuid.UUID) error {
 	_, exists := store.accounts[accountId.String()]
 	if !exists {
-		return fmt.Errorf("account not found")
+		return errors.New("account not found")
 	}
 	delete(store.accounts, accountId.String())
 	return nil
@@ -96,7 +94,7 @@ func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount
 	}
 }
 
-func (store *InMemStore) SetEncryptor(encryptor types.Encryptor, password []byte) {
+func (store *InMemStore) SetEncryptor(encryptor encryptor2.Encryptor, password []byte) {
 	store.encryptor = encryptor
 	store.encryptionPassword = password
 }

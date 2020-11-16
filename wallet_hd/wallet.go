@@ -137,13 +137,12 @@ func (wallet *HDWallet) DeleteAccountByPublicKey(pubKey string) error {
 		return errors.Wrap(err, "failed to get account by public key")
 	}
 
-	err = wallet.context.Storage.DeleteAccount(account.ID())
-	if err != nil {
+	if err := wallet.context.Storage.DeleteAccount(account.ID()); err != nil {
 		return errors.Wrap(err, "failed to delete account from store")
 	}
 	delete(wallet.indexMapper, pubKey)
-	err = wallet.context.Storage.SaveWallet(wallet)
-	if err != nil {
+
+	if err := wallet.context.Storage.SaveWallet(wallet); err != nil {
 		return errors.Wrap(err, "failed to save wallet")
 	}
 	return nil
