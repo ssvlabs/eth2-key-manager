@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -17,7 +18,7 @@ func (store *InMemStore) SaveAttestation(key e2types.PublicKey, req *core.Beacon
 func (store *InMemStore) RetrieveAttestation(key e2types.PublicKey, epoch uint64) (*core.BeaconAttestation, error) {
 	ret := store.attMemory[attestationKey(key, epoch)]
 	if ret == nil {
-		return nil, fmt.Errorf("attestation not found")
+		return nil, errors.New("attestation not found")
 	}
 	return ret, nil
 }
@@ -40,7 +41,7 @@ func (store *InMemStore) SaveProposal(key e2types.PublicKey, req *core.BeaconBlo
 func (store *InMemStore) RetrieveProposal(key e2types.PublicKey, slot uint64) (*core.BeaconBlockHeader, error) {
 	ret := store.proposalMemory[proposalKey(key, slot)]
 	if ret == nil {
-		return nil, fmt.Errorf("proposal not found")
+		return nil, errors.New("proposal not found")
 	}
 	return ret, nil
 }

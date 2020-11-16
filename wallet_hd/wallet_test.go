@@ -7,10 +7,11 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/bloxapp/eth2-key-manager/encryptor"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -26,8 +27,8 @@ func (s *dummyStorage) SaveAccount(account core.ValidatorAccount) error { return
 func (s *dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
 	return nil, nil
 }
-func (s *dummyStorage) DeleteAccount(accountId uuid.UUID) error                 { return nil }
-func (s *dummyStorage) SetEncryptor(encryptor types.Encryptor, password []byte) {}
+func (s *dummyStorage) DeleteAccount(accountId uuid.UUID) error                     { return nil }
+func (s *dummyStorage) SetEncryptor(encryptor encryptor.Encryptor, password []byte) {}
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -228,17 +229,12 @@ func TestWalletMarshaling(t *testing.T) {
 
 			// marshal
 			byts, err := json.Marshal(w)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
+
 			//unmarshal
 			w1 := &HDWallet{context: &core.WalletContext{Storage: storage}}
 			err = json.Unmarshal(byts, w1)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			require.Equal(t, w.id, w1.id)
 			require.Equal(t, w.walletType, w1.walletType)

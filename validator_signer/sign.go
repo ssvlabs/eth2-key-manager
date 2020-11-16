@@ -2,8 +2,8 @@ package validator_signer
 
 import (
 	"encoding/hex"
-	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 )
@@ -14,28 +14,28 @@ func (signer *SimpleSigner) Sign(req *pb.SignRequest) (*pb.SignResponse, error) 
 
 	// 2. get the account
 	if req.GetPublicKey() == nil {
-		return nil, fmt.Errorf("account was not supplied")
-	}
-	account, error := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
-	if error != nil {
-		return nil, error
+		return nil, errors.New("account was not supplied")
 	}
 
-	// 4.
+	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
+	if err != nil {
+		return nil, err
+	}
+
 	forSig, err := PrepareReqForSigning(req)
 	if err != nil {
 		return nil, err
 	}
+
 	sig, err := account.ValidationKeySign(forSig[:])
 	if err != nil {
 		return nil, err
 	}
-	res := &pb.SignResponse{
+
+	return &pb.SignResponse{
 		State:     pb.ResponseState_SUCCEEDED,
 		Signature: sig.Marshal(),
-	}
-
-	return res, nil
+	}, nil
 }
 
 // PrepareReqForSigning prepares sign request for signing.

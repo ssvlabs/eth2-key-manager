@@ -5,12 +5,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
@@ -135,8 +134,8 @@ func TestImportKeyVault(t *testing.T) {
 			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
 			require.NoError(t, err)
 
-			assert.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
-			assert.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
+			require.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
 		})
 	}
 }
@@ -193,9 +192,9 @@ func TestOpenKeyVault(t *testing.T) {
 			expectedWithdrawalKey, err := e2types.BLSPrivateKeyFromBytes(_bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836").Bytes())
 			require.NoError(t, err)
 
-			assert.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
-			assert.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
-			assert.Equal(t, importedVault.walletId, v.walletId)
+			require.Equal(t, expectedValKey.PublicKey().Marshal(), account.ValidatorPublicKey().Marshal())
+			require.Equal(t, expectedWithdrawalKey.PublicKey().Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, importedVault.walletId, v.walletId)
 		})
 	}
 }

@@ -2,6 +2,7 @@ package core
 
 import "github.com/tyler-smith/go-bip39"
 
+// GenerateNewEntropy generates a new entropy
 func GenerateNewEntropy() ([]byte, error) {
 	entropy, err := bip39.NewEntropy(256)
 	if err != nil {
@@ -21,9 +22,10 @@ func EntropyToMnemonic(entropy []byte) (string, error) {
 	return mnemonic, nil
 }
 
-// the seed is the product of applying a key derivation algo (PBKDF2) on the mnemonic (as the entropy)
+// SeedFromMnemonic generates a new seed.
+// The seed is the product of applying a key derivation algo (PBKDF2) on the mnemonic (as the entropy)
 // and the password as salt.
-// please see https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
+// Please see https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 func SeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
 	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, password)
 	if err != nil {

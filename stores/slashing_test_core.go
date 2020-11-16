@@ -60,25 +60,13 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// save
 			err := storage.SaveProposal(test.account.ValidatorPublicKey(), test.proposal)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// fetch
 			proposal, err := storage.RetrieveProposal(test.account.ValidatorPublicKey(), test.proposal.Slot)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			if proposal == nil {
-				t.Errorf("proposal not saved and retrieved")
-				return
-			}
-			if proposal.Compare(test.proposal) != true {
-				t.Errorf("retrieved proposal not matching saved attestation")
-				return
-			}
+			require.NoError(t, err)
+			require.NotNil(t, proposal)
+			require.True(t, proposal.Compare(test.proposal))
 		})
 	}
 }
@@ -135,25 +123,13 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// save
 			err := storage.SaveAttestation(test.account.ValidatorPublicKey(), test.att)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// fetch
 			att, err := storage.RetrieveAttestation(test.account.ValidatorPublicKey(), test.att.Target.Epoch)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			if att == nil {
-				t.Errorf("attestation not saved and retrieved")
-				return
-			}
-			if att.Compare(test.att) != true {
-				t.Errorf("retrieved attestation not matching saved attestation")
-				return
-			}
+			require.NoError(t, err)
+			require.NotNil(t, att)
+			require.True(t, att.Compare(test.att))
 		})
 	}
 }
@@ -166,10 +142,7 @@ func TestingRetrieveEmptyLatestAttestation(storage core.SlashingStore, t *testin
 
 	att, err := storage.RetrieveLatestAttestation(account.ValidatorPublicKey())
 	require.NoError(t, err)
-	if att != nil {
-		t.Errorf("latest attestation should be nil")
-		return
-	}
+	require.Nil(t, att)
 }
 
 func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
@@ -224,25 +197,13 @@ func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// save
 			err := storage.SaveLatestAttestation(test.account.ValidatorPublicKey(), test.att)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// fetch
 			att, err := storage.RetrieveLatestAttestation(test.account.ValidatorPublicKey())
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			if att == nil {
-				t.Errorf("latest attestation not saved and retrieved")
-				return
-			}
-			if att.Compare(test.att) != true {
-				t.Errorf("retrieved latest attestation not matching saved attestation")
-				return
-			}
+			require.NoError(t, err)
+			require.NotNil(t, att)
+			require.True(t, att.Compare(test.att))
 		})
 	}
 }
@@ -297,10 +258,7 @@ func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 	// save
 	for _, att := range attestations {
 		err := storage.SaveAttestation(account.ValidatorPublicKey(), att)
-		if err != nil {
-			t.Error(err)
-			return
-		}
+		require.NoError(t, err)
 	}
 
 	tests := []struct {
@@ -345,25 +303,13 @@ func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// list
 			atts, err := storage.ListAttestations(account.ValidatorPublicKey(), test.start, test.end)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			if atts == nil {
-				t.Errorf("list attestation returns nil")
-				return
-			}
-			if len(atts) != test.expectedCnt {
-				t.Errorf("list attestation returns %d elements, expectd: %d", len(atts), test.expectedCnt)
-				return
-			}
+			require.NoError(t, err)
+			require.NotNil(t, atts)
+			require.Len(t, atts, test.expectedCnt)
 
 			// iterate all and compare
 			for _, att := range atts {
-				if att.Target.Epoch > test.end || att.Source.Epoch < test.start {
-					t.Errorf("list attestation returned an element outside what was requested. start: %d end:%d, returned: %d", test.start, test.end, att.Target.Epoch)
-					return
-				}
+				require.False(t, att.Target.Epoch > test.end || att.Source.Epoch < test.start)
 			}
 		})
 	}

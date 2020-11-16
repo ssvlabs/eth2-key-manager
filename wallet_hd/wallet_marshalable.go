@@ -2,8 +2,9 @@ package wallet_hd
 
 import (
 	"encoding/json"
-	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
@@ -31,14 +32,14 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: id")
 	}
 
 	// type
 	if val, exists := v["type"]; exists {
 		wallet.walletType = val.(string)
 	} else {
-		return fmt.Errorf("could not find var: id")
+		return errors.New("could not find var: type")
 	}
 
 	// indexMapper
@@ -51,7 +52,7 @@ func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
 			}
 		}
 	} else {
-		return fmt.Errorf("could not find var: indexMapper")
+		return errors.New("could not find var: indexMapper")
 	}
 
 	return nil

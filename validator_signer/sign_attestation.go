@@ -2,8 +2,8 @@ package validator_signer
 
 import (
 	"encoding/hex"
-	"fmt"
 
+	"github.com/pkg/errors"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -12,7 +12,7 @@ import (
 func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error) {
 	// 1. get the account
 	if req.GetPublicKey() == nil {
-		return nil, fmt.Errorf("account was not supplied")
+		return nil, errors.New("account was not supplied")
 	}
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(req.GetPublicKey()))
 	if err != nil {
@@ -33,7 +33,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 		if len(val) > 0 {
 
 		}
-		return nil, fmt.Errorf("slashable attestation (%s), not signing", val[0].Status)
+		return nil, errors.Errorf("slashable attestation (%s), not signing", val[0].Status)
 	}
 
 	// 4. add to protection storage

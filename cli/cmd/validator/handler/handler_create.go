@@ -20,11 +20,11 @@ import (
 	contracts "github.com/prysmaticlabs/prysm/contracts/deposit-contract"
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/spf13/cobra"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/validator/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )

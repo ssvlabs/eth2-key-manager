@@ -6,13 +6,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
+	"github.com/stretchr/testify/require"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -45,22 +45,14 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			// create
 			a, err := wallet.CreateValidatorAccount(seed, nil)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// open
 			a1, err := wallet.AccountByPublicKey(hex.EncodeToString(a.ValidatorPublicKey().Marshal()))
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
+
 			a2, err := wallet.AccountByID(a.ID())
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// verify
 			for _, fetchedAccount := range []core.ValidatorAccount{a1, a2} {
@@ -85,7 +77,7 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 	tests := []struct {
 		name       string
 		walletName string
-		encryptor  types.Encryptor
+		encryptor  encryptor2.Encryptor
 		password   []byte
 		error
 	}{
@@ -136,15 +128,9 @@ func TestingWalletStorage(storage core.Storage, t *testing.T) {
 				}
 				return
 			}
-			if fetched == nil {
-				t.Errorf("wallet could not be fetched by id")
-				return
-			}
 
-			if test.error != nil {
-				t.Errorf("expected error: %s", test.error.Error())
-				return
-			}
+			require.NotNil(t, fetched)
+			require.NoError(t, test.error)
 
 			// assert
 			require.Equal(t, wallet.ID(), fetched.ID())

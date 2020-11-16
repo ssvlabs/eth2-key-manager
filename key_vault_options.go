@@ -1,17 +1,17 @@
 package eth2keymanager
 
 import (
-	wtypes "github.com/wealdtech/go-eth2-wallet-types/v2"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
 type KeyVaultOptions struct {
-	encryptor wtypes.Encryptor
+	encryptor encryptor2.Encryptor
 	password  []byte
 	storage   interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
 	seed      []byte
 }
 
-func (options *KeyVaultOptions) SetEncryptor(encryptor wtypes.Encryptor) *KeyVaultOptions {
+func (options *KeyVaultOptions) SetEncryptor(encryptor encryptor2.Encryptor) *KeyVaultOptions {
 	options.encryptor = encryptor
 	return options
 }

@@ -15,11 +15,9 @@ require (
 	github.com/wealdtech/eth2-signer-api v1.3.0
 	github.com/wealdtech/go-eth2-types/v2 v2.5.0
 	github.com/wealdtech/go-eth2-util v1.5.0
-	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.0
-	github.com/wealdtech/go-eth2-wallet-types/v2 v2.6.0
+	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
+	golang.org/x/text v0.3.3
 )
-
-replace gopkg.in/urfave/cli.v2 => github.com/urfave/cli/v2 v2.1.1
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20200530091827-df74fa9e9621
 

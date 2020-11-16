@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	types "github.com/wealdtech/go-eth2-types/v2"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
@@ -58,36 +60,24 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 
 func TestOpeningAccount(t *testing.T) {
 	storage, accounts, err := getPopulatedWalletStorage()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 	stores.TestingOpeningAccount(storage, accounts[0], t)
 }
 
 func TestAddingAccountsToWallet(t *testing.T) {
 	storage, accounts, err := getPopulatedWalletStorage()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 	stores.TestingSavingAccounts(storage, accounts, t)
 }
 
 func TestFetchingNonExistingAccount(t *testing.T) {
 	storage, _, err := getPopulatedWalletStorage()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 	stores.TestingFetchingNonExistingAccount(storage, t)
 }
 
 func TestListingAccounts(t *testing.T) {
 	storage, _, err := getPopulatedWalletStorage()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 	stores.TestingListingAccounts(storage, t)
 }

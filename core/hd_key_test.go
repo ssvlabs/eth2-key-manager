@@ -3,32 +3,14 @@ package core
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"math/big"
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
-
-type mockedStorage struct {
-	seed []byte
-	err  error
-}
-
-func (s *mockedStorage) Name() string                                              { return "" }
-func (s *mockedStorage) SaveWallet(wallet Wallet) error                            { return nil }
-func (s *mockedStorage) OpenWallet() (Wallet, error)                               { return nil, nil }
-func (s *mockedStorage) ListAccounts() ([]ValidatorAccount, error)                 { return nil, nil }
-func (s *mockedStorage) SaveAccount(account ValidatorAccount) error                { return nil }
-func (s *mockedStorage) OpenAccount(accountId uuid.UUID) (ValidatorAccount, error) { return nil, nil }
-func (s *mockedStorage) SetEncryptor(encryptor types.Encryptor, password []byte)   {}
-func (s *mockedStorage) SecurelyFetchPortfolioSeed() ([]byte, error)               { return s.seed, nil }
-func (s *mockedStorage) SecurelySavePortfolioSeed(secret []byte) error             { return s.err }
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -67,7 +49,7 @@ func TestMarshalingHDKey(t *testing.T) {
 			name: "Base account derivation (base path only)",
 			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "", // after basePath
-			err:  fmt.Errorf("invalid relative path. Example: /1/2/3"),
+			err:  errors.New("invalid relative path. Example: /1/2/3"),
 		},
 	}
 
@@ -91,16 +73,11 @@ func TestMarshalingHDKey(t *testing.T) {
 
 			// marshal and unmarshal
 			byts, err := json.Marshal(hdKey)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
+
 			newKey := &HDKey{}
 			err = json.Unmarshal(byts, newKey)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// match
 			require.Equal(t, hdKey.Path(), newKey.Path())
@@ -190,21 +167,21 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			name:        "bad path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "0/0", // after basePath
-			err:         fmt.Errorf("invalid relative path. Example: /1/2/3"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name:        "too large of an index, bad path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/1000/0", // after basePath
-			err:         fmt.Errorf("invalid relative path. Example: /1/2/3"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name:        "not a relative path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "m/0/0", // after basePath
-			err:         fmt.Errorf("invalid relative path. Example: /1/2/3"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 	}
@@ -212,30 +189,24 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			key, err := MasterKeyFromSeed(test.seed, MainNetwork)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			hdKey, err := key.Derive(test.path)
 			if err != nil {
 				if test.err != nil {
-					assert.Equal(t, test.err.Error(), err.Error())
+					require.Equal(t, test.err.Error(), err.Error())
 				} else {
 					t.Error(err)
 				}
 				return
 			} else {
-				if test.err != nil {
-					t.Errorf("should have returned error but didn't")
-					return
-				}
+				require.NoError(t, test.err)
 			}
 
-			assert.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
+			require.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
 			privkey, err := e2types.BLSPrivateKeyFromBytes(test.expectedKey.Bytes())
-			assert.NoError(t, err)
-			assert.Equal(t, privkey.PublicKey().Marshal(), hdKey.PublicKey().Marshal())
+			require.NoError(t, err)
+			require.Equal(t, privkey.PublicKey().Marshal(), hdKey.PublicKey().Marshal())
 		})
 	}
 }

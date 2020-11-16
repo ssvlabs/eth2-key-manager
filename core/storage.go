@@ -3,7 +3,8 @@ package core
 import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+
+	"github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
 // Network represents the network.
@@ -100,5 +101,5 @@ type Storage interface {
 	OpenAccount(accountId uuid.UUID) (ValidatorAccount, error)
 
 	// SetEncryptor sets the given encryptor to the wallet.
-	SetEncryptor(encryptor types.Encryptor, password []byte)
+	SetEncryptor(encryptor encryptor.Encryptor, password []byte)
 }

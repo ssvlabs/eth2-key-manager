@@ -13,10 +13,7 @@ import (
 
 func TestingOpeningAccount(storage core.Storage, account core.ValidatorAccount, t *testing.T) {
 	a1, err := storage.OpenAccount(account.ID())
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
 	require.Equal(t, account.ID().String(), a1.ID().String())
 	require.Equal(t, account.ValidatorPublicKey().Marshal(), a1.ValidatorPublicKey().Marshal())
 	require.Equal(t, account.WithdrawalPublicKey().Marshal(), a1.WithdrawalPublicKey().Marshal())
@@ -25,19 +22,13 @@ func TestingOpeningAccount(storage core.Storage, account core.ValidatorAccount, 
 
 func TestingSavingAccounts(storage core.Storage, accounts []core.ValidatorAccount, t *testing.T) {
 	for _, account := range accounts {
-		testname := fmt.Sprintf("adding account %s", account.Name())
-		t.Run(testname, func(t *testing.T) {
+		t.Run(fmt.Sprintf("adding account %s", account.Name()), func(t *testing.T) {
 			err := storage.SaveAccount(account)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			require.NoError(t, err)
 
 			// verify account was added
 			val, err := storage.OpenAccount(account.ID())
-			if err != nil {
-				t.Error(err)
-			}
+			require.NoError(t, err)
 			require.Equal(t, account.ID(), val.ID())
 			require.Equal(t, account.Name(), val.Name())
 			require.Equal(t, account.ValidatorPublicKey().Marshal(), val.ValidatorPublicKey().Marshal())
@@ -55,9 +46,7 @@ func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 
 		// fetch non existing account
 		_, err := storage.OpenAccount(uuid.New())
-		if err != nil {
-			t.Error(fmt.Errorf("should not return error for unknwon account, just nil"))
-		}
+		require.NoError(t, err)
 	})
 }
 
@@ -77,29 +66,21 @@ func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	accounts := map[string]bool{}
 	for i := 0; i < 10; i++ {
 		account, err := wallet.CreateValidatorAccount(seed, nil)
-		if err != nil {
-			t.Error(err)
-			return
-		}
+		require.NoError(t, err)
+
 		accounts[account.ID().String()] = false
 	}
 
 	// verify listing
 	fetched, err := storage.ListAccounts()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	require.NoError(t, err)
+
 	for _, a := range fetched {
 		accounts[a.ID().String()] = true
 	}
 	for k, v := range accounts {
 		t.Run(k, func(t *testing.T) {
-			if v != true {
-				t.Error(fmt.Errorf("account %s not fetched", k))
-				return
-			}
+			require.True(t, v)
 		})
 	}
-
 }
