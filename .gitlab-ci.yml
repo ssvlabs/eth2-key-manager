@@ -1,5 +1,5 @@
 stages:
-  - build
+  - test
 
 variables:
 
@@ -14,13 +14,9 @@ variables:
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
 
 
-#blox-infra-stage
-Build stage Docker image:
+Test stage Docker image:
   stage: build
   tags:
     - blox-infra-stage 
   script:
-    - echo test
-
-  only:
-    - master
+    - go test -v -cover -race -p 1 ./...
