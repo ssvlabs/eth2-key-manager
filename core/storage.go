@@ -1,9 +1,8 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
@@ -20,7 +19,8 @@ func NetworkFromString(n string) Network {
 	case string(MainNetwork):
 		return MainNetwork
 	default:
-		panic(fmt.Sprintf("undefined network %s", n))
+		logrus.WithField("network", n).Fatal("undefined network")
+		return ""
 	}
 }
 
@@ -32,9 +32,10 @@ func (n Network) ForkVersion() []byte {
 	case ZinkenNetwork:
 		return []byte{0, 0, 0, 3}
 	case MainNetwork:
-		return []byte{0, 0, 0, 4}
+		return []byte{0, 0, 0, 0}
 	default:
-		panic(fmt.Sprintf("undefined network %s", n))
+		logrus.WithField("network", n).Fatal("undefined network")
+		return []byte{}
 	}
 }
 
@@ -48,7 +49,8 @@ func (n Network) DepositContractAddress() string {
 	case MainNetwork:
 		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 	default:
-		panic(fmt.Sprintf("undefined network %s", n))
+		logrus.WithField("network", n).Fatal("undefined network")
+		return ""
 	}
 }
 
