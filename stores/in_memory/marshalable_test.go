@@ -2,25 +2,24 @@ package in_memory
 
 import (
 	"encoding/json"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
 func TestMarshaling(t *testing.T) {
-	if err := e2types.InitBLS(); err != nil { // very important!
-		require.NoError(t, err)
-	}
+	err := e2types.InitBLS()
+	require.NoError(t, err)
 
 	store := NewInMemStore(core.MainNetwork)
 
 	// wallet
 	wallet := wallet_hd.NewHDWallet(&core.WalletContext{Storage: store})
-	err := store.SaveWallet(wallet)
+	err = store.SaveWallet(wallet)
 	require.NoError(t, err)
 
 	// account
