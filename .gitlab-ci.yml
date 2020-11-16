@@ -16,6 +16,7 @@ variables:
 
 Test stage Docker image:
   stage: test
+  image: golang:1.14-stretch
   tags:
     - blox-infra-stage 
   script:
