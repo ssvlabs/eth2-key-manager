@@ -9,6 +9,7 @@ require (
 	github.com/prysmaticlabs/ethereumapis v0.0.0-20200827165051-58ccb36e36b9
 	github.com/prysmaticlabs/go-ssz v0.0.0-20200612203617-6d5c9aa213ae
 	github.com/prysmaticlabs/prysm v1.0.0-alpha.24
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.6.1
 	github.com/tyler-smith/go-bip39 v1.0.2
