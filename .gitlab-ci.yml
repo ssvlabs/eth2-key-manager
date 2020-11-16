@@ -15,7 +15,7 @@ variables:
 
 
 Test stage Docker image:
-  stage: build
+  stage: test
   tags:
     - blox-infra-stage 
   script:
