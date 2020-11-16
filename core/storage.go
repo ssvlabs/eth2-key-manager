@@ -36,7 +36,7 @@ func (n Network) ForkVersion() []byte {
 		return []byte{0, 0, 0, 0}
 	default:
 		logrus.WithField("network", n).Fatal("undefined network")
-		return []byte{}
+		return nil
 	}
 }
 
