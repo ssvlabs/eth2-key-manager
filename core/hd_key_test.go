@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
@@ -17,8 +18,8 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func _bigInt(input string) *big.Int {
-	res, _ := new(big.Int).SetString(input, 10)
+func _bigIntFromSkHex(input string) *big.Int {
+	res, _ := new(big.Int).SetString(input, 16)
 	return res
 }
 
@@ -105,63 +106,63 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/0/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("16278447180917815188301017385774271592438483452880235255024605821259671216398"),
+			expectedKey: _bigIntFromSkHex("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 		},
 		{
 			name:        "validation account 1 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/1/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("22772506560955906640840029020628554414154538440282401807772339666252999598733"),
+			expectedKey: _bigIntFromSkHex("b41df3c322a6fd305fc9425df52501f7f8067dbba551466d82d506c83c6ab287580202aa1a3449f54b9bc464a04b70e6"),
 		},
 		{
 			name:        "validation account 2 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/2/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("39196384482644522441983190042722076264169843386078553516164086198183513560637"),
+			expectedKey: _bigIntFromSkHex("9415b51f7996d6872f32c9bf7c259fad10e211d6097ff52ae99520a0ab3b916b3570073abbb83fa87da66936d351010d"),
 		},
 		{
 			name:        "validation account 3 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/3/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("28093661633617073106051830080274606181076423213304176144286257209925213345002"),
+			expectedKey: _bigIntFromSkHex("80b42ed53fe82598d055c2723bce9b1dde249d0497291856ef77fc75b094c60aca9dcc648e414dc9db41f8b8dc2f13e4"),
 		},
 		{
 			name:        "withdrawal account 0 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/0/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("26551663876804375121305275007227133452639447817512639855729535822239507627836"),
+			expectedKey: _bigIntFromSkHex("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6"),
 		},
 		{
 			name:        "withdrawal account 1 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/1/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("35957947454275682122989949668683794518020231276710636838205992785623169821803"),
+			expectedKey: _bigIntFromSkHex("858e30df33bfdd613234abc9359ccd924f4807f1ba21de328d361e72f8c9ca94c9b7c225536405141df8239db87bd510"),
 		},
 		{
 			name:        "withdrawal account 2 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/2/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("8862394884593725153617163219481465667794938944832130820949251394547028786321"),
+			expectedKey: _bigIntFromSkHex("85586894abb77e41ba5dc3cfa2a7506c7584d024f028501da1e766792bcf6cd79ae17ff68eee84315eba9a2a8e7f89fe"),
 		},
 		{
 			name:        "withdrawal account 3 derivation",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/3/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("24013488102538647731381570745201628464138315555327292772724806156501038782887"),
+			expectedKey: _bigIntFromSkHex("afb22992f52aaf46c461ad1013e88c2c3ca8656c58170a9d08aaaeb9eac404fba839b313150f8f4b2f9fe23e64119c1f"),
 		},
 		{
 			name:        "Base account derivation (big index)",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "/100/0", // after basePath
 			err:         nil,
-			expectedKey: _bigInt("14004582289918763639923763455218870137436565566857894891588947000864308096613"),
+			expectedKey: _bigIntFromSkHex("aaa63a09aa2c0ce6a2a29940df8981eeefac0ea193bf90f2e06edd41356054f2907bc2e1eb5aaa4097361841914cd274"),
 		},
 		{
 			name:        "bad path",
@@ -204,9 +205,9 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			}
 
 			require.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
-			privkey, err := e2types.BLSPrivateKeyFromBytes(test.expectedKey.Bytes())
+			expectedPk, err := e2types.BLSPublicKeyFromBytes(test.expectedKey.Bytes())
 			require.NoError(t, err)
-			require.Equal(t, privkey.PublicKey().Marshal(), hdKey.PublicKey().Marshal())
+			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey().Marshal(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Marshal())))
 		})
 	}
 }

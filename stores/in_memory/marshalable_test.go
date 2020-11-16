@@ -5,17 +5,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
 func TestMarshaling(t *testing.T) {
+	err := e2types.InitBLS()
+	require.NoError(t, err)
+
 	store := NewInMemStore(core.MainNetwork)
 
 	// wallet
 	wallet := wallet_hd.NewHDWallet(&core.WalletContext{Storage: store})
-	err := store.SaveWallet(wallet)
+	err = store.SaveWallet(wallet)
 	require.NoError(t, err)
 
 	// account
@@ -67,7 +71,7 @@ func TestMarshaling(t *testing.T) {
 	t.Run("verify acc", func(t *testing.T) {
 		wallet2, err := store2.OpenWallet()
 		require.NoError(t, err)
-		acc2, err := wallet2.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+		acc2, err := wallet2.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 		require.NoError(t, err)
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})

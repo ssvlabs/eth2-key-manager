@@ -19,8 +19,8 @@ func TestAccountDepositData(t *testing.T) {
 			"account",
 			"deposit-data",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
-			"--index=5",
-			"--public-key=af58413b82211b9e57fde1af57faef5edebdff18797a5792084fc5a8d800cd787adfe3cc7b75fb316a82e70ed2257637",
+			"--index=0",
+			"--public-key=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -36,8 +36,8 @@ func TestAccountDepositData(t *testing.T) {
 			"account",
 			"deposit-data",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
-			"--index=5",
-			"--public-key=af58413b82211b9e57fde1af57faef5edebdff18797a5792084fc5a8d800cd787adfe3cc7b75fb316a82e70ed2257637",
+			"--index=0",
+			"--public-key=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"--network=zinken",
 		})
 		err := cmd.RootCmd.Execute()
