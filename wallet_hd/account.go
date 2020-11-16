@@ -158,11 +158,12 @@ func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
 		return nil, err
 	}
 	return map[string]interface{}{
-		"amount":                depositData.GetAmount(),
-		"publicKey":             hex.EncodeToString(depositData.GetPublicKey()),
-		"signature":             hex.EncodeToString(depositData.GetSignature()),
-		"withdrawalCredentials": hex.EncodeToString(depositData.GetWithdrawalCredentials()),
-		"depositDataRoot":       hex.EncodeToString(root[:]),
+		"amount":                 depositData.GetAmount(),
+		"publicKey":              hex.EncodeToString(depositData.GetPublicKey()),
+		"signature":              hex.EncodeToString(depositData.GetSignature()),
+		"withdrawalCredentials":  hex.EncodeToString(depositData.GetWithdrawalCredentials()),
+		"depositDataRoot":        hex.EncodeToString(root[:]),
+		"depositContractAddress": account.context.Storage.Network().DepositContractAddress(),
 	}, nil
 }
 

@@ -1,11 +1,11 @@
 package eth2keymanager
 
 import (
-	"log"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -30,7 +30,7 @@ func initBLS() error {
 func InitCrypto() {
 	// !!!VERY IMPORTANT!!!
 	if err := initBLS(); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }
 
