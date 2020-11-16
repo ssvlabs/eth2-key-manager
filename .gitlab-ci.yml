@@ -1,0 +1,26 @@
+stages:
+  - build
+
+variables:
+
+  #GLOBAL
+  IMAGE_NAME: eth2-key-manager
+
+  #STAGE
+  ACCOUNT_ID_INFRA_STAGE: 121827225315
+  AWS_REGION_INFRA_STAGE: "us-west-2"
+  DOCKER_REPO_INFRA_STAGE: $ACCOUNT_ID_INFRA_STAGE.dkr.ecr.$AWS_REGION_INFRA_STAGE.amazonaws.com/$IMAGE_NAME
+  APP_REPLICAS_INFRA_STAGE: "1"
+  ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
+
+
+#blox-infra-stage
+Build stage Docker image:
+  stage: build
+  tags:
+    - blox-infra-stage 
+  script:
+    - echo test
+
+  only:
+    - master
