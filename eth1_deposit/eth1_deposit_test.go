@@ -1,7 +1,6 @@
 package eth1_deposit
 
 import (
-	"bytes"
 	"encoding/hex"
 	"fmt"
 	"testing"
@@ -42,12 +41,13 @@ func TestDepositData(t *testing.T) {
 			validatorPrivKey:              _ignoreErr(hex.DecodeString("23fd464c122d7fa8c9c8e46d710ae478ab920c8c0587e86556aa968191d5210e")),
 			withdrawalPubKey:              _ignoreErr(hex.DecodeString("b323537b2867d9f2bae068f93e75a9e2e1c8d594e3696c34dc8010dc403eaeeaf43756a440fc82e1c6f45c6e8348343f")),
 			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("00ea056bfaa692b4e12bb1c3f59049dabcfb0b63f427025c718f5e3b81fdb945")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("aac3de8d5d1700e2519da9346625273ded81a4250bd1b98c50e6587acac9545a1d1598472823aea29220cbc45ae9062f09791dc22252efdd3a1531964e4d62a59511e0f332fb3cc5ea7fe0831de696f040fe806f9f22bd29db0466047584cb23")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("5b508bbed40a083809e4d0ee74135c7289020e33e2dbad2e69f41772d09f5a63")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("b922154b5e1ab3302e0bba98e3eee2f94e8ee246622264e9fd6364530be1e9c94ce76648780b118cfac5741a62abf05b061009c2a41d8a459f2accab91564b5b67b38c53e62037a85cbf366ba63e0b88073e93821e8c9de1c87749f2db925aef")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("bc610cc4fe56d60c64e6665dae24dee70968a6e23cf52ee1da90d99adedcf250")),
 		},
 	}
 
-	e2types.InitBLS()
+	err := e2types.InitBLS()
+	require.NoError(t, err)
 
 	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {
@@ -64,10 +64,10 @@ func TestDepositData(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, val.PublicKey().Marshal(), depositData.PublicKey)
-			require.True(t, bytes.Equal(test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials))
+			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
 			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
-			require.True(t, bytes.Equal(test.expectedRoot, root[:]))
-			require.True(t, bytes.Equal(test.expectedSig, depositData.Signature))
+			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))
+			require.Equal(t, test.expectedSig, depositData.Signature, hex.EncodeToString(depositData.Signature))
 
 			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey))
 			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
