@@ -29,10 +29,6 @@ import (
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
-const (
-	depositAddress = "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC"
-)
-
 // ValidatorConfig represents the validator config data
 type ValidatorConfig struct {
 	UUID    string                 `json:"uuid"`
@@ -110,7 +106,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create deposit contract client
-	depositContract, err := contracts.NewDepositContract(common.HexToAddress(depositAddress), client)
+	depositContract, err := contracts.NewDepositContract(common.HexToAddress(store.Network().DepositContractAddress()), client)
 	if err != nil {
 		return err
 	}
