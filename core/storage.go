@@ -15,8 +15,6 @@ func NetworkFromString(n string) Network {
 	switch n {
 	case string(TestNetwork):
 		return TestNetwork
-	case string(ZinkenNetwork):
-		return ZinkenNetwork
 	case string(MainNetwork):
 		return MainNetwork
 	default:
@@ -29,9 +27,7 @@ func NetworkFromString(n string) Network {
 func (n Network) ForkVersion() []byte {
 	switch n {
 	case TestNetwork:
-		return []byte{0, 0, 0, 1}
-	case ZinkenNetwork:
-		return []byte{0, 0, 0, 3}
+		return []byte{0, 0, 32, 9}
 	case MainNetwork:
 		return []byte{0, 0, 0, 0}
 	default:
@@ -44,9 +40,7 @@ func (n Network) ForkVersion() []byte {
 func (n Network) DepositContractAddress() string {
 	switch n {
 	case TestNetwork:
-		return "0x07b39F4fDE4A38bACe212b546dAc87C58DfE3fDC"
-	case ZinkenNetwork:
-		return "0x99F0Ec06548b086E46Cb0019C78D0b9b9F36cD53"
+		return "0x8c5fecdC472E27Bc447696F431E425D02dd46a8c"
 	case MainNetwork:
 		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 	default:
@@ -62,11 +56,8 @@ func (n Network) FullPath(relativePath string) string {
 
 // Available networks.
 const (
-	// TestNetwork represents the test network.
-	TestNetwork Network = "test"
-
-	// ZinkenNetwork represents Zinken network.
-	ZinkenNetwork Network = "zinken"
+	// TestNetwork represents the Pyrmont test network.
+	TestNetwork Network = "pyrmont"
 
 	// MainNetwork represents the main network.
 	MainNetwork Network = "mainnet"
