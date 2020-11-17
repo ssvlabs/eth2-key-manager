@@ -1,7 +1,6 @@
 package eth1_deposit
 
 import (
-	"bytes"
 	"encoding/hex"
 	"fmt"
 	"testing"
@@ -63,10 +62,10 @@ func TestDepositData(t *testing.T) {
 			)
 			require.NoError(t, err)
 			require.Equal(t, val.PublicKey().Marshal(), depositData.PublicKey)
-			require.True(t, bytes.Equal(test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials))
+			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
 			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
-			require.True(t, bytes.Equal(test.expectedRoot, root[:]))
-			require.True(t, bytes.Equal(test.expectedSig, depositData.Signature))
+			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))
+			require.Equal(t, test.expectedSig, depositData.Signature, hex.EncodeToString(depositData.Signature))
 
 			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey))
 			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
