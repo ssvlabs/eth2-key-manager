@@ -3,7 +3,7 @@ module github.com/bloxapp/eth2-key-manager
 go 1.15
 
 require (
-	github.com/ethereum/go-ethereum v1.9.20
+	github.com/ethereum/go-ethereum v1.9.24
 	github.com/google/uuid v1.1.2
 	github.com/pkg/errors v0.9.1
 	github.com/prysmaticlabs/ethereumapis v0.0.0-20201003171600-a72e5f77d233
