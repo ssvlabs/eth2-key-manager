@@ -21,7 +21,7 @@ func (p *NoProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBe
 	}
 }
 
-func (p *NoProtection) SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
+func (p *NoProtection) UpdateLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
 	return nil
 }
 
@@ -33,6 +33,6 @@ func (p *NoProtection) SaveLatestAttestation(key e2types.PublicKey, req *pb.Sign
 	return nil
 }
 
-func (p *NoProtection) RetrieveLatestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
+func (p *NoProtection) RetrieveHighestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
 	return nil, nil
 }

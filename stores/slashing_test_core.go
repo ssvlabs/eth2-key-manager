@@ -122,11 +122,11 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveAttestation(test.account.ValidatorPublicKey(), test.att)
+			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey(), test.att)
 			require.NoError(t, err)
 
 			// fetch
-			att, err := storage.RetrieveAttestation(test.account.ValidatorPublicKey(), test.att.Target.Epoch)
+			att, err := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey(), test.att.Target.Epoch)
 			require.NoError(t, err)
 			require.NotNil(t, att)
 			require.True(t, att.Compare(test.att))
@@ -257,7 +257,7 @@ func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
 
 	// save
 	for _, att := range attestations {
-		err := storage.SaveAttestation(account.ValidatorPublicKey(), att)
+		err := storage.SaveHighestAttestation(account.ValidatorPublicKey(), att)
 		require.NoError(t, err)
 	}
 

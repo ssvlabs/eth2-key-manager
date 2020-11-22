@@ -37,7 +37,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}
 
 	// 4. add to protection storage
-	if err := signer.slashingProtector.SaveAttestation(account.ValidatorPublicKey(), req); err != nil {
+	if err := signer.slashingProtector.UpdateLatestAttestation(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 

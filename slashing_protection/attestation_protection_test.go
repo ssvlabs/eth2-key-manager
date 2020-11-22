@@ -31,7 +31,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	require.NoError(t, err)
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -50,7 +50,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -69,7 +69,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -88,7 +88,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -107,7 +107,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{

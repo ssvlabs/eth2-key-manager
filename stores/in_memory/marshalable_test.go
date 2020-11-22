@@ -42,7 +42,7 @@ func TestMarshaling(t *testing.T) {
 			Root:  []byte("A"),
 		},
 	}
-	store.SaveAttestation(acc.ValidatorPublicKey(), att)
+	store.SaveHighestAttestation(acc.ValidatorPublicKey(), att)
 
 	// proposal
 	prop := &core.BeaconBlockHeader{
@@ -76,7 +76,7 @@ func TestMarshaling(t *testing.T) {
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})
 	t.Run("verify attestation", func(t *testing.T) {
-		att2, err := store.RetrieveAttestation(acc.ValidatorPublicKey(), 2)
+		att2, err := store.RetrieveHighestAttestation(acc.ValidatorPublicKey(), 2)
 		require.NoError(t, err)
 		require.Equal(t, att.BeaconBlockRoot, att2.BeaconBlockRoot)
 	})

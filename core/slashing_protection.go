@@ -9,20 +9,21 @@ import (
 type SlashingProtector interface {
 	IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*AttestationSlashStatus, error)
 	IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *ProposalSlashStatus
-	SaveAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
+	// Will potentially update the highest attestation given this latest attestation.
+	UpdateLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
 	SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error
-	SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
-	RetrieveLatestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
+	//SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
+	RetrieveHighestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
 }
 
 // SlashingStore represents the behavior of the slashing store
 type SlashingStore interface {
-	SaveAttestation(key e2types.PublicKey, req *BeaconAttestation) error
-	RetrieveAttestation(key e2types.PublicKey, epoch uint64) (*BeaconAttestation, error)
+	SaveHighestAttestation(key e2types.PublicKey, req *BeaconAttestation) error
+	RetrieveHighestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
 	// both epochStart and epochEnd reflect saved attestations by their target epoch
-	ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*BeaconAttestation, error)
+	//ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*BeaconAttestation, error)
 	SaveProposal(key e2types.PublicKey, req *BeaconBlockHeader) error
 	RetrieveProposal(key e2types.PublicKey, slot uint64) (*BeaconBlockHeader, error)
-	SaveLatestAttestation(key e2types.PublicKey, req *BeaconAttestation) error
-	RetrieveLatestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
+	//SaveLatestAttestation(key e2types.PublicKey, req *BeaconAttestation) error
+	//RetrieveLatestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
 }
