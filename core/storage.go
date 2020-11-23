@@ -1,10 +1,20 @@
 package core
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/eth2-key-manager/encryptor"
+)
+
+var (
+	// This is the testNet genesis time, 2020-11-18 12:00:07 UTC
+	testNetGenesisTime = time.Date(2020, 11, 18, 12, 0, 7, 0, time.UTC)
+
+	// This is the mainNet genesis time, 2020-12-01 12:00:00 UTC
+	mainNetGenesisTime = time.Date(2020, 12, 1, 12, 0, 0, 0, time.UTC)
 )
 
 // Network represents the network.
@@ -33,6 +43,19 @@ func (n Network) ForkVersion() []byte {
 	default:
 		logrus.WithField("network", n).Fatal("undefined network")
 		return nil
+	}
+}
+
+// GenesisTime returns the genesis time of the network.
+func (n Network) GenesisTime() time.Time {
+	switch n {
+	case TestNetwork:
+		return testNetGenesisTime
+	case MainNetwork:
+		return mainNetGenesisTime
+	default:
+		logrus.WithField("network", n).Fatal("undefined network")
+		return time.Time{}
 	}
 }
 
