@@ -9,6 +9,14 @@ import (
 	"github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
+var (
+	// This is the testNet genesis time, 2020-11-18 12:00:07 UTC
+	testNetGenesisTime = time.Date(2020, 11, 18, 12, 0, 7, 0, time.UTC)
+
+	// This is the mainNet genesis time, 2020-12-01 12:00:00 UTC
+	mainNetGenesisTime = time.Date(2020, 12, 1, 12, 0, 0, 0, time.UTC)
+)
+
 // Network represents the network.
 type Network string
 
@@ -42,11 +50,9 @@ func (n Network) ForkVersion() []byte {
 func (n Network) GenesisTime() time.Time {
 	switch n {
 	case TestNetwork:
-		// "2020-11-18 12:00:07 UTC"
-		return time.Date(2020, 11, 18, 12, 0, 7, 0, time.UTC)
+		return testNetGenesisTime
 	case MainNetwork:
-		// "2020-12-01 12:00:00 UTC"
-		return time.Date(2020, 12, 1, 12, 0, 0, 0, time.UTC)
+		return mainNetGenesisTime
 	default:
 		logrus.WithField("network", n).Fatal("undefined network")
 		return time.Time{}
