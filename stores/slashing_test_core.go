@@ -126,26 +126,25 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 			require.NoError(t, err)
 
 			// fetch
-			att, err := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey(), test.att.Target.Epoch)
-			require.NoError(t, err)
+			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey())
 			require.NotNil(t, att)
 			require.True(t, att.Compare(test.att))
 		})
 	}
 }
 
-func TestingRetrieveEmptyLatestAttestation(storage core.SlashingStore, t *testing.T) {
-	account := &mockAccount{
-		id:            uuid.New(),
-		validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
-	}
+//func TestingRetrieveEmptyLatestAttestation(storage core.SlashingStore, t *testing.T) {
+//	account := &mockAccount{
+//		id:            uuid.New(),
+//		validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
+//	}
+//
+//	att, err := storage.RetrieveLatestAttestation(account.ValidatorPublicKey())
+//	require.NoError(t, err)
+//	require.Nil(t, att)
+//}
 
-	att, err := storage.RetrieveLatestAttestation(account.ValidatorPublicKey())
-	require.NoError(t, err)
-	require.Nil(t, att)
-}
-
-func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
+func TestingSaveHighestAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name    string
 		att     *core.BeaconAttestation
@@ -196,121 +195,120 @@ func TestingSaveLatestAttestation(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveLatestAttestation(test.account.ValidatorPublicKey(), test.att)
+			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey(), test.att)
 			require.NoError(t, err)
 
 			// fetch
-			att, err := storage.RetrieveLatestAttestation(test.account.ValidatorPublicKey())
-			require.NoError(t, err)
+			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey())
 			require.NotNil(t, att)
 			require.True(t, att.Compare(test.att))
 		})
 	}
 }
 
-func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
-	attestations := []*core.BeaconAttestation{
-		&core.BeaconAttestation{
-			Slot:            30,
-			CommitteeIndex:  1,
-			BeaconBlockRoot: []byte("BeaconBlockRoot"),
-			Source: &core.Checkpoint{
-				Epoch: 1,
-				Root:  []byte("Root"),
-			},
-			Target: &core.Checkpoint{
-				Epoch: 2,
-				Root:  []byte("Root"),
-			},
-		},
-		&core.BeaconAttestation{
-			Slot:            30,
-			CommitteeIndex:  1,
-			BeaconBlockRoot: []byte("BeaconBlockRoot"),
-			Source: &core.Checkpoint{
-				Epoch: 2,
-				Root:  []byte("Root"),
-			},
-			Target: &core.Checkpoint{
-				Epoch: 3,
-				Root:  []byte("Root"),
-			},
-		},
-		&core.BeaconAttestation{
-			Slot:            30,
-			CommitteeIndex:  1,
-			BeaconBlockRoot: []byte("BeaconBlockRoot"),
-			Source: &core.Checkpoint{
-				Epoch: 3,
-				Root:  []byte("Root"),
-			},
-			Target: &core.Checkpoint{
-				Epoch: 8,
-				Root:  []byte("Root"),
-			},
-		},
-	}
-	account := &mockAccount{
-		id:            uuid.New(),
-		validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
-	}
-
-	// save
-	for _, att := range attestations {
-		err := storage.SaveHighestAttestation(account.ValidatorPublicKey(), att)
-		require.NoError(t, err)
-	}
-
-	tests := []struct {
-		name        string
-		start       uint64
-		end         uint64
-		expectedCnt int
-	}{
-		{
-			name:        "empty list 1",
-			start:       0,
-			end:         1,
-			expectedCnt: 0,
-		},
-		{
-			name:        "empty list 2",
-			start:       1000,
-			end:         10010,
-			expectedCnt: 0,
-		},
-		{
-			name:        "simple list 1",
-			start:       1,
-			end:         2,
-			expectedCnt: 1,
-		},
-		{
-			name:        "simple list 2",
-			start:       1,
-			end:         3,
-			expectedCnt: 2,
-		},
-		{
-			name:        "all",
-			start:       0,
-			end:         10,
-			expectedCnt: 3,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			// list
-			atts, err := storage.ListAttestations(account.ValidatorPublicKey(), test.start, test.end)
-			require.NoError(t, err)
-			require.NotNil(t, atts)
-			require.Len(t, atts, test.expectedCnt)
-
-			// iterate all and compare
-			for _, att := range atts {
-				require.False(t, att.Target.Epoch > test.end || att.Source.Epoch < test.start)
-			}
-		})
-	}
-}
+//func TestingListingAttestation(storage core.SlashingStore, t *testing.T) {
+//	attestations := []*core.BeaconAttestation{
+//		&core.BeaconAttestation{
+//			Slot:            30,
+//			CommitteeIndex:  1,
+//			BeaconBlockRoot: []byte("BeaconBlockRoot"),
+//			Source: &core.Checkpoint{
+//				Epoch: 1,
+//				Root:  []byte("Root"),
+//			},
+//			Target: &core.Checkpoint{
+//				Epoch: 2,
+//				Root:  []byte("Root"),
+//			},
+//		},
+//		&core.BeaconAttestation{
+//			Slot:            30,
+//			CommitteeIndex:  1,
+//			BeaconBlockRoot: []byte("BeaconBlockRoot"),
+//			Source: &core.Checkpoint{
+//				Epoch: 2,
+//				Root:  []byte("Root"),
+//			},
+//			Target: &core.Checkpoint{
+//				Epoch: 3,
+//				Root:  []byte("Root"),
+//			},
+//		},
+//		&core.BeaconAttestation{
+//			Slot:            30,
+//			CommitteeIndex:  1,
+//			BeaconBlockRoot: []byte("BeaconBlockRoot"),
+//			Source: &core.Checkpoint{
+//				Epoch: 3,
+//				Root:  []byte("Root"),
+//			},
+//			Target: &core.Checkpoint{
+//				Epoch: 8,
+//				Root:  []byte("Root"),
+//			},
+//		},
+//	}
+//	account := &mockAccount{
+//		id:            uuid.New(),
+//		validationKey: _bigInt("5467048590701165350380985526996487573957450279098876378395441669247373404218"),
+//	}
+//
+//	// save
+//	for _, att := range attestations {
+//		err := storage.SaveHighestAttestation(account.ValidatorPublicKey(), att)
+//		require.NoError(t, err)
+//	}
+//
+//	tests := []struct {
+//		name        string
+//		start       uint64
+//		end         uint64
+//		expectedCnt int
+//	}{
+//		{
+//			name:        "empty list 1",
+//			start:       0,
+//			end:         1,
+//			expectedCnt: 0,
+//		},
+//		{
+//			name:        "empty list 2",
+//			start:       1000,
+//			end:         10010,
+//			expectedCnt: 0,
+//		},
+//		{
+//			name:        "simple list 1",
+//			start:       1,
+//			end:         2,
+//			expectedCnt: 1,
+//		},
+//		{
+//			name:        "simple list 2",
+//			start:       1,
+//			end:         3,
+//			expectedCnt: 2,
+//		},
+//		{
+//			name:        "all",
+//			start:       0,
+//			end:         10,
+//			expectedCnt: 3,
+//		},
+//	}
+//
+//	for _, test := range tests {
+//		t.Run(test.name, func(t *testing.T) {
+//			// list
+//			atts, err := storage.ListAttestations(account.ValidatorPublicKey(), test.start, test.end)
+//			require.NoError(t, err)
+//			require.NotNil(t, atts)
+//			require.Len(t, atts, test.expectedCnt)
+//
+//			// iterate all and compare
+//			for _, att := range atts {
+//				require.False(t, att.Target.Epoch > test.end || att.Source.Epoch < test.start)
+//			}
+//		})
+//	}
+//}

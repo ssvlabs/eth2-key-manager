@@ -152,8 +152,8 @@ func TestSurroundingVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.SurroundingVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("2 Surrounded votes", func(t *testing.T) {
@@ -176,8 +176,8 @@ func TestSurroundingVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 2)
-		require.False(t, res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("1 Surrounding vote", func(t *testing.T) {
@@ -199,8 +199,8 @@ func TestSurroundingVote(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.SurroundedVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("2 Surrounding vote", func(t *testing.T) {
@@ -222,8 +222,8 @@ func TestSurroundingVote(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		require.Len(t, res, 2)
-		require.False(t, res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 }
 
@@ -250,8 +250,8 @@ func TestDoubleAttestationVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.DoubleVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("Different block root, should slash", func(t *testing.T) {
@@ -274,11 +274,11 @@ func TestDoubleAttestationVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.DoubleVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
-	t.Run("Same attestation, should not error", func(t *testing.T) {
+	t.Run("Same attestation, should be slashable (we can't be sure it's not slashable when using highest att.)", func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:     nil,
 			Domain: []byte("domain"),
@@ -296,7 +296,9 @@ func TestDoubleAttestationVote(t *testing.T) {
 				},
 			},
 		})
-		require.False(t, err != nil || len(res) != 0)
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("new attestation, should not error", func(t *testing.T) {
@@ -317,6 +319,6 @@ func TestDoubleAttestationVote(t *testing.T) {
 				},
 			},
 		})
-		require.False(t, err != nil || len(res) != 0)
+		require.False(t, err != nil || res != nil)
 	})
 }

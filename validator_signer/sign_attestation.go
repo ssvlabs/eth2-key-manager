@@ -26,14 +26,11 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 	}()
 
 	// 3. check we can even sign this
-	if val, err := signer.slashingProtector.IsSlashableAttestation(account.ValidatorPublicKey(), req); err != nil || len(val) != 0 {
+	if val, err := signer.slashingProtector.IsSlashableAttestation(account.ValidatorPublicKey(), req); err != nil || val != nil {
 		if err != nil {
 			return nil, err
 		}
-		if len(val) > 0 {
-
-		}
-		return nil, errors.Errorf("slashable attestation (%s), not signing", val[0].Status)
+		return nil, errors.Errorf("slashable attestation (%s), not signing", val.Status)
 	}
 
 	// 4. add to protection storage

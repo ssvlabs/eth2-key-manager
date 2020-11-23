@@ -16,13 +16,10 @@ func (store *InMemStore) SaveHighestAttestation(key e2types.PublicKey, req *core
 	return nil
 }
 
-func (store *InMemStore) RetrieveHighestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
+func (store *InMemStore) RetrieveHighestAttestation(key e2types.PublicKey) *core.BeaconAttestation {
 	k := fmt.Sprintf("%s_highest", attestationKey(key))
 	ret := store.attMemory[k]
-	if ret == nil {
-		return nil, errors.New("attestation not found")
-	}
-	return ret, nil
+	return ret
 }
 
 //func (store *InMemStore) ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {

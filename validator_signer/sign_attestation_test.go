@@ -110,10 +110,10 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 			},
 		})
 		require.NotNil(t, err)
-		require.EqualError(t, err, "slashable attestation (DoubleVote), not signing")
+		require.EqualError(t, err, "slashable attestation (HighestAttestationVote), not signing")
 	})
 
-	t.Run("same vote with different domain, should sign", func(t *testing.T) {
+	t.Run("same vote with different domain, should not sign", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 		signer, err := setupWithSlashingProtection(seed)
 		require.NoError(t, err)
@@ -156,7 +156,8 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 				},
 			},
 		})
-		require.NoError(t, err)
+		require.NotNil(t, err)
+		require.EqualError(t, err, "slashable attestation (HighestAttestationVote), not signing")
 	})
 
 	t.Run("surrounding vote, should err", func(t *testing.T) {
@@ -226,7 +227,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 			},
 		})
 		require.NotNil(t, err)
-		require.EqualError(t, err, "slashable attestation (SurroundingVote), not signing")
+		require.EqualError(t, err, "slashable attestation (HighestAttestationVote), not signing")
 	})
 
 	t.Run("surrounded vote, should err", func(t *testing.T) {
@@ -296,7 +297,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 			},
 		})
 		require.NotNil(t, err)
-		require.EqualError(t, err, "slashable attestation (SurroundedVote), not signing")
+		require.EqualError(t, err, "slashable attestation (HighestAttestationVote), not signing")
 	})
 }
 

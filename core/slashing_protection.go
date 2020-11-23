@@ -7,7 +7,7 @@ import (
 
 // SlashingProtector represents the behavior of the slashing protector
 type SlashingProtector interface {
-	IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) ([]*AttestationSlashStatus, error)
+	IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) (*AttestationSlashStatus, error)
 	IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *ProposalSlashStatus
 	// Will potentially update the highest attestation given this latest attestation.
 	UpdateLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
@@ -19,7 +19,7 @@ type SlashingProtector interface {
 // SlashingStore represents the behavior of the slashing store
 type SlashingStore interface {
 	SaveHighestAttestation(key e2types.PublicKey, req *BeaconAttestation) error
-	RetrieveHighestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
+	RetrieveHighestAttestation(key e2types.PublicKey) *BeaconAttestation
 	// both epochStart and epochEnd reflect saved attestations by their target epoch
 	//ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*BeaconAttestation, error)
 	SaveProposal(key e2types.PublicKey, req *BeaconBlockHeader) error
