@@ -14,7 +14,7 @@ var (
 	testNetGenesisTime = time.Date(2020, 11, 18, 12, 0, 7, 0, time.UTC)
 
 	// This is the mainNet genesis time, 2020-12-01 12:00:00 UTC
-	mainNetGenesisTime = time.Date(2020, 12, 1, 12, 0, 0, 0, time.UTC)
+	mainNetGenesisTime = time.Date(2020, 12, 1, 12, 0, 23, 0, time.UTC)
 )
 
 // Network represents the network.
