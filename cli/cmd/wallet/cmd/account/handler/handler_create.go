@@ -50,7 +50,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	}
 
 	// TODO get rid of network
-	store := in_memory.NewInMemStore(core.TestNetwork)
+	store := in_memory.NewInMemStore(core.PyrmontNetwork)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 

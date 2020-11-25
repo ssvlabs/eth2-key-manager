@@ -61,7 +61,7 @@ func TestMarshalingHDKey(t *testing.T) {
 			//require.NoError(t, err)
 
 			// create the privKey
-			key, err := MasterKeyFromSeed(test.seed, TestNetwork)
+			key, err := MasterKeyFromSeed(test.seed, PyrmontNetwork)
 			require.NoError(t, err)
 
 			hdKey, err := key.Derive(test.path)

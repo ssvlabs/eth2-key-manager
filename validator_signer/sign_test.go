@@ -28,7 +28,7 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewSimpleSigner(wallet, noProtection), nil
+	return NewSimpleSigner(wallet, noProtection, core.PyrmontNetwork), nil
 }
 
 func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (ValidatorSigner, error) {
@@ -64,7 +64,7 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (Valida
 		})
 	}
 
-	return NewSimpleSigner(wallet, protector), nil
+	return NewSimpleSigner(wallet, protector, core.PyrmontNetwork), nil
 }
 
 func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
