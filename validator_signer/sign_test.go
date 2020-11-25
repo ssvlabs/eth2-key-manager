@@ -63,7 +63,6 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (Valida
 			},
 		})
 	}
-
 	return NewSimpleSigner(wallet, protector, core.PyrmontNetwork), nil
 }
 
