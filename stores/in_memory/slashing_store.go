@@ -11,12 +11,15 @@ import (
 )
 
 func (store *InMemStore) SaveHighestAttestation(key e2types.PublicKey, req *core.BeaconAttestation) error {
-	store.highestAttestation = req
+	store.highestAttestation[hex.EncodeToString(key.Marshal())] = req
 	return nil
 }
 
 func (store *InMemStore) RetrieveHighestAttestation(key e2types.PublicKey) *core.BeaconAttestation {
-	return store.highestAttestation
+	if val, ok := store.highestAttestation[hex.EncodeToString(key.Marshal())]; ok {
+		return val
+	}
+	return nil
 }
 
 func (store *InMemStore) SaveProposal(key e2types.PublicKey, req *core.BeaconBlockHeader) error {
