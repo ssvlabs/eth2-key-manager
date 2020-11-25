@@ -12,7 +12,6 @@ type SlashingProtector interface {
 	// Will potentially update the highest attestation given this latest attestation.
 	UpdateLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
 	SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error
-	//SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error
 	RetrieveHighestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
 }
 
@@ -20,10 +19,6 @@ type SlashingProtector interface {
 type SlashingStore interface {
 	SaveHighestAttestation(key e2types.PublicKey, req *BeaconAttestation) error
 	RetrieveHighestAttestation(key e2types.PublicKey) *BeaconAttestation
-	// both epochStart and epochEnd reflect saved attestations by their target epoch
-	//ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*BeaconAttestation, error)
 	SaveProposal(key e2types.PublicKey, req *BeaconBlockHeader) error
 	RetrieveProposal(key e2types.PublicKey, slot uint64) (*BeaconBlockHeader, error)
-	//SaveLatestAttestation(key e2types.PublicKey, req *BeaconAttestation) error
-	//RetrieveLatestAttestation(key e2types.PublicKey) (*BeaconAttestation, error)
 }

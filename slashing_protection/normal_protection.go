@@ -29,7 +29,7 @@ func (protector *NormalProtection) IsSlashableAttestation(key e2types.PublicKey,
 	if highest != nil {
 		return highest.SlashesHighestAttestation(data), nil
 	} else {
-		return nil, fmt.Errorf("highest attestationn data is nil, can't determine if attestation is slashable")
+		return nil, fmt.Errorf("highest attestation data is nil, can't determine if attestation is slashable")
 	}
 }
 
@@ -106,31 +106,6 @@ func (protector *NormalProtection) SaveProposal(key e2types.PublicKey, req *pb.S
 	return protector.store.SaveProposal(key, data)
 }
 
-//func (protector *NormalProtection) SaveLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
-//	val, err := protector.store.RetrieveLatestAttestation(key)
-//	if err != nil {
-//		return nil
-//	}
-//
-//	data := core.ToCoreAttestationData(req)
-//	if val == nil {
-//		return protector.store.SaveLatestAttestation(key, data)
-//	}
-//	if val.Target.Epoch < req.Data.Target.Epoch { // only write newer
-//		return protector.store.SaveLatestAttestation(key, data)
-//	}
-//
-//	return nil
-//}
-
 func (protector *NormalProtection) RetrieveHighestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
 	return protector.store.RetrieveHighestAttestation(key), nil
-}
-
-// specialized func that will prevent overflow for lookup epochs for uint64
-func lookupEpochSub(l uint64, r uint64) uint64 {
-	if l >= r {
-		return l - r
-	}
-	return 0
 }

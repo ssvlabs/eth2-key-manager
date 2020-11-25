@@ -31,7 +31,7 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	return NewSimpleSigner(wallet, noProtection), nil
 }
 
-func setupWithSlashingProtection(seed []byte) (ValidatorSigner, error) {
+func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (ValidatorSigner, error) {
 	store := inmemStorage()
 	protector := prot.NewNormalProtection(store)
 	wallet, err := walletWithSeed(seed, store)
@@ -44,23 +44,25 @@ func setupWithSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	protector.UpdateLatestAttestation(acc.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
-		Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
-		Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
-		Data: &pb.AttestationData{
-			Slot:            0,
-			CommitteeIndex:  0,
-			BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
-			Source: &pb.Checkpoint{
-				Epoch: 0,
-				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+	if setLatestAttestation {
+		protector.UpdateLatestAttestation(acc.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
+			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
+			Data: &pb.AttestationData{
+				Slot:            0,
+				CommitteeIndex:  0,
+				BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+				Source: &pb.Checkpoint{
+					Epoch: 0,
+					Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+				},
+				Target: &pb.Checkpoint{
+					Epoch: 0,
+					Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+				},
 			},
-			Target: &pb.Checkpoint{
-				Epoch: 0,
-				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
-			},
-		},
-	})
+		})
+	}
 
 	return NewSimpleSigner(wallet, protector), nil
 }

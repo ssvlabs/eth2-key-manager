@@ -10,7 +10,7 @@ import (
 
 func TestProposalSlashingSignatures(t *testing.T) {
 	seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	signer, err := setupWithSlashingProtection(seed)
+	signer, err := setupWithSlashingProtection(seed, true)
 	require.NoError(t, err)
 
 	t.Run("valid proposal", func(t *testing.T) {
