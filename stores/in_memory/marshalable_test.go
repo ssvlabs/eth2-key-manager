@@ -1,7 +1,9 @@
 package in_memory
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -56,6 +58,7 @@ func TestMarshaling(t *testing.T) {
 
 	// marshal
 	byts, err := json.Marshal(store)
+	fmt.Printf("%s\n", hex.EncodeToString(byts))
 	require.NoError(t, err)
 
 	// un-marshal

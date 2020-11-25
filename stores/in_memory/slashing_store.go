@@ -11,15 +11,12 @@ import (
 )
 
 func (store *InMemStore) SaveHighestAttestation(key e2types.PublicKey, req *core.BeaconAttestation) error {
-	k := fmt.Sprintf("%s_highest", attestationKey(key))
-	store.attMemory[k] = req
+	store.highestAttestation = req
 	return nil
 }
 
 func (store *InMemStore) RetrieveHighestAttestation(key e2types.PublicKey) *core.BeaconAttestation {
-	k := fmt.Sprintf("%s_highest", attestationKey(key))
-	ret := store.attMemory[k]
-	return ret
+	return store.highestAttestation
 }
 
 func (store *InMemStore) SaveProposal(key e2types.PublicKey, req *core.BeaconBlockHeader) error {
