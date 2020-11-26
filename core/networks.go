@@ -1,10 +1,12 @@
 package core
 
 import (
+	"time"
+
 	"github.com/prysmaticlabs/prysm/shared/timeutils"
 	"github.com/sirupsen/logrus"
-	"time"
 )
+
 // Network represents the network.
 type Network string
 
@@ -55,9 +57,9 @@ func (n Network) FullPath(relativePath string) string {
 func (n Network) MinGenesisTime() uint64 {
 	switch n {
 	case PyrmontNetwork:
-		return 1605700800
+		return 1605700807
 	case MainNetwork:
-		return 1606824000
+		return 1606824023
 	default:
 		logrus.WithField("network", n).Fatal("undefined network")
 		return 0
