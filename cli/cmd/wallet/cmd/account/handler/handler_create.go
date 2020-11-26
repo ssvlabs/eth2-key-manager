@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/hex"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -49,6 +50,20 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to retrieve the response type value")
 	}
 
+	// Get minimals slashing data flag
+	minimal, err := flag.GetMinimalSlashingDataFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
+	}
+	minimalByts, err := hex.DecodeString(minimal)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode minimal slashing data")
+	}
+	minimalAtt := &core.BeaconAttestation{}
+	if err := json.Unmarshal(minimalByts, minimalAtt); err != nil {
+		return errors.Wrap(err, "failed to decode minimal slashing data")
+	}
+
 	// TODO get rid of network
 	store := in_memory.NewInMemStore(core.PyrmontNetwork)
 	options := &eth2keymanager.KeyVaultOptions{}
@@ -66,13 +81,13 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 	if accumulateFlagValue {
 		for i := 0; i <= indexFlagValue; i++ {
-			_, err = wallet.CreateValidatorAccount(seedBytes, &i)
+			_, err = wallet.CreateValidatorAccount(seedBytes, &i, minimalAtt)
 			if err != nil {
 				return errors.Wrap(err, "failed to create validator account")
 			}
 		}
 	} else {
-		_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
+		_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue, minimalAtt)
 		if err != nil {
 			return errors.Wrap(err, "failed to create validator account")
 		}

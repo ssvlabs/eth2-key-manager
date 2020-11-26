@@ -144,7 +144,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 
 		// Create accounts (validators)
 		for j := 0; j < validatorsPerSeed; j++ {
-			account, err := wallet.CreateValidatorAccount(generatedSeed, &j)
+			account, err := wallet.CreateValidatorAccount(generatedSeed, &j, nil)
 			if err != nil {
 				return errors.Wrapf(err, "failed to create validator account")
 			}
