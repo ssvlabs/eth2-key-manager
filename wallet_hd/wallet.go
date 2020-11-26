@@ -175,8 +175,9 @@ func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error)
 		return nil, err
 	}
 	if ret == nil {
-		return nil, nil
+		return nil, ErrAccountNotFound
 	}
+
 	ret.SetContext(wallet.context)
 	return ret, nil
 }
