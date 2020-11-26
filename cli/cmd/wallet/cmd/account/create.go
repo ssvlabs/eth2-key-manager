@@ -25,7 +25,8 @@ func init() {
 	flag.AddSeedFlag(createCmd)
 	flag.AddAccumulateFlag(createCmd)
 	flag.AddResponseTypeFlag(createCmd)
-	flag.AddValidatorMinimalSlashingDataFlag(createCmd)
+	flag.AddHighestSourceFlag(createCmd)
+	flag.AddHighestTargetFlag(createCmd)
 
 	Command.AddCommand(createCmd)
 }

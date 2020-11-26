@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"encoding/json"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -51,17 +50,29 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get minimals slashing data flag
-	minimal, err := flag.GetMinimalSlashingDataFlagValue(cmd)
+	highestSources, err := flag.GetHighestSourceFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
 	}
-	minimalByts, err := hex.DecodeString(minimal)
+	highestTargets, err := flag.GetHighestTargetFlagValue(cmd)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode minimal slashing data")
+		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
 	}
-	minimalAtt := &core.BeaconAttestation{}
-	if err := json.Unmarshal(minimalByts, minimalAtt); err != nil {
-		return errors.Wrap(err, "failed to decode minimal slashing data")
+
+	if accumulateFlagValue {
+		if len(highestSources) != (indexFlagValue + 1) {
+			return errors.Errorf("highest sources length when the accumulate flag is true need to be equal to indexFlagValue")
+		}
+		if len(highestTargets) != (indexFlagValue + 1) {
+			return errors.Errorf("highest targets length when the accumulate flag is true need to be indexFlagValue")
+		}
+	} else {
+		if len(highestSources) != 1 {
+			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
+		}
+		if len(highestTargets) != 1 {
+			return errors.Errorf("highest targets length when the accumulate flag is false need to be 1")
+		}
 	}
 
 	// TODO get rid of network
@@ -86,6 +97,11 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 				return errors.Wrap(err, "failed to create validator account")
 			}
 
+			minimalAtt := &core.BeaconAttestation{
+				Source: &core.Checkpoint{Epoch: uint64(highestSources[i])},
+				Target: &core.Checkpoint{Epoch: uint64(highestTargets[i])},
+			}
+
 			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 				return errors.Wrap(err, "failed to set validator minimal slashing protection")
 			}
@@ -96,6 +112,10 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			return errors.Wrap(err, "failed to create validator account")
 		}
 
+		minimalAtt := &core.BeaconAttestation{
+			Source: &core.Checkpoint{Epoch: uint64(highestSources[0])},
+			Target: &core.Checkpoint{Epoch: uint64(highestTargets[0])},
+		}
 		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 			return errors.Wrap(err, "failed to set validator minimal slashing protection")
 		}

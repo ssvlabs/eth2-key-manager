@@ -2,6 +2,8 @@ package flag
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -34,11 +36,12 @@ func ResponseTypeFromString(n string) ResponseType {
 
 // Flag names.
 const (
-	indexFlag               = "index"
-	seedFlag                = "seed"
-	accumulateFlag          = "accumulate"
-	responseTypeFlag        = "response-type"
-	minimalSlashingDataFlag = "minimal-slashing-data"
+	indexFlag          = "index"
+	seedFlag           = "seed"
+	accumulateFlag     = "accumulate"
+	responseTypeFlag   = "response-type"
+	highestKnownSource = "highest-source"
+	highestKnownTarget = "highest-target"
 )
 
 // AddIndexFlag adds the index flag to the command
@@ -86,11 +89,41 @@ func GetSeedFlagValue(c *cobra.Command) (string, error) {
 	return c.Flags().GetString(seedFlag)
 }
 
-// AddWeb3AddrFlag adds the web3 address flag to the command
-func AddValidatorMinimalSlashingDataFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, minimalSlashingDataFlag, "", "A hex encoded BeaconAttestation object indicating highest source and target known for a validator", true)
+// AddHighestSourceFlag adds the web3 address flag to the command
+func AddHighestSourceFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, highestKnownSource, "", "Array of highest known sources for an array of validators", true)
 }
 
-func GetMinimalSlashingDataFlagValue(c *cobra.Command) (string, error) {
-	return c.Flags().GetString(minimalSlashingDataFlag)
+func GetHighestSourceFlagValue(c *cobra.Command) ([]uint64, error) {
+	str, err := c.Flags().GetString(highestKnownSource)
+	if err != nil {
+		return nil, err
+	}
+	return stringSliceToUint64Slice(str)
+}
+
+// AddHighestTargetFlag adds the web3 address flag to the command
+func AddHighestTargetFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, highestKnownTarget, "", "Array of highest known targets for an array of validators", true)
+}
+
+func GetHighestTargetFlagValue(c *cobra.Command) ([]uint64, error) {
+	str, err := c.Flags().GetString(highestKnownTarget)
+	if err != nil {
+		return nil, err
+	}
+	return stringSliceToUint64Slice(str)
+}
+
+func stringSliceToUint64Slice(str string) ([]uint64, error) {
+	strs := strings.Split(str, ",")
+	ret := make([]uint64, len(strs))
+	for i, s := range strs {
+		n, err := strconv.ParseUint(s, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		ret[i] = n
+	}
+	return ret, nil
 }
