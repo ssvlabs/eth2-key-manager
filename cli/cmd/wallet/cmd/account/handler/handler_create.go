@@ -81,15 +81,23 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 	if accumulateFlagValue {
 		for i := 0; i <= indexFlagValue; i++ {
-			_, err = wallet.CreateValidatorAccount(seedBytes, &i, minimalAtt)
+			acc, err := wallet.CreateValidatorAccount(seedBytes, &i)
 			if err != nil {
 				return errors.Wrap(err, "failed to create validator account")
 			}
+
+			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+				return errors.Wrap(err, "failed to set validator minimal slashing protection")
+			}
 		}
 	} else {
-		_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue, minimalAtt)
+		acc, err := wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
 		if err != nil {
 			return errors.Wrap(err, "failed to create validator account")
+		}
+
+		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+			return errors.Wrap(err, "failed to set validator minimal slashing protection")
 		}
 	}
 

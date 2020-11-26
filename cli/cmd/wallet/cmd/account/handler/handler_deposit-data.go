@@ -64,7 +64,7 @@ func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue, nil)
+	_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
 	if err != nil {
 		return errors.Wrap(err, "failed to create validator account")
 	}

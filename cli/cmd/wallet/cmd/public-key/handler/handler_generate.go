@@ -54,7 +54,7 @@ func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	account, err := wallet.CreateValidatorAccount(seedBytes, &indexFlagValue, nil)
+	account, err := wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
 	if err != nil {
 		return errors.Wrap(err, "failed to create validator account")
 	}
