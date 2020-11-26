@@ -27,11 +27,11 @@ func (store *InMemStore) MarshalJSON() ([]byte, error) {
 	}
 	data["accounts"] = hex.EncodeToString(data["accounts"].([]byte))
 
-	data["attMemory"], err = json.Marshal(store.attMemory)
+	data["highestAtt"], err = json.Marshal(store.highestAttestation)
 	if err != nil {
 		return nil, err
 	}
-	data["attMemory"] = hex.EncodeToString(data["attMemory"].([]byte))
+	data["highestAtt"] = hex.EncodeToString(data["highestAtt"].([]byte))
 
 	data["proposalMemory"], err = json.Marshal(store.proposalMemory)
 	if err != nil {
@@ -89,18 +89,18 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 		return errors.New("could not find var: accounts")
 	}
 
-	// attMemory
-	if val, exists := v["attMemory"]; exists {
+	// highest att.
+	if val, exists := v["highestAtt"]; exists {
 		byts, err := hex.DecodeString(val.(string))
 		if err != nil {
 			return err
 		}
-		err = json.Unmarshal(byts, &store.attMemory)
+		err = json.Unmarshal(byts, &store.highestAttestation)
 		if err != nil {
 			return err
 		}
 	} else {
-		return errors.New("could not find var: attMemory")
+		return errors.New("could not find var: highestAtt")
 	}
 
 	// proposalMemory

@@ -1,6 +1,7 @@
 package slashing_protection
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,7 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAccount) {
+func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProtector, []core.ValidatorAccount) {
 	err := e2types.InitBLS()
 	require.NoError(t, err)
 
@@ -31,7 +32,11 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	require.NoError(t, err)
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	if !withAttestationData {
+		return protector, []core.ValidatorAccount{account1, account2}
+	}
+
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -50,7 +55,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -69,7 +74,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -88,7 +93,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -107,7 +112,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 	})
 	require.NoError(t, err)
 
-	err = protector.SaveAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 		Id:     nil,
 		Domain: []byte("domain"),
 		Data: &pb.AttestationData{
@@ -130,7 +135,7 @@ func setupAttestation(t *testing.T) (core.SlashingProtector, []core.ValidatorAcc
 }
 
 func TestSurroundingVote(t *testing.T) {
-	protector, accounts := setupAttestation(t)
+	protector, accounts := setupAttestation(t, true)
 
 	t.Run("1 Surrounded vote", func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
@@ -152,8 +157,8 @@ func TestSurroundingVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.SurroundingVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("2 Surrounded votes", func(t *testing.T) {
@@ -176,8 +181,8 @@ func TestSurroundingVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 2)
-		require.False(t, res[0].Status != core.SurroundingVote || res[1].Status != core.SurroundingVote)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("1 Surrounding vote", func(t *testing.T) {
@@ -199,8 +204,8 @@ func TestSurroundingVote(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.SurroundedVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("2 Surrounding vote", func(t *testing.T) {
@@ -222,13 +227,13 @@ func TestSurroundingVote(t *testing.T) {
 			},
 		})
 		require.NoError(t, err)
-		require.Len(t, res, 2)
-		require.False(t, res[0].Status != core.SurroundedVote || res[1].Status != core.SurroundedVote)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 }
 
 func TestDoubleAttestationVote(t *testing.T) {
-	protector, accounts := setupAttestation(t)
+	protector, accounts := setupAttestation(t, true)
 
 	t.Run("Different committee index, should slash", func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
@@ -250,8 +255,8 @@ func TestDoubleAttestationVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.DoubleVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("Different block root, should slash", func(t *testing.T) {
@@ -274,11 +279,11 @@ func TestDoubleAttestationVote(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Len(t, res, 1)
-		require.Equal(t, core.DoubleVote, res[0].Status)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
-	t.Run("Same attestation, should not error", func(t *testing.T) {
+	t.Run("Same attestation, should be slashable (we can't be sure it's not slashable when using highest att.)", func(t *testing.T) {
 		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
 			Id:     nil,
 			Domain: []byte("domain"),
@@ -296,7 +301,9 @@ func TestDoubleAttestationVote(t *testing.T) {
 				},
 			},
 		})
-		require.False(t, err != nil || len(res) != 0)
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 
 	t.Run("new attestation, should not error", func(t *testing.T) {
@@ -317,6 +324,175 @@ func TestDoubleAttestationVote(t *testing.T) {
 				},
 			},
 		})
-		require.False(t, err != nil || len(res) != 0)
+		require.False(t, err != nil || res != nil)
 	})
+}
+
+func TestMinimalSlashingProtection(t *testing.T) {
+	protector, accounts := setupAttestation(t, true)
+	at, err := protector.RetrieveHighestAttestation(accounts[0].ValidatorPublicKey())
+	require.NoError(t, err)
+	fmt.Printf("%d", at.Target.Epoch) // 5,10
+
+	t.Run("source lower than highest source", func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+			Id:     nil,
+			Domain: []byte("domain"),
+			Data: &pb.AttestationData{
+				Slot:            30,
+				CommitteeIndex:  4,
+				BeaconBlockRoot: []byte("A"),
+				Source: &pb.Checkpoint{
+					Epoch: 4,
+					Root:  []byte("B"),
+				},
+				Target: &pb.Checkpoint{
+					Epoch: 11,
+					Root:  []byte("C"),
+				},
+			},
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
+	})
+	t.Run("source equal to highest source, target equal to highest target", func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+			Id:     nil,
+			Domain: []byte("domain"),
+			Data: &pb.AttestationData{
+				Slot:            30,
+				CommitteeIndex:  4,
+				BeaconBlockRoot: []byte("A"),
+				Source: &pb.Checkpoint{
+					Epoch: 5,
+					Root:  []byte("B"),
+				},
+				Target: &pb.Checkpoint{
+					Epoch: 10,
+					Root:  []byte("C"),
+				},
+			},
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
+	})
+	t.Run("source higher than highest source, target equal to highest target", func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+			Id:     nil,
+			Domain: []byte("domain"),
+			Data: &pb.AttestationData{
+				Slot:            30,
+				CommitteeIndex:  4,
+				BeaconBlockRoot: []byte("A"),
+				Source: &pb.Checkpoint{
+					Epoch: 6,
+					Root:  []byte("B"),
+				},
+				Target: &pb.Checkpoint{
+					Epoch: 10,
+					Root:  []byte("C"),
+				},
+			},
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Equal(t, core.HighestAttestationVote, res.Status)
+	})
+	t.Run("source equal to highest source, target higher than highest target", func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
+			Id:     nil,
+			Domain: []byte("domain"),
+			Data: &pb.AttestationData{
+				Slot:            30,
+				CommitteeIndex:  4,
+				BeaconBlockRoot: []byte("A"),
+				Source: &pb.Checkpoint{
+					Epoch: 6,
+					Root:  []byte("B"),
+				},
+				Target: &pb.Checkpoint{
+					Epoch: 11,
+					Root:  []byte("C"),
+				},
+			},
+		})
+
+		require.NoError(t, err)
+		require.Nil(t, res)
+	})
+}
+
+func TestUpdateLatestAttestation(t *testing.T) {
+	protector, accounts := setupAttestation(t, false)
+	tests := []struct{
+		name string
+		sourceEpoch uint64
+		targetEpoch uint64
+		expectedHighestSource uint64
+		expectedHighestTarget uint64
+	}{
+		{
+			name: "source and epoch zero",
+			sourceEpoch: 0,
+			targetEpoch: 0,
+			expectedHighestSource: 0,
+			expectedHighestTarget: 0,
+		},
+		{
+			name: "source 0 target 1",
+			sourceEpoch: 0,
+			targetEpoch: 1,
+			expectedHighestSource: 0,
+			expectedHighestTarget: 1,
+		},
+		{
+			name: "source 10 target 11",
+			sourceEpoch: 10,
+			targetEpoch: 11,
+			expectedHighestSource: 10,
+			expectedHighestTarget: 11,
+		},
+		{
+			name: "source 11 target 9, can't happen in real life",
+			sourceEpoch: 11,
+			targetEpoch: 9,
+			expectedHighestSource: 11,
+			expectedHighestTarget: 11,
+		},
+		{
+			name: "source 2 target 9",
+			sourceEpoch: 2,
+			targetEpoch: 9,
+			expectedHighestSource: 11,
+			expectedHighestTarget: 11,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(tt *testing.T) {
+			k := accounts[0].ValidatorPublicKey()
+			err := protector.UpdateLatestAttestation(k, &pb.SignBeaconAttestationRequest{
+				Data: &pb.AttestationData{
+					Source: &pb.Checkpoint{
+						Epoch: test.sourceEpoch,
+					},
+					Target: &pb.Checkpoint{
+						Epoch: test.targetEpoch,
+					},
+				},
+			})
+			require.NoError(tt, err)
+
+			// Validate highest.
+			highest, err := protector.RetrieveHighestAttestation(k)
+			require.NoError(tt, err)
+			require.EqualValues(tt, highest.Source.Epoch, test.expectedHighestSource)
+			require.EqualValues(tt, highest.Target.Epoch, test.expectedHighestTarget)
+		})
+	}
 }

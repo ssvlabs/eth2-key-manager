@@ -57,7 +57,7 @@ func TestDepositData(t *testing.T) {
 			depositData, root, err := DepositData(
 				val,
 				test.withdrawalPubKey,
-				core.TestNetwork,
+				core.PyrmontNetwork,
 				MaxEffectiveBalanceInGwei,
 			)
 			require.NoError(t, err)

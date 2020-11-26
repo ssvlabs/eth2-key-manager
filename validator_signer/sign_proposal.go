@@ -24,7 +24,12 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 	signer.lock(account.ID(), "proposal")
 	defer signer.unlock(account.ID(), "proposal")
 
-	// 2. check we can even sign this
+	// 3. far future check
+	if !IsValidFarFutureSlot(signer.network, req.Data.Slot) {
+		return nil, errors.Errorf("proposed block slot too far into the future")
+	}
+
+	// 4. check we can even sign this
 	if status := signer.slashingProtector.IsSlashableProposal(account.ValidatorPublicKey(), req); status.Status != core.ValidProposal {
 		if status.Error != nil {
 			return nil, status.Error
@@ -32,12 +37,12 @@ func (signer *SimpleSigner) SignBeaconProposal(req *pb.SignBeaconProposalRequest
 		return nil, errors.Errorf("err, slashable proposal: %s", status.Status)
 	}
 
-	// 3. add to protection storage
+	// 5. add to protection storage
 	if err := signer.slashingProtector.SaveProposal(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 
-	// 4. generate ssz root hash and sign
+	// 6. generate ssz root hash and sign
 	forSig, err := PrepareProposalReqForSigning(req)
 	if err != nil {
 		return nil, err
