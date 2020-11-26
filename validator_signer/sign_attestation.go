@@ -25,23 +25,28 @@ func (signer *SimpleSigner) SignBeaconAttestation(req *pb.SignBeaconAttestationR
 		signer.unlock(account.ID(), "attestation")
 	}()
 
-	// 3. check we can even sign this
-	if val, err := signer.slashingProtector.IsSlashableAttestation(account.ValidatorPublicKey(), req); err != nil || len(val) != 0 {
+	// 3. far future check
+	if !IsValidFarFutureEpoch(signer.network, req.Data.Target.Epoch) {
+		return nil, errors.Errorf("target epoch too far into the future")
+	}
+	if !IsValidFarFutureEpoch(signer.network, req.Data.Source.Epoch) {
+		return nil, errors.Errorf("source epoch too far into the future")
+	}
+
+	// 4. check we can even sign this
+	if val, err := signer.slashingProtector.IsSlashableAttestation(account.ValidatorPublicKey(), req); err != nil || val != nil {
 		if err != nil {
 			return nil, err
 		}
-		if len(val) > 0 {
-
-		}
-		return nil, errors.Errorf("slashable attestation (%s), not signing", val[0].Status)
+		return nil, errors.Errorf("slashable attestation (%s), not signing", val.Status)
 	}
 
-	// 4. add to protection storage
-	if err := signer.slashingProtector.SaveAttestation(account.ValidatorPublicKey(), req); err != nil {
+	// 5. add to protection storage
+	if err := signer.slashingProtector.UpdateLatestAttestation(account.ValidatorPublicKey(), req); err != nil {
 		return nil, err
 	}
 
-	// 5. Prepare and sign data
+	// 6. Prepare and sign data
 	forSig, err := PrepareAttestationReqForSigning(req)
 	if err != nil {
 		return nil, err

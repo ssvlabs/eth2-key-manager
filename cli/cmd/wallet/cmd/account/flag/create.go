@@ -34,10 +34,11 @@ func ResponseTypeFromString(n string) ResponseType {
 
 // Flag names.
 const (
-	indexFlag        = "index"
-	seedFlag         = "seed"
-	accumulateFlag   = "accumulate"
-	responseTypeFlag = "response-type"
+	indexFlag               = "index"
+	seedFlag                = "seed"
+	accumulateFlag          = "accumulate"
+	responseTypeFlag        = "response-type"
+	minimalSlashingDataFlag = "minimal-slashing-data"
 )
 
 // AddIndexFlag adds the index flag to the command
@@ -83,4 +84,13 @@ func AddSeedFlag(c *cobra.Command) {
 // GetSeedFlagValue gets the seed flag from the command
 func GetSeedFlagValue(c *cobra.Command) (string, error) {
 	return c.Flags().GetString(seedFlag)
+}
+
+// AddWeb3AddrFlag adds the web3 address flag to the command
+func AddValidatorMinimalSlashingDataFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, minimalSlashingDataFlag, "", "A hex encoded BeaconAttestation object indicating highest source and target known for a validator", true)
+}
+
+func GetMinimalSlashingDataFlagValue(c *cobra.Command) (string, error) {
+	return c.Flags().GetString(minimalSlashingDataFlag)
 }

@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			_, err := MasterKeyFromSeed(test.seed, TestNetwork)
+			_, err := MasterKeyFromSeed(test.seed, PyrmontNetwork)
 			if len(test.expectedError) != 0 {
 				require.EqualError(t, err, test.expectedError)
 				return

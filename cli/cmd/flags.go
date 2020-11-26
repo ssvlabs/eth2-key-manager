@@ -14,7 +14,7 @@ const (
 
 // AddNetworkFlag adds the network flag to the command
 func AddNetworkFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, networkFlag, string(core.TestNetwork), "Ethereum network", false)
+	cliflag.AddPersistentStringFlag(c, networkFlag, string(core.PyrmontNetwork), "Ethereum network", false)
 }
 
 // GetNetworkFlagValue gets the network flag from the command

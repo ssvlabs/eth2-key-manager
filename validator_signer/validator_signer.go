@@ -27,14 +27,16 @@ type signingRoot struct {
 type SimpleSigner struct {
 	wallet            core.Wallet
 	slashingProtector core.SlashingProtector
+	network           core.Network
 	signLocks         map[string]*sync.RWMutex
 }
 
 // NewSimpleSigner is the constructor of SimpleSigner
-func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtector) *SimpleSigner {
+func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtector, network core.Network) *SimpleSigner {
 	return &SimpleSigner{
 		wallet:            wallet,
 		slashingProtector: slashingProtector,
+		network:           network,
 		signLocks:         map[string]*sync.RWMutex{},
 	}
 }

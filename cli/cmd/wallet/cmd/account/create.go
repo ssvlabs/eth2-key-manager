@@ -25,6 +25,7 @@ func init() {
 	flag.AddSeedFlag(createCmd)
 	flag.AddAccumulateFlag(createCmd)
 	flag.AddResponseTypeFlag(createCmd)
+	flag.AddValidatorMinimalSlashingDataFlag(createCmd)
 
 	Command.AddCommand(createCmd)
 }

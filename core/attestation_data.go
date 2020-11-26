@@ -12,6 +12,7 @@ const (
 	DoubleVote      VoteDetectionType = "DoubleVote"
 	SurroundingVote VoteDetectionType = "SurroundingVote"
 	SurroundedVote  VoteDetectionType = "SurroundedVote"
+	HighestAttestationVote VoteDetectionType = "HighestAttestationVote"
 )
 
 // Checkpoint is copied from prysm
@@ -76,6 +77,25 @@ func (att *BeaconAttestation) Compare(other *BeaconAttestation) bool {
 		att.Target.compare(other.Target) &&
 		att.Source.compare(other.Source)
 
+}
+
+func (highestAtt *BeaconAttestation) SlashesHighestAttestation (otherAtt *BeaconAttestation) *AttestationSlashStatus {
+	// Source epoch can't be lower than previously known highest source, it can be equal or higher.
+	if otherAtt.Source.Epoch < highestAtt.Source.Epoch {
+		return &AttestationSlashStatus{
+			Attestation: otherAtt,
+			Status:      HighestAttestationVote,
+		}
+	}
+
+	if otherAtt.Target.Epoch <= highestAtt.Target.Epoch {
+		return &AttestationSlashStatus{
+			Attestation: otherAtt,
+			Status:      HighestAttestationVote,
+		}
+	}
+
+	return nil
 }
 
 // SlashesAttestations returns an array of attestations that this attestation will slash based on a provided history

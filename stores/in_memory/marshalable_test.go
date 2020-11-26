@@ -1,7 +1,9 @@
 package in_memory
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -42,7 +44,7 @@ func TestMarshaling(t *testing.T) {
 			Root:  []byte("A"),
 		},
 	}
-	store.SaveAttestation(acc.ValidatorPublicKey(), att)
+	store.SaveHighestAttestation(acc.ValidatorPublicKey(), att)
 
 	// proposal
 	prop := &core.BeaconBlockHeader{
@@ -56,6 +58,7 @@ func TestMarshaling(t *testing.T) {
 
 	// marshal
 	byts, err := json.Marshal(store)
+	fmt.Printf("%s\n", hex.EncodeToString(byts))
 	require.NoError(t, err)
 
 	// un-marshal
@@ -76,8 +79,7 @@ func TestMarshaling(t *testing.T) {
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})
 	t.Run("verify attestation", func(t *testing.T) {
-		att2, err := store.RetrieveAttestation(acc.ValidatorPublicKey(), 2)
-		require.NoError(t, err)
+		att2 := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
 		require.Equal(t, att.BeaconBlockRoot, att2.BeaconBlockRoot)
 	})
 	t.Run("verify proposal", func(t *testing.T) {

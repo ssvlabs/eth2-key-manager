@@ -1,66 +1,8 @@
 package core
 
 import (
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
-
 	"github.com/bloxapp/eth2-key-manager/encryptor"
-)
-
-// Network represents the network.
-type Network string
-
-// NetworkFromString returns network from the given string value
-func NetworkFromString(n string) Network {
-	switch n {
-	case string(TestNetwork):
-		return TestNetwork
-	case string(MainNetwork):
-		return MainNetwork
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
-		return ""
-	}
-}
-
-// ForkVersion returns the fork version of the network.
-func (n Network) ForkVersion() []byte {
-	switch n {
-	case TestNetwork:
-		return []byte{0, 0, 32, 9}
-	case MainNetwork:
-		return []byte{0, 0, 0, 0}
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
-		return nil
-	}
-}
-
-// DepositContractAddress returns the deposit contract address of the network.
-func (n Network) DepositContractAddress() string {
-	switch n {
-	case TestNetwork:
-		return "0x8c5fecdC472E27Bc447696F431E425D02dd46a8c"
-	case MainNetwork:
-		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
-		return ""
-	}
-}
-
-// ForkVersion returns the fork version of the network.
-func (n Network) FullPath(relativePath string) string {
-	return BaseEIP2334Path + relativePath
-}
-
-// Available networks.
-const (
-	// TestNetwork represents the Pyrmont test network.
-	TestNetwork Network = "pyrmont"
-
-	// MainNetwork represents the main network.
-	MainNetwork Network = "mainnet"
+	"github.com/google/uuid"
 )
 
 // Implements methods to store and retrieve data
