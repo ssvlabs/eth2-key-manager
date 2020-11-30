@@ -6,6 +6,7 @@ import (
 	"github.com/bloxapp/eth2-key-manager/wallets"
 	uuid "github.com/google/uuid"
 	"github.com/pkg/errors"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 )
 
 // InMemStore implements core.Storage using in-memory store.
@@ -13,8 +14,8 @@ type InMemStore struct {
 	network            core.Network
 	wallet             core.Wallet
 	accounts           map[string]*wallets.HDAccount
-	highestAttestation map[string]*core.BeaconAttestation
-	proposalMemory     map[string]*core.BeaconBlockHeader
+	highestAttestation map[string]*eth.AttestationData
+	proposalMemory     map[string]*eth.BeaconBlock
 	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
 }
@@ -29,8 +30,8 @@ func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encry
 	return &InMemStore{
 		network:            network,
 		accounts:           make(map[string]*wallets.HDAccount),
-		highestAttestation: make(map[string]*core.BeaconAttestation),
-		proposalMemory:     make(map[string]*core.BeaconBlockHeader),
+		highestAttestation: make(map[string]*eth.AttestationData),
+		proposalMemory:     make(map[string]*eth.BeaconBlock),
 		encryptor:          encryptor,
 		encryptionPassword: password,
 	}

@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"testing"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
@@ -37,17 +39,17 @@ func (a *mockAccount) SetContext(ctx *core.WalletContext)                       
 func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name     string
-		proposal *core.BeaconBlockHeader
+		proposal *eth.BeaconBlock
 		account  core.ValidatorAccount
 	}{
 		{
 			name: "simple save",
-			proposal: &core.BeaconBlockHeader{
+			proposal: &eth.BeaconBlock{
 				Slot:          100,
 				ProposerIndex: 1,
 				ParentRoot:    []byte("A"),
 				StateRoot:     []byte("A"),
-				BodyRoot:      []byte("A"),
+				Body:          &eth.BeaconBlockBody{},
 			},
 			account: &mockAccount{
 				id:            uuid.New(),
@@ -59,14 +61,20 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveProposal(test.account.ValidatorPublicKey(), test.proposal)
+			err := storage.SaveProposal(test.account.ValidatorPublicKey().Marshal(), test.proposal)
 			require.NoError(t, err)
 
 			// fetch
-			proposal, err := storage.RetrieveProposal(test.account.ValidatorPublicKey(), test.proposal.Slot)
+			proposal, err := storage.RetrieveProposal(test.account.ValidatorPublicKey().Marshal(), test.proposal.Slot)
 			require.NoError(t, err)
 			require.NotNil(t, proposal)
-			require.True(t, proposal.Compare(test.proposal))
+
+			// test equal
+			aRoot, err := proposal.HashTreeRoot()
+			require.NoError(t, err)
+			bRoot, err := proposal.HashTreeRoot()
+			require.NoError(t, err)
+			require.EqualValues(t, aRoot, bRoot)
 		})
 	}
 }
@@ -74,20 +82,20 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name    string
-		att     *core.BeaconAttestation
+		att     *eth.AttestationData
 		account core.ValidatorAccount
 	}{
 		{
 			name: "simple save",
-			att: &core.BeaconAttestation{
+			att: &eth.AttestationData{
 				Slot:            30,
 				CommitteeIndex:  1,
 				BeaconBlockRoot: []byte("BeaconBlockRoot"),
-				Source: &core.Checkpoint{
+				Source: &eth.Checkpoint{
 					Epoch: 1,
 					Root:  []byte("Root"),
 				},
-				Target: &core.Checkpoint{
+				Target: &eth.Checkpoint{
 					Epoch: 4,
 					Root:  []byte("Root"),
 				},
@@ -99,15 +107,15 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 		},
 		{
 			name: "simple save with no change to latest attestation target",
-			att: &core.BeaconAttestation{
+			att: &eth.AttestationData{
 				Slot:            30,
 				CommitteeIndex:  1,
 				BeaconBlockRoot: []byte("BeaconBlockRoot"),
-				Source: &core.Checkpoint{
+				Source: &eth.Checkpoint{
 					Epoch: 1,
 					Root:  []byte("Root"),
 				},
-				Target: &core.Checkpoint{
+				Target: &eth.Checkpoint{
 					Epoch: 3,
 					Root:  []byte("Root"),
 				},
@@ -122,13 +130,19 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey(), test.att)
+			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey().Marshal(), test.att)
 			require.NoError(t, err)
 
 			// fetch
-			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey())
+			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey().Marshal())
 			require.NotNil(t, att)
-			require.True(t, att.Compare(test.att))
+
+			// test equal
+			aRoot, err := att.HashTreeRoot()
+			require.NoError(t, err)
+			bRoot, err := test.att.HashTreeRoot()
+			require.NoError(t, err)
+			require.EqualValues(t, aRoot, bRoot)
 		})
 	}
 }
@@ -136,20 +150,20 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 func TestingSaveHighestAttestation(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
 		name    string
-		att     *core.BeaconAttestation
+		att     *eth.AttestationData
 		account core.ValidatorAccount
 	}{
 		{
 			name: "simple save",
-			att: &core.BeaconAttestation{
+			att: &eth.AttestationData{
 				Slot:            30,
 				CommitteeIndex:  1,
 				BeaconBlockRoot: []byte("BeaconBlockRoot"),
-				Source: &core.Checkpoint{
+				Source: &eth.Checkpoint{
 					Epoch: 1,
 					Root:  []byte("Root"),
 				},
-				Target: &core.Checkpoint{
+				Target: &eth.Checkpoint{
 					Epoch: 4,
 					Root:  []byte("Root"),
 				},
@@ -161,15 +175,15 @@ func TestingSaveHighestAttestation(storage core.SlashingStore, t *testing.T) {
 		},
 		{
 			name: "simple save with no change to latest attestation target",
-			att: &core.BeaconAttestation{
+			att: &eth.AttestationData{
 				Slot:            30,
 				CommitteeIndex:  1,
 				BeaconBlockRoot: []byte("BeaconBlockRoot"),
-				Source: &core.Checkpoint{
+				Source: &eth.Checkpoint{
 					Epoch: 1,
 					Root:  []byte("Root"),
 				},
-				Target: &core.Checkpoint{
+				Target: &eth.Checkpoint{
 					Epoch: 3,
 					Root:  []byte("Root"),
 				},
@@ -184,13 +198,19 @@ func TestingSaveHighestAttestation(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey(), test.att)
+			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey().Marshal(), test.att)
 			require.NoError(t, err)
 
 			// fetch
-			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey())
+			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey().Marshal())
 			require.NotNil(t, att)
-			require.True(t, att.Compare(test.att))
+
+			// test equal
+			aRoot, err := att.HashTreeRoot()
+			require.NoError(t, err)
+			bRoot, err := test.att.HashTreeRoot()
+			require.NoError(t, err)
+			require.EqualValues(t, aRoot, bRoot)
 		})
 	}
 }

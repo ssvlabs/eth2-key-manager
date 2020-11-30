@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/hex"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
@@ -97,12 +99,12 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 				return errors.Wrap(err, "failed to create validator account")
 			}
 
-			minimalAtt := &core.BeaconAttestation{
-				Source: &core.Checkpoint{Epoch: uint64(highestSources[i])},
-				Target: &core.Checkpoint{Epoch: uint64(highestTargets[i])},
+			minimalAtt := &eth.AttestationData{
+				Source: &eth.Checkpoint{Epoch: uint64(highestSources[i])},
+				Target: &eth.Checkpoint{Epoch: uint64(highestTargets[i])},
 			}
 
-			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey().Marshal(), minimalAtt); err != nil {
 				return errors.Wrap(err, "failed to set validator minimal slashing protection")
 			}
 		}
@@ -112,11 +114,11 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			return errors.Wrap(err, "failed to create validator account")
 		}
 
-		minimalAtt := &core.BeaconAttestation{
-			Source: &core.Checkpoint{Epoch: uint64(highestSources[0])},
-			Target: &core.Checkpoint{Epoch: uint64(highestTargets[0])},
+		minimalAtt := &eth.AttestationData{
+			Source: &eth.Checkpoint{Epoch: uint64(highestSources[0])},
+			Target: &eth.Checkpoint{Epoch: uint64(highestTargets[0])},
 		}
-		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey().Marshal(), minimalAtt); err != nil {
 			return errors.Wrap(err, "failed to set validator minimal slashing protection")
 		}
 	}

@@ -1,9 +1,7 @@
 package core
 
 import (
-	"bytes"
-
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 )
 
 type ProposalDetectionType string
@@ -15,35 +13,7 @@ const (
 )
 
 type ProposalSlashStatus struct {
-	Proposal *BeaconBlockHeader
+	Proposal *eth.BeaconBlock
 	Status   ProposalDetectionType
 	Error    error
-}
-
-// copy from prysm https://github.com/prysmaticlabs/prysm/blob/master/validator/client/validator_propose.go#L220-L226
-type BeaconBlockHeader struct {
-	Slot          uint64 `json:"slot"`
-	ProposerIndex uint64 `json:"proposer_index"`
-	ParentRoot    []byte `ssz-size:"32" json:"parent_root"`
-	StateRoot     []byte `ssz-size:"32" json:"state_root"`
-	BodyRoot      []byte `ssz-size:"32" json:"body_root"`
-}
-
-func (proposal *BeaconBlockHeader) Compare(other *BeaconBlockHeader) bool {
-	return proposal.Slot == other.Slot &&
-		bytes.Compare(proposal.ParentRoot, other.ParentRoot) == 0 &&
-		proposal.ProposerIndex == other.ProposerIndex &&
-		bytes.Compare(proposal.StateRoot, other.StateRoot) == 0 &&
-		bytes.Compare(proposal.BodyRoot, other.BodyRoot) == 0
-
-}
-
-func ToCoreBlockData(req *pb.SignBeaconProposalRequest) *BeaconBlockHeader {
-	return &BeaconBlockHeader{ // Create a local copy of the data; we need ssz size information to calculate the correct root.
-		Slot:          req.Data.Slot,
-		ProposerIndex: req.Data.ProposerIndex,
-		ParentRoot:    req.Data.ParentRoot,
-		StateRoot:     req.Data.StateRoot,
-		BodyRoot:      req.Data.BodyRoot,
-	}
 }

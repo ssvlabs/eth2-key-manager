@@ -4,31 +4,31 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/pkg/errors"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-func (store *InMemStore) SaveHighestAttestation(key e2types.PublicKey, req *core.BeaconAttestation) error {
-	store.highestAttestation[hex.EncodeToString(key.Marshal())] = req
+func (store *InMemStore) SaveHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
+	store.highestAttestation[hex.EncodeToString(pubKey)] = attestation
 	return nil
 }
 
-func (store *InMemStore) RetrieveHighestAttestation(key e2types.PublicKey) *core.BeaconAttestation {
-	if val, ok := store.highestAttestation[hex.EncodeToString(key.Marshal())]; ok {
-		return val
+func (store *InMemStore) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {
+	if val, ok := store.highestAttestation[hex.EncodeToString(pubKey)]; ok {
+		return val, nil
 	}
+	return nil, nil
+}
+
+func (store *InMemStore) SaveProposal(pubKey []byte, block *eth.BeaconBlock) error {
+	store.proposalMemory[proposalKey(pubKey, block.Slot)] = block
 	return nil
 }
 
-func (store *InMemStore) SaveProposal(key e2types.PublicKey, req *core.BeaconBlockHeader) error {
-	store.proposalMemory[proposalKey(key, req.Slot)] = req
-	return nil
-}
-
-func (store *InMemStore) RetrieveProposal(key e2types.PublicKey, slot uint64) (*core.BeaconBlockHeader, error) {
-	ret := store.proposalMemory[proposalKey(key, slot)]
+func (store *InMemStore) RetrieveProposal(pubKey []byte, slot uint64) (*eth.BeaconBlock, error) {
+	ret := store.proposalMemory[proposalKey(pubKey, slot)]
 	if ret == nil {
 		return nil, errors.New("proposal not found")
 	}
@@ -39,6 +39,6 @@ func attestationKey(key e2types.PublicKey) string {
 	return hex.EncodeToString(key.Marshal())
 }
 
-func proposalKey(key e2types.PublicKey, targetSlot uint64) string {
-	return fmt.Sprintf("%s_%d", hex.EncodeToString(key.Marshal()), targetSlot)
+func proposalKey(pubKey []byte, targetSlot uint64) string {
+	return fmt.Sprintf("%s_%d", hex.EncodeToString(pubKey), targetSlot)
 }

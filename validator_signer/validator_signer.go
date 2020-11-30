@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/go-ssz"
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 
@@ -13,9 +14,9 @@ import (
 // ValidatorSigner represents the behavior of the validator signer
 type ValidatorSigner interface {
 	ListAccounts() (*pb.ListAccountsResponse, error)
-	SignBeaconProposal(req *pb.SignBeaconProposalRequest) (*pb.SignResponse, error)
-	SignBeaconAttestation(req *pb.SignBeaconAttestationRequest) (*pb.SignResponse, error)
-	Sign(req *pb.SignRequest) (*pb.SignResponse, error)
+	SignBeaconBlock(block *eth.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
+	SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error)
+	SignSlot(slot uint64, domain []byte, pubKey []byte) ([]byte, error)
 }
 
 type signingRoot struct {
