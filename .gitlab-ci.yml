@@ -13,11 +13,12 @@ variables:
   DOCKER_REPO_INFRA_STAGE: $ACCOUNT_ID_INFRA_STAGE.dkr.ecr.$AWS_REGION_INFRA_STAGE.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_STAGE: "1"
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
+  STAGE_GO_IMAGE: 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:golang-1.15
 
 
 Security check:
   stage: gosec
-  image: golang:1.15
+  image: $STAGE_GO_IMAGE
   tags:
     - blox-infra-stage
   script:
@@ -26,7 +27,7 @@ Security check:
 
 Test stage Docker image:
   stage: test
-  image: golang:1.15
+  image: $STAGE_GO_IMAGE
   tags:
     - blox-infra-stage 
   script:
