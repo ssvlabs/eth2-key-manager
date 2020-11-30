@@ -1,10 +1,12 @@
-package wallet_hd
+package hd
 
 import (
 	"encoding/hex"
 	"fmt"
 	"sort"
 	"strconv"
+
+	"github.com/bloxapp/eth2-key-manager/wallets"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -96,7 +98,7 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	}
 
 	// Create ret account
-	ret, err := NewValidatorAccount(
+	ret, err := wallets.NewValidatorAccount(
 		name,
 		validatorKey,
 		withdrawalKey.PublicKey(),
@@ -129,6 +131,10 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	}
 
 	return ret, nil
+}
+
+func (wallet *HDWallet) AddValidatorAccount(account core.ValidatorAccount) error {
+	return errors.Errorf("hierarchical deterministic wallets can't add a validator they need too derive it, please use CreateValidatorAccount")
 }
 
 func (wallet *HDWallet) DeleteAccountByPublicKey(pubKey string) error {
@@ -167,7 +173,7 @@ func (wallet *HDWallet) Accounts() []core.ValidatorAccount {
 	return accounts
 }
 
-// AccountByID provides a single account from the wallet given its ID.
+// AccountByID provides a nd account from the wallet given its ID.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
 	ret, err := wallet.context.Storage.OpenAccount(id)
@@ -186,7 +192,7 @@ func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
 	wallet.context = ctx
 }
 
-// AccountByPublicKey provides a single account from the wallet given its public key.
+// AccountByPublicKey provides a nd account from the wallet given its public key.
 // This will error if the account is not found.
 func (wallet *HDWallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
 	id, exists := wallet.indexMapper[pubKey]

@@ -4,6 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
+	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+
+	hd2 "github.com/bloxapp/eth2-key-manager/wallets/hd"
+
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -20,6 +24,8 @@ func (store *InMemStore) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 	data["wallet"] = hex.EncodeToString(data["wallet"].([]byte))
+
+	data["walletType"] = store.wallet.Type()
 
 	data["accounts"], err = json.Marshal(store.accounts)
 	if err != nil {
@@ -62,17 +68,35 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 	}
 
 	// wallet
-	if val, exists := v["wallet"]; exists {
-		byts, err := hex.DecodeString(val.(string))
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(byts, &store.wallet)
-		if err != nil {
-			return err
+	if walletType, exists := v["walletType"]; exists {
+		if val, exists := v["wallet"]; exists {
+			byts, err := hex.DecodeString(val.(string))
+			if err != nil {
+				return err
+			}
+
+			if walletType == core.HDWallet {
+				hd := &hd2.HDWallet{}
+				err = json.Unmarshal(byts, &hd)
+				if err != nil {
+					return err
+				}
+				store.wallet = hd
+			} else if walletType == core.NDWallet {
+				nd := &nd.NDWallet{}
+				err = json.Unmarshal(byts, &nd)
+				if err != nil {
+					return err
+				}
+				store.wallet = nd
+			} else {
+				return errors.Errorf("unknown wallet type %s", walletType)
+			}
+		} else {
+			return errors.New("could not find var: wallet")
 		}
 	} else {
-		return errors.New("could not find var: wallet")
+		return errors.New("could not find var: walletType")
 	}
 
 	// accounts

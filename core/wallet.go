@@ -1,12 +1,14 @@
 package core
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type WalletType = string
 
 const (
 	HDWallet WalletType = "HD" // hierarchical deterministic wallet
-	ND       WalletType = "ND" // non - deterministic
+	NDWallet WalletType = "ND" // non - deterministic
 )
 
 // A wallet is a container of accounts.
@@ -19,7 +21,12 @@ type Wallet interface {
 	Type() WalletType
 
 	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
+	// Keep in mind ND wallets will probably not allow this function, use AddValidatorAccount.
 	CreateValidatorAccount(seed []byte, indexPointer *int) (ValidatorAccount, error)
+
+	// Used to specifically add an account.
+	// Keep in mind HD wallets will probably not allow this function, use CreateValidatorAccount.
+	AddValidatorAccount(account ValidatorAccount) error
 
 	// Accounts provides all accounts in the wallet.
 	Accounts() []ValidatorAccount

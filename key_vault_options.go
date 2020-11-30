@@ -1,14 +1,16 @@
 package eth2keymanager
 
 import (
+	"github.com/bloxapp/eth2-key-manager/core"
 	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
 type KeyVaultOptions struct {
-	encryptor encryptor2.Encryptor
-	password  []byte
-	storage   interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
-	seed      []byte
+	encryptor  encryptor2.Encryptor
+	password   []byte
+	storage    interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
+	seed       []byte
+	walletType core.WalletType
 }
 
 func (options *KeyVaultOptions) SetEncryptor(encryptor encryptor2.Encryptor) *KeyVaultOptions {
@@ -28,5 +30,10 @@ func (options *KeyVaultOptions) SetPassword(password string) *KeyVaultOptions {
 
 func (options *KeyVaultOptions) SetSeed(seed []byte) *KeyVaultOptions {
 	options.seed = seed
+	return options
+}
+
+func (options *KeyVaultOptions) SetWalletType(walletType core.WalletType) *KeyVaultOptions {
+	options.walletType = walletType
 	return options
 }

@@ -1,9 +1,12 @@
-package wallet_hd
+package wallets
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -11,6 +14,15 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
+
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
+}
+
+func storage() core.Storage {
+	return &dummy.DummyStorage{}
+}
 
 func TestAccountMarshaling(t *testing.T) {
 	tests := []struct {

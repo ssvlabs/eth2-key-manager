@@ -1,4 +1,4 @@
-package wallet_hd
+package hd
 
 import (
 	"encoding/hex"
@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/encryptor"
+	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -16,19 +16,9 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-type dummyStorage struct{}
-
-func (s *dummyStorage) Name() string                                    { return "" }
-func (s *dummyStorage) Network() core.Network                           { return core.MainNetwork }
-func (s *dummyStorage) SaveWallet(wallet core.Wallet) error             { return nil }
-func (s *dummyStorage) OpenWallet() (core.Wallet, error)                { return nil, nil }
-func (s *dummyStorage) ListAccounts() ([]core.ValidatorAccount, error)  { return nil, nil }
-func (s *dummyStorage) SaveAccount(account core.ValidatorAccount) error { return nil }
-func (s *dummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
-	return nil, nil
+func storage() core.Storage {
+	return &dummy.DummyStorage{}
 }
-func (s *dummyStorage) DeleteAccount(accountId uuid.UUID) error                     { return nil }
-func (s *dummyStorage) SetEncryptor(encryptor encryptor.Encryptor, password []byte) {}
 
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
@@ -38,10 +28,6 @@ func _byteArray(input string) []byte {
 func _bigIntFromSkHex(input string) *big.Int {
 	res, _ := new(big.Int).SetString(input, 16)
 	return res
-}
-
-func storage() core.Storage {
-	return &dummyStorage{}
 }
 
 // ethereum foundation launched a launchpad for making deposits.

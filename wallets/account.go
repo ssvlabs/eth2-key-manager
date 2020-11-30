@@ -1,4 +1,4 @@
-package wallet_hd
+package wallets
 
 import (
 	"encoding/hex"

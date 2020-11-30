@@ -1,13 +1,13 @@
-package wallet_hd
+package nd
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 )
 
-func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
+func (wallet *NDWallet) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
 	data["id"] = wallet.id
@@ -17,7 +17,7 @@ func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
-func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
+func (wallet *NDWallet) UnmarshalJSON(data []byte) error {
 	// parse
 	var v map[string]interface{}
 	if err := json.Unmarshal(data, &v); err != nil {

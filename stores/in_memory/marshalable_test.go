@@ -1,17 +1,65 @@
 package in_memory
 
 import (
-	"encoding/hex"
 	"encoding/json"
-	"fmt"
+	"math/big"
 	"testing"
+
+	"github.com/bloxapp/eth2-key-manager/wallets"
+	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+
+	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 
 	"github.com/stretchr/testify/require"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
+
+func _bigIntFromSkHex(input string) *big.Int {
+	res, _ := new(big.Int).SetString(input, 16)
+	return res
+}
+
+func TestMarshalingNDWallet(t *testing.T) {
+	err := e2types.InitBLS()
+	require.NoError(t, err)
+
+	store := NewInMemStore(core.MainNetwork)
+
+	// setup wallet
+	walletCtx := &core.WalletContext{Storage: store}
+	wallet := nd.NewNDWallet(walletCtx)
+	k, err := core.NewHDKeyFromPrivateKey(_byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"), "")
+	require.NoError(t, err)
+	account, err := wallets.NewValidatorAccount("", k, k.PublicKey(), "", walletCtx)
+	require.NoError(t, err)
+	wallet.AddValidatorAccount(account)
+	err = store.SaveWallet(wallet)
+	require.NoError(t, err)
+
+	// marshal
+	byts, err := json.Marshal(store)
+	require.NoError(t, err)
+
+	// un-marshal
+	var store2 InMemStore
+	require.NoError(t, json.Unmarshal(byts, &store2))
+
+	// verify
+	t.Run("verify wallet", func(t *testing.T) {
+		wallet2, err := store2.OpenWallet()
+		require.NoError(t, err)
+		require.Equal(t, wallet.ID().String(), wallet2.ID().String())
+	})
+	t.Run("verify acc", func(t *testing.T) {
+		wallet2, err := store2.OpenWallet()
+		require.NoError(t, err)
+		acc2, err := wallet2.AccountByPublicKey("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972")
+		require.NoError(t, err)
+		require.Equal(t, account.ID().String(), acc2.ID().String())
+	})
+}
 
 func TestMarshaling(t *testing.T) {
 	err := e2types.InitBLS()
@@ -20,7 +68,7 @@ func TestMarshaling(t *testing.T) {
 	store := NewInMemStore(core.MainNetwork)
 
 	// wallet
-	wallet := wallet_hd.NewHDWallet(&core.WalletContext{Storage: store})
+	wallet := hd.NewHDWallet(&core.WalletContext{Storage: store})
 	err = store.SaveWallet(wallet)
 	require.NoError(t, err)
 
@@ -58,7 +106,6 @@ func TestMarshaling(t *testing.T) {
 
 	// marshal
 	byts, err := json.Marshal(store)
-	fmt.Printf("%s\n", hex.EncodeToString(byts))
 	require.NoError(t, err)
 
 	// un-marshal

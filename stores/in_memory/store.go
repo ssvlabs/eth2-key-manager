@@ -3,7 +3,7 @@ package in_memory
 import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
-	"github.com/bloxapp/eth2-key-manager/wallet_hd"
+	"github.com/bloxapp/eth2-key-manager/wallets"
 	uuid "github.com/google/uuid"
 	"github.com/pkg/errors"
 )
@@ -11,8 +11,8 @@ import (
 // InMemStore implements core.Storage using in-memory store.
 type InMemStore struct {
 	network            core.Network
-	wallet             *wallet_hd.HDWallet
-	accounts           map[string]*wallet_hd.HDAccount
+	wallet             core.Wallet
+	accounts           map[string]*wallets.HDAccount
 	highestAttestation map[string]*core.BeaconAttestation
 	proposalMemory     map[string]*core.BeaconBlockHeader
 	encryptor          encryptor2.Encryptor
@@ -28,7 +28,7 @@ func NewInMemStore(network core.Network) *InMemStore {
 func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encryptor, password []byte) *InMemStore {
 	return &InMemStore{
 		network:            network,
-		accounts:           make(map[string]*wallet_hd.HDAccount),
+		accounts:           make(map[string]*wallets.HDAccount),
 		highestAttestation: make(map[string]*core.BeaconAttestation),
 		proposalMemory:     make(map[string]*core.BeaconBlockHeader),
 		encryptor:          encryptor,
@@ -48,7 +48,7 @@ func (store *InMemStore) Network() core.Network {
 
 // SaveWallet implements core.Storage interface.
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
-	store.wallet = wallet.(*wallet_hd.HDWallet)
+	store.wallet = wallet
 	return nil
 }
 
@@ -72,7 +72,7 @@ func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
 }
 
 func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
-	store.accounts[account.ID().String()] = account.(*wallet_hd.HDAccount)
+	store.accounts[account.ID().String()] = account.(*wallets.HDAccount)
 	return nil
 }
 

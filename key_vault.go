@@ -3,13 +3,16 @@ package eth2keymanager
 import (
 	"sync"
 
+	"github.com/bloxapp/eth2-key-manager/wallets/hd"
+
+	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 )
 
 var initBLSOnce sync.Once
@@ -88,8 +91,13 @@ func NewKeyVault(options *KeyVaultOptions) (*KeyVault, error) {
 		Storage: storage,
 	}
 
-	// update wallet context
-	wallet := wallet_hd.NewHDWallet(context)
+	// create wallet
+	var wallet core.Wallet
+	if options.walletType == core.NDWallet {
+		wallet = nd.NewNDWallet(context)
+	} else { // ND wallet by default
+		wallet = hd.NewHDWallet(context)
+	}
 
 	ret := &KeyVault{
 		Context:  context,
