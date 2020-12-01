@@ -101,7 +101,7 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	ret, err := wallets.NewValidatorAccount(
 		name,
 		validatorKey,
-		withdrawalKey.PublicKey(),
+		withdrawalKey.PublicKey().Serialize(),
 		baseAccountPath,
 		wallet.context,
 	)
@@ -109,7 +109,7 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 		return nil, err
 	}
 
-	validatorPublicKey := hex.EncodeToString(ret.ValidatorPublicKey().Marshal())
+	validatorPublicKey := hex.EncodeToString(ret.ValidatorPublicKey())
 
 	// Register new wallet and save portfolio
 	reset := func() {

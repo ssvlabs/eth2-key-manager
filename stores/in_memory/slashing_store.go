@@ -15,11 +15,11 @@ func (store *InMemStore) SaveHighestAttestation(pubKey []byte, attestation *eth.
 	return nil
 }
 
-func (store *InMemStore) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {
+func (store *InMemStore) RetrieveHighestAttestation(pubKey []byte) *eth.AttestationData {
 	if val, ok := store.highestAttestation[hex.EncodeToString(pubKey)]; ok {
-		return val, nil
+		return val
 	}
-	return nil, nil
+	return nil
 }
 
 func (store *InMemStore) SaveProposal(pubKey []byte, block *eth.BeaconBlock) error {

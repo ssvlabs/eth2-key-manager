@@ -26,15 +26,14 @@ type mockAccount struct {
 func (a *mockAccount) ID() uuid.UUID    { return a.id }
 func (a *mockAccount) Name() string     { return "" }
 func (a *mockAccount) BasePath() string { return "" }
-func (a *mockAccount) ValidatorPublicKey() e2types.PublicKey {
+func (a *mockAccount) ValidatorPublicKey() []byte {
 	priv, _ := e2types.BLSPrivateKeyFromBytes(a.validationKey.Bytes())
-	return priv.PublicKey()
+	return priv.PublicKey().Marshal()
 }
-func (a *mockAccount) WithdrawalPublicKey() e2types.PublicKey                   { return nil }
-func (a *mockAccount) ValidationKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
-func (a *mockAccount) WithdrawalKeySign(data []byte) (e2types.Signature, error) { return nil, nil }
-func (a *mockAccount) GetDepositData() (map[string]interface{}, error)          { return nil, nil }
-func (a *mockAccount) SetContext(ctx *core.WalletContext)                       {}
+func (a *mockAccount) WithdrawalPublicKey() []byte                     { return nil }
+func (a *mockAccount) ValidationKeySign(data []byte) ([]byte, error)   { return nil, nil }
+func (a *mockAccount) GetDepositData() (map[string]interface{}, error) { return nil, nil }
+func (a *mockAccount) SetContext(ctx *core.WalletContext)              {}
 
 func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	tests := []struct {
@@ -61,11 +60,11 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveProposal(test.account.ValidatorPublicKey().Marshal(), test.proposal)
+			err := storage.SaveProposal(test.account.ValidatorPublicKey(), test.proposal)
 			require.NoError(t, err)
 
 			// fetch
-			proposal, err := storage.RetrieveProposal(test.account.ValidatorPublicKey().Marshal(), test.proposal.Slot)
+			proposal, err := storage.RetrieveProposal(test.account.ValidatorPublicKey(), test.proposal.Slot)
 			require.NoError(t, err)
 			require.NotNil(t, proposal)
 
@@ -130,11 +129,11 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey().Marshal(), test.att)
+			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey(), test.att)
 			require.NoError(t, err)
 
 			// fetch
-			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey().Marshal())
+			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey())
 			require.NotNil(t, att)
 
 			// test equal
@@ -198,11 +197,11 @@ func TestingSaveHighestAttestation(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey().Marshal(), test.att)
+			err := storage.SaveHighestAttestation(test.account.ValidatorPublicKey(), test.att)
 			require.NoError(t, err)
 
 			// fetch
-			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey().Marshal())
+			att := storage.RetrieveHighestAttestation(test.account.ValidatorPublicKey())
 			require.NotNil(t, att)
 
 			// test equal

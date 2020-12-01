@@ -164,7 +164,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 			}
 			seedToAccounts[mnemonic] = append(seedToAccounts[mnemonic], ValidatorConfig{
 				UUID:    uuid.New().String(),
-				PubKey:  hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
+				PubKey:  hex.EncodeToString(account.ValidatorPublicKey()),
 				Path:    store.Network().FullPath(account.BasePath()),
 				Version: encryptor.Version(),
 				Crypto:  cryptoFields,

@@ -55,5 +55,5 @@ func (signer *SimpleSigner) SignBeaconBlock(block *eth.BeaconBlock, domain []byt
 		return nil, err
 	}
 
-	return sig.Marshal(), nil
+	return sig, nil
 }

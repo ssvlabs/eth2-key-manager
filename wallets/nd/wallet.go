@@ -59,7 +59,7 @@ func (wallet *NDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 }
 
 func (wallet *NDWallet) AddValidatorAccount(account core.ValidatorAccount) error {
-	validatorPublicKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
+	validatorPublicKey := hex.EncodeToString(account.ValidatorPublicKey())
 	wallet.indexMapper[validatorPublicKey] = account.ID()
 
 	// Store account

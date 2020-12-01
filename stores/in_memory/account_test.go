@@ -27,7 +27,6 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
-	options.SetSeed(seed)
 	vault, err := eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, nil, err

@@ -69,7 +69,7 @@ func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 			}
 			account, err := w.CreateValidatorAccount(seed, nil)
 			require.NoError(t, err)
-			require.Equal(t, test.validatorPubKey, hex.EncodeToString(account.ValidatorPublicKey().Marshal()))
+			require.Equal(t, test.validatorPubKey, hex.EncodeToString(account.ValidatorPublicKey()))
 		})
 	}
 }
@@ -129,8 +129,8 @@ func TestAccountDerivation(t *testing.T) {
 			with, err := e2types.BLSPublicKeyFromBytes(test.expectedWithdrawalKey.Bytes())
 			require.NoError(t, err)
 
-			require.Equal(t, val.Marshal(), account.ValidatorPublicKey().Marshal(), fmt.Sprintf("expceted validation pk: %s\n", hex.EncodeToString(account.ValidatorPublicKey().Marshal())))
-			require.Equal(t, with.Marshal(), account.WithdrawalPublicKey().Marshal(), fmt.Sprintf("expceted withdrawal pk: %s\n", hex.EncodeToString(account.WithdrawalPublicKey().Marshal())))
+			require.Equal(t, val.Marshal(), account.ValidatorPublicKey(), fmt.Sprintf("expceted validation pk: %s\n", hex.EncodeToString(account.ValidatorPublicKey())))
+			require.Equal(t, with.Marshal(), account.WithdrawalPublicKey(), fmt.Sprintf("expceted withdrawal pk: %s\n", hex.EncodeToString(account.WithdrawalPublicKey())))
 		})
 	}
 }

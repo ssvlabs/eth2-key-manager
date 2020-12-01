@@ -104,7 +104,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 				Target: &eth.Checkpoint{Epoch: uint64(highestTargets[i])},
 			}
 
-			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey().Marshal(), minimalAtt); err != nil {
+			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 				return errors.Wrap(err, "failed to set validator minimal slashing protection")
 			}
 		}
@@ -118,7 +118,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			Source: &eth.Checkpoint{Epoch: uint64(highestSources[0])},
 			Target: &eth.Checkpoint{Epoch: uint64(highestTargets[0])},
 		}
-		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey().Marshal(), minimalAtt); err != nil {
+		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 			return errors.Wrap(err, "failed to set validator minimal slashing protection")
 		}
 	}
@@ -139,8 +139,8 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		accObj := map[string]string{
 			"id":               a.ID().String(),
 			"name":             a.Name(),
-			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey().Marshal()),
-			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey().Marshal()),
+			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey()),
+			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey()),
 		}
 		accounts = append(accounts, accObj)
 	}

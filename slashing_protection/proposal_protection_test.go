@@ -4,8 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/stretchr/testify/require"
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
@@ -53,38 +54,26 @@ func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {
 	}
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	protector.SaveProposal(account1.ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-		Id:     nil,
-		Domain: []byte("domain"),
-		Data: &pb.BeaconBlockHeader{
-			Slot:          100,
-			ProposerIndex: 2,
-			ParentRoot:    []byte("A"),
-			StateRoot:     []byte("A"),
-			BodyRoot:      []byte("A"),
-		},
+	protector.SaveProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
+		Slot:          100,
+		ProposerIndex: 2,
+		ParentRoot:    []byte("A"),
+		StateRoot:     []byte("A"),
+		Body:          &eth.BeaconBlockBody{},
 	})
-	protector.SaveProposal(account1.ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-		Id:     nil,
-		Domain: []byte("domain"),
-		Data: &pb.BeaconBlockHeader{
-			Slot:          101,
-			ProposerIndex: 2,
-			ParentRoot:    []byte("B"),
-			StateRoot:     []byte("B"),
-			BodyRoot:      []byte("B"),
-		},
+	protector.SaveProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
+		Slot:          101,
+		ProposerIndex: 2,
+		ParentRoot:    []byte("B"),
+		StateRoot:     []byte("B"),
+		Body:          &eth.BeaconBlockBody{},
 	})
-	protector.SaveProposal(account1.ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-		Id:     nil,
-		Domain: []byte("domain"),
-		Data: &pb.BeaconBlockHeader{
-			Slot:          102,
-			ProposerIndex: 2,
-			ParentRoot:    []byte("C"),
-			StateRoot:     []byte("C"),
-			BodyRoot:      []byte("C"),
-		},
+	protector.SaveProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
+		Slot:          102,
+		ProposerIndex: 2,
+		ParentRoot:    []byte("C"),
+		StateRoot:     []byte("C"),
+		Body:          &eth.BeaconBlockBody{},
 	})
 
 	return protector, []core.ValidatorAccount{account1, account2}, nil
@@ -95,76 +84,56 @@ func TestDoubleProposal(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("New proposal, should not slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-			Id:     nil,
-			Domain: []byte("domain"),
-			Data: &pb.BeaconBlockHeader{
-				Slot:          99,
-				ProposerIndex: 2,
-				ParentRoot:    []byte("Z"),
-				StateRoot:     []byte("Z"),
-				BodyRoot:      []byte("Z"),
-			},
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          99,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("Z"),
+			StateRoot:     []byte("Z"),
+			Body:          &eth.BeaconBlockBody{},
 		})
 		require.Equal(t, res.Status, core.ValidProposal)
 	})
 
 	t.Run("different proposer index, should not slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[1].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-			Id:     nil,
-			Domain: []byte("domain"),
-			Data: &pb.BeaconBlockHeader{
-				Slot:          100,
-				ProposerIndex: 3,
-				ParentRoot:    []byte("A"),
-				StateRoot:     []byte("A"),
-				BodyRoot:      []byte("A"),
-			},
+		res := protector.IsSlashableProposal(accounts[1].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          100,
+			ProposerIndex: 3,
+			ParentRoot:    []byte("A"),
+			StateRoot:     []byte("A"),
+			Body:          &eth.BeaconBlockBody{},
 		})
 		require.Equal(t, res.Status, core.ValidProposal)
 	})
 
 	t.Run("double proposal (different body root), should slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-			Id:     nil,
-			Domain: []byte("domain"),
-			Data: &pb.BeaconBlockHeader{
-				Slot:          100,
-				ProposerIndex: 2,
-				ParentRoot:    []byte("A"),
-				StateRoot:     []byte("A"),
-				BodyRoot:      []byte("B"),
-			},
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          100,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("A"),
+			StateRoot:     []byte("A"),
+			Body:          &eth.BeaconBlockBody{Graffiti: []byte("B")},
 		})
 		require.Equal(t, res.Status, core.DoubleProposal)
 	})
 
 	t.Run("double proposal (different state root), should slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-			Id:     nil,
-			Domain: []byte("domain"),
-			Data: &pb.BeaconBlockHeader{
-				Slot:          100,
-				ProposerIndex: 2,
-				ParentRoot:    []byte("A"),
-				StateRoot:     []byte("B"),
-				BodyRoot:      []byte("A"),
-			},
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          100,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("A"),
+			StateRoot:     []byte("B"),
+			Body:          &eth.BeaconBlockBody{},
 		})
 		require.Equal(t, res.Status, core.DoubleProposal)
 	})
 
 	t.Run("double proposal (different state and body root), should slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &pb.SignBeaconProposalRequest{
-			Id:     nil,
-			Domain: []byte("domain"),
-			Data: &pb.BeaconBlockHeader{
-				Slot:          100,
-				ProposerIndex: 2,
-				ParentRoot:    []byte("A"),
-				StateRoot:     []byte("B"),
-				BodyRoot:      []byte("B"),
-			},
+		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          100,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("A"),
+			StateRoot:     []byte("B"),
+			Body:          &eth.BeaconBlockBody{Graffiti: []byte("B")},
 		})
 		require.Equal(t, res.Status, core.DoubleProposal)
 	})

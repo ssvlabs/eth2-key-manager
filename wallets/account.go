@@ -4,12 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type HDAccount struct {
@@ -19,7 +17,7 @@ type HDAccount struct {
 	basePath         string
 	id               uuid.UUID
 	validationKey    *core.HDKey
-	withdrawalPubKey e2types.PublicKey
+	withdrawalPubKey []byte
 	context          *core.WalletContext
 }
 
@@ -29,7 +27,7 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	data["id"] = account.id
 	data["name"] = account.name
 	data["validationKey"] = account.validationKey
-	data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey.Marshal())
+	data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey)
 	data["baseAccountPath"] = account.basePath
 	return json.Marshal(data)
 }
@@ -88,7 +86,7 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		account.withdrawalPubKey, err = e2types.BLSPublicKeyFromBytes(byts)
+		account.withdrawalPubKey = byts
 		if err != nil {
 			return err
 		}
@@ -102,7 +100,7 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 func NewValidatorAccount(
 	name string,
 	validationKey *core.HDKey,
-	withdrawalPubKey e2types.PublicKey,
+	withdrawalPubKey []byte,
 	basePath string,
 	context *core.WalletContext,
 ) (*HDAccount, error) {
@@ -132,17 +130,17 @@ func (account *HDAccount) BasePath() string {
 }
 
 // ValidatorPublicKey provides the public key for the account.
-func (account *HDAccount) ValidatorPublicKey() e2types.PublicKey {
-	return account.validationKey.PublicKey()
+func (account *HDAccount) ValidatorPublicKey() []byte {
+	return account.validationKey.PublicKey().Serialize()
 }
 
 // WithdrawalPublicKey provides the public key for the account.
-func (account *HDAccount) WithdrawalPublicKey() e2types.PublicKey {
+func (account *HDAccount) WithdrawalPublicKey() []byte {
 	return account.withdrawalPubKey
 }
 
 // Sign signs data with the account.
-func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature, error) {
+func (account *HDAccount) ValidationKeySign(data []byte) ([]byte, error) {
 	return account.validationKey.Sign(data)
 }
 
@@ -150,7 +148,7 @@ func (account *HDAccount) ValidationKeySign(data []byte) (e2types.Signature, err
 func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
 	depositData, root, err := eth1_deposit.DepositData(
 		account.validationKey,
-		account.withdrawalPubKey.Marshal(),
+		account.withdrawalPubKey,
 		account.context.Storage.Network(),
 		eth1_deposit.MaxEffectiveBalanceInGwei,
 	)

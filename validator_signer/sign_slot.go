@@ -32,5 +32,5 @@ func (signer *SimpleSigner) SignSlot(slot uint64, domain []byte, pubKey []byte) 
 		return nil, err
 	}
 
-	return sig.Marshal(), nil
+	return sig, nil
 }

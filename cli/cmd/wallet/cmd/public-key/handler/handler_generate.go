@@ -60,8 +60,8 @@ func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
 	}
 
 	publicKey := map[string]interface{}{
-		"validationPubKey": hex.EncodeToString(account.ValidatorPublicKey().Marshal()),
-		"withdrawalPubKey": hex.EncodeToString(account.WithdrawalPublicKey().Marshal()),
+		"validationPubKey": hex.EncodeToString(account.ValidatorPublicKey()),
+		"withdrawalPubKey": hex.EncodeToString(account.WithdrawalPublicKey()),
 		"index":            indexFlagValue,
 	}
 

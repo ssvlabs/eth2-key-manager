@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/google/uuid"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 // A validator account holds the information and actions needed by validator account keys.
@@ -20,13 +19,13 @@ type ValidatorAccount interface {
 	BasePath() string
 
 	// ValidatorPublicKey provides the public key for the validation key.
-	ValidatorPublicKey() e2types.PublicKey
+	ValidatorPublicKey() []byte
 
 	// WithdrawalPublicKey provides the public key for the withdrawal key.
-	WithdrawalPublicKey() e2types.PublicKey
+	WithdrawalPublicKey() []byte
 
 	// ValidationKeySign signs data with the validation key.
-	ValidationKeySign(data []byte) (e2types.Signature, error)
+	ValidationKeySign(data []byte) ([]byte, error)
 
 	// GetDepositData returns deposit data
 	GetDepositData() (map[string]interface{}, error)

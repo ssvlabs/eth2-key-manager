@@ -61,7 +61,7 @@ func TestDepositData(t *testing.T) {
 				MaxEffectiveBalanceInGwei,
 			)
 			require.NoError(t, err)
-			require.Equal(t, val.PublicKey().Marshal(), depositData.PublicKey)
+			require.Equal(t, val.PublicKey().Serialize(), depositData.PublicKey)
 			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
 			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
 			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))

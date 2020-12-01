@@ -5,9 +5,12 @@ import (
 	"log"
 	"testing"
 
+	"github.com/herumi/bls-eth-go-binary/bls"
+
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
 	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 
@@ -45,21 +48,17 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (Valida
 		log.Fatal(err)
 	}
 	if setLatestAttestation {
-		protector.UpdateLatestAttestation(acc.ValidatorPublicKey(), &pb.SignBeaconAttestationRequest{
-			Id:     &pb.SignBeaconAttestationRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
-			Domain: ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
-			Data: &pb.AttestationData{
-				Slot:            0,
-				CommitteeIndex:  0,
-				BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
-				Source: &pb.Checkpoint{
-					Epoch: 0,
-					Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
-				},
-				Target: &pb.Checkpoint{
-					Epoch: 0,
-					Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
-				},
+		protector.UpdateLatestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+			Slot:            0,
+			CommitteeIndex:  0,
+			BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+			Source: &eth.Checkpoint{
+				Epoch: 0,
+				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+			},
+			Target: &eth.Checkpoint{
+				Epoch: 0,
+				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
 			},
 		})
 	}
@@ -73,7 +72,6 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
-	options.SetSeed(seed)
 	vault, err := eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, err
@@ -92,61 +90,58 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 	return wallet, nil
 }
 
-func TestSignatures(t *testing.T) {
+func TestSlotSignatures(t *testing.T) {
 	seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	signer, err := setupNoSlashingProtection(seed)
 	require.NoError(t, err)
 
-	accountPriv, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0")
+	derivedPriv, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0") // TODO - refactor to remte wealdetch dependency
 	require.NoError(t, err)
+
+	accountPriv := &bls.SecretKey{}
+	require.NoError(t, accountPriv.SetHexString(hex.EncodeToString(derivedPriv.Marshal())))
 
 	tests := []struct {
 		name          string
-		req           *pb.SignRequest
+		slot          uint64
+		pubKey        []byte
+		domain        []byte
 		expectedError error
-		accountPriv   *e2types.BLSPrivateKey
+		accountPriv   *bls.SecretKey
 		msg           string
 	}{
 		{
-			name: "simple sign",
-			req: &pb.SignRequest{
-				Id:     &pb.SignRequest_PublicKey{PublicKey: _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")},
-				Data:   []byte("data"),
-				Domain: []byte("domain"),
-			},
+			name:          "simple sign",
+			slot:          1,
+			pubKey:        _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
+			domain:        []byte("domain"),
 			expectedError: nil,
 			accountPriv:   accountPriv,
 			msg:           "c47e6c550b583a4bce0f2504d81045042d7c4bf439f769e8838f8686a93993f7",
 		},
 		{
-			name: "unknown account, should error",
-			req: &pb.SignRequest{
-				Id:     &pb.SignRequest_PublicKey{PublicKey: _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c")},
-				Data:   []byte("data"),
-				Domain: []byte("domain"),
-			},
+			name:          "unknown account, should error",
+			slot:          1,
+			pubKey:        _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c"),
+			domain:        []byte("domain"),
 			expectedError: errors.New("account not found"),
 			accountPriv:   nil,
 			msg:           "",
 		},
 		{
-			name: "empty account, should error",
-			req: &pb.SignRequest{
-				Id:     &pb.SignRequest_Account{Account: ""},
-				Data:   []byte("data"),
-				Domain: []byte("domain"),
-			},
+			name:          "nil account, should error",
+			slot:          1,
+			pubKey:        nil,
+			domain:        []byte("domain"),
 			expectedError: errors.New("account was not supplied"),
 			accountPriv:   nil,
 			msg:           "",
 		},
 		{
-			name: "nil account, should error",
-			req: &pb.SignRequest{
-				Id:     nil,
-				Data:   []byte("data"),
-				Domain: []byte("domain"),
-			},
+			name:          "empty account, should error",
+			slot:          1,
+			pubKey:        _byteArray(""),
+			domain:        []byte("domain"),
 			expectedError: errors.New("account was not supplied"),
 			accountPriv:   nil,
 			msg:           "",
@@ -155,7 +150,7 @@ func TestSignatures(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.Sign(test.req)
+			res, err := signer.SignSlot(test.slot, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -166,12 +161,10 @@ func TestSignatures(t *testing.T) {
 				// check sign worked
 				require.NoError(t, err)
 
-				sig, err := e2types.BLSSignatureFromBytes(res.Signature)
+				sig := &bls.Sign{}
+				err := sig.SetHexString(hex.EncodeToString(res))
 				require.NoError(t, err)
-
-				msgBytes, err := hex.DecodeString(test.msg)
-				require.NoError(t, err)
-				require.True(t, sig.Verify(msgBytes, test.accountPriv.PublicKey()))
+				require.True(t, sig.Verify(test.accountPriv.GetPublicKey(), test.msg))
 			}
 		})
 	}

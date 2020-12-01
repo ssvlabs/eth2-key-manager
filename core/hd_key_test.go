@@ -83,8 +83,8 @@ func TestMarshalingHDKey(t *testing.T) {
 			// match
 			require.Equal(t, hdKey.Path(), newKey.Path())
 			require.Equal(t, hdKey.id.String(), newKey.id.String())
-			require.Equal(t, hdKey.privKey.Marshal(), newKey.privKey.Marshal())
-			require.Equal(t, hdKey.PublicKey().Marshal(), newKey.PublicKey().Marshal())
+			require.Equal(t, hdKey.privKey, newKey.privKey)
+			require.Equal(t, hdKey.PublicKey(), newKey.PublicKey())
 		})
 	}
 }
@@ -207,7 +207,7 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			require.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
 			expectedPk, err := e2types.BLSPublicKeyFromBytes(test.expectedKey.Bytes())
 			require.NoError(t, err)
-			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey().Marshal(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Marshal())))
+			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Serialize())))
 		})
 	}
 }

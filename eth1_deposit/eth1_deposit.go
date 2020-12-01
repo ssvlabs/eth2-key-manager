@@ -22,7 +22,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 		WithdrawalCredentials []byte `ssz-size:"32"`
 		Amount                uint64
 	}{
-		PublicKey:             validationKey.PublicKey().Marshal(),
+		PublicKey:             validationKey.PublicKey().Serialize(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
 		Amount:                amountInGwei,
 	}
@@ -54,10 +54,10 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 	}
 
 	signedDepositData := &ethpb.Deposit_Data{
-		PublicKey:             validationKey.PublicKey().Marshal(),
+		PublicKey:             validationKey.PublicKey().Serialize(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
 		Amount:                amountInGwei,
-		Signature:             sig.Marshal(),
+		Signature:             sig,
 	}
 
 	depositDataRoot, err := ssz.HashTreeRoot(signedDepositData)

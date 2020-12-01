@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/ethereum/go-ethereum v1.9.24
 	github.com/google/uuid v1.1.2
-	github.com/herumi/bls-eth-go-binary v0.0.0-20201104034342-d782bdf735de // indirect
+	github.com/herumi/bls-eth-go-binary v0.0.0-20201104034342-d782bdf735de
 	github.com/pkg/errors v0.9.1
 	github.com/prysmaticlabs/ethereumapis v0.0.0-20201003171600-a72e5f77d233
 	github.com/prysmaticlabs/go-ssz v0.0.0-20200612203617-6d5c9aa213ae

@@ -15,8 +15,8 @@ func TestingOpeningAccount(storage core.Storage, account core.ValidatorAccount, 
 	a1, err := storage.OpenAccount(account.ID())
 	require.NoError(t, err)
 	require.Equal(t, account.ID().String(), a1.ID().String())
-	require.Equal(t, account.ValidatorPublicKey().Marshal(), a1.ValidatorPublicKey().Marshal())
-	require.Equal(t, account.WithdrawalPublicKey().Marshal(), a1.WithdrawalPublicKey().Marshal())
+	require.Equal(t, account.ValidatorPublicKey(), a1.ValidatorPublicKey())
+	require.Equal(t, account.WithdrawalPublicKey(), a1.WithdrawalPublicKey())
 	require.Equal(t, account.Name(), a1.Name())
 }
 
@@ -31,19 +31,14 @@ func TestingSavingAccounts(storage core.Storage, accounts []core.ValidatorAccoun
 			require.NoError(t, err)
 			require.Equal(t, account.ID(), val.ID())
 			require.Equal(t, account.Name(), val.Name())
-			require.Equal(t, account.ValidatorPublicKey().Marshal(), val.ValidatorPublicKey().Marshal())
-			require.Equal(t, account.WithdrawalPublicKey().Marshal(), val.WithdrawalPublicKey().Marshal())
+			require.Equal(t, account.ValidatorPublicKey(), val.ValidatorPublicKey())
+			require.Equal(t, account.WithdrawalPublicKey(), val.WithdrawalPublicKey())
 		})
 	}
 }
 
 func TestingFetchingNonExistingAccount(storage core.Storage, t *testing.T) {
 	t.Run("testing", func(t *testing.T) {
-		// create keyvault and wallet
-		options := &eth2keymanager.KeyVaultOptions{}
-		options.SetStorage(storage)
-		options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"))
-
 		// fetch non existing account
 		_, err := storage.OpenAccount(uuid.New())
 		require.NoError(t, err)
@@ -55,7 +50,6 @@ func TestingListingAccounts(storage core.Storage, t *testing.T) {
 	// create keyvault and wallet
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(storage)
-	options.SetSeed(seed)
 	vault, err := eth2keymanager.NewKeyVault(options)
 	require.NoError(t, err)
 

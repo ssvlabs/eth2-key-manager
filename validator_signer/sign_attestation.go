@@ -56,5 +56,5 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *eth.AttestationDa
 		return nil, err
 	}
 
-	return sig.Marshal(), nil
+	return sig, nil
 }
