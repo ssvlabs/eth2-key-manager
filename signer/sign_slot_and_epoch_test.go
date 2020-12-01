@@ -159,3 +159,75 @@ func TestSlotSignatures(t *testing.T) {
 		})
 	}
 }
+
+func TestEpochSignatures(t *testing.T) {
+	seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
+	signer, err := setupNoSlashingProtection(seed)
+	require.NoError(t, err)
+
+	pk := &bls.PublicKey{}
+	require.NoError(t, pk.Deserialize(_byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")))
+
+	tests := []struct {
+		name          string
+		epoch         uint64
+		pubKey        []byte
+		domain        []byte
+		expectedError error
+		msg           string
+	}{
+		{
+			name:          "simple sign",
+			epoch:         1,
+			pubKey:        _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
+			expectedError: nil,
+			msg:           "7920f65abe2efb506d0ec763e227ab58978b6e2dda41d4bc2ceb785b4084b0fa",
+		},
+		{
+			name:          "unknown account, should error",
+			epoch:         1,
+			pubKey:        _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c"),
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
+			expectedError: errors.New("account not found"),
+			msg:           "",
+		},
+		{
+			name:          "nil account, should error",
+			epoch:         1,
+			pubKey:        nil,
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
+			expectedError: errors.New("account was not supplied"),
+			msg:           "",
+		},
+		{
+			name:          "empty account, should error",
+			epoch:         1,
+			pubKey:        _byteArray(""),
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
+			expectedError: errors.New("account not found"),
+			msg:           "",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			res, err := signer.SignEpoch(test.epoch, test.domain, test.pubKey)
+			if test.expectedError != nil {
+				if err != nil {
+					require.Equal(t, test.expectedError.Error(), err.Error())
+				} else {
+					t.Errorf("no error returned, expected: %s", test.expectedError.Error())
+				}
+			} else {
+				// check sign worked
+				require.NoError(t, err)
+
+				sig := &bls.Sign{}
+				err := sig.Deserialize(res)
+				require.NoError(t, err)
+				require.True(t, sig.VerifyByte(pk, _byteArray(test.msg)))
+			}
+		})
+	}
+}

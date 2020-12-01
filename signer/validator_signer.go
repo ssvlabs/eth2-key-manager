@@ -17,6 +17,7 @@ type ValidatorSigner interface {
 	SignBeaconBlock(block *eth.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
 	SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error)
 	SignSlot(slot uint64, domain []byte, pubKey []byte) ([]byte, error)
+	SignEpoch(epoch uint64, domain []byte, pubKey []byte) ([]byte, error)
 }
 
 type signingRoot struct {
