@@ -12,7 +12,6 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -21,7 +20,7 @@ func _byteArray(input string) []byte {
 }
 
 func keyVault(storage core.Storage) (*eth2keymanager.KeyVault, error) {
-	if err := e2types.InitBLS(); err != nil {
+	if err := core.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 

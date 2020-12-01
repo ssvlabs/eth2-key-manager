@@ -1,8 +1,6 @@
 package eth2keymanager
 
 import (
-	"sync"
-
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
@@ -10,29 +8,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-var initBLSOnce sync.Once
-
-// initBLS initializes BLS ONLY ONCE!
-func initBLS() error {
-	var err error
-	var wg sync.WaitGroup
-	initBLSOnce.Do(func() {
-		wg.Add(1)
-		err = e2types.InitBLS()
-		wg.Done()
-	})
-	wg.Wait()
-	return err
-}
-
 func InitCrypto() {
 	// !!!VERY IMPORTANT!!!
-	if err := initBLS(); err != nil {
+	if err := core.InitBLS(); err != nil {
 		logrus.Fatal(err)
 	}
 }

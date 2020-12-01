@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/timeutils"
@@ -17,6 +19,12 @@ import (
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
 	return res
+}
+
+func _byteArray32(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	ret := bytesutil.ToBytes32(res)
+	return ret[:]
 }
 
 func ignoreError(val interface{}, err error) interface{} {
@@ -107,7 +115,6 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		},
 			ignoreError(hex.DecodeString("A")).([]byte),
 			_byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
-		require.NoError(t, err)
 		require.EqualError(t, err, "slashable attestation (HighestAttestationVote), not signing")
 	})
 

@@ -34,7 +34,7 @@ func _bigIntFromSkHex(input string) *big.Int {
 // this test compares the launchpad results and KeyVault
 // Updated for V1.0.0 https://github.com/ethereum/eth2.0-deposit-cli/releases/tag/v1.0.0
 func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
-	e2types.InitBLS()
+	core.InitBLS()
 
 	tests := []struct {
 		mnemonic        string
@@ -75,7 +75,7 @@ func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 }
 
 func TestAccountDerivation(t *testing.T) {
-	e2types.InitBLS()
+	core.InitBLS()
 
 	// create wallet
 	storage := storage()

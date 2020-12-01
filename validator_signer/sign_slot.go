@@ -2,6 +2,7 @@ package validator_signer
 
 import (
 	"encoding/hex"
+	"fmt"
 
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 
@@ -26,6 +27,8 @@ func (signer *SimpleSigner) SignSlot(slot uint64, domain []byte, pubKey []byte) 
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
 
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {

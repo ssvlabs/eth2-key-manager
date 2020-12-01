@@ -5,19 +5,17 @@ import (
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	types "github.com/wealdtech/go-eth2-types/v2"
-
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 // Account creates a new wallet account and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
-	err := types.InitBLS()
+	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}

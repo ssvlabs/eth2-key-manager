@@ -46,7 +46,7 @@ func TestDepositData(t *testing.T) {
 		},
 	}
 
-	e2types.InitBLS()
+	require.NoError(t, core.InitBLS())
 
 	for _, test := range tests {
 		t.Run(test.testname, func(t *testing.T) {

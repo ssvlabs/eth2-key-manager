@@ -3,9 +3,10 @@ package handler
 import (
 	"encoding/hex"
 
+	"github.com/bloxapp/eth2-key-manager/core"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	types "github.com/wealdtech/go-eth2-types/v2"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/public-key/flag"
@@ -14,7 +15,7 @@ import (
 
 // Account generates a new wallet account at specific index and prints the account.
 func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
-	err := types.InitBLS()
+	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}

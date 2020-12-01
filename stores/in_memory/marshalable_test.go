@@ -12,10 +12,8 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 
-	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/stretchr/testify/require"
 )
 
 func _bigIntFromSkHex(input string) *big.Int {
@@ -24,7 +22,7 @@ func _bigIntFromSkHex(input string) *big.Int {
 }
 
 func TestMarshalingNDWallet(t *testing.T) {
-	err := e2types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	store := NewInMemStore(core.MainNetwork)
@@ -64,7 +62,7 @@ func TestMarshalingNDWallet(t *testing.T) {
 }
 
 func TestMarshaling(t *testing.T) {
-	err := e2types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	store := NewInMemStore(core.MainNetwork)

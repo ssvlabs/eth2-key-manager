@@ -8,11 +8,9 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types/v2"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func _byteArray(input string) []byte {
@@ -45,7 +43,7 @@ func TestAccountMarshaling(t *testing.T) {
 		},
 	}
 
-	types.InitBLS()
+	core.InitBLS()
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {

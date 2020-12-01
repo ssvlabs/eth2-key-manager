@@ -3,17 +3,17 @@ package handler
 import (
 	"encoding/hex"
 
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	types "github.com/wealdtech/go-eth2-types/v2"
+	"github.com/bloxapp/eth2-key-manager/core"
 
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 // Account list wallet accounts and prints the accounts.
 func (h *Account) List(cmd *cobra.Command, args []string) error {
-	err := types.InitBLS()
+	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}

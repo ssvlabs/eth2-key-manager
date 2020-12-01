@@ -24,7 +24,7 @@ func _bigIntFromSkHex(input string) *big.Int {
 }
 
 func TestMarshalingHDKey(t *testing.T) {
-	if err := e2types.InitBLS(); err != nil {
+	if err := InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
@@ -90,7 +90,7 @@ func TestMarshalingHDKey(t *testing.T) {
 }
 
 func TestDerivableKeyRelativePathDerivation(t *testing.T) {
-	if err := e2types.InitBLS(); err != nil {
+	if err := InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
@@ -207,7 +207,7 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			require.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
 			expectedPk, err := e2types.BLSPublicKeyFromBytes(test.expectedKey.Bytes())
 			require.NoError(t, err)
-			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Serialize())))
+			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey().Serialize(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Serialize())))
 		})
 	}
 }

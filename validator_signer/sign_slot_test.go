@@ -11,8 +11,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-	util "github.com/wealdtech/go-eth2-util"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -66,7 +64,7 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (Valida
 }
 
 func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
+	if err := core.InitBLS(); err != nil { // very important!
 		return nil, err
 	}
 
@@ -95,11 +93,8 @@ func TestSlotSignatures(t *testing.T) {
 	signer, err := setupNoSlashingProtection(seed)
 	require.NoError(t, err)
 
-	derivedPriv, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0") // TODO - refactor to remte wealdetch dependency
-	require.NoError(t, err)
-
-	accountPriv := &bls.SecretKey{}
-	require.NoError(t, accountPriv.SetHexString(hex.EncodeToString(derivedPriv.Marshal())))
+	pk := &bls.PublicKey{}
+	require.NoError(t, pk.Deserialize(_byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")))
 
 	tests := []struct {
 		name          string
@@ -107,43 +102,38 @@ func TestSlotSignatures(t *testing.T) {
 		pubKey        []byte
 		domain        []byte
 		expectedError error
-		accountPriv   *bls.SecretKey
 		msg           string
 	}{
 		{
 			name:          "simple sign",
 			slot:          1,
 			pubKey:        _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
-			domain:        []byte("domain"),
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: nil,
-			accountPriv:   accountPriv,
-			msg:           "c47e6c550b583a4bce0f2504d81045042d7c4bf439f769e8838f8686a93993f7",
+			msg:           "7920f65abe2efb506d0ec763e227ab58978b6e2dda41d4bc2ceb785b4084b0fa",
 		},
 		{
 			name:          "unknown account, should error",
 			slot:          1,
 			pubKey:        _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c"),
-			domain:        []byte("domain"),
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: errors.New("account not found"),
-			accountPriv:   nil,
 			msg:           "",
 		},
 		{
 			name:          "nil account, should error",
 			slot:          1,
 			pubKey:        nil,
-			domain:        []byte("domain"),
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: errors.New("account was not supplied"),
-			accountPriv:   nil,
 			msg:           "",
 		},
 		{
 			name:          "empty account, should error",
 			slot:          1,
 			pubKey:        _byteArray(""),
-			domain:        []byte("domain"),
-			expectedError: errors.New("account was not supplied"),
-			accountPriv:   nil,
+			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
+			expectedError: errors.New("account not found"),
 			msg:           "",
 		},
 	}
@@ -162,9 +152,9 @@ func TestSlotSignatures(t *testing.T) {
 				require.NoError(t, err)
 
 				sig := &bls.Sign{}
-				err := sig.SetHexString(hex.EncodeToString(res))
+				err := sig.Deserialize(res)
 				require.NoError(t, err)
-				require.True(t, sig.Verify(test.accountPriv.GetPublicKey(), test.msg))
+				require.True(t, sig.VerifyByte(pk, _byteArray(test.msg)))
 			}
 		})
 	}

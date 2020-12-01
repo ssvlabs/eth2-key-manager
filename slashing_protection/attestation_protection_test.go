@@ -8,13 +8,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProtector, []core.ValidatorAccount) {
-	err := e2types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	// seed

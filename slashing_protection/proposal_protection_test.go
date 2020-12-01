@@ -7,7 +7,6 @@ import (
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -30,7 +29,7 @@ func vault() (*eth2keymanager.KeyVault, error) {
 }
 
 func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {
-	if err := e2types.InitBLS(); err != nil { // very important!
+	if err := core.InitBLS(); err != nil { // very important!
 		return nil, nil, err
 	}
 
