@@ -1,4 +1,4 @@
-package validator_signer
+package signer
 
 import (
 	"encoding/hex"

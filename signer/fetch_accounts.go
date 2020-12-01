@@ -1,4 +1,4 @@
-package validator_signer
+package signer
 
 import (
 	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
