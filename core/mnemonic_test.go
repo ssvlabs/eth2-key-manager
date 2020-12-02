@@ -6,11 +6,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func TestSeedFromMnemonic(t *testing.T) {
-	e2types.InitBLS()
+	require.NoError(t, InitBLS())
 
 	tests := []struct {
 		mnemonic        string

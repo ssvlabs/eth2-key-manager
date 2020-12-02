@@ -6,8 +6,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	types "github.com/wealdtech/go-eth2-types/v2"
-
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores"
@@ -19,7 +17,7 @@ func _byteArray(input string) []byte {
 }
 
 func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) {
-	types.InitBLS()
+	core.InitBLS()
 	store := getStorage()
 
 	// seed
@@ -27,7 +25,6 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
-	options.SetSeed(seed)
 	vault, err := eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return nil, nil, err

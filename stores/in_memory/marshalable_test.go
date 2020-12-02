@@ -5,15 +5,15 @@ import (
 	"math/big"
 	"testing"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/bloxapp/eth2-key-manager/wallets"
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 
-	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/stretchr/testify/require"
 )
 
 func _bigIntFromSkHex(input string) *big.Int {
@@ -22,7 +22,7 @@ func _bigIntFromSkHex(input string) *big.Int {
 }
 
 func TestMarshalingNDWallet(t *testing.T) {
-	err := e2types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	store := NewInMemStore(core.MainNetwork)
@@ -32,7 +32,7 @@ func TestMarshalingNDWallet(t *testing.T) {
 	wallet := nd.NewNDWallet(walletCtx)
 	k, err := core.NewHDKeyFromPrivateKey(_byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"), "")
 	require.NoError(t, err)
-	account, err := wallets.NewValidatorAccount("", k, k.PublicKey(), "", walletCtx)
+	account, err := wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 	require.NoError(t, err)
 	wallet.AddValidatorAccount(account)
 	err = store.SaveWallet(wallet)
@@ -62,7 +62,7 @@ func TestMarshalingNDWallet(t *testing.T) {
 }
 
 func TestMarshaling(t *testing.T) {
-	err := e2types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	store := NewInMemStore(core.MainNetwork)
@@ -79,15 +79,15 @@ func TestMarshaling(t *testing.T) {
 	require.NoError(t, err)
 
 	// attestation
-	att := &core.BeaconAttestation{
+	att := &eth.AttestationData{
 		Slot:            1,
 		CommitteeIndex:  1,
 		BeaconBlockRoot: []byte("A"),
-		Source: &core.Checkpoint{
+		Source: &eth.Checkpoint{
 			Epoch: 1,
 			Root:  []byte("A"),
 		},
-		Target: &core.Checkpoint{
+		Target: &eth.Checkpoint{
 			Epoch: 2,
 			Root:  []byte("A"),
 		},
@@ -95,12 +95,12 @@ func TestMarshaling(t *testing.T) {
 	store.SaveHighestAttestation(acc.ValidatorPublicKey(), att)
 
 	// proposal
-	prop := &core.BeaconBlockHeader{
+	prop := &eth.BeaconBlock{
 		Slot:          1,
 		ProposerIndex: 1,
 		ParentRoot:    []byte("A"),
 		StateRoot:     []byte("A"),
-		BodyRoot:      []byte("A"),
+		Body:          &eth.BeaconBlockBody{},
 	}
 	store.SaveProposal(acc.ValidatorPublicKey(), prop)
 

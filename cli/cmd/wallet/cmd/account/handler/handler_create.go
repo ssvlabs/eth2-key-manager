@@ -3,19 +3,19 @@ package handler
 import (
 	"encoding/hex"
 
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	types "github.com/wealdtech/go-eth2-types/v2"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 // Account creates a new wallet account and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
-	err := types.InitBLS()
+	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}
@@ -97,9 +97,9 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 				return errors.Wrap(err, "failed to create validator account")
 			}
 
-			minimalAtt := &core.BeaconAttestation{
-				Source: &core.Checkpoint{Epoch: uint64(highestSources[i])},
-				Target: &core.Checkpoint{Epoch: uint64(highestTargets[i])},
+			minimalAtt := &eth.AttestationData{
+				Source: &eth.Checkpoint{Epoch: uint64(highestSources[i])},
+				Target: &eth.Checkpoint{Epoch: uint64(highestTargets[i])},
 			}
 
 			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
@@ -112,9 +112,9 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			return errors.Wrap(err, "failed to create validator account")
 		}
 
-		minimalAtt := &core.BeaconAttestation{
-			Source: &core.Checkpoint{Epoch: uint64(highestSources[0])},
-			Target: &core.Checkpoint{Epoch: uint64(highestTargets[0])},
+		minimalAtt := &eth.AttestationData{
+			Source: &eth.Checkpoint{Epoch: uint64(highestSources[0])},
+			Target: &eth.Checkpoint{Epoch: uint64(highestTargets[0])},
 		}
 		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 			return errors.Wrap(err, "failed to set validator minimal slashing protection")
@@ -137,8 +137,8 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		accObj := map[string]string{
 			"id":               a.ID().String(),
 			"name":             a.Name(),
-			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey().Marshal()),
-			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey().Marshal()),
+			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey()),
+			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey()),
 		}
 		accounts = append(accounts, accObj)
 	}

@@ -9,7 +9,6 @@ type KeyVaultOptions struct {
 	encryptor  encryptor2.Encryptor
 	password   []byte
 	storage    interface{} // a generic interface as there are a few core storage interfaces (storage, slashing storage and so on)
-	seed       []byte
 	walletType core.WalletType
 }
 
@@ -25,11 +24,6 @@ func (options *KeyVaultOptions) SetStorage(storage interface{}) *KeyVaultOptions
 
 func (options *KeyVaultOptions) SetPassword(password string) *KeyVaultOptions {
 	options.password = []byte(password)
-	return options
-}
-
-func (options *KeyVaultOptions) SetSeed(seed []byte) *KeyVaultOptions {
-	options.seed = seed
 	return options
 }
 

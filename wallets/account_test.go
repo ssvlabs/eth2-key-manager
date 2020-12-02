@@ -8,11 +8,9 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types/v2"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func _byteArray(input string) []byte {
@@ -45,7 +43,7 @@ func TestAccountMarshaling(t *testing.T) {
 		},
 	}
 
-	types.InitBLS()
+	core.InitBLS()
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
@@ -64,7 +62,7 @@ func TestAccountMarshaling(t *testing.T) {
 				name:             test.name,
 				id:               test.id,
 				validationKey:    validationKey,
-				withdrawalPubKey: withdrawalKey.PublicKey(),
+				withdrawalPubKey: withdrawalKey.PublicKey().Serialize(),
 				basePath:         fmt.Sprintf("/%s", test.accountIndex),
 			}
 
@@ -78,8 +76,8 @@ func TestAccountMarshaling(t *testing.T) {
 
 			require.Equal(t, a.id, a1.id)
 			require.Equal(t, a.name, a1.name)
-			require.Equal(t, a.validationKey.PublicKey().Marshal(), a1.validationKey.PublicKey().Marshal())
-			require.Equal(t, a.withdrawalPubKey.Marshal(), a1.withdrawalPubKey.Marshal())
+			require.Equal(t, a.validationKey.PublicKey().Serialize(), a1.validationKey.PublicKey().Serialize())
+			require.Equal(t, a.withdrawalPubKey, a1.withdrawalPubKey)
 			require.Equal(t, a.basePath, a1.basePath)
 		})
 	}

@@ -12,7 +12,6 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -21,13 +20,12 @@ func _byteArray(input string) []byte {
 }
 
 func keyVault(storage core.Storage) (*eth2keymanager.KeyVault, error) {
-	if err := e2types.InitBLS(); err != nil {
+	if err := core.InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(storage)
-	options.SetSeed(_byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"))
 	return eth2keymanager.NewKeyVault(options)
 }
 
@@ -48,7 +46,7 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 			require.NoError(t, err)
 
 			// open
-			a1, err := wallet.AccountByPublicKey(hex.EncodeToString(a.ValidatorPublicKey().Marshal()))
+			a1, err := wallet.AccountByPublicKey(hex.EncodeToString(a.ValidatorPublicKey()))
 			require.NoError(t, err)
 
 			a2, err := wallet.AccountByID(a.ID())
@@ -58,8 +56,8 @@ func TestingOpenAccounts(storage core.Storage, t *testing.T) {
 			for _, fetchedAccount := range []core.ValidatorAccount{a1, a2} {
 				require.Equal(t, a.ID().String(), fetchedAccount.ID().String())
 				require.Equal(t, a.Name(), fetchedAccount.Name())
-				require.Equal(t, a.ValidatorPublicKey().Marshal(), fetchedAccount.ValidatorPublicKey().Marshal())
-				require.Equal(t, a.WithdrawalPublicKey().Marshal(), fetchedAccount.WithdrawalPublicKey().Marshal())
+				require.Equal(t, a.ValidatorPublicKey(), fetchedAccount.ValidatorPublicKey())
+				require.Equal(t, a.WithdrawalPublicKey(), fetchedAccount.WithdrawalPublicKey())
 			}
 		})
 	}

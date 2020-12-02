@@ -8,9 +8,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/herumi/bls-eth-go-binary/bls"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -24,7 +25,7 @@ func _bigIntFromSkHex(input string) *big.Int {
 }
 
 func TestMarshalingHDKey(t *testing.T) {
-	if err := e2types.InitBLS(); err != nil {
+	if err := InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
@@ -83,14 +84,14 @@ func TestMarshalingHDKey(t *testing.T) {
 			// match
 			require.Equal(t, hdKey.Path(), newKey.Path())
 			require.Equal(t, hdKey.id.String(), newKey.id.String())
-			require.Equal(t, hdKey.privKey.Marshal(), newKey.privKey.Marshal())
-			require.Equal(t, hdKey.PublicKey().Marshal(), newKey.PublicKey().Marshal())
+			require.Equal(t, hdKey.privKey, newKey.privKey)
+			require.Equal(t, hdKey.PublicKey(), newKey.PublicKey())
 		})
 	}
 }
 
 func TestDerivableKeyRelativePathDerivation(t *testing.T) {
-	if err := e2types.InitBLS(); err != nil {
+	if err := InitBLS(); err != nil {
 		os.Exit(1)
 	}
 
@@ -205,9 +206,12 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			}
 
 			require.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
-			expectedPk, err := e2types.BLSPublicKeyFromBytes(test.expectedKey.Bytes())
+
+			expectedPk := &bls.PublicKey{}
+			require.NoError(t, expectedPk.Deserialize(test.expectedKey.Bytes()))
+
 			require.NoError(t, err)
-			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey().Marshal(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Marshal())))
+			require.Equal(t, expectedPk.Serialize(), hdKey.PublicKey().Serialize(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Serialize())))
 		})
 	}
 }

@@ -1,7 +1,10 @@
 package core
 
 import (
+	"encoding/hex"
 	"regexp"
+
+	"github.com/herumi/bls-eth-go-binary/bls"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -41,14 +44,19 @@ func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 	}
 
 	path := master.network.FullPath(relativePath)
-	key, err := util.PrivateKeyFromSeedAndPath(master.seed, path)
+	key, err := util.PrivateKeyFromSeedAndPath(master.seed, path) // TODO - needs to be refactored to remove wealdetch dependency
 	if err != nil {
+		return nil, err
+	}
+
+	sk := &bls.SecretKey{}
+	if err := sk.SetHexString(hex.EncodeToString(key.Marshal())); err != nil {
 		return nil, err
 	}
 
 	return &HDKey{
 		id:      uuid.New(),
-		privKey: key,
+		privKey: sk,
 		path:    path,
 	}, nil
 }

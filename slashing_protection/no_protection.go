@@ -1,34 +1,32 @@
 package slashing_protection
 
 import (
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 )
 
 type NoProtection struct {
 }
 
-func (p *NoProtection) IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) (*core.AttestationSlashStatus, error) {
+func (p *NoProtection) IsSlashableAttestation(pubKey []byte, attestation *eth.AttestationData) (*core.AttestationSlashStatus, error) {
 	return nil, nil
 }
 
-func (p *NoProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *core.ProposalSlashStatus {
+func (p *NoProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) *core.ProposalSlashStatus {
 	return &core.ProposalSlashStatus{
 		Proposal: nil,
 		Status:   core.ValidProposal,
 	}
 }
 
-func (p *NoProtection) SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error  {
+func (p *NoProtection) SaveProposal(pubKey []byte, block *eth.BeaconBlock) error {
 	return nil
 }
 
-func (p *NoProtection) UpdateLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
+func (p *NoProtection) UpdateLatestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
 	return nil
 }
 
-func (p *NoProtection) RetrieveHighestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
+func (p *NoProtection) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {
 	return nil, nil
 }

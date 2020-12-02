@@ -4,7 +4,8 @@ import (
 	"github.com/pkg/errors"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	ssz "github.com/prysmaticlabs/go-ssz"
-	types "github.com/wealdtech/go-eth2-types/v2"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/shared/params"
 	util "github.com/wealdtech/go-eth2-util"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -15,14 +16,22 @@ const (
 	BLSWithdrawalPrefixByte   byte   = byte(0)
 )
 
+var IsSupportedDepositNetwork = func(network core.Network) bool {
+	return network == core.PyrmontNetwork || network == core.MainNetwork
+}
+
 // DepositData is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
 func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network core.Network, amountInGwei uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+	if !IsSupportedDepositNetwork(network) {
+		return nil, [32]byte{}, errors.Errorf("Network %s is not supported", network)
+	}
+
 	depositData := struct {
 		PublicKey             []byte `ssz-size:"48"`
 		WithdrawalCredentials []byte `ssz-size:"32"`
 		Amount                uint64
 	}{
-		PublicKey:             validationKey.PublicKey().Marshal(),
+		PublicKey:             validationKey.PublicKey().Serialize(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
 		Amount:                amountInGwei,
 	}
@@ -32,7 +41,10 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 	}
 
 	// Create domain
-	domain := types.Domain(types.DomainDeposit, network.ForkVersion(), types.ZeroGenesisValidatorsRoot)
+	domain, err := helpers.ComputeDomain(params.BeaconConfig().DomainDeposit, network.ForkVersion(), make([]byte, 32))
+	if err != nil {
+		return nil, [32]byte{}, errors.Wrap(err, "failed to calculate domain")
+	}
 
 	// Prepare for sig
 	signingContainer := struct {
@@ -54,10 +66,10 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 	}
 
 	signedDepositData := &ethpb.Deposit_Data{
-		PublicKey:             validationKey.PublicKey().Marshal(),
+		PublicKey:             validationKey.PublicKey().Serialize(),
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
 		Amount:                amountInGwei,
-		Signature:             sig.Marshal(),
+		Signature:             sig,
 	}
 
 	depositDataRoot, err := ssz.HashTreeRoot(signedDepositData)

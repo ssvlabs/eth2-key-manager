@@ -33,6 +33,6 @@ func main() {
 	wallet, _ := vault.Wallet()
 	account, _ := wallet.CreateValidatorAccount(seed, nil)
 
-	fmt.Printf("created validator account with pub key: %s\n", hex.EncodeToString(account.ValidatorPublicKey().Marshal()))
+	fmt.Printf("created validator account with pub key: %s\n", hex.EncodeToString(account.ValidatorPublicKey()))
 
 }

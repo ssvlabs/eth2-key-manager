@@ -1,9 +1,10 @@
 package slashing_protection
 
 import (
+	"bytes"
 	"fmt"
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
+
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -18,23 +19,28 @@ func NewNormalProtection(store core.SlashingStore) *NormalProtection {
 }
 
 // will detect double, surround and surrounded slashable events
-func (protector *NormalProtection) IsSlashableAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) (*core.AttestationSlashStatus, error) {
-	data := core.ToCoreAttestationData(req)
-
+func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attestation *eth.AttestationData) (*core.AttestationSlashStatus, error) {
 	// lookupEndEpoch should be the latest written attestation, if not than req.Data.Target.Epoch
-	highest, err := protector.RetrieveHighestAttestation(key)
+	highest, err := protector.RetrieveHighestAttestation(pubKey)
 	if err != nil {
 		return nil, err
 	}
 	if highest != nil {
-		return highest.SlashesHighestAttestation(data), nil
+		// Source epoch can't be lower than previously known highest source, it can be equal or higher.
+		if attestation.Source.Epoch < highest.Source.Epoch || attestation.Target.Epoch <= highest.Target.Epoch {
+			return &core.AttestationSlashStatus{
+				Attestation: attestation,
+				Status:      core.HighestAttestationVote,
+			}, nil
+		}
+		return nil, nil
 	} else {
 		return nil, fmt.Errorf("highest attestation data is nil, can't determine if attestation is slashable")
 	}
 }
 
-func (protector *NormalProtection) IsSlashableProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) *core.ProposalSlashStatus {
-	matchedProposal, err := protector.store.RetrieveProposal(key, req.Data.Slot)
+func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) *core.ProposalSlashStatus {
+	matchedProposal, err := protector.store.RetrieveProposal(pubKey, block.Slot)
 	if err != nil && err.Error() != "proposal not found" {
 		return &core.ProposalSlashStatus{
 			Proposal: nil,
@@ -50,31 +56,39 @@ func (protector *NormalProtection) IsSlashableProposal(key e2types.PublicKey, re
 		}
 	}
 
-	data := core.ToCoreBlockData(req)
+	equal := func(a *eth.BeaconBlock, b *eth.BeaconBlock) bool {
+		aRoot, err := a.HashTreeRoot()
+		if err != nil {
+			return false
+		}
+		bRoot, err := b.HashTreeRoot()
+		if err != nil {
+			return false
+		}
+		return bytes.Equal(aRoot[:], bRoot[:])
+	}
 
 	// if it's the same
-	if data.Compare(matchedProposal) {
+	if equal(block, matchedProposal) {
 		return &core.ProposalSlashStatus{
-			Proposal: data,
+			Proposal: matchedProposal,
 			Status:   core.ValidProposal,
 		}
 	}
 
 	// slashable
 	return &core.ProposalSlashStatus{
-		Proposal: data,
+		Proposal: matchedProposal,
 		Status:   core.DoubleProposal,
 	}
 }
 
 // Will potentially update the highest attestation given this latest attestation.
-func (protector *NormalProtection) UpdateLatestAttestation(key e2types.PublicKey, req *pb.SignBeaconAttestationRequest) error {
-	data := core.ToCoreAttestationData(req)
-
+func (protector *NormalProtection) UpdateLatestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
 	// if no previous highest attestation found, set current
-	highest := protector.store.RetrieveHighestAttestation(key)
+	highest := protector.store.RetrieveHighestAttestation(pubKey)
 	if highest == nil {
-		err := protector.store.SaveHighestAttestation(key, data)
+		err := protector.store.SaveHighestAttestation(pubKey, attestation)
 		if err != nil {
 			return err
 		}
@@ -83,17 +97,17 @@ func (protector *NormalProtection) UpdateLatestAttestation(key e2types.PublicKey
 
 	// Taken from https://github.com/prysmaticlabs/prysm/blob/master/slasher/detection/detect.go#L233
 	shouldUpdate := false
-	if highest.Source.Epoch < data.Source.Epoch {
-		highest.Source.Epoch = data.Source.Epoch
+	if highest.Source.Epoch < attestation.Source.Epoch {
+		highest.Source.Epoch = attestation.Source.Epoch
 		shouldUpdate = true
 	}
-	if highest.Target.Epoch < data.Target.Epoch {
-		highest.Target.Epoch = data.Target.Epoch
+	if highest.Target.Epoch < attestation.Target.Epoch {
+		highest.Target.Epoch = attestation.Target.Epoch
 		shouldUpdate = true
 	}
 
 	if shouldUpdate {
-		err := protector.store.SaveHighestAttestation(key, highest)
+		err := protector.store.SaveHighestAttestation(pubKey, highest)
 		if err != nil {
 			return err
 		}
@@ -101,11 +115,10 @@ func (protector *NormalProtection) UpdateLatestAttestation(key e2types.PublicKey
 	return nil
 }
 
-func (protector *NormalProtection) SaveProposal(key e2types.PublicKey, req *pb.SignBeaconProposalRequest) error {
-	data := core.ToCoreBlockData(req)
-	return protector.store.SaveProposal(key, data)
+func (protector *NormalProtection) SaveProposal(key []byte, block *eth.BeaconBlock) error {
+	return protector.store.SaveProposal(key, block)
 }
 
-func (protector *NormalProtection) RetrieveHighestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
-	return protector.store.RetrieveHighestAttestation(key), nil
+func (protector *NormalProtection) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {
+	return protector.store.RetrieveHighestAttestation(pubKey), nil
 }

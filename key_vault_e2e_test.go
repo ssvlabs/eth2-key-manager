@@ -5,12 +5,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/stretchr/testify/require"
 )
 
 func _bigIntFromSkHex(input string) *big.Int {
@@ -112,7 +110,6 @@ func TestImportKeyVault(t *testing.T) {
 			seed := test.seed
 			options := &KeyVaultOptions{}
 			options.SetStorage(test.storage)
-			options.SetSeed(seed)
 			options.SetEncryptor(keystorev4.New())
 			options.SetPassword("password")
 			v, err := NewKeyVault(options)
@@ -129,13 +126,8 @@ func TestImportKeyVault(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
-			expectedValKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf").Bytes())
-			require.NoError(t, err)
-			expectedWithdrawalKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6").Bytes())
-			require.NoError(t, err)
-
-			require.Equal(t, expectedValKey.Marshal(), account.ValidatorPublicKey().Marshal())
-			require.Equal(t, expectedWithdrawalKey.Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"), account.ValidatorPublicKey())
+			require.Equal(t, _byteArray("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6"), account.WithdrawalPublicKey())
 		})
 	}
 }
@@ -169,13 +161,11 @@ func TestOpenKeyVault(t *testing.T) {
 			options.SetPassword("password")
 
 			// import keyvault
-			options.SetSeed(test.seed)
 			importedVault, err := NewKeyVault(options)
 			// test common tests
 			testVault(t, importedVault, test.seed) // this will create some wallets and accounts
 
 			// open vault
-			options.SetSeed(nil) // important
 			v, err := OpenKeyVault(options)
 			require.NoError(t, err)
 
@@ -187,13 +177,8 @@ func TestOpenKeyVault(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, account)
 
-			expectedValKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf").Bytes())
-			require.NoError(t, err)
-			expectedWithdrawalKey, err := e2types.BLSPublicKeyFromBytes(_bigIntFromSkHex("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6").Bytes())
-			require.NoError(t, err)
-
-			require.Equal(t, expectedValKey.Marshal(), account.ValidatorPublicKey().Marshal())
-			require.Equal(t, expectedWithdrawalKey.Marshal(), account.WithdrawalPublicKey().Marshal())
+			require.Equal(t, _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"), account.ValidatorPublicKey())
+			require.Equal(t, _byteArray("a0b9324da8a8a696c53950e984de25b299c123d17bab972eca1ac2c674964c9f817047bc6048ef0705d7ec6fae6d5da6"), account.WithdrawalPublicKey())
 			require.Equal(t, importedVault.walletId, v.walletId)
 		})
 	}
@@ -206,7 +191,7 @@ func testVault(t *testing.T, v *KeyVault, seed []byte) {
 	// create and fetch validator account
 	val, err := wallet.CreateValidatorAccount(seed, nil)
 	require.NoError(t, err)
-	val1, err := wallet.AccountByPublicKey(hex.EncodeToString(val.ValidatorPublicKey().Marshal()))
+	val1, err := wallet.AccountByPublicKey(hex.EncodeToString(val.ValidatorPublicKey()))
 	require.NoError(t, err)
 	val2, err := wallet.AccountByID(val.ID())
 	require.NoError(t, err)
