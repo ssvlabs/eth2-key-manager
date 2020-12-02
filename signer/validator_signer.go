@@ -3,17 +3,14 @@ package signer
 import (
 	"sync"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/go-ssz"
-	pb "github.com/wealdtech/eth2-signer-api/pb/v1"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // ValidatorSigner represents the behavior of the validator signer
 type ValidatorSigner interface {
-	ListAccounts() (*pb.ListAccountsResponse, error)
 	SignBeaconBlock(block *eth.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
 	SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error)
 	SignAggregateAndProof(agg *eth.AggregateAttestationAndProof, domain []byte, pubKey []byte) ([]byte, error)

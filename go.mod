@@ -14,7 +14,6 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.6.1
 	github.com/tyler-smith/go-bip39 v1.0.2
-	github.com/wealdtech/eth2-signer-api v1.3.0
 	github.com/wealdtech/go-eth2-util v1.6.2
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
 	golang.org/x/text v0.3.4
