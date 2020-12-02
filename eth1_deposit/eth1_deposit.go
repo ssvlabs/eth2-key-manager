@@ -16,8 +16,16 @@ const (
 	BLSWithdrawalPrefixByte   byte   = byte(0)
 )
 
+var IsSupportedDepositNetwork = func(network core.Network) bool {
+	return network == core.PyrmontNetwork || network == core.MainNetwork
+}
+
 // DepositData is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
 func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network core.Network, amountInGwei uint64) (*ethpb.Deposit_Data, [32]byte, error) {
+	if !IsSupportedDepositNetwork(network) {
+		return nil, [32]byte{}, errors.Errorf("Network %s is not supported", network)
+	}
+
 	depositData := struct {
 		PublicKey             []byte `ssz-size:"48"`
 		WithdrawalCredentials []byte `ssz-size:"32"`

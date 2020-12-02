@@ -128,3 +128,15 @@ func TestPyrmontDepositData(t *testing.T) {
 		})
 	}
 }
+
+func TestUnsupportedNetwork(t *testing.T) {
+	depositData, root, err := DepositData(
+		nil,
+		make([]byte, 48),
+		core.Network("not_supported"),
+		MaxEffectiveBalanceInGwei,
+	)
+	require.EqualError(t, err, "Network not_supported is not supported")
+	require.Nil(t, depositData)
+	require.EqualValues(t, root, [32]byte{})
+}
