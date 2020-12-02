@@ -4,7 +4,8 @@ import (
 	"github.com/pkg/errors"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	ssz "github.com/prysmaticlabs/go-ssz"
-	types "github.com/wealdtech/go-eth2-types/v2"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/shared/params"
 	util "github.com/wealdtech/go-eth2-util"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -32,7 +33,10 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 	}
 
 	// Create domain
-	domain := types.Domain(types.DomainDeposit, network.ForkVersion(), types.ZeroGenesisValidatorsRoot)
+	domain, err := helpers.ComputeDomain(params.BeaconConfig().DomainDeposit, network.ForkVersion(), make([]byte, 32))
+	if err != nil {
+		return nil, [32]byte{}, errors.Wrap(err, "failed to calculate domain")
+	}
 
 	// Prepare for sig
 	signingContainer := struct {

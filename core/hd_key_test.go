@@ -8,9 +8,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/herumi/bls-eth-go-binary/bls"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -205,9 +206,12 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			}
 
 			require.Equal(t, MainNetwork.FullPath(test.path), hdKey.Path())
-			expectedPk, err := e2types.BLSPublicKeyFromBytes(test.expectedKey.Bytes())
+
+			expectedPk := &bls.PublicKey{}
+			require.NoError(t, expectedPk.Deserialize(test.expectedKey.Bytes()))
+
 			require.NoError(t, err)
-			require.Equal(t, expectedPk.Marshal(), hdKey.PublicKey().Serialize(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Serialize())))
+			require.Equal(t, expectedPk.Serialize(), hdKey.PublicKey().Serialize(), fmt.Sprintf("expected %s", hex.EncodeToString(hdKey.PublicKey().Serialize())))
 		})
 	}
 }

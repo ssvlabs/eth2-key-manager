@@ -7,7 +7,6 @@ import (
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	"github.com/pkg/errors"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func (store *InMemStore) SaveHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
@@ -33,10 +32,6 @@ func (store *InMemStore) RetrieveProposal(pubKey []byte, slot uint64) (*eth.Beac
 		return nil, errors.New("proposal not found")
 	}
 	return ret, nil
-}
-
-func attestationKey(key e2types.PublicKey) string {
-	return hex.EncodeToString(key.Marshal())
 }
 
 func proposalKey(pubKey []byte, targetSlot uint64) string {

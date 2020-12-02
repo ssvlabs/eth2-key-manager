@@ -5,13 +5,13 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/herumi/bls-eth-go-binary/bls"
+
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 func _bigInt(input string) *big.Int {
@@ -28,8 +28,9 @@ func (a *mockAccount) ID() uuid.UUID    { return a.id }
 func (a *mockAccount) Name() string     { return "" }
 func (a *mockAccount) BasePath() string { return "" }
 func (a *mockAccount) ValidatorPublicKey() []byte {
-	priv, _ := e2types.BLSPrivateKeyFromBytes(a.validationKey.Bytes())
-	return priv.PublicKey().Marshal()
+	sk := &bls.SecretKey{}
+	sk.Deserialize(a.validationKey.Bytes())
+	return sk.GetPublicKey().Serialize()
 }
 func (a *mockAccount) WithdrawalPublicKey() []byte                     { return nil }
 func (a *mockAccount) ValidationKeySign(data []byte) ([]byte, error)   { return nil, nil }

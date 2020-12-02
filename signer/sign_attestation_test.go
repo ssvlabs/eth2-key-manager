@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/herumi/bls-eth-go-binary/bls"
+
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -12,7 +14,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 )
 
@@ -319,8 +320,11 @@ func TestAttestationSignatures(t *testing.T) {
 	signer, err := setupWithSlashingProtection(seed, true)
 	require.NoError(t, err)
 
-	accountPriv, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0")
+	derivedSk, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0")
 	require.NoError(t, err)
+
+	sk := &bls.SecretKey{}
+	require.NoError(t, sk.SetHexString(hex.EncodeToString(derivedSk.Marshal())))
 
 	tests := []struct {
 		name          string
@@ -328,7 +332,7 @@ func TestAttestationSignatures(t *testing.T) {
 		domain        []byte
 		pubKey        []byte
 		expectedError error
-		accountPriv   *e2types.BLSPrivateKey
+		accountPriv   *bls.SecretKey
 		msg           string
 	}{
 		{
@@ -349,7 +353,7 @@ func TestAttestationSignatures(t *testing.T) {
 			domain:        ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			pubKey:        _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 			expectedError: nil,
-			accountPriv:   accountPriv,
+			accountPriv:   sk,
 			msg:           "2783ca6dc161cc5feae0492ae79e52d7ae3eaff4b1f6b547d856533e9b733d8b",
 		},
 		{
@@ -370,7 +374,7 @@ func TestAttestationSignatures(t *testing.T) {
 			domain:        ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			pubKey:        _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 			expectedError: errors.New("source epoch too far into the future"),
-			accountPriv:   accountPriv,
+			accountPriv:   sk,
 		},
 		{
 			name: "far into the future target",
@@ -390,7 +394,7 @@ func TestAttestationSignatures(t *testing.T) {
 			domain:        ignoreError(hex.DecodeString("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")).([]byte),
 			pubKey:        _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 			expectedError: errors.New("target epoch too far into the future"),
-			accountPriv:   accountPriv,
+			accountPriv:   sk,
 		},
 		{
 			name: "unknown account, should error",
@@ -449,12 +453,12 @@ func TestAttestationSignatures(t *testing.T) {
 				// check sign worked
 				require.NoError(t, err)
 
-				sig, err := e2types.BLSSignatureFromBytes(res)
-				require.NoError(t, err)
+				sig := bls.Sign{}
+				require.NoError(t, sig.Deserialize(res))
 
 				msgBytes, err := hex.DecodeString(test.msg)
 				require.NoError(t, err)
-				require.True(t, sig.Verify(msgBytes, test.accountPriv.PublicKey()))
+				require.True(t, sig.VerifyByte(test.accountPriv.GetPublicKey(), msgBytes))
 			}
 		})
 	}
