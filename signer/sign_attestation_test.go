@@ -37,13 +37,12 @@ func ignoreError(val interface{}, err error) interface{} {
 }
 
 // tested against a block and sig generated from https://github.com/prysmaticlabs/prysm/blob/master/shared/testutil/block.go#L357
-func TestBenchmarkAttestation(t *testing.T) {
+func TestReferenceAttestation(t *testing.T) {
 	sk := _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c")
 	pk := _byteArray("a9cf360aa15fb1d1d30ee2b578dc5884823c19661886ae8b892775ccb3bd96b7d7345569a2aa0b14e4d015c54a6a0c54")
-	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a2212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
-	//signingRoot := _byteArray("c1754daca6f9c8da983e24a236980e2eac47ec91140fba91f301d5e418fb8417")
+	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a24080212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
 	domain := _byteArray("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
-	sig := _byteArray("99a5075afd2a7d28edfcdd1b3bec052e9b5ed21afdb2607b23910cad0113aacaab3251897c88bbe8bfb7b7cc3ae4c103189b1fb73e7c29a789e33f33b7afcfb6b28933be88fe86a2a3052241482d1c0eb442b4b79e968a2456b2a298b384303b")
+	sig := _byteArray("b4fa352d2d6dbdf884266af7ea0914451929b343527ea6c1737ac93b3dde8b7c98e6ce61d68b7a2e7b7af8f8d0fd429d0bdd5f930b83e6842bf4342d3d1d3d10fc0d15bab7649bb8aa8287ca104a1f79d396ce0217bb5cd3e6503a3bce4c9776")
 
 	// setup KeyVault
 	store := inmemStorage()
