@@ -29,7 +29,9 @@ func _ignoreErr(a []byte, err error) []byte {
 	return a
 }
 
-func TestDepositData(t *testing.T) {
+// tested against eth2.0-deposit-cli V1.1.0
+// Mnemonic: sphere attract wide clown fire balcony dance maple sphere seat design dentist eye orbit diet apart noise cinnamon wealth magic inject witness dress divorce
+func TestMainetDepositData(t *testing.T) {
 	tests := []struct {
 		testname                      string
 		validatorPrivKey              []byte
@@ -39,11 +41,61 @@ func TestDepositData(t *testing.T) {
 		expectedRoot                  []byte
 	}{
 		{
-			validatorPrivKey:              _ignoreErr(hex.DecodeString("23fd464c122d7fa8c9c8e46d710ae478ab920c8c0587e86556aa968191d5210e")),
-			withdrawalPubKey:              _ignoreErr(hex.DecodeString("b323537b2867d9f2bae068f93e75a9e2e1c8d594e3696c34dc8010dc403eaeeaf43756a440fc82e1c6f45c6e8348343f")),
-			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("00ea056bfaa692b4e12bb1c3f59049dabcfb0b63f427025c718f5e3b81fdb945")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("b922154b5e1ab3302e0bba98e3eee2f94e8ee246622264e9fd6364530be1e9c94ce76648780b118cfac5741a62abf05b061009c2a41d8a459f2accab91564b5b67b38c53e62037a85cbf366ba63e0b88073e93821e8c9de1c87749f2db925aef")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("bc610cc4fe56d60c64e6665dae24dee70968a6e23cf52ee1da90d99adedcf250")),
+			validatorPrivKey:              _ignoreErr(hex.DecodeString("175db1c5411459893301c3f2ebe740e5da07db8f17c2df4fa0be6d31a48a4f79")),
+			withdrawalPubKey:              _ignoreErr(hex.DecodeString("8d176708b908f288cc0e9d43f75674e73c0db94026822c5ce2c3e0f9e773c9ee95fdba824302f1208c225b0ed2d54154")),
+			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("8ab63bb2ef45d5fe4b5ba3b6aa2db122db350c05846b6ffc1415c603ba998226599a21aa65a8cb55c1b888767bdac2b51901d34cde41003c689b8c125fc67d3abd2527ccaf1390c13c3fc65a7422de8a7e29ae8e9736321606172c7b3bf6de36")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("76139d2c8d8e87a4737ce7acbf97ce8980732921550c5443a8754635c11296d3")),
+		},
+	}
+
+	require.NoError(t, core.InitBLS())
+
+	for _, test := range tests {
+		t.Run(test.testname, func(t *testing.T) {
+			val, err := core.NewHDKeyFromPrivateKey(test.validatorPrivKey, "")
+			require.NoError(t, err)
+
+			// create data
+			depositData, root, err := DepositData(
+				val,
+				test.withdrawalPubKey,
+				core.MainNetwork,
+				MaxEffectiveBalanceInGwei,
+			)
+			require.NoError(t, err)
+			require.Equal(t, val.PublicKey().Serialize(), depositData.PublicKey)
+			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
+			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
+			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))
+			require.Equal(t, test.expectedSig, depositData.Signature, hex.EncodeToString(depositData.Signature))
+
+			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey))
+			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
+			fmt.Printf("Amount: %d\n", depositData.Amount)
+			fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
+			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature))
+		})
+	}
+}
+
+// tested against eth2.0-deposit-cli V1.1.0
+// Mnemonic: sphere attract wide clown fire balcony dance maple sphere seat design dentist eye orbit diet apart noise cinnamon wealth magic inject witness dress divorce
+func TestPyrmontDepositData(t *testing.T) {
+	tests := []struct {
+		testname                      string
+		validatorPrivKey              []byte
+		withdrawalPubKey              []byte
+		expectedWithdrawalCredentials []byte
+		expectedSig                   []byte
+		expectedRoot                  []byte
+	}{
+		{
+			validatorPrivKey:              _ignoreErr(hex.DecodeString("175db1c5411459893301c3f2ebe740e5da07db8f17c2df4fa0be6d31a48a4f79")),
+			withdrawalPubKey:              _ignoreErr(hex.DecodeString("8d176708b908f288cc0e9d43f75674e73c0db94026822c5ce2c3e0f9e773c9ee95fdba824302f1208c225b0ed2d54154")),
+			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("ab4c9da6a20f385da7a8beb8ac8f58d691d83cd31ba807dbb6de631f5b4c5b1e82e811e41422ccbcd16ef5cb370e50af093dd58ebbc1575b5ed0395ab94538bf0a938f75ec683d4e2e1090c6f1e79a85d771781c3d72a3718451684360e43241")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("06175367bbd24e1966fb7b4299d1a6b0fc107c4385872fc9e4f956e5ffcb61dc")),
 		},
 	}
 
