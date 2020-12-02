@@ -1,4 +1,7 @@
 # Blox Eth Key Manager
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbloxapp%2Feth2-key-manager.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbloxapp%2Feth2-key-manager?ref=badge_shield)
+
 :hammer_and_wrench: UNDER HEAVY CONSTRUCTION :hammer_and_wrench:
 
 
