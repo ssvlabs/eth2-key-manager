@@ -4,6 +4,10 @@ import (
 	"encoding/hex"
 	"testing"
 
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
+	"github.com/bloxapp/eth2-key-manager/wallets"
+
 	"github.com/herumi/bls-eth-go-binary/bls"
 
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
@@ -30,6 +34,42 @@ func _byteArray32(input string) []byte {
 
 func ignoreError(val interface{}, err error) interface{} {
 	return val
+}
+
+// tested against a block and sig generated from https://github.com/prysmaticlabs/prysm/blob/master/shared/testutil/block.go#L357
+func TestBenchmarkAttestation(t *testing.T) {
+	sk := _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c")
+	pk := _byteArray("a9cf360aa15fb1d1d30ee2b578dc5884823c19661886ae8b892775ccb3bd96b7d7345569a2aa0b14e4d015c54a6a0c54")
+	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a2212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	//signingRoot := _byteArray("c1754daca6f9c8da983e24a236980e2eac47ec91140fba91f301d5e418fb8417")
+	domain := _byteArray("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
+	sig := _byteArray("99a5075afd2a7d28edfcdd1b3bec052e9b5ed21afdb2607b23910cad0113aacaab3251897c88bbe8bfb7b7cc3ae4c103189b1fb73e7c29a789e33f33b7afcfb6b28933be88fe86a2a3052241482d1c0eb442b4b79e968a2456b2a298b384303b")
+
+	// setup KeyVault
+	store := inmemStorage()
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store)
+	options.SetWalletType(core.NDWallet)
+	vault, err := eth2keymanager.NewKeyVault(options)
+	require.NoError(t, err)
+	wallet, err := vault.Wallet()
+	require.NoError(t, err)
+	k, err := core.NewHDKeyFromPrivateKey(sk, "")
+	require.NoError(t, err)
+	acc, err := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
+	require.NoError(t, err)
+	require.NoError(t, wallet.AddValidatorAccount(acc))
+
+	// setup signer
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PyrmontNetwork)
+
+	// decode attestation
+	attData := &eth.AttestationData{}
+	require.NoError(t, attData.Unmarshal(attestationDataByts))
+
+	actualSig, err := signer.SignBeaconAttestation(attData, domain, pk)
+	require.NoError(t, err)
+	require.EqualValues(t, sig, actualSig)
 }
 
 func TestAttestationSlashingSignatures(t *testing.T) {
