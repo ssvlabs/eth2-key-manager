@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/hex"
 
+	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
+
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
@@ -58,6 +60,15 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
 	}
+	highestProposals, err := flag.GetHighestProposalFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
+	}
+
+	network, err := cmd2.GetNetworkFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to network")
+	}
 
 	if accumulateFlagValue {
 		if len(highestSources) != (indexFlagValue + 1) {
@@ -66,6 +77,9 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		if len(highestTargets) != (indexFlagValue + 1) {
 			return errors.Errorf("highest targets length when the accumulate flag is true need to be indexFlagValue")
 		}
+		if len(highestProposals) != (indexFlagValue + 1) {
+			return errors.Errorf("highest proposals length when the accumulate flag is true need to be indexFlagValue")
+		}
 	} else {
 		if len(highestSources) != 1 {
 			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
@@ -73,10 +87,13 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		if len(highestTargets) != 1 {
 			return errors.Errorf("highest targets length when the accumulate flag is false need to be 1")
 		}
+		if len(highestProposals) != 1 {
+			return errors.Errorf("highest proposals length when the accumulate flag is false need to be 1")
+		}
 	}
 
 	// TODO get rid of network
-	store := in_memory.NewInMemStore(core.PyrmontNetwork)
+	store := in_memory.NewInMemStore(network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
@@ -97,12 +114,20 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 				return errors.Wrap(err, "failed to create validator account")
 			}
 
+			// add minimal attestation protection data
 			minimalAtt := &eth.AttestationData{
 				Source: &eth.Checkpoint{Epoch: uint64(highestSources[i])},
 				Target: &eth.Checkpoint{Epoch: uint64(highestTargets[i])},
 			}
-
 			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+				return errors.Wrap(err, "failed to set validator minimal slashing protection")
+			}
+
+			// add minimal proposal protection data
+			minimalProposal := &eth.BeaconBlock{
+				Slot: highestProposals[i],
+			}
+			if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
 				return errors.Wrap(err, "failed to set validator minimal slashing protection")
 			}
 		}
@@ -112,11 +137,20 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			return errors.Wrap(err, "failed to create validator account")
 		}
 
+		// add minimal attestation protection data
 		minimalAtt := &eth.AttestationData{
 			Source: &eth.Checkpoint{Epoch: uint64(highestSources[0])},
 			Target: &eth.Checkpoint{Epoch: uint64(highestTargets[0])},
 		}
 		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+			return errors.Wrap(err, "failed to set validator minimal slashing protection")
+		}
+
+		// add minimal proposal protection data
+		minimalProposal := &eth.BeaconBlock{
+			Slot: highestProposals[0],
+		}
+		if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
 			return errors.Wrap(err, "failed to set validator minimal slashing protection")
 		}
 	}

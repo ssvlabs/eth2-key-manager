@@ -11,7 +11,7 @@ import (
 )
 
 func TestPublicKeyGenerate(t *testing.T) {
-	t.Run("Successfully generate public-key", func(t *testing.T) {
+	t.Run("Successfully generate public-key (pyrmont)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -20,6 +20,24 @@ func TestPublicKeyGenerate(t *testing.T) {
 			"generate",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=4",
+			"--network=pyrmont",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.NotNil(t, actualOutput)
+		require.NoError(t, err)
+	})
+
+	t.Run("Successfully generate public-key (mainnet)", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"public-key",
+			"generate",
+			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
+			"--index=4",
+			"--network=mainnet",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -36,6 +54,7 @@ func TestPublicKeyGenerate(t *testing.T) {
 			"generate",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=-1",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)

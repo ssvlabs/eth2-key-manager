@@ -11,12 +11,25 @@ import (
 )
 
 func TestAccountCreate(t *testing.T) {
-	t.Run("Successfully create wallet", func(t *testing.T) {
+	t.Run("Successfully create wallet (pyrmont)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
 			"wallet",
 			"create",
+			"--network=pyrmont",
+		})
+		err := cmd.RootCmd.Execute()
+		require.NoError(t, err)
+	})
+
+	t.Run("Successfully create wallet (mainnet)", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"create",
+			"--network=mainnet",
 		})
 		err := cmd.RootCmd.Execute()
 		require.NoError(t, err)

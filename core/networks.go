@@ -18,7 +18,6 @@ func NetworkFromString(n string) Network {
 	case string(MainNetwork):
 		return MainNetwork
 	default:
-		logrus.WithField("network", n).Fatal("undefined network")
 		return ""
 	}
 }

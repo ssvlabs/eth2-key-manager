@@ -27,6 +27,8 @@ func init() {
 	flag.AddResponseTypeFlag(createCmd)
 	flag.AddHighestSourceFlag(createCmd)
 	flag.AddHighestTargetFlag(createCmd)
+	flag.AddHighestProposalFlag(createCmd)
+	rootcmd.AddNetworkFlag(createCmd)
 
 	Command.AddCommand(createCmd)
 }

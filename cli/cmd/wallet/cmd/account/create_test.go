@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccountCreate(t *testing.T) {
-	t.Run("Successfully create account at specific index and return as object", func(t *testing.T) {
+	t.Run("Successfully create account at specific index and return as object (pyrmont)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -23,11 +23,55 @@ func TestAccountCreate(t *testing.T) {
 			"--response-type=object",
 			"--highest-source=1",
 			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
 		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+	})
+
+	t.Run("Successfully create account at specific index and return as object (mainnet)", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
+			"--index=5",
+			"--response-type=object",
+			"--highest-source=1",
+			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=mainnet",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.NotNil(t, actualOutput)
+		require.NoError(t, err)
+	})
+
+	t.Run("no network flag", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
+			"--index=5",
+			"--response-type=object",
+			"--highest-source=1",
+			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=not_known",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.EqualValues(t, actualOutput, "")
+		require.EqualError(t, err, "failed to network: unknown network")
 	})
 
 	t.Run("Successfully create account at specific index and return as storage", func(t *testing.T) {
@@ -41,6 +85,8 @@ func TestAccountCreate(t *testing.T) {
 			"--index=0",
 			"--highest-source=1",
 			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -61,6 +107,8 @@ func TestAccountCreate(t *testing.T) {
 			"--response-type=object",
 			"--highest-source=1,2,3,4,5,6",
 			"--highest-target=2,3,4,5,6,7",
+			"--highest-proposal=2,3,4,5,6,7",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -80,6 +128,8 @@ func TestAccountCreate(t *testing.T) {
 			"--accumulate=true",
 			"--highest-source=1,2,3,4,5,6",
 			"--highest-target=2,3,4,5,6,7",
+			"--highest-proposal=2,3,4,5,6,7",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -96,6 +146,7 @@ func TestAccountCreate(t *testing.T) {
 			"create",
 			"--seed=01213",
 			"--index=1",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
@@ -113,6 +164,26 @@ func TestAccountCreate(t *testing.T) {
 			"--index=1",
 			"--highest-source=1,2,3,4,5",
 			"--highest-target=2,3,4,5,6",
+			"--network=pyrmont",
+		})
+		err := cmd.RootCmd.Execute()
+		require.Error(t, err)
+		require.EqualError(t, err, "failed to HEX decode seed: encoding/hex: odd length hex string")
+	})
+
+	t.Run("highest proposal invalid (accumulate false)", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--seed=01213",
+			"--index=1",
+			"--highest-source=1",
+			"--highest-target=2",
+			"--highest-proposal=2,3,4,5,6,7",
+			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)

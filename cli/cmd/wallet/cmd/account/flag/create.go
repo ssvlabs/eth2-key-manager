@@ -36,12 +36,13 @@ func ResponseTypeFromString(n string) ResponseType {
 
 // Flag names.
 const (
-	indexFlag          = "index"
-	seedFlag           = "seed"
-	accumulateFlag     = "accumulate"
-	responseTypeFlag   = "response-type"
-	highestKnownSource = "highest-source"
-	highestKnownTarget = "highest-target"
+	indexFlag            = "index"
+	seedFlag             = "seed"
+	accumulateFlag       = "accumulate"
+	responseTypeFlag     = "response-type"
+	highestKnownSource   = "highest-source"
+	highestKnownTarget   = "highest-target"
+	highestKnownProposal = "highest-proposal"
 )
 
 // AddIndexFlag adds the index flag to the command
@@ -109,6 +110,19 @@ func AddHighestTargetFlag(c *cobra.Command) {
 
 func GetHighestTargetFlagValue(c *cobra.Command) ([]uint64, error) {
 	str, err := c.Flags().GetString(highestKnownTarget)
+	if err != nil {
+		return nil, err
+	}
+	return stringSliceToUint64Slice(str)
+}
+
+// AddHighestProposalFlag adds the web3 address flag to the command
+func AddHighestProposalFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, highestKnownProposal, "", "Array of highest known proposed blocks (slot) for an array of validators", true)
+}
+
+func GetHighestProposalFlagValue(c *cobra.Command) ([]uint64, error) {
+	str, err := c.Flags().GetString(highestKnownProposal)
 	if err != nil {
 		return nil, err
 	}

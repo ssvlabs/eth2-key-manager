@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
@@ -14,7 +16,7 @@ const (
 
 // AddNetworkFlag adds the network flag to the command
 func AddNetworkFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, networkFlag, string(core.PyrmontNetwork), "Ethereum network", false)
+	cliflag.AddPersistentStringFlag(c, networkFlag, "", "Ethereum network", false)
 }
 
 // GetNetworkFlagValue gets the network flag from the command
@@ -24,5 +26,10 @@ func GetNetworkFlagValue(c *cobra.Command) (core.Network, error) {
 		return "", err
 	}
 
-	return core.NetworkFromString(networkValue), nil
+	ret := core.NetworkFromString(networkValue)
+	if len(ret) == 0 {
+		return "", fmt.Errorf("unknown network")
+	}
+
+	return ret, nil
 }
