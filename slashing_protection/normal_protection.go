@@ -1,7 +1,6 @@
 package slashing_protection
 
 import (
-	"bytes"
 	"fmt"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
@@ -39,52 +38,27 @@ func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attesta
 	}
 }
 
-func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) *core.ProposalSlashStatus {
-	matchedProposal, err := protector.store.RetrieveProposal(pubKey, block.Slot)
-	if err != nil && err.Error() != "proposal not found" {
-		return &core.ProposalSlashStatus{
-			Proposal: nil,
-			Status:   core.Error,
-			Error:    err,
-		}
+func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) (*core.ProposalSlashStatus, error) {
+	highest := protector.store.RetrieveHighestProposal(pubKey)
+	if highest == nil {
+		return nil, fmt.Errorf("highest proposal data is nil, can't determine if proposal is slashable")
 	}
 
-	if matchedProposal == nil {
+	if block.Slot > highest.Slot {
 		return &core.ProposalSlashStatus{
 			Proposal: nil,
 			Status:   core.ValidProposal,
-		}
+		}, nil
 	}
 
-	equal := func(a *eth.BeaconBlock, b *eth.BeaconBlock) bool {
-		aRoot, err := a.HashTreeRoot()
-		if err != nil {
-			return false
-		}
-		bRoot, err := b.HashTreeRoot()
-		if err != nil {
-			return false
-		}
-		return bytes.Equal(aRoot[:], bRoot[:])
-	}
-
-	// if it's the same
-	if equal(block, matchedProposal) {
-		return &core.ProposalSlashStatus{
-			Proposal: matchedProposal,
-			Status:   core.ValidProposal,
-		}
-	}
-
-	// slashable
 	return &core.ProposalSlashStatus{
-		Proposal: matchedProposal,
-		Status:   core.DoubleProposal,
-	}
+		Proposal: nil,
+		Status:   core.HighestProposalVote,
+	}, nil
 }
 
 // Will potentially update the highest attestation given this latest attestation.
-func (protector *NormalProtection) UpdateLatestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
+func (protector *NormalProtection) UpdateHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
 	// if no previous highest attestation found, set current
 	highest := protector.store.RetrieveHighestAttestation(pubKey)
 	if highest == nil {
@@ -115,8 +89,22 @@ func (protector *NormalProtection) UpdateLatestAttestation(pubKey []byte, attest
 	return nil
 }
 
-func (protector *NormalProtection) SaveProposal(key []byte, block *eth.BeaconBlock) error {
-	return protector.store.SaveProposal(key, block)
+func (protector *NormalProtection) UpdateHighestProposal(key []byte, block *eth.BeaconBlock) error {
+	// if no previous highest proposal found, set current
+	highest := protector.store.RetrieveHighestProposal(key)
+	if highest == nil {
+		err := protector.store.SaveHighestProposal(key, block)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if highest.Slot < block.Slot {
+		return protector.store.SaveHighestProposal(key, block)
+	}
+
+	return nil
 }
 
 func (protector *NormalProtection) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {

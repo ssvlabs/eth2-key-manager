@@ -53,8 +53,7 @@ func TestBenchmarkBlockProposal(t *testing.T) {
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer
-	protector := prot.NewNormalProtection(store)
-	signer := NewSimpleSigner(wallet, protector, core.PyrmontNetwork)
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PyrmontNetwork)
 
 	// decode block
 	blk := &eth.BeaconBlock{}
@@ -67,7 +66,7 @@ func TestBenchmarkBlockProposal(t *testing.T) {
 
 func TestProposalSlashingSignatures(t *testing.T) {
 	seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	signer, err := setupWithSlashingProtection(seed, true)
+	signer, err := setupWithSlashingProtection(seed, true, true)
 	require.NoError(t, err)
 
 	t.Run("valid proposal", func(t *testing.T) {
@@ -92,7 +91,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk.StateRoot = _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 		_, err = signer.SignBeaconBlock(blk, _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
-		require.EqualError(t, err, "err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
 
 	t.Run("double proposal, different body root. Should error", func(t *testing.T) {
@@ -101,7 +100,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk.Body.Graffiti = []byte("different body root")
 		_, err = signer.SignBeaconBlock(blk, []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
-		require.EqualError(t, err, "err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
 
 	t.Run("double proposal, different parent root. Should error", func(t *testing.T) {
@@ -110,7 +109,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk.ParentRoot = _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52458")
 		_, err = signer.SignBeaconBlock(blk, []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
-		require.EqualError(t, err, "err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
 
 	t.Run("double proposal, different proposer index. Should error", func(t *testing.T) {
@@ -119,7 +118,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk.ProposerIndex = 3
 		_, err = signer.SignBeaconBlock(blk, []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
-		require.EqualError(t, err, "err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
 }
 
@@ -129,7 +128,7 @@ func TestFarFutureProposalSignature(t *testing.T) {
 	maxValidSlot := network.EstimatedSlotAtTime(timeutils.Now().Unix() + FarFutureMaxValidEpoch)
 
 	t.Run("max valid source", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(seed, true)
+		signer, err := setupWithSlashingProtection(seed, true, true)
 		require.NoError(t, err)
 
 		blk := testBlock()
@@ -139,7 +138,7 @@ func TestFarFutureProposalSignature(t *testing.T) {
 		require.NoError(t, err)
 	})
 	t.Run("too far into the future source", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(seed, true)
+		signer, err := setupWithSlashingProtection(seed, true, true)
 		require.NoError(t, err)
 
 		blk := testBlock()

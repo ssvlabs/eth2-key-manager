@@ -12,18 +12,18 @@ func (p *NoProtection) IsSlashableAttestation(pubKey []byte, attestation *eth.At
 	return nil, nil
 }
 
-func (p *NoProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) *core.ProposalSlashStatus {
+func (p *NoProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) (*core.ProposalSlashStatus, error) {
 	return &core.ProposalSlashStatus{
 		Proposal: nil,
 		Status:   core.ValidProposal,
-	}
+	}, nil
 }
 
-func (p *NoProtection) SaveProposal(pubKey []byte, block *eth.BeaconBlock) error {
+func (p *NoProtection) UpdateHighestProposal(pubKey []byte, block *eth.BeaconBlock) error {
 	return nil
 }
 
-func (p *NoProtection) UpdateLatestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
+func (p *NoProtection) UpdateHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
 	return nil
 }
 

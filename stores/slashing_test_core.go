@@ -63,12 +63,11 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveProposal(test.account.ValidatorPublicKey(), test.proposal)
+			err := storage.SaveHighestProposal(test.account.ValidatorPublicKey(), test.proposal)
 			require.NoError(t, err)
 
 			// fetch
-			proposal, err := storage.RetrieveProposal(test.account.ValidatorPublicKey(), test.proposal.Slot)
-			require.NoError(t, err)
+			proposal := storage.RetrieveHighestProposal(test.account.ValidatorPublicKey())
 			require.NotNil(t, proposal)
 
 			// test equal

@@ -35,7 +35,7 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	return NewSimpleSigner(wallet, noProtection, core.PyrmontNetwork), nil
 }
 
-func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (ValidatorSigner, error) {
+func setupWithSlashingProtection(seed []byte, setLatestAttestation bool, setLatestProposal bool) (ValidatorSigner, error) {
 	store := inmemStorage()
 	protector := prot.NewNormalProtection(store)
 	wallet, err := walletWithSeed(seed, store)
@@ -49,7 +49,7 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (Valida
 		log.Fatal(err)
 	}
 	if setLatestAttestation {
-		protector.UpdateLatestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+		protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
 			Slot:            0,
 			CommitteeIndex:  0,
 			BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
@@ -63,6 +63,13 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool) (Valida
 			},
 		})
 	}
+
+	if setLatestProposal {
+		protector.UpdateHighestProposal(acc.ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot: 0,
+		})
+	}
+
 	return NewSimpleSigner(wallet, protector, core.PyrmontNetwork), nil
 }
 

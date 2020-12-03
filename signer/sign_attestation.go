@@ -42,7 +42,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *eth.AttestationDa
 	}
 
 	// 5. add to protection storage
-	if err := signer.slashingProtector.UpdateLatestAttestation(pubKey, attestation); err != nil {
+	if err := signer.slashingProtector.UpdateHighestAttestation(pubKey, attestation); err != nil {
 		return nil, err
 	}
 

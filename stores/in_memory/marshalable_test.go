@@ -1,7 +1,9 @@
 package in_memory
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -102,11 +104,13 @@ func TestMarshaling(t *testing.T) {
 		StateRoot:     []byte("A"),
 		Body:          &eth.BeaconBlockBody{},
 	}
-	store.SaveProposal(acc.ValidatorPublicKey(), prop)
+	store.SaveHighestProposal(acc.ValidatorPublicKey(), prop)
 
 	// marshal
 	byts, err := json.Marshal(store)
 	require.NoError(t, err)
+
+	fmt.Printf("%s\n", hex.EncodeToString(byts))
 
 	// un-marshal
 	var store2 InMemStore
@@ -130,8 +134,7 @@ func TestMarshaling(t *testing.T) {
 		require.Equal(t, att.BeaconBlockRoot, att2.BeaconBlockRoot)
 	})
 	t.Run("verify proposal", func(t *testing.T) {
-		prop2, err := store.RetrieveProposal(acc.ValidatorPublicKey(), 1)
-		require.NoError(t, err)
+		prop2 := store.RetrieveHighestProposal(acc.ValidatorPublicKey())
 		require.Equal(t, prop.StateRoot, prop2.StateRoot)
 	})
 }

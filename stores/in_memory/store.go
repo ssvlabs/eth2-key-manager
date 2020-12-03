@@ -15,7 +15,7 @@ type InMemStore struct {
 	wallet             core.Wallet
 	accounts           map[string]*wallets.HDAccount
 	highestAttestation map[string]*eth.AttestationData
-	proposalMemory     map[string]*eth.BeaconBlock
+	highestProposal    map[string]*eth.BeaconBlock
 	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
 }
@@ -31,7 +31,7 @@ func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encry
 		network:            network,
 		accounts:           make(map[string]*wallets.HDAccount),
 		highestAttestation: make(map[string]*eth.AttestationData),
-		proposalMemory:     make(map[string]*eth.BeaconBlock),
+		highestProposal:    make(map[string]*eth.BeaconBlock),
 		encryptor:          encryptor,
 		encryptionPassword: password,
 	}

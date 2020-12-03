@@ -35,7 +35,7 @@ func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProt
 		return protector, []core.ValidatorAccount{account1, account2}
 	}
 
-	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
 		Slot:            30,
 		CommitteeIndex:  5,
 		BeaconBlockRoot: []byte("A"),
@@ -50,7 +50,7 @@ func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProt
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
 		Slot:            30,
 		CommitteeIndex:  5,
 		BeaconBlockRoot: []byte("A"),
@@ -65,7 +65,7 @@ func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProt
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
 		Slot:            30,
 		CommitteeIndex:  5,
 		BeaconBlockRoot: []byte("B"),
@@ -80,7 +80,7 @@ func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProt
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
 		Slot:            30,
 		CommitteeIndex:  5,
 		BeaconBlockRoot: []byte("B"),
@@ -95,7 +95,7 @@ func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProt
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateLatestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
 		Slot:            30,
 		CommitteeIndex:  5,
 		BeaconBlockRoot: []byte("B"),
@@ -407,7 +407,7 @@ func TestUpdateLatestAttestation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(tt *testing.T) {
 			k := accounts[0].ValidatorPublicKey()
-			err := protector.UpdateLatestAttestation(k, &eth.AttestationData{
+			err := protector.UpdateHighestAttestation(k, &eth.AttestationData{
 				Source: &eth.Checkpoint{
 					Epoch: test.sourceEpoch,
 				},

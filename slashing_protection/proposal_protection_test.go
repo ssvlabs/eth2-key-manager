@@ -28,7 +28,7 @@ func vault() (*eth2keymanager.KeyVault, error) {
 	return eth2keymanager.NewKeyVault(options)
 }
 
-func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {
+func setupProposal(updateHighestProposal bool) (core.SlashingProtector, []core.ValidatorAccount, error) {
 	if err := core.InitBLS(); err != nil { // very important!
 		return nil, nil, err
 	}
@@ -53,87 +53,60 @@ func setupProposal() (core.SlashingProtector, []core.ValidatorAccount, error) {
 	}
 
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
-	protector.SaveProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
-		Slot:          100,
-		ProposerIndex: 2,
-		ParentRoot:    []byte("A"),
-		StateRoot:     []byte("A"),
-		Body:          &eth.BeaconBlockBody{},
-	})
-	protector.SaveProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
-		Slot:          101,
-		ProposerIndex: 2,
-		ParentRoot:    []byte("B"),
-		StateRoot:     []byte("B"),
-		Body:          &eth.BeaconBlockBody{},
-	})
-	protector.SaveProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
-		Slot:          102,
-		ProposerIndex: 2,
-		ParentRoot:    []byte("C"),
-		StateRoot:     []byte("C"),
-		Body:          &eth.BeaconBlockBody{},
-	})
+
+	if updateHighestProposal {
+		protector.UpdateHighestProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          100,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("A"),
+			StateRoot:     []byte("A"),
+			Body:          &eth.BeaconBlockBody{},
+		})
+	}
 
 	return protector, []core.ValidatorAccount{account1, account2}, nil
 }
 
-func TestDoubleProposal(t *testing.T) {
-	protector, accounts, err := setupProposal()
-	require.NoError(t, err)
-
+func TestProposalProtection(t *testing.T) {
 	t.Run("New proposal, should not slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+		protector, accounts, err := setupProposal(true)
+		require.NoError(t, err)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          101,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("Z"),
+			StateRoot:     []byte("Z"),
+			Body:          &eth.BeaconBlockBody{},
+		})
+		require.NoError(t, err)
+		require.Equal(t, res.Status, core.ValidProposal)
+	})
+
+	t.Run("No highest proposal db, should error", func(t *testing.T) {
+		protector, accounts, err := setupProposal(false)
+		require.NoError(t, err)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
 			Slot:          99,
 			ProposerIndex: 2,
 			ParentRoot:    []byte("Z"),
 			StateRoot:     []byte("Z"),
 			Body:          &eth.BeaconBlockBody{},
 		})
-		require.Equal(t, res.Status, core.ValidProposal)
+		require.EqualError(t, err, "highest proposal data is nil, can't determine if proposal is slashable")
+		require.Nil(t, res)
 	})
 
-	t.Run("different proposer index, should not slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[1].ValidatorPublicKey(), &eth.BeaconBlock{
-			Slot:          100,
-			ProposerIndex: 3,
-			ParentRoot:    []byte("A"),
-			StateRoot:     []byte("A"),
+	t.Run("Lower than highest proposal db, should error", func(t *testing.T) {
+		protector, accounts, err := setupProposal(true)
+		require.NoError(t, err)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot:          99,
+			ProposerIndex: 2,
+			ParentRoot:    []byte("Z"),
+			StateRoot:     []byte("Z"),
 			Body:          &eth.BeaconBlockBody{},
 		})
-		require.Equal(t, res.Status, core.ValidProposal)
-	})
-
-	t.Run("double proposal (different body root), should slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
-			Slot:          100,
-			ProposerIndex: 2,
-			ParentRoot:    []byte("A"),
-			StateRoot:     []byte("A"),
-			Body:          &eth.BeaconBlockBody{Graffiti: []byte("B")},
-		})
-		require.Equal(t, res.Status, core.DoubleProposal)
-	})
-
-	t.Run("double proposal (different state root), should slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
-			Slot:          100,
-			ProposerIndex: 2,
-			ParentRoot:    []byte("A"),
-			StateRoot:     []byte("B"),
-			Body:          &eth.BeaconBlockBody{},
-		})
-		require.Equal(t, res.Status, core.DoubleProposal)
-	})
-
-	t.Run("double proposal (different state and body root), should slash", func(t *testing.T) {
-		res := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
-			Slot:          100,
-			ProposerIndex: 2,
-			ParentRoot:    []byte("A"),
-			StateRoot:     []byte("B"),
-			Body:          &eth.BeaconBlockBody{Graffiti: []byte("B")},
-		})
-		require.Equal(t, res.Status, core.DoubleProposal)
+		require.NoError(t, err)
+		require.Equal(t, res.Status, core.HighestProposalVote)
 	})
 }

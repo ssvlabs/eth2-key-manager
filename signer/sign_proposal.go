@@ -33,15 +33,16 @@ func (signer *SimpleSigner) SignBeaconBlock(block *eth.BeaconBlock, domain []byt
 	}
 
 	// 4. check we can even sign this
-	if status := signer.slashingProtector.IsSlashableProposal(pubKey, block); status.Status != core.ValidProposal {
-		if status.Error != nil {
-			return nil, status.Error
-		}
-		return nil, errors.Errorf("err, slashable proposal: %s", status.Status)
+	status, err := signer.slashingProtector.IsSlashableProposal(pubKey, block)
+	if err != nil {
+		return nil, err
+	}
+	if status.Status != core.ValidProposal {
+		return nil, errors.Errorf("slashable proposal (%s), not signing", status.Status)
 	}
 
 	// 5. add to protection storage
-	if err := signer.slashingProtector.SaveProposal(pubKey, block); err != nil {
+	if err := signer.slashingProtector.UpdateHighestProposal(pubKey, block); err != nil {
 		return nil, err
 	}
 
