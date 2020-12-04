@@ -6,7 +6,7 @@ import (
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	seed, _ := core.SeedFromEntropy(entropy, "")
 
 	// create storage
-	store := in_memory.NewInMemStore(core.PyrmontNetwork)
+	store := inmemory.NewInMemStore(core.PyrmontNetwork)
 
 	// create options
 	options := &eth2keymanager.KeyVaultOptions{}

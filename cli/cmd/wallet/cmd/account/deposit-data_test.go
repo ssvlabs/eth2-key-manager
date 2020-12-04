@@ -20,7 +20,7 @@ func TestAccountDepositData(t *testing.T) {
 			"deposit-data",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=0",
-			"--public-key=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
+			"--publickey=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
@@ -38,7 +38,7 @@ func TestAccountDepositData(t *testing.T) {
 			"deposit-data",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=0",
-			"--public-key=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
+			"--publickey=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"--network=pyrmont",
 		})
 		err := cmd.RootCmd.Execute()
@@ -47,7 +47,7 @@ func TestAccountDepositData(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Fail retrieve deposit-data for unmatched index and public-key", func(t *testing.T) {
+	t.Run("Fail retrieve deposit-data for unmatched index and publickey", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -56,7 +56,7 @@ func TestAccountDepositData(t *testing.T) {
 			"deposit-data",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=5",
-			"--public-key=81fd26fe6e7cdbe1d0d45020050ba94c625f5236bf162b9ad3fca137d9120a0572c6f59b8cc70fae6cd6bb471b673e97",
+			"--publickey=81fd26fe6e7cdbe1d0d45020050ba94c625f5236bf162b9ad3fca137d9120a0572c6f59b8cc70fae6cd6bb471b673e97",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)

@@ -25,8 +25,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/validator/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
-	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	eth1deposit "github.com/bloxapp/eth2-key-manager/eth1_deposit"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 // ValidatorConfig represents the validator config data
@@ -84,7 +84,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to get wallet balance")
 	}
 
-	store := in_memory.NewInMemStore(h.network)
+	store := inmemory.NewInMemStore(h.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
@@ -99,7 +99,7 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 
 	// Check balance
 	minBalance := big.NewInt(0).
-		SetUint64(eth1_deposit.MaxEffectiveBalanceInGwei * uint64(seedsCount) * uint64(validatorsPerSeed))
+		SetUint64(eth1deposit.MaxEffectiveBalanceInGwei * uint64(seedsCount) * uint64(validatorsPerSeed))
 	minBalance = minBalance.Mul(minBalance, big.NewInt(1e9))
 	if walletBalance.Cmp(minBalance) < 0 {
 		return errors.New("insufficient funds for transfer")
@@ -284,7 +284,7 @@ func buildTransactionOpts(privateKey string) (*bind.TransactOpts, error) {
 	}
 
 	txOps := bind.NewKeyedTransactor(privKey)
-	txOps.Value = new(big.Int).Mul(big.NewInt(int64(eth1_deposit.MaxEffectiveBalanceInGwei)), big.NewInt(1e9))
+	txOps.Value = new(big.Int).Mul(big.NewInt(int64(eth1deposit.MaxEffectiveBalanceInGwei)), big.NewInt(1e9))
 	txOps.GasLimit = 500000
 	return txOps, nil
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 // List lists wallet accounts and prints the accounts.
@@ -29,7 +29,7 @@ func (h *Account) List(cmd *cobra.Command, _ []string) error {
 		return errors.Wrap(err, "failed to HEX decode storage")
 	}
 
-	var store in_memory.InMemStore
+	var store inmemory.InMemStore
 	err = store.UnmarshalJSON(storageBytes)
 	if err != nil {
 		return errors.Wrap(err, "failed to JSON un-marshal storage")

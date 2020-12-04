@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
+	eth1deposit "github.com/bloxapp/eth2-key-manager/eth1_deposit"
 )
 
 // HDAccount represents HD account
@@ -151,11 +151,11 @@ func (account *HDAccount) ValidationKeySign(data []byte) ([]byte, error) {
 
 // GetDepositData returns deposit data
 func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
-	depositData, root, err := eth1_deposit.DepositData(
+	depositData, root, err := eth1deposit.DepositData(
 		account.validationKey,
 		account.withdrawalPubKey,
 		account.context.Storage.Network(),
-		eth1_deposit.MaxEffectiveBalanceInGwei,
+		eth1deposit.MaxEffectiveBalanceInGwei,
 	)
 	if err != nil {
 		return nil, err

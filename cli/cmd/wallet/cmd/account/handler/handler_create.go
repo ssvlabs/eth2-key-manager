@@ -12,7 +12,7 @@ import (
 	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 // Create creates a new wallet account and prints the storage.
@@ -95,7 +95,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	}
 
 	// TODO get rid of network
-	store := in_memory.NewInMemStore(network)
+	store := inmemory.NewInMemStore(network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 

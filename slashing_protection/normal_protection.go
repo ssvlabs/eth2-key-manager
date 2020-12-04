@@ -1,8 +1,9 @@
-package slashing_protection
+package slashingprotection
 
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -34,9 +35,9 @@ func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attesta
 			}, nil
 		}
 		return nil, nil
-	} else {
-		return nil, fmt.Errorf("highest attestation data is nil, can't determine if attestation is slashable")
 	}
+
+	return nil, errors.New("highest attestation data is nil, can't determine if attestation is slashable")
 }
 
 // IsSlashableProposal detects slashable proposal request

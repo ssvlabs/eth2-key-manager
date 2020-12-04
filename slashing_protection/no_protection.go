@@ -1,4 +1,4 @@
-package slashing_protection
+package slashingprotection
 
 import (
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"

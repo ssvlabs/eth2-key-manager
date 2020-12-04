@@ -1,4 +1,4 @@
-package slashing_protection
+package slashingprotection
 
 import (
 	"fmt"

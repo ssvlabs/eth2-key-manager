@@ -1,11 +1,11 @@
-package public_key
+package publickey
 
 import (
 	"github.com/spf13/cobra"
 
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/public-key/flag"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/public-key/handler"
+	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/flag"
+	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/handler"
 )
 
 // generateCmd represents the generate public key command.

@@ -1,4 +1,4 @@
-package stores
+package inmemory
 
 import (
 	"encoding/json"
@@ -43,7 +43,12 @@ func testBlock() *eth.BeaconBlock {
 	return blk
 }
 
-func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
+func getSlashingStorage() core.SlashingStore {
+	return NewInMemStore(core.MainNetwork)
+}
+
+func TestSavingProposal(t *testing.T) {
+	storage := getSlashingStorage()
 	tests := []struct {
 		name     string
 		proposal *eth.BeaconBlock
@@ -79,7 +84,8 @@ func TestingSaveProposal(storage core.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
+func TestSavingAttestation(t *testing.T) {
+	storage := getSlashingStorage()
 	tests := []struct {
 		name    string
 		att     *eth.AttestationData
@@ -147,7 +153,8 @@ func TestingSaveAttestation(storage core.SlashingStore, t *testing.T) {
 	}
 }
 
-func TestingSaveHighestAttestation(storage core.SlashingStore, t *testing.T) {
+func TestSavingHighestAttestation(t *testing.T) {
+	storage := getSlashingStorage()
 	tests := []struct {
 		name    string
 		att     *eth.AttestationData

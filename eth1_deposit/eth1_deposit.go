@@ -1,4 +1,4 @@
-package eth1_deposit
+package eth1deposit
 
 import (
 	"github.com/pkg/errors"
@@ -12,10 +12,14 @@ import (
 )
 
 const (
+	// MaxEffectiveBalanceInGwei is the max effective balance
 	MaxEffectiveBalanceInGwei uint64 = 32000000000
-	BLSWithdrawalPrefixByte   byte   = byte(0)
+
+	// BLSWithdrawalPrefixByte is the BLS withdrawal prefix
+	BLSWithdrawalPrefixByte byte = byte(0)
 )
 
+// IsSupportedDepositNetwork returns true if the given network is supported
 var IsSupportedDepositNetwork = func(network core.Network) bool {
 	return network == core.PyrmontNetwork || network == core.MainNetwork
 }

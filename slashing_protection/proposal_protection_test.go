@@ -1,4 +1,4 @@
-package slashing_protection
+package slashingprotection
 
 import (
 	"encoding/hex"
@@ -9,7 +9,7 @@ import (
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 func _byteArray(input string) []byte {
@@ -17,8 +17,8 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func store() *in_memory.InMemStore {
-	return in_memory.NewInMemStore(core.MainNetwork)
+func store() *inmemory.InMemStore {
+	return inmemory.NewInMemStore(core.MainNetwork)
 }
 
 func vault() (*eth2keymanager.KeyVault, error) {

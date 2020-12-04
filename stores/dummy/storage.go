@@ -7,6 +7,7 @@ import (
 	"github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
+// Storage is the storage mock
 type Storage struct{}
 
 // Name does nothing

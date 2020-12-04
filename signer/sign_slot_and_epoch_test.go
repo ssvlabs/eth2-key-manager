@@ -14,12 +14,12 @@ import (
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets"
 )
 
-func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore(core.MainNetwork)
+func inmemStorage() *inmemory.InMemStore {
+	return inmemory.NewInMemStore(core.MainNetwork)
 }
 
 func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {

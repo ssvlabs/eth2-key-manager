@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
-// Wallet creates a new wallet and prints the storage
-func (h *Wallet) Create(cmd *cobra.Command, args []string) error {
-	store := in_memory.NewInMemStore(h.network)
+// Create creates a new wallet and prints the storage
+func (h *Wallet) Create(cmd *cobra.Command, _ []string) error {
+	store := inmemory.NewInMemStore(h.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 

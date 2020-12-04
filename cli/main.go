@@ -7,7 +7,7 @@ import (
 	_ "github.com/bloxapp/eth2-key-manager/cli/cmd/validator"
 	_ "github.com/bloxapp/eth2-key-manager/cli/cmd/wallet"
 	_ "github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account"
-	_ "github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/public-key"
+	_ "github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey"
 )
 
 func main() {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 func _byteArray(input string) []byte {
@@ -16,8 +16,8 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func inmemStorage() *in_memory.InMemStore {
-	return in_memory.NewInMemStore(core.MainNetwork)
+func inmemStorage() *inmemory.InMemStore {
+	return inmemory.NewInMemStore(core.MainNetwork)
 }
 
 func TestNoKeyVault(t *testing.T) {
