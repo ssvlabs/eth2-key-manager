@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
 	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"

@@ -3,15 +3,13 @@ package stores
 import (
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/wallets/hd"
-
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
+	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 )
 
 func encryptor() encryptor2.Encryptor {
@@ -54,7 +52,7 @@ func TestingWalletStorageWithEncryption(storage core.Storage, t *testing.T) {
 			// set encryptor
 			storage.SetEncryptor(encryptor(), test.password)
 
-			w := hd.NewHDWallet(&core.WalletContext{Storage: storage})
+			w := hd.NewWallet(&core.WalletContext{Storage: storage})
 
 			err := storage.SaveWallet(w)
 			require.NoError(t, err)

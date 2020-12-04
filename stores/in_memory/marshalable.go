@@ -4,15 +4,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/bloxapp/eth2-key-manager/wallets/nd"
-
-	hd2 "github.com/bloxapp/eth2-key-manager/wallets/hd"
-
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	hd2 "github.com/bloxapp/eth2-key-manager/wallets/hd"
+	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 )
 
+// MarshalJSON is the custom JSON marshaler
 func (store *InMemStore) MarshalJSON() ([]byte, error) {
 	var err error
 	data := make(map[string]interface{})
@@ -48,6 +47,7 @@ func (store *InMemStore) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
+// UnmarshalJSON is the custom JSON unmarshaler
 func (store *InMemStore) UnmarshalJSON(data []byte) error {
 	// parse
 	var v map[string]interface{}
@@ -76,14 +76,14 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			}
 
 			if walletType == core.HDWallet {
-				hd := &hd2.HDWallet{}
+				hd := &hd2.Wallet{}
 				err = json.Unmarshal(byts, &hd)
 				if err != nil {
 					return err
 				}
 				store.wallet = hd
 			} else if walletType == core.NDWallet {
-				nd := &nd.NDWallet{}
+				nd := &nd.Wallet{}
 				err = json.Unmarshal(byts, &nd)
 				if err != nil {
 					return err

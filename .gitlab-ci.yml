@@ -1,4 +1,5 @@
 stages:
+  - lint
   - gosec
   - test
 
@@ -15,6 +16,16 @@ variables:
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
   STAGE_GO_IMAGE: 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:golang-1.15
 
+
+Run linter:
+  stage: lint
+  image: golang:1.15
+  tags:
+    - blox-infra-stage
+  script:
+    - go get -u golang.org/x/lint/golint
+    - go get -u golang.org/x/tools/cmd/goimports
+    - ./scripts/lint.sh .
 
 Security check:
   stage: gosec

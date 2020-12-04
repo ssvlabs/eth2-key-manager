@@ -77,18 +77,18 @@ func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
 	return nil
 }
 
-func (store *InMemStore) DeleteAccount(accountId uuid.UUID) error {
-	_, exists := store.accounts[accountId.String()]
+func (store *InMemStore) DeleteAccount(accountID uuid.UUID) error {
+	_, exists := store.accounts[accountID.String()]
 	if !exists {
 		return errors.New("account not found")
 	}
-	delete(store.accounts, accountId.String())
+	delete(store.accounts, accountID.String())
 	return nil
 }
 
 // will return nil,nil if no account was found
-func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
-	if val := store.accounts[accountId.String()]; val != nil {
+func (store *InMemStore) OpenAccount(accountID uuid.UUID) (core.ValidatorAccount, error) {
+	if val := store.accounts[accountID.String()]; val != nil {
 		return val, nil
 	} else {
 		return nil, nil

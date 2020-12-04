@@ -5,13 +5,12 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/herumi/bls-eth-go-binary/bls"
-
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 )
 
 func _bigInt(input string) *big.Int {

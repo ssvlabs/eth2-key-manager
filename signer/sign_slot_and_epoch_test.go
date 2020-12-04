@@ -6,19 +6,16 @@ import (
 	"log"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/wallets"
-
 	"github.com/herumi/bls-eth-go-binary/bls"
-
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
 	"github.com/pkg/errors"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/wallets"
 )
 
 func inmemStorage() *in_memory.InMemStore {
@@ -189,8 +186,7 @@ func TestAggregateProofReferenceSignatures(t *testing.T) {
 	require.NoError(t, err)
 	k, err := core.NewHDKeyFromPrivateKey(sk, "")
 	require.NoError(t, err)
-	acc, err := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
-	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer
@@ -221,8 +217,7 @@ func TestAggregateAndProofReferenceSignatures(t *testing.T) {
 	require.NoError(t, err)
 	k, err := core.NewHDKeyFromPrivateKey(sk, "")
 	require.NoError(t, err)
-	acc, err := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
-	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer
@@ -256,8 +251,7 @@ func TestRandaoReferenceSignatures(t *testing.T) {
 	require.NoError(t, err)
 	k, err := core.NewHDKeyFromPrivateKey(sk, "")
 	require.NoError(t, err)
-	acc, err := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
-	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer

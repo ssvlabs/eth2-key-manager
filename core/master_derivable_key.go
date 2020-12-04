@@ -4,9 +4,8 @@ import (
 	"encoding/hex"
 	"regexp"
 
-	"github.com/herumi/bls-eth-go-binary/bls"
-
 	"github.com/google/uuid"
+	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
 	util "github.com/wealdtech/go-eth2-util"
 )

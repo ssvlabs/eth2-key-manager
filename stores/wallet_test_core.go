@@ -6,12 +6,12 @@ import (
 	"os"
 	"testing"
 
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
-	"github.com/stretchr/testify/require"
 )
 
 func _byteArray(input string) []byte {

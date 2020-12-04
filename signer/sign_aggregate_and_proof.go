@@ -8,6 +8,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 )
 
+// SignAggregateAndProof signs aggregate and proof
 func (signer *SimpleSigner) SignAggregateAndProof(agg *eth.AggregateAttestationAndProof, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. check we can even sign this
 	// TODO - should we?

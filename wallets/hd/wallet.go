@@ -6,15 +6,14 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/bloxapp/eth2-key-manager/wallets"
-
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/wallets"
 )
 
-// according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
+// Default values according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md
 const (
 	BaseAccountPath   = "/%d"
 	WithdrawalKeyPath = BaseAccountPath + "/0"
@@ -27,16 +26,17 @@ var (
 	ErrAccountNotFound = errors.New("account not found")
 )
 
-// an hierarchical deterministic wallet
-type HDWallet struct {
+// Wallet represents hierarchical deterministic wallet
+type Wallet struct {
 	id          uuid.UUID
 	walletType  core.WalletType
 	indexMapper map[string]uuid.UUID
 	context     *core.WalletContext
 }
 
-func NewHDWallet(context *core.WalletContext) *HDWallet {
-	return &HDWallet{
+// NewWallet is the constructor of Wallet
+func NewWallet(context *core.WalletContext) *Wallet {
+	return &Wallet{
 		id:          uuid.New(),
 		walletType:  core.HDWallet,
 		indexMapper: make(map[string]uuid.UUID),
@@ -45,17 +45,17 @@ func NewHDWallet(context *core.WalletContext) *HDWallet {
 }
 
 // ID provides the ID for the wallet.
-func (wallet *HDWallet) ID() uuid.UUID {
+func (wallet *Wallet) ID() uuid.UUID {
 	return wallet.id
 }
 
 // Type provides the type of the wallet.
-func (wallet *HDWallet) Type() core.WalletType {
+func (wallet *Wallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
 // GetNextAccountIndex provides next index to create account at.
-func (wallet *HDWallet) GetNextAccountIndex() int {
+func (wallet *Wallet) GetNextAccountIndex() int {
 	if len(wallet.indexMapper) == 0 {
 		return 0
 	}
@@ -64,8 +64,8 @@ func (wallet *HDWallet) GetNextAccountIndex() int {
 	return int(index) + 1
 }
 
-// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
-func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
+// CreateValidatorAccount creates a new validation (validator) key pair in the wallet.
+func (wallet *Wallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
 	// Resolve index to create account at
 	var index int
 	if indexPointer != nil {
@@ -98,16 +98,13 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	}
 
 	// Create ret account
-	ret, err := wallets.NewValidatorAccount(
+	ret := wallets.NewValidatorAccount(
 		name,
 		validatorKey,
 		withdrawalKey.PublicKey().Serialize(),
 		baseAccountPath,
 		wallet.context,
 	)
-	if err != nil {
-		return nil, err
-	}
 
 	validatorPublicKey := hex.EncodeToString(ret.ValidatorPublicKey())
 
@@ -133,11 +130,13 @@ func (wallet *HDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (
 	return ret, nil
 }
 
-func (wallet *HDWallet) AddValidatorAccount(account core.ValidatorAccount) error {
+// AddValidatorAccount returns error
+func (wallet *Wallet) AddValidatorAccount(_ core.ValidatorAccount) error {
 	return errors.Errorf("hierarchical deterministic wallets can't add a validator they need too derive it, please use CreateValidatorAccount")
 }
 
-func (wallet *HDWallet) DeleteAccountByPublicKey(pubKey string) error {
+// DeleteAccountByPublicKey deletes account by the given public key
+func (wallet *Wallet) DeleteAccountByPublicKey(pubKey string) error {
 	account, err := wallet.AccountByPublicKey(pubKey)
 	if err != nil {
 		return errors.Wrap(err, "failed to get account by public key")
@@ -155,7 +154,7 @@ func (wallet *HDWallet) DeleteAccountByPublicKey(pubKey string) error {
 }
 
 // Accounts provides all accounts in the wallet.
-func (wallet *HDWallet) Accounts() []core.ValidatorAccount {
+func (wallet *Wallet) Accounts() []core.ValidatorAccount {
 	accounts := make([]core.ValidatorAccount, 0)
 	for pubKey := range wallet.indexMapper {
 		id := wallet.indexMapper[pubKey]
@@ -175,7 +174,7 @@ func (wallet *HDWallet) Accounts() []core.ValidatorAccount {
 
 // AccountByID provides a nd account from the wallet given its ID.
 // This will error if the account is not found.
-func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
+func (wallet *Wallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
 	ret, err := wallet.context.Storage.OpenAccount(id)
 	if err != nil {
 		return nil, err
@@ -188,13 +187,14 @@ func (wallet *HDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error)
 	return ret, nil
 }
 
-func (wallet *HDWallet) SetContext(ctx *core.WalletContext) {
+// SetContext is the context setter
+func (wallet *Wallet) SetContext(ctx *core.WalletContext) {
 	wallet.context = ctx
 }
 
 // AccountByPublicKey provides a nd account from the wallet given its public key.
 // This will error if the account is not found.
-func (wallet *HDWallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
+func (wallet *Wallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
 	id, exists := wallet.indexMapper[pubKey]
 	if !exists {
 		return nil, ErrAccountNotFound

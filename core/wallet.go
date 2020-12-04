@@ -4,14 +4,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// WalletType represents wallet type
 type WalletType = string
 
+// Wallet types
 const (
 	HDWallet WalletType = "HD" // hierarchical deterministic wallet
 	NDWallet WalletType = "ND" // non - deterministic
 )
 
-// A wallet is a container of accounts.
+// Wallet is a container of accounts.
 // Accounts = key pairs
 type Wallet interface {
 	// ID provides the ID for the wallet.

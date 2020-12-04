@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// A validator account holds the information and actions needed by validator account keys.
+// ValidatorAccount holds the information and actions needed by validator account keys.
 // It holds 2 keys, a validation and a withdrawal key.
 // As a minimum, the ValidatorAccount should have at least the validation key.
 // Withdrawal key is not mandatory to be present.

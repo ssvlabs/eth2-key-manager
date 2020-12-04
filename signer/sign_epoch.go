@@ -7,6 +7,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 )
 
+// SignEpoch signs the given epoch
 func (signer *SimpleSigner) SignEpoch(epoch uint64, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. check we can even sign this
 	// TODO - should we?

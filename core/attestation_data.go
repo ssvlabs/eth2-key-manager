@@ -4,8 +4,10 @@ import (
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 )
 
+// VoteDetectionType represents vote detection type
 type VoteDetectionType string
 
+// Vote detection types
 const (
 	DoubleVote             VoteDetectionType = "DoubleVote"
 	SurroundingVote        VoteDetectionType = "SurroundingVote"
@@ -13,6 +15,7 @@ const (
 	HighestAttestationVote VoteDetectionType = "HighestAttestationVote"
 )
 
+// AttestationSlashStatus represents attestation slashing status
 type AttestationSlashStatus struct {
 	Attestation *eth.AttestationData
 	Status      VoteDetectionType

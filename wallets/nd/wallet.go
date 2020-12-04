@@ -5,9 +5,10 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // Predefined errors
@@ -16,16 +17,17 @@ var (
 	ErrAccountNotFound = errors.New("account not found")
 )
 
-// an hierarchical deterministic wallet
-type NDWallet struct {
+// Wallet is hierarchical deterministic wallet
+type Wallet struct {
 	id          uuid.UUID
 	walletType  core.WalletType
 	indexMapper map[string]uuid.UUID
 	context     *core.WalletContext
 }
 
-func NewNDWallet(context *core.WalletContext) *NDWallet {
-	return &NDWallet{
+// NewWallet is the constructor of Wallet
+func NewWallet(context *core.WalletContext) *Wallet {
+	return &Wallet{
 		id:          uuid.New(),
 		walletType:  core.NDWallet,
 		indexMapper: make(map[string]uuid.UUID),
@@ -34,17 +36,17 @@ func NewNDWallet(context *core.WalletContext) *NDWallet {
 }
 
 // ID provides the ID for the wallet.
-func (wallet *NDWallet) ID() uuid.UUID {
+func (wallet *Wallet) ID() uuid.UUID {
 	return wallet.id
 }
 
 // Type provides the type of the wallet.
-func (wallet *NDWallet) Type() core.WalletType {
+func (wallet *Wallet) Type() core.WalletType {
 	return wallet.walletType
 }
 
 // GetNextAccountIndex provides next index to create account at.
-func (wallet *NDWallet) GetNextAccountIndex() int {
+func (wallet *Wallet) GetNextAccountIndex() int {
 	if len(wallet.indexMapper) == 0 {
 		return 0
 	}
@@ -53,12 +55,13 @@ func (wallet *NDWallet) GetNextAccountIndex() int {
 	return int(index) + 1
 }
 
-// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
-func (wallet *NDWallet) CreateValidatorAccount(seed []byte, indexPointer *int) (core.ValidatorAccount, error) {
+// CreateValidatorAccount creates a new validation (validator) key pair in the wallet.
+func (wallet *Wallet) CreateValidatorAccount(_ []byte, _ *int) (core.ValidatorAccount, error) {
 	return nil, errors.Errorf("non deterministic wallet can't create validator, please use AddValidatorAccount")
 }
 
-func (wallet *NDWallet) AddValidatorAccount(account core.ValidatorAccount) error {
+// AddValidatorAccount adds the given account
+func (wallet *Wallet) AddValidatorAccount(account core.ValidatorAccount) error {
 	validatorPublicKey := hex.EncodeToString(account.ValidatorPublicKey())
 	wallet.indexMapper[validatorPublicKey] = account.ID()
 
@@ -76,7 +79,8 @@ func (wallet *NDWallet) AddValidatorAccount(account core.ValidatorAccount) error
 	return nil
 }
 
-func (wallet *NDWallet) DeleteAccountByPublicKey(pubKey string) error {
+// DeleteAccountByPublicKey deletes account by public key
+func (wallet *Wallet) DeleteAccountByPublicKey(pubKey string) error {
 	account, err := wallet.AccountByPublicKey(pubKey)
 	if err != nil {
 		return errors.Wrap(err, "failed to get account by public key")
@@ -94,7 +98,7 @@ func (wallet *NDWallet) DeleteAccountByPublicKey(pubKey string) error {
 }
 
 // Accounts provides all accounts in the wallet.
-func (wallet *NDWallet) Accounts() []core.ValidatorAccount {
+func (wallet *Wallet) Accounts() []core.ValidatorAccount {
 	accounts := make([]core.ValidatorAccount, 0)
 	for pubKey := range wallet.indexMapper {
 		id := wallet.indexMapper[pubKey]
@@ -114,7 +118,7 @@ func (wallet *NDWallet) Accounts() []core.ValidatorAccount {
 
 // AccountByID provides a nd account from the wallet given its ID.
 // This will error if the account is not found.
-func (wallet *NDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
+func (wallet *Wallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error) {
 	ret, err := wallet.context.Storage.OpenAccount(id)
 	if err != nil {
 		return nil, err
@@ -127,13 +131,14 @@ func (wallet *NDWallet) AccountByID(id uuid.UUID) (core.ValidatorAccount, error)
 	return ret, nil
 }
 
-func (wallet *NDWallet) SetContext(ctx *core.WalletContext) {
+// SetContext is the context setter
+func (wallet *Wallet) SetContext(ctx *core.WalletContext) {
 	wallet.context = ctx
 }
 
 // AccountByPublicKey provides a nd account from the wallet given its public key.
 // This will error if the account is not found.
-func (wallet *NDWallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
+func (wallet *Wallet) AccountByPublicKey(pubKey string) (core.ValidatorAccount, error) {
 	id, exists := wallet.indexMapper[pubKey]
 	if !exists {
 		return nil, ErrAccountNotFound

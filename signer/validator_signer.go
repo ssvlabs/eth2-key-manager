@@ -3,10 +3,10 @@ package signer
 import (
 	"sync"
 
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/prysmaticlabs/go-ssz"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // ValidatorSigner represents the behavior of the validator signer
@@ -42,8 +42,8 @@ func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtecto
 }
 
 // lock locks signer
-func (signer *SimpleSigner) lock(accountId uuid.UUID, operation string) {
-	k := accountId.String() + "_" + operation
+func (signer *SimpleSigner) lock(accountID uuid.UUID, operation string) {
+	k := accountID.String() + "_" + operation
 	if val, ok := signer.signLocks[k]; ok {
 		val.Lock()
 	} else {
@@ -52,26 +52,9 @@ func (signer *SimpleSigner) lock(accountId uuid.UUID, operation string) {
 	}
 }
 
-func (signer *SimpleSigner) unlock(accountId uuid.UUID, operation string) {
-	k := accountId.String() + "_" + operation
+func (signer *SimpleSigner) unlock(accountID uuid.UUID, operation string) {
+	k := accountID.String() + "_" + operation
 	if val, ok := signer.signLocks[k]; ok {
 		val.Unlock()
 	}
-}
-
-func prepareForSig(data interface{}, domain []byte) ([32]byte, error) {
-	root, err := ssz.HashTreeRoot(data)
-	if err != nil {
-		return [32]byte{}, err
-	}
-
-	forSig, err := ssz.HashTreeRoot(&signingRoot{
-		Hash:   root,
-		Domain: domain,
-	})
-	if err != nil {
-		return [32]byte{}, err
-	}
-
-	return forSig, nil
 }

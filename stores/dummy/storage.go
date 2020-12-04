@@ -14,8 +14,8 @@ func (s *DummyStorage) SaveWallet(wallet core.Wallet) error             { return
 func (s *DummyStorage) OpenWallet() (core.Wallet, error)                { return nil, nil }
 func (s *DummyStorage) ListAccounts() ([]core.ValidatorAccount, error)  { return nil, nil }
 func (s *DummyStorage) SaveAccount(account core.ValidatorAccount) error { return nil }
-func (s *DummyStorage) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
+func (s *DummyStorage) OpenAccount(accountID uuid.UUID) (core.ValidatorAccount, error) {
 	return nil, nil
 }
-func (s *DummyStorage) DeleteAccount(accountId uuid.UUID) error                     { return nil }
+func (s *DummyStorage) DeleteAccount(accountID uuid.UUID) error                     { return nil }
 func (s *DummyStorage) SetEncryptor(encryptor encryptor.Encryptor, password []byte) {}

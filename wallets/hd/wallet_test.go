@@ -7,11 +7,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/stores/dummy"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 )
 
 func storage() core.Storage {
@@ -58,7 +58,7 @@ func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 
 			//
 			storage := storage()
-			w := &HDWallet{
+			w := &Wallet{
 				id:          uuid.New(),
 				indexMapper: make(map[string]uuid.UUID),
 				context: &core.WalletContext{
@@ -78,7 +78,7 @@ func TestAccountDerivation(t *testing.T) {
 	// create wallet
 	storage := storage()
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	w := &HDWallet{
+	w := &Wallet{
 		id:          uuid.New(),
 		indexMapper: make(map[string]uuid.UUID),
 		context: &core.WalletContext{
@@ -145,7 +145,7 @@ func TestCreateAccounts(t *testing.T) {
 	storage := storage()
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 
-	w := &HDWallet{
+	w := &Wallet{
 		id:          uuid.New(),
 		indexMapper: make(map[string]uuid.UUID),
 		//key:key,
@@ -200,7 +200,7 @@ func TestWalletMarshaling(t *testing.T) {
 			// setup storage
 			storage := storage()
 
-			w := &HDWallet{
+			w := &Wallet{
 				walletType:  test.walletType,
 				id:          test.id,
 				indexMapper: test.indexMapper,
@@ -212,7 +212,7 @@ func TestWalletMarshaling(t *testing.T) {
 			require.NoError(t, err)
 
 			//unmarshal
-			w1 := &HDWallet{context: &core.WalletContext{Storage: storage}}
+			w1 := &Wallet{context: &core.WalletContext{Storage: storage}}
 			err = json.Unmarshal(byts, w1)
 			require.NoError(t, err)
 

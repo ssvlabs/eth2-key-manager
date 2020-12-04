@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/stores/dummy"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 )
 
 func storage() core.Storage {
@@ -55,7 +55,7 @@ func TestWalletMarshaling(t *testing.T) {
 			// setup storage
 			storage := storage()
 
-			w := &NDWallet{
+			w := &Wallet{
 				walletType:  test.walletType,
 				id:          test.id,
 				indexMapper: test.indexMapper,
@@ -67,7 +67,7 @@ func TestWalletMarshaling(t *testing.T) {
 			require.NoError(t, err)
 
 			//unmarshal
-			w1 := &NDWallet{context: &core.WalletContext{Storage: storage}}
+			w1 := &Wallet{context: &core.WalletContext{Storage: storage}}
 			err = json.Unmarshal(byts, w1)
 			require.NoError(t, err)
 
