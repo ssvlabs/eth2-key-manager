@@ -2,8 +2,6 @@ package flag
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -90,54 +88,32 @@ func GetSeedFlagValue(c *cobra.Command) (string, error) {
 	return c.Flags().GetString(seedFlag)
 }
 
-// AddHighestSourceFlag adds the web3 address flag to the command
+// AddHighestSourceFlag adds the highest source flag to the command
 func AddHighestSourceFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, highestKnownSource, "", "Array of highest known sources for an array of validators", true)
+	cliflag.AddPersistentInt64SliceFlag(c, highestKnownSource, nil, "Array of highest known sources for an array of validators", true)
 }
 
-func GetHighestSourceFlagValue(c *cobra.Command) ([]uint64, error) {
-	str, err := c.Flags().GetString(highestKnownSource)
-	if err != nil {
-		return nil, err
-	}
-	return stringSliceToUint64Slice(str)
+// GetHighestSourceFlagValue gets the highest source flag from the command
+func GetHighestSourceFlagValue(c *cobra.Command) ([]int64, error) {
+	return c.Flags().GetInt64Slice(highestKnownSource)
 }
 
-// AddHighestTargetFlag adds the web3 address flag to the command
+// AddHighestTargetFlag adds the highest target flag to the command
 func AddHighestTargetFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, highestKnownTarget, "", "Array of highest known targets for an array of validators", true)
+	cliflag.AddPersistentInt64SliceFlag(c, highestKnownTarget, nil, "Array of highest known targets for an array of validators", true)
 }
 
-func GetHighestTargetFlagValue(c *cobra.Command) ([]uint64, error) {
-	str, err := c.Flags().GetString(highestKnownTarget)
-	if err != nil {
-		return nil, err
-	}
-	return stringSliceToUint64Slice(str)
+// GetHighestTargetFlagValue gets the highest target flag from the command
+func GetHighestTargetFlagValue(c *cobra.Command) ([]int64, error) {
+	return c.Flags().GetInt64Slice(highestKnownTarget)
 }
 
-// AddHighestProposalFlag adds the web3 address flag to the command
+// AddHighestProposalFlag adds the highest proposal flag to the command
 func AddHighestProposalFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, highestKnownProposal, "", "Array of highest known proposed blocks (slot) for an array of validators", true)
+	cliflag.AddPersistentInt64SliceFlag(c, highestKnownProposal, nil, "Array of highest known proposed blocks (slot) for an array of validators", true)
 }
 
-func GetHighestProposalFlagValue(c *cobra.Command) ([]uint64, error) {
-	str, err := c.Flags().GetString(highestKnownProposal)
-	if err != nil {
-		return nil, err
-	}
-	return stringSliceToUint64Slice(str)
-}
-
-func stringSliceToUint64Slice(str string) ([]uint64, error) {
-	strs := strings.Split(str, ",")
-	ret := make([]uint64, len(strs))
-	for i, s := range strs {
-		n, err := strconv.ParseUint(s, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		ret[i] = n
-	}
-	return ret, nil
+// GetHighestProposalFlagValue gets the highest proposal flag from the command
+func GetHighestProposalFlagValue(c *cobra.Command) ([]int64, error) {
+	return c.Flags().GetInt64Slice(highestKnownProposal)
 }

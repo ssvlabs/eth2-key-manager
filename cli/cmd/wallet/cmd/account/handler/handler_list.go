@@ -11,8 +11,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
-// Account list wallet accounts and prints the accounts.
-func (h *Account) List(cmd *cobra.Command, args []string) error {
+// List lists wallet accounts and prints the accounts.
+func (h *Account) List(cmd *cobra.Command, _ []string) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")

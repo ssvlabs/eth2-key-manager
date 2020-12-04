@@ -12,7 +12,7 @@ func GenerateNewEntropy() ([]byte, error) {
 	return entropy, nil
 }
 
-// Given an entropy, create the mnemonic passphrase.
+// EntropyToMnemonic creates the mnemonic passphrase.
 func EntropyToMnemonic(entropy []byte) (string, error) {
 	mnemonic, err := bip39.NewMnemonic(entropy)
 	if err != nil {
@@ -34,6 +34,7 @@ func SeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
 	return seed, nil
 }
 
+// SeedFromEntropy creates seed from the given entropy
 // the seed is the product of applying a key derivation algo (PBKDF2) on the mnemonic (as the entropy)
 // and the password as salt.
 // please see https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki

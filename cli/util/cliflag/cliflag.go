@@ -34,6 +34,20 @@ func AddPersistentIntFlag(c *cobra.Command, flag string, value int, description 
 	}
 }
 
+// AddPersistentInt64SliceFlag adds a int64 slice flag to the command
+func AddPersistentInt64SliceFlag(c *cobra.Command, flag string, value []int64, description string, isRequired bool) {
+	req := ""
+	if isRequired {
+		req = " (required)"
+	}
+
+	c.PersistentFlags().Int64Slice(flag, value, fmt.Sprintf("%s%s", description, req))
+
+	if isRequired {
+		c.MarkPersistentFlagRequired(flag)
+	}
+}
+
 // AddPersistentBoolFlag adds a bool flag to the command
 func AddPersistentBoolFlag(c *cobra.Command, flag string, value bool, description string, isRequired bool) {
 	req := ""

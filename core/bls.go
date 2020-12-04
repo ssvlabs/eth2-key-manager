@@ -9,6 +9,7 @@ import (
 // initBLS initializes BLS ONLY ONCE!
 var initBLSOnce sync.Once
 
+// InitBLS initializes BLS
 func InitBLS() error {
 	var err error
 	var wg sync.WaitGroup

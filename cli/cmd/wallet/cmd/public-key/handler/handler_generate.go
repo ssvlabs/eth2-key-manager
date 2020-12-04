@@ -13,8 +13,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
-// Account generates a new wallet account at specific index and prints the account.
-func (h *PublicKey) Generate(cmd *cobra.Command, args []string) error {
+// Generate generates a new wallet account at specific index and prints the account.
+func (h *PublicKey) Generate(cmd *cobra.Command, _ []string) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")

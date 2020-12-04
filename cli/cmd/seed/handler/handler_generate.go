@@ -10,8 +10,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-// Seed generates a new key-vault seed and prints it.
-func (h *Seed) Generate(cmd *cobra.Command, args []string) error {
+// Generate generates a new key-vault seed and prints it.
+func (h *Seed) Generate(cmd *cobra.Command, _ []string) error {
 	var seed []byte
 
 	// Get mnemonic flag.

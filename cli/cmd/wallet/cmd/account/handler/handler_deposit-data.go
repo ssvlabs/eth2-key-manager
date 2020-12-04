@@ -14,8 +14,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
-// Account DepositData generates account deposit-data and prints it.
-func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
+// DepositData generates account deposit-data and prints it.
+func (h *Account) DepositData(cmd *cobra.Command, _ []string) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")

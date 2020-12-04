@@ -10,6 +10,7 @@ import (
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 )
 
+// InitCrypto initializes cryptography
 func InitCrypto() {
 	// !!!VERY IMPORTANT!!!
 	if err := core.InitBLS(); err != nil {
