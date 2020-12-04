@@ -3,8 +3,9 @@ package signer
 import (
 	"time"
 
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/prysmaticlabs/prysm/shared/timeutils"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // FarFutureMaxValidEpoch is the max epoch of fat future signing

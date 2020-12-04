@@ -19,7 +19,7 @@ func _byteArray(input string) []byte {
 }
 
 func storage() core.Storage {
-	return &dummy.DummyStorage{}
+	return &dummy.Storage{}
 }
 
 func TestAccountMarshaling(t *testing.T) {

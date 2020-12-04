@@ -3,16 +3,15 @@ package handler
 import (
 	"encoding/hex"
 
-	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
-
+	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
 // Account creates a new wallet account and prints the storage.

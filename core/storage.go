@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/google/uuid"
+
+	"github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
 // Storage represents storage behavior

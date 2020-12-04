@@ -3,8 +3,9 @@ package slashing_protection
 import (
 	"fmt"
 
-	"github.com/bloxapp/eth2-key-manager/core"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // NormalProtection implements normal protection logic

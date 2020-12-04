@@ -3,12 +3,12 @@ package handler
 import (
 	"encoding/hex"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 )
 
 // Account list wallet accounts and prints the accounts.

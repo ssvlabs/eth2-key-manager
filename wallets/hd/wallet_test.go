@@ -15,7 +15,7 @@ import (
 )
 
 func storage() core.Storage {
-	return &dummy.DummyStorage{}
+	return &dummy.Storage{}
 }
 
 func _byteArray(input string) []byte {
