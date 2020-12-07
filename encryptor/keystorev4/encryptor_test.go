@@ -2,12 +2,12 @@ package keystorev4
 
 import (
 	"encoding/json"
-	"errors"
 	"testing"
 
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
-
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
 )
 
 func TestEncrypt(t *testing.T) {

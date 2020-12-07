@@ -1,8 +1,6 @@
 package slashingprotection
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
@@ -44,7 +42,7 @@ func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attesta
 func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) (*core.ProposalSlashStatus, error) {
 	highest := protector.store.RetrieveHighestProposal(pubKey)
 	if highest == nil {
-		return nil, fmt.Errorf("highest proposal data is nil, can't determine if proposal is slashable")
+		return nil, errors.New("highest proposal data is nil, can't determine if proposal is slashable")
 	}
 
 	if block.Slot > highest.Slot {

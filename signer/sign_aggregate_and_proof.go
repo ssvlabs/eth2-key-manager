@@ -2,7 +2,8 @@ package signer
 
 import (
 	"encoding/hex"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"

@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
@@ -28,7 +27,7 @@ func GetNetworkFlagValue(c *cobra.Command) (core.Network, error) {
 
 	ret := core.NetworkFromString(networkValue)
 	if len(ret) == 0 {
-		return "", fmt.Errorf("unknown network")
+		return "", errors.New("unknown network")
 	}
 
 	return ret, nil

@@ -2,9 +2,9 @@ package nd
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // MarshalJSON is the custom JSON marshaler
