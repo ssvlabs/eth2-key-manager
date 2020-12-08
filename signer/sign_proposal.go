@@ -3,15 +3,14 @@ package signer
 import (
 	"encoding/hex"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-
+	"github.com/pkg/errors"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
-	"github.com/pkg/errors"
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
+// SignBeaconBlock signs the given beacon block
 func (signer *SimpleSigner) SignBeaconBlock(block *eth.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {

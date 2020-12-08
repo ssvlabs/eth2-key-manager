@@ -5,18 +5,14 @@ import (
 	"encoding/json"
 	"testing"
 
-	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
-
-	"github.com/bloxapp/eth2-key-manager/wallets"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/prysmaticlabs/prysm/shared/timeutils"
+	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/prysmaticlabs/prysm/shared/timeutils"
-
-	"github.com/stretchr/testify/require"
+	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
+	"github.com/bloxapp/eth2-key-manager/wallets"
 )
 
 func testBlock() *eth.BeaconBlock {
@@ -48,8 +44,7 @@ func TestBenchmarkBlockProposal(t *testing.T) {
 	require.NoError(t, err)
 	k, err := core.NewHDKeyFromPrivateKey(_byteArray(sk), "")
 	require.NoError(t, err)
-	acc, err := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
-	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer

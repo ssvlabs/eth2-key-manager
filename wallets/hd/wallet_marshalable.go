@@ -7,7 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
+// MarshalJSON is the custom JSON marshaler
+func (wallet *Wallet) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
 	data["id"] = wallet.id
@@ -17,7 +18,8 @@ func (wallet *HDWallet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
-func (wallet *HDWallet) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON is the custom JSON unmarshaler
+func (wallet *Wallet) UnmarshalJSON(data []byte) error {
 	// parse
 	var v map[string]interface{}
 	if err := json.Unmarshal(data, &v); err != nil {

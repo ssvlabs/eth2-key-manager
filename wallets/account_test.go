@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/stores/dummy"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/dummy"
 )
 
 func _byteArray(input string) []byte {
@@ -19,7 +19,7 @@ func _byteArray(input string) []byte {
 }
 
 func storage() core.Storage {
-	return &dummy.DummyStorage{}
+	return &dummy.Storage{}
 }
 
 func TestAccountMarshaling(t *testing.T) {
@@ -27,7 +27,7 @@ func TestAccountMarshaling(t *testing.T) {
 		id       uuid.UUID
 		testName string
 		//accountType core.AccountType
-		parentWalletId uuid.UUID
+		parentWalletID uuid.UUID
 		name           string
 		seed           []byte
 		accountIndex   string
@@ -36,7 +36,7 @@ func TestAccountMarshaling(t *testing.T) {
 			testName: "simple account",
 			id:       uuid.New(),
 			//accountType:core.ValidatorAccount,
-			parentWalletId: uuid.New(),
+			parentWalletID: uuid.New(),
 			name:           "account1",
 			seed:           _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			accountIndex:   "0",

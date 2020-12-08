@@ -4,21 +4,18 @@ import (
 	"encoding/hex"
 	"testing"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/wallets"
-
 	"github.com/herumi/bls-eth-go-binary/bls"
-
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-
-	"github.com/bloxapp/eth2-key-manager/core"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/prysmaticlabs/prysm/shared/timeutils"
-
 	"github.com/pkg/errors"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+	"github.com/prysmaticlabs/prysm/shared/timeutils"
 	"github.com/stretchr/testify/require"
 	util "github.com/wealdtech/go-eth2-util"
+
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/core"
+	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
+	"github.com/bloxapp/eth2-key-manager/wallets"
 )
 
 func _byteArray(input string) []byte {
@@ -55,7 +52,7 @@ func TestReferenceAttestation(t *testing.T) {
 	require.NoError(t, err)
 	k, err := core.NewHDKeyFromPrivateKey(sk, "")
 	require.NoError(t, err)
-	acc, err := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
 	require.NoError(t, err)
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 

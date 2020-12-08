@@ -1,4 +1,4 @@
-package public_key
+package publickey
 
 import (
 	"github.com/spf13/cobra"
@@ -6,9 +6,9 @@ import (
 	walletcmd "github.com/bloxapp/eth2-key-manager/cli/cmd/wallet"
 )
 
-// Command represents the wallet public-key related command.
+// Command represents the wallet publickey related command.
 var Command = &cobra.Command{
-	Use:   "public-key",
+	Use:   "publickey",
 	Short: "Manage wallet public-keys",
 }
 

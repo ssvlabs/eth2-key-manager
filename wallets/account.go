@@ -4,12 +4,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/eth1_deposit"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/eth2-key-manager/core"
+	eth1deposit "github.com/bloxapp/eth2-key-manager/eth1_deposit"
 )
 
+// HDAccount represents HD account
 type HDAccount struct {
 	name string
 	// holds the base path from which the account was derived
@@ -21,6 +23,7 @@ type HDAccount struct {
 	context          *core.WalletContext
 }
 
+// MarshalJSON is the custom JSON marshaler
 func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
@@ -32,6 +35,7 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
+// UnmarshalJSON is the custom JSON unmarshaler
 func (account *HDAccount) UnmarshalJSON(data []byte) error {
 	// parse
 	var v map[string]interface{}
@@ -97,13 +101,14 @@ func (account *HDAccount) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// NewValidatorAccount is the constructor of HDAccount
 func NewValidatorAccount(
 	name string,
 	validationKey *core.HDKey,
 	withdrawalPubKey []byte,
 	basePath string,
 	context *core.WalletContext,
-) (*HDAccount, error) {
+) *HDAccount {
 	return &HDAccount{
 		name:             name,
 		id:               uuid.New(),
@@ -111,7 +116,7 @@ func NewValidatorAccount(
 		withdrawalPubKey: withdrawalPubKey,
 		basePath:         basePath,
 		context:          context,
-	}, nil
+	}
 }
 
 // ID provides the ID for the account.
@@ -139,18 +144,18 @@ func (account *HDAccount) WithdrawalPublicKey() []byte {
 	return account.withdrawalPubKey
 }
 
-// Sign signs data with the account.
+// ValidationKeySign signs data with the account.
 func (account *HDAccount) ValidationKeySign(data []byte) ([]byte, error) {
 	return account.validationKey.Sign(data)
 }
 
-// Get Deposit Data
+// GetDepositData returns deposit data
 func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
-	depositData, root, err := eth1_deposit.DepositData(
+	depositData, root, err := eth1deposit.DepositData(
 		account.validationKey,
 		account.withdrawalPubKey,
 		account.context.Storage.Network(),
-		eth1_deposit.MaxEffectiveBalanceInGwei,
+		eth1deposit.MaxEffectiveBalanceInGwei,
 	)
 	if err != nil {
 		return nil, err
@@ -165,6 +170,7 @@ func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
 	}, nil
 }
 
+// SetContext is the context setter
 func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx
 }

@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Mnemonic generates a new key-vault mnemonic and prints it.
-func (h *Mnemonic) Generate(cmd *cobra.Command, args []string) error {
+// Generate generates a new key-vault mnemonic and prints it.
+func (h *Mnemonic) Generate(_ *cobra.Command, _ []string) error {
 	// Generate new entropy
 	entropy, err := core.GenerateNewEntropy()
 	if err != nil {

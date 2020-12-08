@@ -1,12 +1,13 @@
-package in_memory
+package inmemory
 
 import (
-	"github.com/bloxapp/eth2-key-manager/core"
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
-	"github.com/bloxapp/eth2-key-manager/wallets"
 	uuid "github.com/google/uuid"
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
+	"github.com/bloxapp/eth2-key-manager/core"
+	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+	"github.com/bloxapp/eth2-key-manager/wallets"
 )
 
 // InMemStore implements core.Storage using in-memory store.
@@ -53,7 +54,7 @@ func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
 	return nil
 }
 
-// will return nil,nil if no wallet was found
+// OpenWallet returns nil,nil if no wallet was found
 func (store *InMemStore) OpenWallet() (core.Wallet, error) {
 	if store.wallet != nil {
 		store.wallet.SetContext(store.freshContext())
@@ -62,7 +63,7 @@ func (store *InMemStore) OpenWallet() (core.Wallet, error) {
 	return nil, errors.New("wallet not found")
 }
 
-// will return an empty array for no accounts
+// ListAccounts returns an empty array for no accounts
 func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
 	w, err := store.OpenWallet()
 	if err != nil {
@@ -72,29 +73,31 @@ func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
 	return w.Accounts(), nil
 }
 
+// SaveAccount saves the given account
 func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
 	store.accounts[account.ID().String()] = account.(*wallets.HDAccount)
 	return nil
 }
 
-func (store *InMemStore) DeleteAccount(accountId uuid.UUID) error {
-	_, exists := store.accounts[accountId.String()]
+// DeleteAccount deletes account by its ID
+func (store *InMemStore) DeleteAccount(accountID uuid.UUID) error {
+	_, exists := store.accounts[accountID.String()]
 	if !exists {
 		return errors.New("account not found")
 	}
-	delete(store.accounts, accountId.String())
+	delete(store.accounts, accountID.String())
 	return nil
 }
 
-// will return nil,nil if no account was found
-func (store *InMemStore) OpenAccount(accountId uuid.UUID) (core.ValidatorAccount, error) {
-	if val := store.accounts[accountId.String()]; val != nil {
+// OpenAccount returns nil,nil if no account was found
+func (store *InMemStore) OpenAccount(accountID uuid.UUID) (core.ValidatorAccount, error) {
+	if val := store.accounts[accountID.String()]; val != nil {
 		return val, nil
-	} else {
-		return nil, nil
 	}
+	return nil, nil
 }
 
+// SetEncryptor is the encryptor setter
 func (store *InMemStore) SetEncryptor(encryptor encryptor2.Encryptor, password []byte) {
 	store.encryptor = encryptor
 	store.encryptionPassword = password

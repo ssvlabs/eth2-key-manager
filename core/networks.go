@@ -48,11 +48,12 @@ func (n Network) DepositContractAddress() string {
 	}
 }
 
-// ForkVersion returns the fork version of the network.
+// FullPath returns the full path of the network.
 func (n Network) FullPath(relativePath string) string {
 	return BaseEIP2334Path + relativePath
 }
 
+// MinGenesisTime returns min genesis time value
 func (n Network) MinGenesisTime() uint64 {
 	switch n {
 	case PyrmontNetwork:
@@ -65,18 +66,22 @@ func (n Network) MinGenesisTime() uint64 {
 	}
 }
 
+// SlotDurationSec returns slot duration
 func (n Network) SlotDurationSec() time.Duration {
 	return 12 * time.Second
 }
 
+// SlotsPerEpoch returns number of slots per one epoch
 func (n Network) SlotsPerEpoch() uint64 {
 	return 32
 }
 
+// EstimatedCurrentSlot returns the estimation of the current slot
 func (n Network) EstimatedCurrentSlot() uint64 {
 	return n.EstimatedSlotAtTime(timeutils.Now().Unix())
 }
 
+// EstimatedSlotAtTime estimates slot at the given time
 func (n Network) EstimatedSlotAtTime(time int64) uint64 {
 	genesis := int64(n.MinGenesisTime())
 	if time < genesis {
@@ -85,11 +90,13 @@ func (n Network) EstimatedSlotAtTime(time int64) uint64 {
 	return uint64(time-genesis) / uint64(n.SlotDurationSec().Seconds())
 }
 
+// EstimatedCurrentEpoch estimates the current epoch
 // https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/beacon-chain.md#compute_start_slot_at_epoch
 func (n Network) EstimatedCurrentEpoch() uint64 {
 	return n.EstimatedEpochAtSlot(n.EstimatedCurrentSlot())
 }
 
+// EstimatedEpochAtSlot estimates epoch at the given slot
 func (n Network) EstimatedEpochAtSlot(slot uint64) uint64 {
 	return slot / n.SlotsPerEpoch()
 }

@@ -33,7 +33,7 @@ type Storage interface {
 	// */
 	SaveAccount(account ValidatorAccount) error
 	// will return nil,nil if no account was found
-	OpenAccount(accountId uuid.UUID) (ValidatorAccount, error)
+	OpenAccount(accountID uuid.UUID) (ValidatorAccount, error)
 
 	// could also bee set to nil
 	SetEncryptor(encryptor types.Encryptor, password []byte)

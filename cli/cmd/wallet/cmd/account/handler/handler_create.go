@@ -2,20 +2,20 @@ package handler
 
 import (
 	"encoding/hex"
+	"fmt"
 
-	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
-
+	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
-// Account creates a new wallet account and prints the storage.
+// Create creates a new wallet account and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	err := core.InitBLS()
 	if err != nil {
@@ -81,6 +81,8 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			return errors.Errorf("highest proposals length when the accumulate flag is true need to be indexFlagValue")
 		}
 	} else {
+		fmt.Println("highestSources", highestSources)
+		fmt.Println("args", args)
 		if len(highestSources) != 1 {
 			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
 		}
@@ -93,7 +95,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	}
 
 	// TODO get rid of network
-	store := in_memory.NewInMemStore(network)
+	store := inmemory.NewInMemStore(network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
@@ -125,7 +127,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 			// add minimal proposal protection data
 			minimalProposal := &eth.BeaconBlock{
-				Slot: highestProposals[i],
+				Slot: uint64(highestProposals[i]),
 			}
 			if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
 				return errors.Wrap(err, "failed to set validator minimal slashing protection")
@@ -148,7 +150,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 		// add minimal proposal protection data
 		minimalProposal := &eth.BeaconBlock{
-			Slot: highestProposals[0],
+			Slot: uint64(highestProposals[0]),
 		}
 		if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
 			return errors.Wrap(err, "failed to set validator minimal slashing protection")

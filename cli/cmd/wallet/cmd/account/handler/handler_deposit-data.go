@@ -11,11 +11,11 @@ import (
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
-// Account DepositData generates account deposit-data and prints it.
-func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
+// DepositData generates account deposit-data and prints it.
+func (h *Account) DepositData(cmd *cobra.Command, _ []string) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
@@ -51,7 +51,7 @@ func (h *Account) DepositData(cmd *cobra.Command, args []string) error {
 	}
 
 	// TODO get rid of network
-	store := in_memory.NewInMemStore(network)
+	store := inmemory.NewInMemStore(network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 

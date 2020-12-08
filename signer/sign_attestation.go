@@ -9,6 +9,7 @@ import (
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 )
 
+// SignBeaconAttestation signs beacon attestation data
 func (signer *SimpleSigner) SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {

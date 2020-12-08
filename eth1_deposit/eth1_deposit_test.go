@@ -1,4 +1,4 @@
-package eth1_deposit
+package eth1deposit
 
 import (
 	"encoding/hex"

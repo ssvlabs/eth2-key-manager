@@ -8,7 +8,7 @@ import (
 
 // Flag names.
 const (
-	publicKeyFlag = "public-key"
+	publicKeyFlag = "publickey"
 )
 
 // AddPublicKeyFlag adds the public key flag to the command

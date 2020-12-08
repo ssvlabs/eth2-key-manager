@@ -1,4 +1,4 @@
-package public_key_test
+package publickey_test
 
 import (
 	"bytes"
@@ -11,12 +11,12 @@ import (
 )
 
 func TestPublicKeyGenerate(t *testing.T) {
-	t.Run("Successfully generate public-key (pyrmont)", func(t *testing.T) {
+	t.Run("Successfully generate publickey (pyrmont)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
 			"wallet",
-			"public-key",
+			"publickey",
 			"generate",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=4",
@@ -28,12 +28,12 @@ func TestPublicKeyGenerate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Successfully generate public-key (mainnet)", func(t *testing.T) {
+	t.Run("Successfully generate publickey (mainnet)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
 			"wallet",
-			"public-key",
+			"publickey",
 			"generate",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=4",
@@ -45,12 +45,12 @@ func TestPublicKeyGenerate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Fail to generate public-key with negative index", func(t *testing.T) {
+	t.Run("Fail to generate publickey with negative index", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
 			"wallet",
-			"public-key",
+			"publickey",
 			"generate",
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=-1",

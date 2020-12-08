@@ -1,29 +1,21 @@
-package in_memory
+package inmemory
 
 import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"testing"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
-	"github.com/bloxapp/eth2-key-manager/wallets"
-	"github.com/bloxapp/eth2-key-manager/wallets/nd"
-
-	"github.com/bloxapp/eth2-key-manager/wallets/hd"
+	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/stretchr/testify/require"
+	"github.com/bloxapp/eth2-key-manager/wallets"
+	"github.com/bloxapp/eth2-key-manager/wallets/hd"
+	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 )
 
-func _bigIntFromSkHex(input string) *big.Int {
-	res, _ := new(big.Int).SetString(input, 16)
-	return res
-}
-
-func TestMarshalingNDWallet(t *testing.T) {
+func TestMarshalingWallet(t *testing.T) {
 	err := core.InitBLS()
 	require.NoError(t, err)
 
@@ -31,10 +23,10 @@ func TestMarshalingNDWallet(t *testing.T) {
 
 	// setup wallet
 	walletCtx := &core.WalletContext{Storage: store}
-	wallet := nd.NewNDWallet(walletCtx)
+	wallet := nd.NewWallet(walletCtx)
 	k, err := core.NewHDKeyFromPrivateKey(_byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"), "")
 	require.NoError(t, err)
-	account, err := wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
+	account := wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 	require.NoError(t, err)
 	wallet.AddValidatorAccount(account)
 	err = store.SaveWallet(wallet)
@@ -70,7 +62,7 @@ func TestMarshaling(t *testing.T) {
 	store := NewInMemStore(core.MainNetwork)
 
 	// wallet
-	wallet := hd.NewHDWallet(&core.WalletContext{Storage: store})
+	wallet := hd.NewWallet(&core.WalletContext{Storage: store})
 	err = store.SaveWallet(wallet)
 	require.NoError(t, err)
 

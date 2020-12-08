@@ -31,6 +31,7 @@ func NewHDKeyFromPrivateKey(priv []byte, path string) (*HDKey, error) {
 	}, nil
 }
 
+// MarshalJSON is the custom JSON marshaler
 func (key *HDKey) MarshalJSON() ([]byte, error) {
 	data := make(map[string]interface{})
 
@@ -41,6 +42,7 @@ func (key *HDKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
+// UnmarshalJSON is the custom JSON unmarshaler
 func (key *HDKey) UnmarshalJSON(data []byte) error {
 	// parse
 	var v map[string]interface{}
@@ -76,14 +78,17 @@ func (key *HDKey) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// PublicKey returns the public key
 func (key *HDKey) PublicKey() *bls.PublicKey {
 	return key.privKey.GetPublicKey()
 }
 
+// Sign signs the given data
 func (key *HDKey) Sign(data []byte) ([]byte, error) {
 	return key.privKey.SignByte(data).Serialize(), nil
 }
 
+// Path returns path
 func (key *HDKey) Path() string {
 	return key.path
 }

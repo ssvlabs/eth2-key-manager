@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/herumi/bls-eth-go-binary/bls"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
