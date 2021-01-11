@@ -2,8 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"fmt"
-
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/spf13/cobra"
@@ -81,8 +79,6 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 			return errors.Errorf("highest proposals length when the accumulate flag is true need to be indexFlagValue")
 		}
 	} else {
-		fmt.Println("highestSources", highestSources)
-		fmt.Println("args", args)
 		if len(highestSources) != 1 {
 			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
 		}
