@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/hex"
+
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/spf13/cobra"
