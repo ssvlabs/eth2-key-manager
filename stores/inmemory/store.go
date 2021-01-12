@@ -1,6 +1,8 @@
 package inmemory
 
 import (
+	"sync"
+
 	uuid "github.com/google/uuid"
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
@@ -12,11 +14,20 @@ import (
 
 // InMemStore implements core.Storage using in-memory store.
 type InMemStore struct {
-	network            core.Network
-	wallet             core.Wallet
-	accounts           map[string]*wallets.HDAccount
-	highestAttestation map[string]*eth.AttestationData
-	highestProposal    map[string]*eth.BeaconBlock
+	network core.Network
+
+	walletLock sync.Mutex
+	wallet     core.Wallet
+
+	accountsLock sync.Mutex
+	accounts     map[string]*wallets.HDAccount
+
+	highestAttestationLock sync.Mutex
+	highestAttestation     map[string]*eth.AttestationData
+
+	highestProposalLock sync.Mutex
+	highestProposal     map[string]*eth.BeaconBlock
+
 	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
 }
@@ -50,7 +61,9 @@ func (store *InMemStore) Network() core.Network {
 
 // SaveWallet implements core.Storage interface.
 func (store *InMemStore) SaveWallet(wallet core.Wallet) error {
+	store.walletLock.Lock()
 	store.wallet = wallet
+	store.walletLock.Unlock()
 	return nil
 }
 
@@ -75,12 +88,17 @@ func (store *InMemStore) ListAccounts() ([]core.ValidatorAccount, error) {
 
 // SaveAccount saves the given account
 func (store *InMemStore) SaveAccount(account core.ValidatorAccount) error {
+	store.accountsLock.Lock()
 	store.accounts[account.ID().String()] = account.(*wallets.HDAccount)
+	store.accountsLock.Unlock()
 	return nil
 }
 
 // DeleteAccount deletes account by its ID
 func (store *InMemStore) DeleteAccount(accountID uuid.UUID) error {
+	store.accountsLock.Lock()
+	defer store.accountsLock.Unlock()
+
 	_, exists := store.accounts[accountID.String()]
 	if !exists {
 		return errors.New("account not found")
@@ -91,10 +109,10 @@ func (store *InMemStore) DeleteAccount(accountID uuid.UUID) error {
 
 // OpenAccount returns nil,nil if no account was found
 func (store *InMemStore) OpenAccount(accountID uuid.UUID) (core.ValidatorAccount, error) {
-	if val := store.accounts[accountID.String()]; val != nil {
-		return val, nil
-	}
-	return nil, nil
+	store.accountsLock.Lock()
+	val := store.accounts[accountID.String()]
+	store.accountsLock.Unlock()
+	return val, nil
 }
 
 // SetEncryptor is the encryptor setter
