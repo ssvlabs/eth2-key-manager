@@ -32,12 +32,12 @@ func EntropyToMnemonic(entropy []byte) (string, error) {
 // and the password as salt.
 // Please see https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 func SeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
-	wordlists := bip39.GetWordList()
+	wordlist := bip39.GetWordList()
 
 	normalizedMnemonic := ""
 	for _, mnemonicWord := range strings.Fields(mnemonic) {
 		i := -1
-		for _, word := range wordlists {
+		for _, word := range wordlist {
 			i = strings.Index(word, mnemonicWord)
 			if i == 0 {
 				normalizedMnemonic += word + " "
