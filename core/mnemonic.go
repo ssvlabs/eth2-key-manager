@@ -1,6 +1,12 @@
 package core
 
-import "github.com/tyler-smith/go-bip39"
+import (
+	"fmt"
+	"sort"
+	"strings"
+
+	"github.com/tyler-smith/go-bip39"
+)
 
 // GenerateNewEntropy generates a new entropy
 func GenerateNewEntropy() ([]byte, error) {
@@ -27,7 +33,28 @@ func EntropyToMnemonic(entropy []byte) (string, error) {
 // and the password as salt.
 // Please see https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 func SeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
-	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, password)
+	wordlists := bip39.GetWordList()
+	sort.Strings(wordlists)
+
+	normalizedMnemonic := ""
+	for _, mnemonicWord := range strings.Fields(mnemonic) {
+		i := -1
+		for _, word := range wordlists {
+			i = strings.Index(word, mnemonicWord)
+			if i == 0 {
+				normalizedMnemonic += word + " "
+				break
+			}
+		}
+		if i != 0 {
+			return nil, fmt.Errorf("word %s was not found in wordlist", mnemonicWord)
+		}
+	}
+	normalizedMnemonic = strings.Trim(normalizedMnemonic, " ")
+	fmt.Println(normalizedMnemonic)
+	fmt.Println(mnemonic)
+
+	seed, err := bip39.NewSeedWithErrorChecking(normalizedMnemonic, password)
 	if err != nil {
 		return nil, err
 	}
