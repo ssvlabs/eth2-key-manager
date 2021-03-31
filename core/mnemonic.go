@@ -40,7 +40,11 @@ func SeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
 		for _, word := range wordlist {
 			i = strings.Index(word, mnemonicWord)
 			if i == 0 {
-				normalizedMnemonic += word + " "
+				nextWord := mnemonicWord
+				if len(mnemonicWord) == 4 {
+					nextWord = word
+				}
+				normalizedMnemonic += nextWord + " "
 				break
 			}
 		}
@@ -49,7 +53,6 @@ func SeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
 		}
 	}
 	normalizedMnemonic = strings.Trim(normalizedMnemonic, " ")
-
 	seed, err := bip39.NewSeedWithErrorChecking(normalizedMnemonic, password)
 	if err != nil {
 		return nil, err
