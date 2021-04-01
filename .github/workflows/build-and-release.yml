@@ -24,7 +24,7 @@ jobs:
           GH_TOKEN: ${{ secrets.github_token }}
 
       - name: Build cli binary file
-        run: CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags \"-static -lm\" " -o releases/linux-keyvault-cli ./cli
+        run: CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags -static" -o releases/linux-keyvault-cli ./cli
         env:
           GH_TOKEN: ${{ secrets.github_token }}
 
