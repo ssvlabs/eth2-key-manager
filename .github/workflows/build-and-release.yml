@@ -4,12 +4,12 @@ on: push
 
 jobs:
   release:
-      runs-on: ${{ matrix.os }}
-      # runs-on: [self-hosted]
+    runs-on: ${{ matrix.os }}
+    # runs-on: [self-hosted]
 
-      strategy:
-        matrix:
-          os: [macos-latest, ubuntu-latest]
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
 
     steps:
       - name: Check out Git repository
