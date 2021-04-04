@@ -47,5 +47,5 @@ jobs:
         with:
           draft: true
           allowUpdates: true
-          artifacts: "release/"
+          artifacts: "release/*"
           token: ${{ secrets.GITHUB_TOKEN }}
