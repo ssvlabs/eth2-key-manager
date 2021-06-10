@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccountCreate(t *testing.T) {
-	t.Run("Successfully create account at specific index and return as object (pyrmont)", func(t *testing.T) {
+	t.Run("Successfully create account at specific index and return as object (prater)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -24,7 +24,7 @@ func TestAccountCreate(t *testing.T) {
 			"--highest-source=1",
 			"--highest-target=2",
 			"--highest-proposal=2",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -86,7 +86,7 @@ func TestAccountCreate(t *testing.T) {
 			"--highest-source=1",
 			"--highest-target=2",
 			"--highest-proposal=2",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -108,7 +108,7 @@ func TestAccountCreate(t *testing.T) {
 			"--highest-source=1,2,3,4,5,6",
 			"--highest-target=2,3,4,5,6,7",
 			"--highest-proposal=2,3,4,5,6,7",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -129,7 +129,7 @@ func TestAccountCreate(t *testing.T) {
 			"--highest-source=1,2,3,4,5,6",
 			"--highest-target=2,3,4,5,6,7",
 			"--highest-proposal=2,3,4,5,6,7",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -146,7 +146,7 @@ func TestAccountCreate(t *testing.T) {
 			"create",
 			"--seed=01213",
 			"--index=1",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
@@ -164,7 +164,7 @@ func TestAccountCreate(t *testing.T) {
 			"--index=1",
 			"--highest-source=1,2,3,4,5",
 			"--highest-target=2,3,4,5,6",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
@@ -183,7 +183,7 @@ func TestAccountCreate(t *testing.T) {
 			"--highest-source=1",
 			"--highest-target=2",
 			"--highest-proposal=2,3,4,5,6,7",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
