@@ -22,7 +22,7 @@ func TestValidatorCreate(t *testing.T) {
 	walletPK := "15c20889f519082fccd95b385bb304bb29bf531a58afe2a67c89ebf802a23d1b"
 	walletAddr := "7015514B3da332d95EE1B94d32ADce4cAa0bAa28"
 
-	t.Run("successfully create one validator for one seed (pyrmont)", func(t *testing.T) {
+	t.Run("successfully create one validator for one seed (prater)", func(t *testing.T) {
 		var getBalanceCalled int
 		var getTransactionCountCalled int
 		var gasPriceCalled int
@@ -109,7 +109,7 @@ func TestValidatorCreate(t *testing.T) {
 			"--validators-per-seed", "1",
 			"--seeds-count", "1",
 			"--web3-addr", srv.URL,
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.NoError(t, err)
@@ -260,7 +260,7 @@ func TestValidatorCreate(t *testing.T) {
 			"--validators-per-seed", "1",
 			"--seeds-count", "1",
 			"--web3-addr", srv.URL,
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
@@ -283,7 +283,7 @@ func TestValidatorCreate(t *testing.T) {
 			"--validators-per-seed", "1",
 			"--seeds-count", "1",
 			"--web3-addr", "http://test.test",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)

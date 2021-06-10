@@ -51,7 +51,7 @@ func TestAccountMarshaling(t *testing.T) {
 			storage := storage()
 
 			// create key and account
-			masterKey, err := core.MasterKeyFromSeed(test.seed, core.PyrmontNetwork)
+			masterKey, err := core.MasterKeyFromSeed(test.seed, core.PraterNetwork)
 			require.NoError(t, err)
 			validationKey, err := masterKey.Derive(fmt.Sprintf("/%s/0/0", test.accountIndex))
 			require.NoError(t, err)

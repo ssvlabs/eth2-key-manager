@@ -48,7 +48,7 @@ func TestBenchmarkBlockProposal(t *testing.T) {
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer
-	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PyrmontNetwork)
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PraterNetwork)
 
 	// decode block
 	blk := &eth.BeaconBlock{}
@@ -119,7 +119,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 
 func TestFarFutureProposalSignature(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	network := core.PyrmontNetwork
+	network := core.PraterNetwork
 	maxValidSlot := network.EstimatedSlotAtTime(timeutils.Now().Unix() + FarFutureMaxValidEpoch)
 
 	t.Run("max valid source", func(tt *testing.T) {

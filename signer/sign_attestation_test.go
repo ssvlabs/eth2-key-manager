@@ -57,7 +57,7 @@ func TestReferenceAttestation(t *testing.T) {
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
 	// setup signer
-	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PyrmontNetwork)
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PraterNetwork)
 
 	// decode attestation
 	attData := &eth.AttestationData{}
@@ -502,7 +502,7 @@ func TestAttestationSignatures(t *testing.T) {
 
 func TestFarFutureAttestationSignature(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	network := core.PyrmontNetwork
+	network := core.PraterNetwork
 	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(timeutils.Now().Unix() + FarFutureMaxValidEpoch))
 
 	t.Run("max valid source", func(tt *testing.T) {

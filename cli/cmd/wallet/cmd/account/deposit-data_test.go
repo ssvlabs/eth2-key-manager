@@ -21,7 +21,7 @@ func TestAccountDepositData(t *testing.T) {
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=0",
 			"--publickey=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
@@ -39,7 +39,7 @@ func TestAccountDepositData(t *testing.T) {
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=0",
 			"--publickey=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"--network=pyrmont",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()

@@ -29,7 +29,7 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewSimpleSigner(wallet, noProtection, core.PyrmontNetwork), nil
+	return NewSimpleSigner(wallet, noProtection, core.PraterNetwork), nil
 }
 
 func setupWithSlashingProtection(seed []byte, setLatestAttestation bool, setLatestProposal bool) (ValidatorSigner, error) {
@@ -67,7 +67,7 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool, setLate
 		})
 	}
 
-	return NewSimpleSigner(wallet, protector, core.PyrmontNetwork), nil
+	return NewSimpleSigner(wallet, protector, core.PraterNetwork), nil
 }
 
 func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
@@ -191,7 +191,7 @@ func TestAggregateProofReferenceSignatures(t *testing.T) {
 
 	// setup signer
 	protector := prot.NewNormalProtection(store)
-	signer := NewSimpleSigner(wallet, protector, core.PyrmontNetwork)
+	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
 	sig, err := signer.SignSlot(slot, domain, pk)
 	require.NoError(t, err)
@@ -222,7 +222,7 @@ func TestAggregateAndProofReferenceSignatures(t *testing.T) {
 
 	// setup signer
 	protector := prot.NewNormalProtection(store)
-	signer := NewSimpleSigner(wallet, protector, core.PyrmontNetwork)
+	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
 	// decode aggregated att proof
 	aggAndProof := &eth.AggregateAttestationAndProof{}
@@ -256,7 +256,7 @@ func TestRandaoReferenceSignatures(t *testing.T) {
 
 	// setup signer
 	protector := prot.NewNormalProtection(store)
-	signer := NewSimpleSigner(wallet, protector, core.PyrmontNetwork)
+	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
 	// decode epoch
 	epoch := binary.LittleEndian.Uint64(_byteArray("0000000000000000000000000000000000000000000000000000000000000000"))

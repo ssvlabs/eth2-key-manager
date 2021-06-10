@@ -81,7 +81,7 @@ func TestMainetDepositData(t *testing.T) {
 
 // tested against eth2.0-deposit-cli V1.1.0
 // Mnemonic: sphere attract wide clown fire balcony dance maple sphere seat design dentist eye orbit diet apart noise cinnamon wealth magic inject witness dress divorce
-func TestPyrmontDepositData(t *testing.T) {
+func TestpraterDepositData(t *testing.T) {
 	tests := []struct {
 		testname                      string
 		validatorPrivKey              []byte
@@ -110,7 +110,7 @@ func TestPyrmontDepositData(t *testing.T) {
 			depositData, root, err := DepositData(
 				val,
 				test.withdrawalPubKey,
-				core.PyrmontNetwork,
+				core.PraterNetwork,
 				MaxEffectiveBalanceInGwei,
 			)
 			require.NoError(t, err)
