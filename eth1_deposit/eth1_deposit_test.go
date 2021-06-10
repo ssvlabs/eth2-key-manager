@@ -110,7 +110,7 @@ func TestPyrmontDepositData(t *testing.T) {
 			depositData, root, err := DepositData(
 				val,
 				test.withdrawalPubKey,
-				core.PyrmontNetwork,
+				core.PraterNetwork,
 				MaxEffectiveBalanceInGwei,
 			)
 			require.NoError(t, err)

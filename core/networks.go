@@ -13,8 +13,8 @@ type Network string
 // NetworkFromString returns network from the given string value
 func NetworkFromString(n string) Network {
 	switch n {
-	case string(PyrmontNetwork):
-		return PyrmontNetwork
+	case string(PraterNetwork):
+		return PraterNetwork
 	case string(MainNetwork):
 		return MainNetwork
 	default:
@@ -25,8 +25,8 @@ func NetworkFromString(n string) Network {
 // ForkVersion returns the fork version of the network.
 func (n Network) ForkVersion() []byte {
 	switch n {
-	case PyrmontNetwork:
-		return []byte{0, 0, 32, 9}
+	case PraterNetwork:
+		return []byte{0x00, 0x00, 0x10, 0x20}
 	case MainNetwork:
 		return []byte{0, 0, 0, 0}
 	default:
@@ -38,8 +38,8 @@ func (n Network) ForkVersion() []byte {
 // DepositContractAddress returns the deposit contract address of the network.
 func (n Network) DepositContractAddress() string {
 	switch n {
-	case PyrmontNetwork:
-		return "0x8c5fecdC472E27Bc447696F431E425D02dd46a8c"
+	case PraterNetwork:
+		return "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b"
 	case MainNetwork:
 		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 	default:
@@ -56,8 +56,8 @@ func (n Network) FullPath(relativePath string) string {
 // MinGenesisTime returns min genesis time value
 func (n Network) MinGenesisTime() uint64 {
 	switch n {
-	case PyrmontNetwork:
-		return 1605700807
+	case PraterNetwork:
+		return 1614588812
 	case MainNetwork:
 		return 1606824023
 	default:
@@ -103,8 +103,8 @@ func (n Network) EstimatedEpochAtSlot(slot uint64) uint64 {
 
 // Available networks.
 const (
-	// PyrmontNetwork represents the Pyrmont test network.
-	PyrmontNetwork Network = "pyrmont"
+	// PraterNetwork represents the Prater test network.
+	PraterNetwork Network = "prater"
 
 	// MainNetwork represents the main network.
 	MainNetwork Network = "mainnet"
