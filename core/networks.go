@@ -57,7 +57,7 @@ func (n Network) FullPath(relativePath string) string {
 func (n Network) MinGenesisTime() uint64 {
 	switch n {
 	case PraterNetwork:
-		return 1614588812
+		return 1616508000
 	case MainNetwork:
 		return 1606824023
 	default:
