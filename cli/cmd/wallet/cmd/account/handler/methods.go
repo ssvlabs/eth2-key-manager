@@ -157,10 +157,15 @@ func GenerateOneAccount(wallet core.Wallet, store *inmemory.InMemStore, index in
 		}
 	}
 
+	highestIndex := index
+	if seedless == true || accountFlags.accumulate != true {
+		highestIndex = 0
+	}
+
 	// add minimal attestation protection data
 	minimalAtt := &eth.AttestationData{
-		Source: &eth.Checkpoint{Epoch: uint64(accountFlags.highestSources[index])},
-		Target: &eth.Checkpoint{Epoch: uint64(accountFlags.highestTargets[index])},
+		Source: &eth.Checkpoint{Epoch: uint64(accountFlags.highestSources[highestIndex])},
+		Target: &eth.Checkpoint{Epoch: uint64(accountFlags.highestTargets[highestIndex])},
 	}
 	if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 		return errors.Wrap(err, "failed to set validator minimal slashing protection")
@@ -168,7 +173,7 @@ func GenerateOneAccount(wallet core.Wallet, store *inmemory.InMemStore, index in
 
 	// add minimal proposal protection data
 	minimalProposal := &eth.BeaconBlock{
-		Slot: uint64(accountFlags.highestProposals[index]),
+		Slot: uint64(accountFlags.highestProposals[highestIndex]),
 	}
 	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
 		return errors.Wrap(err, "failed to set validator minimal slashing protection")
@@ -202,7 +207,7 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 			}
 		}
 	} else {
-		err := GenerateOneAccount(wallet, store, 0, accountFlags, seedless)
+		err := GenerateOneAccount(wallet, store, accountFlags.index, accountFlags, seedless)
 		if err != nil {
 			return err
 		}
