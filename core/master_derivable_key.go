@@ -22,7 +22,7 @@ const (
 // MasterDerivableKey is not intended to be used a signing key, just as a medium for managing keys
 type MasterDerivableKey struct {
 	seed       []byte
-	privateKey string
+	privateKey []byte
 	network    Network
 }
 
@@ -34,12 +34,12 @@ func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error
 	}
 	return &MasterDerivableKey{
 		seed:       seed,
-		privateKey: "",
+		privateKey: nil,
 		network:    network,
 	}, nil
 }
 
-func MasterKeyFromPrivateKey(privateKey string, network Network) (*MasterDerivableKey, error) {
+func MasterKeyFromPrivateKey(privateKey []byte, network Network) (*MasterDerivableKey, error) {
 	if len(privateKey) == 0 {
 		return nil, errors.New("private key is required")
 	}
@@ -61,11 +61,7 @@ func (master *MasterDerivableKey) Derive(relativePath string, seedless bool) (*H
 	var err error
 
 	if seedless == true {
-		privateKey, err := hex.DecodeString(master.privateKey)
-		if err != nil {
-			return nil, err
-		}
-		key, err = e2types.BLSPrivateKeyFromBytes(privateKey)
+		key, err = e2types.BLSPrivateKeyFromBytes(master.privateKey)
 		if err != nil {
 			return nil, err
 		}

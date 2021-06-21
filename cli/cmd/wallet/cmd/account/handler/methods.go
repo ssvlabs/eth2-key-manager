@@ -18,7 +18,7 @@ type CreateAccountFlagValues struct {
 	index            int
 	seed             string
 	seedBytes        []byte
-	privateKey       string
+	privateKey       []byte
 	accumulate       bool
 	responseType     flag.ResponseType
 	highestSources   []uint64
@@ -71,7 +71,11 @@ func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagV
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the private key flag value")
 		}
-		accountFlagValues.privateKey = privateKeyValue
+		privateKeyBytes, err := hex.DecodeString(privateKeyValue)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to convert private key string to bytes")
+		}
+		accountFlagValues.privateKey = privateKeyBytes
 
 		// Seed mode
 	} else {

@@ -125,7 +125,7 @@ func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterD
 }
 
 // CreateValidatorAccountFromPrivateKey creates account having only private key
-func (wallet *Wallet) CreateValidatorAccountFromPrivateKey(privateKey string, indexPointer *int) (core.ValidatorAccount, error) {
+func (wallet *Wallet) CreateValidatorAccountFromPrivateKey(privateKey []byte, indexPointer *int) (core.ValidatorAccount, error) {
 	// Create the master key based on the private key and network.
 	key, err := core.MasterKeyFromPrivateKey(privateKey, wallet.context.Storage.Network())
 	if err != nil {
