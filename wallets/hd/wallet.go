@@ -83,8 +83,6 @@ func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterD
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("validatorPath: %s\n", validatorPath)
-	fmt.Printf("validatorKey: %s\n", validatorKey.PublicKey().SerializeToHexStr())
 
 	// Create withdrawal key
 	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, index)
@@ -92,8 +90,6 @@ func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterD
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("withdrawalPath: %s\n", withdrawalPath)
-	fmt.Printf("withdrawalKey: %s\n", withdrawalKey.PublicKey().SerializeToHexStr())
 
 	// Create ret account
 	ret := wallets.NewValidatorAccount(

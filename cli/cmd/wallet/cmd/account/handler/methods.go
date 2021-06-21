@@ -194,7 +194,7 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	if accountFlags.accumulate {
+	if accountFlags.accumulate && seedless != true {
 		for i := 0; i <= accountFlags.index; i++ {
 			err := GenerateOneAccount(wallet, store, i, accountFlags, seedless)
 			if err != nil {
@@ -221,11 +221,17 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 
 	var accounts []map[string]string
 	for _, a := range wallet.Accounts() {
+		var withdrawalPubKey string
+		if seedless == true {
+			withdrawalPubKey = ""
+		} else {
+			withdrawalPubKey = hex.EncodeToString(a.WithdrawalPublicKey())
+		}
 		accObj := map[string]string{
 			"id":               a.ID().String(),
 			"name":             a.Name(),
 			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey()),
-			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey()),
+			"withdrawalPubKey": withdrawalPubKey,
 		}
 		accounts = append(accounts, accObj)
 	}
