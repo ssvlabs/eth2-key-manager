@@ -157,8 +157,22 @@ func (wallet *Wallet) CreateValidatorAccount(seed []byte, indexPointer *int) (co
 }
 
 // AddValidatorAccount returns error
-func (wallet *Wallet) AddValidatorAccount(_ core.ValidatorAccount) error {
-	return errors.Errorf("hierarchical deterministic wallets can't add a validator they need too derive it, please use CreateValidatorAccount")
+func (wallet *Wallet) AddValidatorAccount(account core.ValidatorAccount) error {
+	validatorPublicKey := hex.EncodeToString(account.ValidatorPublicKey())
+	wallet.indexMapper[validatorPublicKey] = account.ID()
+
+	// Store account
+	if err := wallet.context.Storage.SaveAccount(account); err != nil {
+		return err
+	}
+
+	// Store wallet
+	err := wallet.context.Storage.SaveWallet(wallet)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteAccountByPublicKey deletes account by the given public key
