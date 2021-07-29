@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/spf13/cobra"
+	"strings"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
@@ -18,7 +19,7 @@ type CreateAccountFlagValues struct {
 	index            int
 	seed             string
 	seedBytes        []byte
-	privateKey       []byte
+	privateKey       [][]byte
 	accumulate       bool
 	responseType     flag.ResponseType
 	highestSources   []uint64
@@ -67,16 +68,18 @@ func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagV
 	// Seedless mode
 	if seedless == true {
 		// Private key
-		privateKeyValue, err := flag.GetPrivateKeyFlagValue(cmd)
+		privateKeyValues, err := flag.GetPrivateKeyFlagValue(cmd)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the private key flag value")
 		}
-		privateKeyBytes, err := hex.DecodeString(privateKeyValue)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to convert private key string to bytes")
+		privateKeys := strings.Split(privateKeyValues, ",")
+		for i := 0; i < len(privateKeys); i++ {
+			privateKeyBytes, err := hex.DecodeString(privateKeys[i])
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to convert private key string to bytes")
+			}
+			accountFlagValues.privateKey = append(accountFlagValues.privateKey, privateKeyBytes)
 		}
-		accountFlagValues.privateKey = privateKeyBytes
-
 		// Seed mode
 	} else {
 		// Seed flag
@@ -143,16 +146,18 @@ func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagV
 	return &accountFlagValues, nil
 }
 
-// GenerateOneAccount generates account by index using provided account flags
-func GenerateOneAccount(wallet core.Wallet, store *inmemory.InMemStore, index int, accountFlags *CreateAccountFlagValues, seedless bool) error {
+// GenerateAccounts generates account by index using provided account flags
+func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int, accountFlags *CreateAccountFlagValues, seedless bool) error {
 
 	var acc core.ValidatorAccount
 	var err error
 
 	if seedless == true {
-		acc, err = wallet.CreateValidatorAccountFromPrivateKey(accountFlags.privateKey, &index)
-		if err != nil {
-			return errors.Wrap(err, "failed to create validator account")
+		for i := index; i < index+len(accountFlags.privateKey); i++ {
+			acc, err = wallet.CreateValidatorAccountFromPrivateKey(accountFlags.privateKey[i-index], &i)
+			if err != nil {
+				return errors.Wrap(err, "failed to create validator account")
+			}
 		}
 	} else {
 		acc, err = wallet.CreateValidatorAccount(accountFlags.seedBytes, &index)
@@ -205,13 +210,13 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 
 	if accountFlags.accumulate && seedless != true {
 		for i := 0; i <= accountFlags.index; i++ {
-			err := GenerateOneAccount(wallet, store, i, accountFlags, seedless)
+			err := GenerateAccounts(wallet, store, i, accountFlags, seedless)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
-		err := GenerateOneAccount(wallet, store, accountFlags.index, accountFlags, seedless)
+		err := GenerateAccounts(wallet, store, accountFlags.index, accountFlags, seedless)
 		if err != nil {
 			return err
 		}
