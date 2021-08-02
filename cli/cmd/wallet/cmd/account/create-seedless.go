@@ -23,7 +23,6 @@ func init() {
 	// Define flags for the command.
 	flag.AddIndexFlag(createSeedlessCmd)
 	flag.AddPrivateKeyFlag(createSeedlessCmd)
-	flag.AddAccumulateFlag(createSeedlessCmd)
 	flag.AddResponseTypeFlag(createSeedlessCmd)
 	flag.AddHighestSourceFlag(createSeedlessCmd)
 	flag.AddHighestTargetFlag(createSeedlessCmd)

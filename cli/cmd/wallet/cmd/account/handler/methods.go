@@ -30,25 +30,25 @@ type CreateAccountFlagValues struct {
 
 // CheckHighestValues Performs basic checks for account flags
 func CheckHighestValues(accountFlagValues CreateAccountFlagValues) error {
-	if accountFlagValues.accumulate {
+	if accountFlagValues.accumulate || len(accountFlagValues.privateKey) > 1 {
 		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest sources length when the accumulate flag is true need to be equal to index")
+			return errors.Errorf("highest sources length when the accumulate flag is true or with more than one seedless account need to be equal to index")
 		}
 		if len(accountFlagValues.highestTargets) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest targets length when the accumulate flag is true need to be index")
+			return errors.Errorf("highest targets length when the accumulate flag is true or with more than one seedless account need to be index")
 		}
 		if len(accountFlagValues.highestProposals) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest proposals length when the accumulate flag is true need to be index")
+			return errors.Errorf("highest proposals length when the accumulate flag is true or with more than one seedless account need to be index")
 		}
 	} else {
 		if len(accountFlagValues.highestSources) != 1 {
-			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
+			return errors.Errorf("highest sources length when the accumulate flag is false or with one seedless account need to be 1")
 		}
 		if len(accountFlagValues.highestTargets) != 1 {
-			return errors.Errorf("highest targets length when the accumulate flag is false need to be 1")
+			return errors.Errorf("highest targets length when the accumulate flag is false or with one seedless account need to be 1")
 		}
 		if len(accountFlagValues.highestProposals) != 1 {
-			return errors.Errorf("highest proposals length when the accumulate flag is false need to be 1")
+			return errors.Errorf("highest proposals length when the accumulate flag is false or with one seedless account need to be 1")
 		}
 	}
 	return nil
@@ -95,14 +95,14 @@ func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagV
 			return nil, errors.Wrap(err, "failed to HEX decode seed")
 		}
 		accountFlagValues.seedBytes = seedBytes
-	}
 
-	// Get accumulate flag.
-	accumulateFlagValue, err := flag.GetAccumulateFlagValue(cmd)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the accumulate flag value")
+		// Get accumulate flag.
+		accumulateFlagValue, err := flag.GetAccumulateFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the accumulate flag value")
+		}
+		accountFlagValues.accumulate = accumulateFlagValue
 	}
-	accountFlagValues.accumulate = accumulateFlagValue
 
 	// Get response-type flag.
 	responseType, err := flag.GetResponseTypeFlagValue(cmd)
@@ -147,16 +147,20 @@ func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagV
 }
 
 // GenerateAccounts generates account by index using provided account flags
-func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int, accountFlags *CreateAccountFlagValues, seedless bool) error {
-
+func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int, accountFlags *CreateAccountFlagValues) error {
 	var acc core.ValidatorAccount
 	var err error
 
-	if seedless == true {
+	if len(accountFlags.privateKey) > 0 {
 		for i := index; i < index+len(accountFlags.privateKey); i++ {
 			acc, err = wallet.CreateValidatorAccountFromPrivateKey(accountFlags.privateKey[i-index], &i)
 			if err != nil {
 				return errors.Wrap(err, "failed to create validator account")
+			}
+
+			err = SaveHighestData(acc, store, accountFlags, index)
+			if err != nil {
+				return errors.Wrap(err, "Can not save highest sources, targets and proposals for account")
 			}
 		}
 	} else {
@@ -164,10 +168,19 @@ func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int,
 		if err != nil {
 			return errors.Wrap(err, "failed to create validator account")
 		}
-	}
 
+		err = SaveHighestData(acc, store, accountFlags, index)
+		if err != nil {
+			return errors.Wrap(err, "Can not save highest sources, targets and proposals for account")
+		}
+	}
+	return nil
+}
+
+// SaveHighestData save the highest sources, targets and proposals for account
+func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, accountFlags *CreateAccountFlagValues, index int) error {
 	highestIndex := index
-	if seedless == true || accountFlags.accumulate != true {
+	if accountFlags.accumulate != true && len(accountFlags.privateKey) <= 1 {
 		highestIndex = 0
 	}
 
@@ -190,8 +203,8 @@ func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int,
 	return nil
 }
 
-// BuildAndPrintAccounts builds all accounts or one account depending of seedless flag
-func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, seedless bool) error {
+// BuildAndPrintAccounts builds all accounts or one account depending on seedless flag
+func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues) error {
 	// Initialize store
 	store := inmemory.NewInMemStore(accountFlags.network)
 	options := &eth2keymanager.KeyVaultOptions{}
@@ -208,15 +221,15 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	if accountFlags.accumulate && seedless != true {
+	if accountFlags.accumulate {
 		for i := 0; i <= accountFlags.index; i++ {
-			err := GenerateAccounts(wallet, store, i, accountFlags, seedless)
+			err := GenerateAccounts(wallet, store, i, accountFlags)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
-		err := GenerateAccounts(wallet, store, accountFlags.index, accountFlags, seedless)
+		err := GenerateAccounts(wallet, store, accountFlags.index, accountFlags)
 		if err != nil {
 			return err
 		}
@@ -236,7 +249,7 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 	var accounts []map[string]string
 	for _, a := range wallet.Accounts() {
 		var withdrawalPubKey string
-		if seedless == true {
+		if len(accountFlags.privateKey) > 0 {
 			withdrawalPubKey = ""
 		} else {
 			withdrawalPubKey = hex.EncodeToString(a.WithdrawalPublicKey())
@@ -250,7 +263,7 @@ func (h *Account) BuildAndPrintAccounts(accountFlags *CreateAccountFlagValues, s
 		accounts = append(accounts, accObj)
 	}
 
-	if accountFlags.accumulate {
+	if accountFlags.accumulate || len(accountFlags.privateKey) > 1 {
 		err = h.printer.JSON(accounts)
 	} else if len(accounts) > 0 {
 		err = h.printer.JSON(accounts[0])

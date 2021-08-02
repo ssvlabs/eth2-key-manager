@@ -19,7 +19,7 @@ func (h *Account) CreateSeedless(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = h.BuildAndPrintAccounts(accountFlags, true)
+	err = h.BuildAndPrintAccounts(accountFlags)
 	if err != nil {
 		return err
 	}

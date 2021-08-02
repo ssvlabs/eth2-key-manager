@@ -9,22 +9,22 @@ import (
 )
 
 // depositDataCmd represents the deposit-data account command.
-var depositDataCmd = &cobra.Command{
-	Use:   "deposit-data",
+var depositDataSeedlessCmd = &cobra.Command{
+	Use:   "deposit-data-seedless",
 	Short: "Returns an account deposit data.",
-	Long:  `This command returns an account deposit data using public key and storage.`,
+	Long:  `This command returns an account deposit data using public key and private key.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		handler := handler.New(rootcmd.ResultPrinter)
-		return handler.DepositData(cmd, args, false)
+		return handler.DepositData(cmd, args, true)
 	},
 }
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(depositDataCmd)
-	flag.AddSeedFlag(depositDataCmd)
-	flag.AddPublicKeyFlag(depositDataCmd)
-	rootcmd.AddNetworkFlag(depositDataCmd)
+	flag.AddIndexFlag(depositDataSeedlessCmd)
+	flag.AddPrivateKeyFlag(depositDataSeedlessCmd)
+	flag.AddPublicKeyFlag(depositDataSeedlessCmd)
+	rootcmd.AddNetworkFlag(depositDataSeedlessCmd)
 
-	Command.AddCommand(depositDataCmd)
+	Command.AddCommand(depositDataSeedlessCmd)
 }

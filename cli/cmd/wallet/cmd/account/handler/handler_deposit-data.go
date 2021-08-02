@@ -15,25 +15,27 @@ import (
 )
 
 // DepositData generates account deposit-data and prints it.
-func (h *Account) DepositData(cmd *cobra.Command, _ []string) error {
+func (h *Account) DepositData(cmd *cobra.Command, _ []string, seedless bool) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}
 
-	// Get index flag.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the index flag value")
-	}
+	var seedOrPrivateKeyBytes []byte
+	var seedOrPrivateKeyFlagValue string
 
-	// Get seed flag.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	if seedless == true {
+		// Get private key flag value
+		seedOrPrivateKeyFlagValue, err = flag.GetPrivateKeyFlagValue(cmd)
+	} else {
+		// Get seed flag value
+		seedOrPrivateKeyFlagValue, err = flag.GetSeedFlagValue(cmd)
+	}
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the seed flag value")
 	}
 
-	seedBytes, err := hex.DecodeString(seedFlagValue)
+	seedOrPrivateKeyBytes, err = hex.DecodeString(seedOrPrivateKeyFlagValue)
 	if err != nil {
 		return errors.Wrap(err, "failed to HEX decode seed")
 	}
@@ -65,7 +67,17 @@ func (h *Account) DepositData(cmd *cobra.Command, _ []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	_, err = wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
+	// Get index flag.
+	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the index flag value")
+	}
+
+	if seedless == true {
+		_, err = wallet.CreateValidatorAccountFromPrivateKey(seedOrPrivateKeyBytes, &indexFlagValue)
+	} else {
+		_, err = wallet.CreateValidatorAccount(seedOrPrivateKeyBytes, &indexFlagValue)
+	}
 	if err != nil {
 		return errors.Wrap(err, "failed to create validator account")
 	}
