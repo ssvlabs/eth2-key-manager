@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccountCreateSeedless(t *testing.T) {
-	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
+	t.Run("Successfully create seedless account at specific index-from and return as object (prater)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -19,11 +19,11 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
-			"--index=5",
+			"--index-from=5",
 			"--response-type=object",
-			"--highest-source=1",
-			"--highest-target=2",
-			"--highest-proposal=2",
+			"--highest-source=1,2,3,4,5,6",
+			"--highest-target=1,2,3,4,5,6",
+			"--highest-proposal=1,2,3,4,5,6",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
@@ -32,7 +32,7 @@ func TestAccountCreateSeedless(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Successfully create seedless account at specific index and return as object (mainnet)", func(t *testing.T) {
+	t.Run("Successfully create seedless account at specific index-from and return as object (mainnet)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -40,11 +40,11 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
-			"--index=5",
+			"--index-from=11",
 			"--response-type=object",
-			"--highest-source=1",
-			"--highest-target=2",
-			"--highest-proposal=2",
+			"--highest-source=1,2,3,4,5,6,7,8,9,10,11,12",
+			"--highest-target=1,2,3,4,5,6,7,8,9,10,11,12",
+			"--highest-proposal=1,2,3,4,5,6,7,8,9,10,11,12",
 			"--network=mainnet",
 		})
 		err := cmd.RootCmd.Execute()
@@ -61,7 +61,7 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
-			"--index=5",
+			"--index-from=0",
 			"--response-type=object",
 			"--highest-source=1",
 			"--highest-target=2",
@@ -74,7 +74,7 @@ func TestAccountCreateSeedless(t *testing.T) {
 		require.EqualError(t, err, "failed to network: unknown network")
 	})
 
-	t.Run("Successfully create seedless account at specific index and return as storage", func(t *testing.T) {
+	t.Run("Successfully create seedless account at specific index-from and return as storage", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -82,7 +82,7 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
-			"--index=0",
+			"--index-from=0",
 			"--highest-source=1",
 			"--highest-target=2",
 			"--highest-proposal=2",
@@ -94,7 +94,7 @@ func TestAccountCreateSeedless(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Successfully create 3 seedless accounts till specific index and return as objects", func(t *testing.T) {
+	t.Run("Successfully create 3 seedless accounts from specific index-from and return as objects", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -102,11 +102,11 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898,63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989899,63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989890",
-			"--index=5",
+			"--index-from=1",
 			"--response-type=object",
-			"--highest-proposal=1,2,3,4,5,6",
-			"--highest-target=1,2,3,4,5,6",
-			"--highest-source=1,2,3,4,5,6",
+			"--highest-proposal=1,2,3,4",
+			"--highest-target=1,2,3,4",
+			"--highest-source=1,2,3,4",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
@@ -123,12 +123,12 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
-			"--index=1",
+			"--index-from=1",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "highest sources length when the accumulate flag is false or with one seedless account need to be 1")
+		require.EqualError(t, err, "highest sources length for seedless accounts need to be equal to <index-from> + <private keys count>")
 	})
 
 	t.Run("Fail to HEX decode private key", func(t *testing.T) {
@@ -139,11 +139,11 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"account",
 			"create-seedless",
 			"--private-key=01213",
-			"--index=1",
+			"--index-from=1",
 			"--network=prater",
-			"--highest-proposal=1",
-			"--highest-target=1",
-			"--highest-source=1",
+			"--highest-proposal=1,2",
+			"--highest-target=1,2",
+			"--highest-source=1,2",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)

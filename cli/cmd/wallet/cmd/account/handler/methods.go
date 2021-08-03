@@ -17,6 +17,7 @@ import (
 // CreateAccountFlagValues keeps all collected values for seed and seedless modes
 type CreateAccountFlagValues struct {
 	index            int
+	indexFrom        int
 	seed             string
 	seedBytes        []byte
 	privateKey       [][]byte
@@ -30,25 +31,39 @@ type CreateAccountFlagValues struct {
 
 // CheckHighestValues Performs basic checks for account flags
 func CheckHighestValues(accountFlagValues CreateAccountFlagValues) error {
-	if accountFlagValues.accumulate || len(accountFlagValues.privateKey) > 1 {
+	if len(accountFlagValues.privateKey) > 0 {
+		errorExplain := "length for seedless accounts need to be equal to <index-from> + <private keys count>"
+		privateKeysCount := len(accountFlagValues.privateKey)
+		finalAccountsCount := accountFlagValues.indexFrom + privateKeysCount
+
+		if len(accountFlagValues.highestSources) != finalAccountsCount {
+			return errors.Errorf("highest sources " + errorExplain)
+		}
+		if len(accountFlagValues.highestTargets) != finalAccountsCount {
+			return errors.Errorf("highest targets " + errorExplain)
+		}
+		if len(accountFlagValues.highestProposals) != finalAccountsCount {
+			return errors.Errorf("highest proposals " + errorExplain)
+		}
+	} else if accountFlagValues.accumulate {
 		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest sources length when the accumulate flag is true or with more than one seedless account need to be equal to index")
+			return errors.Errorf("highest sources length when the accumulate flag is true need to be equal to index")
 		}
 		if len(accountFlagValues.highestTargets) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest targets length when the accumulate flag is true or with more than one seedless account need to be index")
+			return errors.Errorf("highest targets length when the accumulate flag is true need to be index")
 		}
 		if len(accountFlagValues.highestProposals) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest proposals length when the accumulate flag is true or with more than one seedless account need to be index")
+			return errors.Errorf("highest proposals length when the accumulate flag is true need to be index")
 		}
 	} else {
 		if len(accountFlagValues.highestSources) != 1 {
-			return errors.Errorf("highest sources length when the accumulate flag is false or with one seedless account need to be 1")
+			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
 		}
 		if len(accountFlagValues.highestTargets) != 1 {
-			return errors.Errorf("highest targets length when the accumulate flag is false or with one seedless account need to be 1")
+			return errors.Errorf("highest targets length when the accumulate flag is false need to be 1")
 		}
 		if len(accountFlagValues.highestProposals) != 1 {
-			return errors.Errorf("highest proposals length when the accumulate flag is false or with one seedless account need to be 1")
+			return errors.Errorf("highest proposals length when the accumulate flag is false need to be 1")
 		}
 	}
 	return nil
@@ -58,20 +73,21 @@ func CheckHighestValues(accountFlagValues CreateAccountFlagValues) error {
 func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagValues, error) {
 	accountFlagValues := CreateAccountFlagValues{}
 
-	// Get index flag.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
-	}
-	accountFlagValues.index = indexFlagValue
-
 	// Seedless mode
 	if seedless == true {
+		// Private key
+		indexFromValue, err := flag.GetIndexFromFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the index-from flag value")
+		}
+		accountFlagValues.indexFrom = indexFromValue
+
 		// Private key
 		privateKeyValues, err := flag.GetPrivateKeyFlagValue(cmd)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the private key flag value")
 		}
+
 		privateKeys := strings.Split(privateKeyValues, ",")
 		for i := 0; i < len(privateKeys); i++ {
 			privateKeyBytes, err := hex.DecodeString(privateKeys[i])
@@ -82,6 +98,13 @@ func CollectAccountFlags(cmd *cobra.Command, seedless bool) (*CreateAccountFlagV
 		}
 		// Seed mode
 	} else {
+		// Get index flag.
+		indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the index flag value")
+		}
+		accountFlagValues.index = indexFlagValue
+
 		// Seed flag
 		seedFlagValue, err := flag.GetSeedFlagValue(cmd)
 		if err != nil {
@@ -152,13 +175,13 @@ func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int,
 	var err error
 
 	if len(accountFlags.privateKey) > 0 {
-		for i := index; i < index+len(accountFlags.privateKey); i++ {
-			acc, err = wallet.CreateValidatorAccountFromPrivateKey(accountFlags.privateKey[i-index], &i)
+		for i := accountFlags.indexFrom; i < accountFlags.indexFrom+len(accountFlags.privateKey); i++ {
+			acc, err = wallet.CreateValidatorAccountFromPrivateKey(accountFlags.privateKey[i-accountFlags.indexFrom], &i)
 			if err != nil {
 				return errors.Wrap(err, "failed to create validator account")
 			}
 
-			err = SaveHighestData(acc, store, accountFlags, index)
+			err = SaveHighestData(acc, store, accountFlags, i-accountFlags.indexFrom)
 			if err != nil {
 				return errors.Wrap(err, "Can not save highest sources, targets and proposals for account")
 			}

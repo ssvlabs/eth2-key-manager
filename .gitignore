@@ -33,3 +33,5 @@ dist
 # binary
 keyvault-cli
 keyvault-cli.exe
+venv
+scripts/tests/*.json

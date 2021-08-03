@@ -21,7 +21,7 @@ var createSeedlessCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(createSeedlessCmd)
+	flag.AddIndexFromFlag(createSeedlessCmd)
 	flag.AddPrivateKeyFlag(createSeedlessCmd)
 	flag.AddResponseTypeFlag(createSeedlessCmd)
 	flag.AddHighestSourceFlag(createSeedlessCmd)
