@@ -32,17 +32,16 @@ type CreateAccountFlagValues struct {
 // CheckHighestValues Performs basic checks for account flags
 func CheckHighestValues(accountFlagValues CreateAccountFlagValues) error {
 	if len(accountFlagValues.privateKey) > 0 {
-		errorExplain := "length for seedless accounts need to be equal to <index-from> + <private keys count>"
+		errorExplain := "length for seedless accounts need to be equal to private keys count"
 		privateKeysCount := len(accountFlagValues.privateKey)
-		finalAccountsCount := accountFlagValues.indexFrom + privateKeysCount
 
-		if len(accountFlagValues.highestSources) != finalAccountsCount {
+		if len(accountFlagValues.highestSources) != privateKeysCount {
 			return errors.Errorf("highest sources " + errorExplain)
 		}
-		if len(accountFlagValues.highestTargets) != finalAccountsCount {
+		if len(accountFlagValues.highestTargets) != privateKeysCount {
 			return errors.Errorf("highest targets " + errorExplain)
 		}
-		if len(accountFlagValues.highestProposals) != finalAccountsCount {
+		if len(accountFlagValues.highestProposals) != privateKeysCount {
 			return errors.Errorf("highest proposals " + errorExplain)
 		}
 	} else if accountFlagValues.accumulate {

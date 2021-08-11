@@ -21,9 +21,9 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
 			"--index-from=5",
 			"--response-type=object",
-			"--highest-source=1,2,3,4,5,6",
-			"--highest-target=1,2,3,4,5,6",
-			"--highest-proposal=1,2,3,4,5,6",
+			"--highest-source=6",
+			"--highest-target=6",
+			"--highest-proposal=6",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
@@ -42,9 +42,9 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
 			"--index-from=11",
 			"--response-type=object",
-			"--highest-source=1,2,3,4,5,6,7,8,9,10,11,12",
-			"--highest-target=1,2,3,4,5,6,7,8,9,10,11,12",
-			"--highest-proposal=1,2,3,4,5,6,7,8,9,10,11,12",
+			"--highest-source=12",
+			"--highest-target=12",
+			"--highest-proposal=12",
 			"--network=mainnet",
 		})
 		err := cmd.RootCmd.Execute()
@@ -104,9 +104,9 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898,63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989899,63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989890",
 			"--index-from=1",
 			"--response-type=object",
-			"--highest-proposal=1,2,3,4",
-			"--highest-target=1,2,3,4",
-			"--highest-source=1,2,3,4",
+			"--highest-proposal=2,3,4",
+			"--highest-target=2,3,4",
+			"--highest-source=2,3,4",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
@@ -128,7 +128,7 @@ func TestAccountCreateSeedless(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "highest sources length for seedless accounts need to be equal to <index-from> + <private keys count>")
+		require.EqualError(t, err, "highest sources length for seedless accounts need to be equal to private keys count")
 	})
 
 	t.Run("Fail to HEX decode private key", func(t *testing.T) {
@@ -141,9 +141,9 @@ func TestAccountCreateSeedless(t *testing.T) {
 			"--private-key=01213",
 			"--index-from=1",
 			"--network=prater",
-			"--highest-proposal=1,2",
-			"--highest-target=1,2",
-			"--highest-source=1,2",
+			"--highest-proposal=2",
+			"--highest-target=2",
+			"--highest-source=2",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
