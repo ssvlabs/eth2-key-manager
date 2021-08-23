@@ -17,8 +17,6 @@ func NetworkFromString(n string) Network {
 		return PyrmontNetwork
 	case string(PraterNetwork):
 		return PraterNetwork
-	case string(PyrmontNetwork):
-		return PyrmontNetwork
 	case string(MainNetwork):
 		return MainNetwork
 	default:
