@@ -13,6 +13,8 @@ type Network string
 // NetworkFromString returns network from the given string value
 func NetworkFromString(n string) Network {
 	switch n {
+	case string(PyrmontNetwork):
+		return PyrmontNetwork
 	case string(PraterNetwork):
 		return PraterNetwork
 	case string(PyrmontNetwork):
