@@ -2,11 +2,13 @@ package handler
 
 import (
 	"encoding/hex"
-	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
+	"strings"
+
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/spf13/cobra"
-	"strings"
+
+	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"

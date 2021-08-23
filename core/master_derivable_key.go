@@ -2,8 +2,9 @@ package core
 
 import (
 	"encoding/hex"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
 	"regexp"
+
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/google/uuid"
 	"github.com/herumi/bls-eth-go-binary/bls"
@@ -39,6 +40,7 @@ func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error
 	}, nil
 }
 
+// MasterKeyFromPrivateKey gets the private key from master key
 func MasterKeyFromPrivateKey(privateKey []byte, network Network) (*MasterDerivableKey, error) {
 	if len(privateKey) == 0 {
 		return nil, errors.New("private key is required")
