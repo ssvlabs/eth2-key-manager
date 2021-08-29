@@ -6,11 +6,12 @@ import (
 
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/prysmaticlabs/prysm/shared/timeutils"
-	"github.com/stretchr/testify/require"
 	util "github.com/wealdtech/go-eth2-util"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -37,7 +38,7 @@ func ignoreError(val interface{}, err error) interface{} {
 func TestReferenceAttestation(t *testing.T) {
 	sk := _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c")
 	pk := _byteArray("a9cf360aa15fb1d1d30ee2b578dc5884823c19661886ae8b892775ccb3bd96b7d7345569a2aa0b14e4d015c54a6a0c54")
-	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a24080212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
 	domain := _byteArray("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	sig := _byteArray("b4fa352d2d6dbdf884266af7ea0914451929b343527ea6c1737ac93b3dde8b7c98e6ce61d68b7a2e7b7af8f8d0fd429d0bdd5f930b83e6842bf4342d3d1d3d10fc0d15bab7649bb8aa8287ca104a1f79d396ce0217bb5cd3e6503a3bce4c9776")
 
@@ -61,7 +62,7 @@ func TestReferenceAttestation(t *testing.T) {
 
 	// decode attestation
 	attData := &eth.AttestationData{}
-	require.NoError(t, attData.Unmarshal(attestationDataByts))
+	require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
 
 	actualSig, err := signer.SignBeaconAttestation(attData, domain, pk)
 	require.NoError(t, err)

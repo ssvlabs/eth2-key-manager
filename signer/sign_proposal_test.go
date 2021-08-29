@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/timeutils"
 	"github.com/stretchr/testify/require"
 

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	types "github.com/prysmaticlabs/eth2-types"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -361,8 +363,8 @@ func TestUpdateLatestAttestation(t *testing.T) {
 	protector, accounts := setupAttestation(t, false)
 	tests := []struct {
 		name                  string
-		sourceEpoch           uint64
-		targetEpoch           uint64
+		sourceEpoch           types.Epoch
+		targetEpoch           types.Epoch
 		expectedHighestSource uint64
 		expectedHighestTarget uint64
 	}{

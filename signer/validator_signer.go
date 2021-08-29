@@ -3,8 +3,10 @@ package signer
 import (
 	"sync"
 
+	types "github.com/prysmaticlabs/eth2-types"
+
 	"github.com/google/uuid"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -14,8 +16,8 @@ type ValidatorSigner interface {
 	SignBeaconBlock(block *eth.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
 	SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error)
 	SignAggregateAndProof(agg *eth.AggregateAttestationAndProof, domain []byte, pubKey []byte) ([]byte, error)
-	SignSlot(slot uint64, domain []byte, pubKey []byte) ([]byte, error)
-	SignEpoch(epoch uint64, domain []byte, pubKey []byte) ([]byte, error)
+	SignSlot(slot types.Slot, domain []byte, pubKey []byte) ([]byte, error)
+	SignEpoch(epoch types.Epoch, domain []byte, pubKey []byte) ([]byte, error)
 }
 
 type signingRoot struct {
