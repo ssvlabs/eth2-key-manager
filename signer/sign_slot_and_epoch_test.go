@@ -24,6 +24,16 @@ func inmemStorage() *inmemory.InMemStore {
 	return inmemory.NewInMemStore(core.MainNetwork)
 }
 
+func setupNoSlashingProtectionSK(sk []byte) (ValidatorSigner, error) {
+	noProtection := &prot.NoProtection{}
+	store := inmemStorage()
+	wallet, err := walletWithSK(sk, store)
+	if err != nil {
+		return nil, err
+	}
+	return NewSimpleSigner(wallet, noProtection, core.PraterNetwork), nil
+}
+
 func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	noProtection := &prot.NoProtection{}
 	store := inmemStorage()
@@ -91,6 +101,36 @@ func walletWithSeed(seed []byte, store core.Storage) (core.Wallet, error) {
 
 	_, err = wallet.CreateValidatorAccount(seed, nil)
 	if err != nil {
+		return nil, err
+	}
+
+	return wallet, nil
+}
+
+func walletWithSK(sk []byte, store core.Storage) (core.Wallet, error) {
+	if err := core.InitBLS(); err != nil { // very important!
+		return nil, err
+	}
+
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store).SetWalletType(core.NDWallet)
+	vault, err := eth2keymanager.NewKeyVault(options)
+	if err != nil {
+		return nil, err
+	}
+
+	wallet, err := vault.Wallet()
+	if err != nil {
+		return nil, err
+	}
+
+	k, err := core.NewHDKeyFromPrivateKey(sk, "")
+	if err != nil {
+		return nil, err
+	}
+
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
+	if err := wallet.AddValidatorAccount(acc); err != nil {
 		return nil, err
 	}
 
