@@ -2,9 +2,9 @@ package eth1deposit
 
 import (
 	"github.com/pkg/errors"
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	ssz "github.com/prysmaticlabs/go-ssz"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/params"
 	util "github.com/wealdtech/go-eth2-util"
 
@@ -76,7 +76,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 		Signature:             sig,
 	}
 
-	depositDataRoot, err := ssz.HashTreeRoot(signedDepositData)
+	depositDataRoot, err := signedDepositData.HashTreeRoot()
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}

@@ -3,6 +3,8 @@ package core
 import (
 	"time"
 
+	types "github.com/prysmaticlabs/eth2-types"
+
 	"github.com/prysmaticlabs/prysm/shared/timeutils"
 	"github.com/sirupsen/logrus"
 )
@@ -85,28 +87,28 @@ func (n Network) SlotsPerEpoch() uint64 {
 }
 
 // EstimatedCurrentSlot returns the estimation of the current slot
-func (n Network) EstimatedCurrentSlot() uint64 {
+func (n Network) EstimatedCurrentSlot() types.Slot {
 	return n.EstimatedSlotAtTime(timeutils.Now().Unix())
 }
 
 // EstimatedSlotAtTime estimates slot at the given time
-func (n Network) EstimatedSlotAtTime(time int64) uint64 {
+func (n Network) EstimatedSlotAtTime(time int64) types.Slot {
 	genesis := int64(n.MinGenesisTime())
 	if time < genesis {
 		return 0
 	}
-	return uint64(time-genesis) / uint64(n.SlotDurationSec().Seconds())
+	return types.Slot(uint64(time-genesis) / uint64(n.SlotDurationSec().Seconds()))
 }
 
 // EstimatedCurrentEpoch estimates the current epoch
 // https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/beacon-chain.md#compute_start_slot_at_epoch
-func (n Network) EstimatedCurrentEpoch() uint64 {
+func (n Network) EstimatedCurrentEpoch() types.Epoch {
 	return n.EstimatedEpochAtSlot(n.EstimatedCurrentSlot())
 }
 
 // EstimatedEpochAtSlot estimates epoch at the given slot
-func (n Network) EstimatedEpochAtSlot(slot uint64) uint64 {
-	return slot / n.SlotsPerEpoch()
+func (n Network) EstimatedEpochAtSlot(slot types.Slot) types.Epoch {
+	return types.Epoch(slot / types.Slot(n.SlotsPerEpoch()))
 }
 
 // Available networks.

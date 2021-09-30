@@ -3,7 +3,7 @@ package inmemory
 import (
 	"encoding/hex"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
 // SaveHighestAttestation saves the given highest attestation

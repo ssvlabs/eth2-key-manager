@@ -2,10 +2,10 @@ package handler
 
 import (
 	"encoding/hex"
+	types "github.com/prysmaticlabs/eth2-types"
 	"strings"
 
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/spf13/cobra"
 
 	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
@@ -14,6 +14,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
 // CreateAccountFlagValues keeps all collected values for seed and seedless modes
@@ -210,8 +212,8 @@ func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, acco
 
 	// add minimal attestation protection data
 	minimalAtt := &eth.AttestationData{
-		Source: &eth.Checkpoint{Epoch: uint64(accountFlags.highestSources[highestIndex])},
-		Target: &eth.Checkpoint{Epoch: uint64(accountFlags.highestTargets[highestIndex])},
+		Source: &eth.Checkpoint{Epoch: types.Epoch(accountFlags.highestSources[highestIndex])},
+		Target: &eth.Checkpoint{Epoch: types.Epoch(accountFlags.highestTargets[highestIndex])},
 	}
 	if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 		return errors.Wrap(err, "failed to set validator minimal slashing protection")
@@ -219,7 +221,7 @@ func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, acco
 
 	// add minimal proposal protection data
 	minimalProposal := &eth.BeaconBlock{
-		Slot: uint64(accountFlags.highestProposals[highestIndex]),
+		Slot: types.Slot(accountFlags.highestProposals[highestIndex]),
 	}
 	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
 		return errors.Wrap(err, "failed to set validator minimal slashing protection")

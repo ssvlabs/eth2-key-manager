@@ -21,7 +21,7 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 	err = h.BuildAndPrintAccounts(accountFlags)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to retrieve the response type value")
 	}
 	return nil
 }
