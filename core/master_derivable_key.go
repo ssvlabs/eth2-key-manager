@@ -4,11 +4,10 @@ import (
 	"encoding/hex"
 	"regexp"
 
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-
 	"github.com/google/uuid"
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 )
 

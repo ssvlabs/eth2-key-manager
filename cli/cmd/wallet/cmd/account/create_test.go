@@ -71,7 +71,7 @@ func TestAccountCreate(t *testing.T) {
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
 		require.EqualValues(t, actualOutput, "")
-		require.EqualError(t, err, "failed to retrieve the network flag value: unknown network")
+		require.EqualError(t, err, "failed to collect account flags: failed to retrieve the network flag value: unknown network")
 	})
 
 	t.Run("Successfully create account at specific index and return as storage", func(t *testing.T) {
@@ -150,7 +150,7 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to HEX decode seed: encoding/hex: odd length hex string")
+		require.EqualError(t, err, "failed to collect account flags: failed to HEX decode seed: encoding/hex: odd length hex string")
 	})
 
 	t.Run("highest sources invalid (accumulate false)", func(t *testing.T) {
@@ -160,15 +160,16 @@ func TestAccountCreate(t *testing.T) {
 			"wallet",
 			"account",
 			"create",
-			"--seed=01213",
+			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=1",
 			"--highest-source=1,2,3,4,5",
 			"--highest-target=2,3,4,5,6",
+			"--highest-proposal=2,3,4,5,6",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to HEX decode seed: encoding/hex: odd length hex string")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true need to be equal to index")
 	})
 
 	t.Run("highest proposal invalid (accumulate false)", func(t *testing.T) {
@@ -178,7 +179,7 @@ func TestAccountCreate(t *testing.T) {
 			"wallet",
 			"account",
 			"create",
-			"--seed=01213",
+			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=1",
 			"--highest-source=1",
 			"--highest-target=2",
@@ -187,7 +188,7 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to HEX decode seed: encoding/hex: odd length hex string")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true need to be equal to index")
 	})
 
 	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
@@ -265,7 +266,7 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "highest sources length for seedless accounts need to be equal to private keys count")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length for seedless accounts need to be equal to private keys count")
 	})
 
 	t.Run("Fail to HEX decode private key", func(t *testing.T) {
@@ -284,6 +285,6 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to HEX decode private-key: encoding/hex: odd length hex string")
+		require.EqualError(t, err, "failed to collect account flags: failed to HEX decode private-key: encoding/hex: odd length hex string")
 	})
 }
