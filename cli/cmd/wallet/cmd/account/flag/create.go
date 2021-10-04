@@ -37,7 +37,6 @@ func ResponseTypeFromString(n string) ResponseType {
 // Flag names.
 const (
 	indexFlag            = "index"
-	indexFromFlag        = "index-from"
 	seedFlag             = "seed"
 	privateKeyFlag       = "private-key"
 	accumulateFlag       = "accumulate"
@@ -57,6 +56,11 @@ func GetPrivateKeyFlagValue(c *cobra.Command) (string, error) {
 	return c.Flags().GetString(privateKeyFlag)
 }
 
+// GetPrivateKeyFlagName gets privateKeyFlag name
+func GetPrivateKeyFlagName() string {
+	return privateKeyFlag
+}
+
 // AddIndexFlag adds the index flag to the command
 func AddIndexFlag(c *cobra.Command) {
 	cliflag.AddPersistentIntFlag(c, indexFlag, 0, "account index", true)
@@ -65,16 +69,6 @@ func AddIndexFlag(c *cobra.Command) {
 // GetIndexFlagValue gets the index flag from the command
 func GetIndexFlagValue(c *cobra.Command) (int, error) {
 	return c.Flags().GetInt(indexFlag)
-}
-
-// AddIndexFromFlag adds the index-from flag to the command
-func AddIndexFromFlag(c *cobra.Command) {
-	cliflag.AddPersistentIntFlag(c, indexFromFlag, 0, "account index from", true)
-}
-
-// GetIndexFromFlagValue gets the index flag from the command
-func GetIndexFromFlagValue(c *cobra.Command) (int, error) {
-	return c.Flags().GetInt(indexFromFlag)
 }
 
 // AddAccumulateFlag adds the accumulate flag to the command

@@ -7,19 +7,19 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-// Create creates a new wallet account and prints the storage.
+// Create creates a new wallet account(s) and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}
 
-	accountFlags, err := CollectAccountFlags(cmd, false)
+	accountFlags, err := CollectAccountFlags(cmd)
 	if err != nil {
 		return err
 	}
 
-	err = h.BuildAndPrintAccounts(accountFlags)
+	err = h.BuildAccounts(accountFlags)
 	if err != nil {
 		return err
 	}

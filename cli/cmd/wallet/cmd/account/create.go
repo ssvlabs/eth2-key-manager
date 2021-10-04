@@ -12,7 +12,7 @@ import (
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates a wallet account.",
-	Long:  `This command creates an account using seed and index.`,
+	Long:  `This command creates an account using seed/validator private key and index (index_from).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		handler := handler.New(rootcmd.ResultPrinter)
 		return handler.Create(cmd, args)
@@ -23,6 +23,7 @@ func init() {
 	// Define flags for the command.
 	flag.AddIndexFlag(createCmd)
 	flag.AddSeedFlag(createCmd)
+	flag.AddPrivateKeyFlag(createCmd)
 	flag.AddAccumulateFlag(createCmd)
 	flag.AddResponseTypeFlag(createCmd)
 	flag.AddHighestSourceFlag(createCmd)

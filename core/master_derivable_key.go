@@ -42,7 +42,7 @@ func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error
 
 // MasterKeyFromPrivateKey gets the private key from master key
 func MasterKeyFromPrivateKey(privateKey []byte, network Network) (*MasterDerivableKey, error) {
-	if len(privateKey) == 0 {
+	if privateKey == nil || len(privateKey) == 0 {
 		return nil, errors.New("private key is required")
 	}
 	return &MasterDerivableKey{
@@ -53,16 +53,18 @@ func MasterKeyFromPrivateKey(privateKey []byte, network Network) (*MasterDerivab
 }
 
 // Derive derives a HD key based on the given relative path.
-func (master *MasterDerivableKey) Derive(relativePath string, seedless bool) (*HDKey, error) {
+func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 	if !validateRelativePath(relativePath) {
 		return nil, errors.New("invalid relative path. Example: /1/2/3")
 	}
 
-	path := master.network.FullPath(relativePath)
 	var key *e2types.BLSPrivateKey
 	var err error
 
-	if seedless == true {
+	path := master.network.FullPath(relativePath)
+
+	// seedless mode
+	if master.seed == nil {
 		key, err = e2types.BLSPrivateKeyFromBytes(master.privateKey)
 		if err != nil {
 			return nil, err

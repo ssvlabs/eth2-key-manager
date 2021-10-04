@@ -65,7 +65,7 @@ func (wallet *Wallet) GetNextAccountIndex() int {
 }
 
 // BuildValidatorAccount using pointer and constructed key, using seedless or seed modes
-func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterDerivableKey, seedless bool) (*wallets.HDAccount, error) {
+func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterDerivableKey) (*wallets.HDAccount, error) {
 	// Resolve index to create account at
 	var index int
 	if indexPointer != nil {
@@ -79,14 +79,14 @@ func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterD
 
 	// Create validator key
 	validatorPath := fmt.Sprintf(ValidatorKeyPath, index)
-	validatorKey, err := key.Derive(validatorPath, seedless)
+	validatorKey, err := key.Derive(validatorPath)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create withdrawal key
 	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, index)
-	withdrawalKey, err := key.Derive(withdrawalPath, seedless)
+	withdrawalKey, err := key.Derive(withdrawalPath)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (wallet *Wallet) CreateValidatorAccountFromPrivateKey(privateKey []byte, in
 	}
 
 	// Build account
-	account, err := wallet.BuildValidatorAccount(indexPointer, key, true)
+	account, err := wallet.BuildValidatorAccount(indexPointer, key)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (wallet *Wallet) CreateValidatorAccount(seed []byte, indexPointer *int) (co
 	}
 
 	// Build account
-	account, err := wallet.BuildValidatorAccount(indexPointer, key, false)
+	account, err := wallet.BuildValidatorAccount(indexPointer, key)
 	if err != nil {
 		return nil, err
 	}

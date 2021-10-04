@@ -71,7 +71,7 @@ func TestAccountCreate(t *testing.T) {
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
 		require.EqualValues(t, actualOutput, "")
-		require.EqualError(t, err, "failed to network: unknown network")
+		require.EqualError(t, err, "failed to retrieve the network flag value: unknown network")
 	})
 
 	t.Run("Successfully create account at specific index and return as storage", func(t *testing.T) {
@@ -188,5 +188,102 @@ func TestAccountCreate(t *testing.T) {
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
 		require.EqualError(t, err, "failed to HEX decode seed: encoding/hex: odd length hex string")
+	})
+
+	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
+			"--index=5",
+			"--response-type=object",
+			"--highest-source=6",
+			"--highest-target=6",
+			"--highest-proposal=6",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.NotNil(t, actualOutput)
+		require.NoError(t, err)
+	})
+
+	t.Run("Successfully create seedless account at specific index and return as storage", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
+			"--index=0",
+			"--highest-source=1",
+			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.NotNil(t, actualOutput)
+		require.NoError(t, err)
+	})
+
+	t.Run("Successfully create 3 seedless accounts from specific index and return as objects", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898,63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989899,63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989890",
+			"--index=1",
+			"--response-type=object",
+			"--highest-proposal=2,3,4",
+			"--highest-target=2,3,4",
+			"--highest-source=2,3,4",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.NotNil(t, actualOutput)
+		require.NoError(t, err)
+	})
+
+	t.Run("Missing Highest Values", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
+			"--index=1",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		require.Error(t, err)
+		require.EqualError(t, err, "highest sources length for seedless accounts need to be equal to private keys count")
+	})
+
+	t.Run("Fail to HEX decode private key", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--private-key=01213",
+			"--index=1",
+			"--network=prater",
+			"--highest-proposal=2",
+			"--highest-target=2",
+			"--highest-source=2",
+		})
+		err := cmd.RootCmd.Execute()
+		require.Error(t, err)
+		require.EqualError(t, err, "failed to HEX decode private-key: encoding/hex: odd length hex string")
 	})
 }
