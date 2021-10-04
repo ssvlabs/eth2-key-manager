@@ -11,11 +11,11 @@ import (
 // depositDataCmd represents the deposit-data account command.
 var depositDataCmd = &cobra.Command{
 	Use:   "deposit-data",
-	Short: "Returns an account deposit data.",
-	Long:  `This command returns an account deposit data using public key and storage.`,
+	Short: "Returns an account deposit-data.",
+	Long:  `This command returns an account deposit-data using public key and storage.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		handler := handler.New(rootcmd.ResultPrinter)
-		return handler.DepositData(cmd, args, false)
+		return handler.DepositData(cmd, args)
 	},
 }
 
