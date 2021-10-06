@@ -44,7 +44,7 @@ func setupNoSlashingProtection(seed []byte) (ValidatorSigner, error) {
 	return NewSimpleSigner(wallet, noProtection, core.PraterNetwork), nil
 }
 
-func setupWithSlashingProtection(seed []byte, setLatestAttestation bool, setLatestProposal bool) (ValidatorSigner, error) {
+func setupWithSlashingProtection(t *testing.T, seed []byte, setLatestAttestation bool, setLatestProposal bool) (ValidatorSigner, error) {
 	store := inmemStorage()
 	protector := prot.NewNormalProtection(store)
 	wallet, err := walletWithSeed(seed, store)
@@ -58,7 +58,7 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool, setLate
 		log.Fatal(err)
 	}
 	if setLatestAttestation {
-		protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+		err := protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
 			Slot:            0,
 			CommitteeIndex:  0,
 			BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
@@ -71,12 +71,13 @@ func setupWithSlashingProtection(seed []byte, setLatestAttestation bool, setLate
 				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
 			},
 		})
+		require.NoError(t, err)
 	}
 
 	if setLatestProposal {
-		protector.UpdateHighestProposal(acc.ValidatorPublicKey(), &eth.BeaconBlock{
+		require.NoError(t, protector.UpdateHighestProposal(acc.ValidatorPublicKey(), &eth.BeaconBlock{
 			Slot: 0,
-		})
+		}))
 	}
 
 	return NewSimpleSigner(wallet, protector, core.PraterNetwork), nil

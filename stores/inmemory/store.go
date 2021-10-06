@@ -126,13 +126,3 @@ func (store *InMemStore) freshContext() *core.WalletContext {
 		Storage: store,
 	}
 }
-
-func (store *InMemStore) canEncrypt() bool {
-	if store.encryptor != nil {
-		if store.encryptionPassword == nil {
-			return false
-		}
-		return true
-	}
-	return false
-}

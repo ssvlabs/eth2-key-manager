@@ -123,7 +123,9 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 	defer func() {
 		if err := h.writeResultToFiles(seedToAccounts); err != nil {
 			h.printer.Error(err)
-			h.printer.JSON(seedToAccounts)
+			if err := h.printer.JSON(seedToAccounts); err != nil {
+				h.printer.Error(err)
+			}
 		}
 	}()
 	for i := 0; i < seedsCount; i++ {
@@ -283,7 +285,10 @@ func buildTransactionOpts(privateKey string) (*bind.TransactOpts, error) {
 		return nil, errors.Wrap(err, "failed to decode private key")
 	}
 
-	txOps := bind.NewKeyedTransactor(privKey)
+	txOps, err := bind.NewKeyedTransactorWithChainID(privKey, big.NewInt(1337))
+	if err != nil {
+		return nil, err
+	}
 	txOps.Value = new(big.Int).Mul(big.NewInt(int64(eth1deposit.MaxEffectiveBalanceInGwei)), big.NewInt(1e9))
 	txOps.GasLimit = 500000
 	txOps.Context = context.Background()

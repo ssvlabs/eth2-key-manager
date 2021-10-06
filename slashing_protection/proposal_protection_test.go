@@ -27,10 +27,8 @@ func vault() (*eth2keymanager.KeyVault, error) {
 	return eth2keymanager.NewKeyVault(options)
 }
 
-func setupProposal(updateHighestProposal bool) (core.SlashingProtector, []core.ValidatorAccount, error) {
-	if err := core.InitBLS(); err != nil { // very important!
-		return nil, nil, err
-	}
+func setupProposal(t *testing.T, updateHighestProposal bool) (core.SlashingProtector, []core.ValidatorAccount, error) {
+	require.NoError(t, core.InitBLS()) // very important!!!
 
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	// create an account to use
@@ -54,13 +52,13 @@ func setupProposal(updateHighestProposal bool) (core.SlashingProtector, []core.V
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 
 	if updateHighestProposal {
-		protector.UpdateHighestProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
+		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
 			Slot:          100,
 			ProposerIndex: 2,
 			ParentRoot:    []byte("A"),
 			StateRoot:     []byte("A"),
 			Body:          &eth.BeaconBlockBody{},
-		})
+		}))
 	}
 
 	return protector, []core.ValidatorAccount{account1, account2}, nil
@@ -68,7 +66,7 @@ func setupProposal(updateHighestProposal bool) (core.SlashingProtector, []core.V
 
 func TestProposalProtection(t *testing.T) {
 	t.Run("New proposal, should not slash", func(t *testing.T) {
-		protector, accounts, err := setupProposal(true)
+		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
 		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
 			Slot:          101,
@@ -82,7 +80,7 @@ func TestProposalProtection(t *testing.T) {
 	})
 
 	t.Run("No highest proposal db, should error", func(t *testing.T) {
-		protector, accounts, err := setupProposal(false)
+		protector, accounts, err := setupProposal(t, false)
 		require.NoError(t, err)
 		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
 			Slot:          99,
@@ -96,7 +94,7 @@ func TestProposalProtection(t *testing.T) {
 	})
 
 	t.Run("Lower than highest proposal db, should error", func(t *testing.T) {
-		protector, accounts, err := setupProposal(true)
+		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
 		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
 			Slot:          99,

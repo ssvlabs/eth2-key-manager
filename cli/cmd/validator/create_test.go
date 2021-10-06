@@ -60,7 +60,7 @@ func TestValidatorCreate(t *testing.T) {
 			body := make(map[string]interface{})
 			err := json.NewDecoder(r.Body).Decode(&body)
 			require.NoError(t, err)
-			defer r.Body.Close()
+			defer require.NoError(t, r.Body.Close())
 
 			switch body["method"] {
 			case "eth_getBalance":
@@ -71,8 +71,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": balance.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_getTransactionCount":
 				getTransactionCountCalled++
 				require.NotEmpty(t, body["params"].([]interface{})[0].(string))
@@ -80,8 +80,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": hexutil.Uint64(5206).String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_gasPrice":
 				gasPriceCalled++
 				balance := hexutil.Big(*big.NewInt(1e9))
@@ -89,8 +89,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": balance.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_getCode":
 				getCodeCalled++
 				require.NotEmpty(t, body["params"].([]interface{})[0].(string))
@@ -99,38 +99,38 @@ func TestValidatorCreate(t *testing.T) {
 					"result": code.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_estimateGas":
 				estimateGasCalled++
 				resp, err := json.Marshal(map[string]interface{}{
 					"result": hexutil.Uint64(1).String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_sendRawTransaction":
 				sendTransactionCalled++
 				resp, err := json.Marshal(map[string]interface{}{
 					"result": "success",
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_getBlockByNumber":
 				blockByNumberCalled++
 				resp, err := json.Marshal(blkByNumberRes())
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_maxPriorityFeePerGas":
 				gasPriceCalled++
 				resp, err := json.Marshal(map[string]interface{}{
 					"result": hexutil.Uint64(100).String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			}
 		}))
 		defer srv.Close()
@@ -186,8 +186,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": balance.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_getTransactionCount":
 				getTransactionCountCalled++
 				require.NotEmpty(t, body["params"].([]interface{})[0].(string))
@@ -195,8 +195,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": hexutil.Uint64(5206).String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_gasPrice":
 				gasPriceCalled++
 				balance := hexutil.Big(*big.NewInt(1e9))
@@ -204,8 +204,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": balance.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_getCode":
 				getCodeCalled++
 				require.NotEmpty(t, body["params"].([]interface{})[0].(string))
@@ -214,38 +214,38 @@ func TestValidatorCreate(t *testing.T) {
 					"result": code.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_estimateGas":
 				estimateGasCalled++
 				resp, err := json.Marshal(map[string]interface{}{
 					"result": hexutil.Uint64(1).String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_sendRawTransaction":
 				sendTransactionCalled++
 				resp, err := json.Marshal(map[string]interface{}{
 					"result": "success",
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_getBlockByNumber":
 				blockByNumberCalled++
 				resp, err := json.Marshal(blkByNumberRes())
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			case "eth_maxPriorityFeePerGas":
 				gasPriceCalled++
 				resp, err := json.Marshal(map[string]interface{}{
 					"result": hexutil.Uint64(100).String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			}
 		}))
 		defer srv.Close()
@@ -285,7 +285,7 @@ func TestValidatorCreate(t *testing.T) {
 			body := make(map[string]interface{})
 			err := json.NewDecoder(r.Body).Decode(&body)
 			require.NoError(t, err)
-			defer r.Body.Close()
+			defer require.NoError(t, r.Body.Close())
 
 			switch body["method"] {
 			case "eth_getBalance":
@@ -296,8 +296,8 @@ func TestValidatorCreate(t *testing.T) {
 					"result": balance.String(),
 				})
 				require.NoError(t, err)
-				w.Write(resp)
-				break
+				_, err = w.Write(resp)
+				require.NoError(t, err)
 			}
 		}))
 		defer srv.Close()

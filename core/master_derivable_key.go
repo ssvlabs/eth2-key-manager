@@ -29,7 +29,7 @@ type MasterDerivableKey struct {
 // MasterKeyFromSeed is the constructor of MasterDerivableKey.
 // Base privKey is m / purpose / coin_type / as EIP 2334 defines
 func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error) {
-	if seed == nil || len(seed) == 0 {
+	if len(seed) == 0 {
 		return nil, errors.New("seed can't be nil or length 0")
 	}
 	return &MasterDerivableKey{
@@ -41,7 +41,7 @@ func MasterKeyFromSeed(seed []byte, network Network) (*MasterDerivableKey, error
 
 // MasterKeyFromPrivateKey gets the private key from master key
 func MasterKeyFromPrivateKey(privateKey []byte, network Network) (*MasterDerivableKey, error) {
-	if privateKey == nil || len(privateKey) == 0 {
+	if len(privateKey) == 0 {
 		return nil, errors.New("private key is required")
 	}
 	return &MasterDerivableKey{

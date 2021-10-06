@@ -28,7 +28,7 @@ func TestMarshalingWallet(t *testing.T) {
 	require.NoError(t, err)
 	account := wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 	require.NoError(t, err)
-	wallet.AddValidatorAccount(account)
+	require.NoError(t, wallet.AddValidatorAccount(account))
 	err = store.SaveWallet(wallet)
 	require.NoError(t, err)
 
@@ -86,7 +86,7 @@ func TestMarshaling(t *testing.T) {
 			Root:  []byte("A"),
 		},
 	}
-	store.SaveHighestAttestation(acc.ValidatorPublicKey(), att)
+	require.NoError(t, store.SaveHighestAttestation(acc.ValidatorPublicKey(), att))
 
 	// proposal
 	prop := &eth.BeaconBlock{
@@ -96,7 +96,7 @@ func TestMarshaling(t *testing.T) {
 		StateRoot:     []byte("A"),
 		Body:          &eth.BeaconBlockBody{},
 	}
-	store.SaveHighestProposal(acc.ValidatorPublicKey(), prop)
+	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), prop))
 
 	// marshal
 	byts, err := json.Marshal(store)

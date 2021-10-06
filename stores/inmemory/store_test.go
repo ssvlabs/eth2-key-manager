@@ -76,8 +76,8 @@ func TestStoringWithEncryption(t *testing.T) {
 	}
 }
 
-func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) {
-	core.InitBLS()
+func getPopulatedWalletStorage(t *testing.T) (core.Storage, []core.ValidatorAccount, error) {
+	require.NoError(t, core.InitBLS())
 	store := getStorage()
 
 	// seed
@@ -116,7 +116,7 @@ func getPopulatedWalletStorage() (core.Storage, []core.ValidatorAccount, error) 
 }
 
 func TestOpeningAccount(t *testing.T) {
-	storage, accounts, err := getPopulatedWalletStorage()
+	storage, accounts, err := getPopulatedWalletStorage(t)
 	require.NoError(t, err)
 	a1, err := storage.OpenAccount(accounts[0].ID())
 	require.NoError(t, err)
@@ -127,7 +127,7 @@ func TestOpeningAccount(t *testing.T) {
 }
 
 func TestAddingAccountsToWallet(t *testing.T) {
-	storage, accounts, err := getPopulatedWalletStorage()
+	storage, accounts, err := getPopulatedWalletStorage(t)
 	require.NoError(t, err)
 	for _, account := range accounts {
 		t.Run(fmt.Sprintf("adding account %s", account.Name()), func(t *testing.T) {
@@ -146,7 +146,7 @@ func TestAddingAccountsToWallet(t *testing.T) {
 }
 
 func TestFetchingNonExistingAccount(t *testing.T) {
-	storage, _, err := getPopulatedWalletStorage()
+	storage, _, err := getPopulatedWalletStorage(t)
 	require.NoError(t, err)
 	t.Run("testing", func(t *testing.T) {
 		// fetch non existing account
@@ -156,7 +156,7 @@ func TestFetchingNonExistingAccount(t *testing.T) {
 }
 
 func TestListingAccounts(t *testing.T) {
-	storage, _, err := getPopulatedWalletStorage()
+	storage, _, err := getPopulatedWalletStorage(t)
 	require.NoError(t, err)
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	// create keyvault and wallet

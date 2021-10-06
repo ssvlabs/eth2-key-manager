@@ -77,7 +77,6 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root")
 		}
-		break
 	case version.Phase0:
 		block, ok := b.Proto().(*ethpb.BeaconBlock)
 		if !ok {
@@ -87,7 +86,6 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root")
 		}
-		break
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {

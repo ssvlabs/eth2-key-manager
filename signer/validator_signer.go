@@ -25,11 +25,6 @@ type ValidatorSigner interface {
 	SignSyncCommitteeContributionAndProof(contribAndProof *eth.ContributionAndProof, domain []byte, pubKey []byte) ([]byte, error)
 }
 
-type signingRoot struct {
-	Hash   [32]byte `ssz-size:"32"`
-	Domain []byte   `ssz-size:"32"`
-}
-
 // SimpleSigner implements ValidatorSigner interface
 type SimpleSigner struct {
 	wallet            core.Wallet

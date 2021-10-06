@@ -250,7 +250,7 @@ func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int,
 // SaveHighestData save the highest source, target and proposal for account
 func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, accountFlags *CreateAccountFlagValues, index int) error {
 	highestIndex := index
-	if accountFlags.accumulate != true && len(accountFlags.privateKeys) <= 1 {
+	if !accountFlags.accumulate && len(accountFlags.privateKeys) <= 1 {
 		highestIndex = 0
 	}
 
