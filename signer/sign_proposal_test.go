@@ -102,7 +102,7 @@ func TestBenchmarkBlockProposal(t *testing.T) {
 
 func TestProposalSlashingSignatures(t *testing.T) {
 	seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	signer, err := setupWithSlashingProtection(nil, seed, true, true)
+	signer, err := setupWithSlashingProtection(t, seed, true, true)
 	require.NoError(t, err)
 
 	t.Run("valid proposal", func(t *testing.T) {
@@ -164,7 +164,7 @@ func TestFarFutureProposalSignature(t *testing.T) {
 	maxValidSlot := network.EstimatedSlotAtTime(timeutils.Now().Unix() + FarFutureMaxValidEpoch)
 
 	t.Run("max valid source", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(nil, seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		blk := testBlock(t)
@@ -174,7 +174,7 @@ func TestFarFutureProposalSignature(t *testing.T) {
 		require.NoError(t, err)
 	})
 	t.Run("too far into the future source", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(nil, seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		blk := testBlock(t)
