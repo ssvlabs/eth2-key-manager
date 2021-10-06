@@ -10,6 +10,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 )
 
+// SignSyncCommittee sign sync committee
 func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
@@ -39,6 +40,7 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain []byte
 	return sig, nil
 }
 
+// SignSyncCommitteeSelectionData sign sync committee slection data
 func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *eth.SyncAggregatorSelectionData, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
@@ -70,6 +72,7 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *eth.SyncAggrega
 	return sig, nil
 }
 
+// SignSyncCommitteeContributionAndProof sign sync committee
 func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProof *eth.ContributionAndProof, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {

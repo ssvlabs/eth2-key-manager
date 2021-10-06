@@ -3,12 +3,15 @@ package signer
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/wallets"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/stretchr/testify/require"
 )
 
 func TestReferenceAttestationAggregation(t *testing.T) {

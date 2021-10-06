@@ -2,8 +2,9 @@ package handler
 
 import (
 	"encoding/hex"
-	types "github.com/prysmaticlabs/eth2-types"
 	"strings"
+
+	types "github.com/prysmaticlabs/eth2-types"
 
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
