@@ -17,8 +17,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	contracts "github.com/prysmaticlabs/prysm/contracts/deposit-contract"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+	contracts "github.com/prysmaticlabs/prysm/contracts/deposit"
+	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"

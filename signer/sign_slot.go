@@ -6,7 +6,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 )
 
 // SignSlot signes the given slot
@@ -24,7 +24,7 @@ func (signer *SimpleSigner) SignSlot(slot types.Slot, domain []byte, pubKey []by
 		return nil, err
 	}
 
-	root, err := helpers.ComputeSigningRoot(slot, domain)
+	root, err := signing.ComputeSigningRoot(slot, domain)
 	if err != nil {
 		return nil, err
 	}

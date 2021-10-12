@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 )
 
 // SignSyncCommittee sign sync committee
@@ -28,7 +28,7 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain []byte
 
 	// 3. sign
 	sszRoot := types.SSZBytes(msgBlockRoot)
-	root, err := helpers.ComputeSigningRoot(&sszRoot, domain)
+	root, err := signing.ComputeSigningRoot(&sszRoot, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -60,7 +60,7 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *eth.SyncAggrega
 	if data == nil {
 		return nil, errors.New("selection data nil")
 	}
-	root, err := helpers.ComputeSigningRoot(data, domain)
+	root, err := signing.ComputeSigningRoot(data, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -92,7 +92,7 @@ func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProo
 	if contribAndProof == nil {
 		return nil, errors.New("contrib proof data nil")
 	}
-	root, err := helpers.ComputeSigningRoot(contribAndProof, domain)
+	root, err := signing.ComputeSigningRoot(contribAndProof, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}

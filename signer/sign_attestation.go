@@ -3,7 +3,7 @@ package signer
 import (
 	"encoding/hex"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 
 	"github.com/pkg/errors"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
@@ -48,7 +48,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *eth.AttestationDa
 	}
 
 	// 6. Prepare and sign data
-	root, err := helpers.ComputeSigningRoot(attestation, domain)
+	root, err := signing.ComputeSigningRoot(attestation, domain)
 	if err != nil {
 		return nil, err
 	}

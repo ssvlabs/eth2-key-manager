@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/ethereum/go-ethereum v1.9.25
 	github.com/google/uuid v1.2.0
-	github.com/herumi/bls-eth-go-binary v0.0.0-20210130185500-57372fb27371
+	github.com/herumi/bls-eth-go-binary v0.0.0-20210917013441-d37c07cfda4e
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/protolambda/zssz v0.1.5 // indirect
@@ -24,4 +24,4 @@ require (
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20210707101027-e8523651bf6f
 
-replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20210827024218-7757b49f067e
+replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20211005004110-843ed50e0acc

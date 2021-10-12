@@ -6,11 +6,11 @@ import (
 
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/shared/timeutils"
+	prysmTime "github.com/prysmaticlabs/prysm/time"
 	util "github.com/wealdtech/go-eth2-util"
 
+	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
@@ -504,7 +504,7 @@ func TestAttestationSignatures(t *testing.T) {
 func TestFarFutureAttestationSignature(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	network := core.PraterNetwork
-	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(timeutils.Now().Unix() + FarFutureMaxValidEpoch))
+	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(prysmTime.Now().Unix() + FarFutureMaxValidEpoch))
 
 	t.Run("max valid source", func(tt *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)

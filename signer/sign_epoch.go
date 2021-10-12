@@ -6,7 +6,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 )
 
 // SignEpoch signs the given epoch
@@ -24,7 +24,7 @@ func (signer *SimpleSigner) SignEpoch(epoch types.Epoch, domain []byte, pubKey [
 		return nil, err
 	}
 
-	root, err := helpers.ComputeSigningRoot(epoch, domain)
+	root, err := signing.ComputeSigningRoot(epoch, domain)
 	if err != nil {
 		return nil, err
 	}

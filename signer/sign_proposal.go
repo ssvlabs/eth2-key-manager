@@ -5,12 +5,12 @@ import (
 
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
-	"github.com/prysmaticlabs/prysm/shared/version"
+	"github.com/prysmaticlabs/prysm/runtime/version"
 
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -73,7 +73,7 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 		if !ok {
 			return nil, errors.New("could not convert obj to beacon block altair")
 		}
-		root, err = helpers.ComputeSigningRoot(block, domain)
+		root, err = signing.ComputeSigningRoot(block, domain)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root")
 		}
@@ -82,7 +82,7 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 		if !ok {
 			return nil, errors.New("could not convert obj to beacon block phase 0")
 		}
-		root, err = helpers.ComputeSigningRoot(block, domain)
+		root, err = signing.ComputeSigningRoot(block, domain)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root")
 		}

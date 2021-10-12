@@ -5,7 +5,7 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 
-	"github.com/prysmaticlabs/prysm/shared/timeutils"
+	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/sirupsen/logrus"
 )
 
@@ -88,7 +88,7 @@ func (n Network) SlotsPerEpoch() uint64 {
 
 // EstimatedCurrentSlot returns the estimation of the current slot
 func (n Network) EstimatedCurrentSlot() types.Slot {
-	return n.EstimatedSlotAtTime(timeutils.Now().Unix())
+	return n.EstimatedSlotAtTime(prysmTime.Now().Unix())
 }
 
 // EstimatedSlotAtTime estimates slot at the given time
