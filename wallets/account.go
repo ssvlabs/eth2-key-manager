@@ -30,7 +30,13 @@ func (account *HDAccount) MarshalJSON() ([]byte, error) {
 	data["id"] = account.id
 	data["name"] = account.name
 	data["validationKey"] = account.validationKey
-	data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey)
+	// Withdrawal public key is equal to public key in seedless mode
+	if hex.EncodeToString(account.withdrawalPubKey) != hex.EncodeToString(account.ValidatorPublicKey()) {
+		data["withdrawalPubKey"] = hex.EncodeToString(account.withdrawalPubKey)
+	} else {
+		// In case of seedless account we return empty string
+		data["withdrawalPubKey"] = ""
+	}
 	data["baseAccountPath"] = account.basePath
 	return json.Marshal(data)
 }

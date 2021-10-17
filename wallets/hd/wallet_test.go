@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"testing"
 
 	"github.com/google/uuid"
@@ -23,16 +22,11 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func _bigIntFromSkHex(input string) *big.Int {
-	res, _ := new(big.Int).SetString(input, 16)
-	return res
-}
-
 // ethereum foundation launched a launchpad for making deposits.
 // this test compares the launchpad results and KeyVault
 // Updated for V1.0.0 https://github.com/ethereum/eth2.0-deposit-cli/releases/tag/v1.0.0
 func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
-	core.InitBLS()
+	require.NoError(t, core.InitBLS())
 
 	tests := []struct {
 		mnemonic        string
@@ -73,7 +67,7 @@ func TestAccountDerivationComparedToOfficialLaunchPad(t *testing.T) {
 }
 
 func TestAccountDerivation(t *testing.T) {
-	core.InitBLS()
+	require.NoError(t, core.InitBLS())
 
 	// create wallet
 	storage := storage()

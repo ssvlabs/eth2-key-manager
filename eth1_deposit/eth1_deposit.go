@@ -2,10 +2,10 @@ package eth1deposit
 
 import (
 	"github.com/pkg/errors"
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	ssz "github.com/prysmaticlabs/go-ssz"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/shared/params"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
+	"github.com/prysmaticlabs/prysm/config/params"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	util "github.com/wealdtech/go-eth2-util"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -16,7 +16,7 @@ const (
 	MaxEffectiveBalanceInGwei uint64 = 32000000000
 
 	// BLSWithdrawalPrefixByte is the BLS withdrawal prefix
-	BLSWithdrawalPrefixByte byte = byte(0)
+	BLSWithdrawalPrefixByte = byte(0)
 )
 
 // IsSupportedDepositNetwork returns true if the given network is supported
@@ -45,7 +45,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 	}
 
 	// Create domain
-	domain, err := helpers.ComputeDomain(params.BeaconConfig().DomainDeposit, network.ForkVersion(), make([]byte, 32))
+	domain, err := signing.ComputeDomain(params.BeaconConfig().DomainDeposit, network.ForkVersion(), make([]byte, 32))
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to calculate domain")
 	}
@@ -76,7 +76,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 		Signature:             sig,
 	}
 
-	depositDataRoot, err := ssz.HashTreeRoot(signedDepositData)
+	depositDataRoot, err := signedDepositData.HashTreeRoot()
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}

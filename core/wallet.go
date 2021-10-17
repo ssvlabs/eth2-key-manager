@@ -22,11 +22,14 @@ type Wallet interface {
 	// Type provides the type of the wallet.
 	Type() WalletType
 
-	// CreateValidatorKey creates a new validation (validator) key pair in the wallet.
+	// CreateValidatorAccount creates a new validation (validator) key pair in the wallet.
 	// Keep in mind ND wallets will probably not allow this function, use AddValidatorAccount.
 	CreateValidatorAccount(seed []byte, indexPointer *int) (ValidatorAccount, error)
 
-	// Used to specifically add an account.
+	// CreateValidatorAccountFromPrivateKey creates validator account from Private Key
+	CreateValidatorAccountFromPrivateKey(privateKey []byte, indexPointer *int) (ValidatorAccount, error)
+
+	// AddValidatorAccount used to specifically add an account.
 	// Keep in mind HD wallets will probably not allow this function, use CreateValidatorAccount.
 	AddValidatorAccount(account ValidatorAccount) error
 

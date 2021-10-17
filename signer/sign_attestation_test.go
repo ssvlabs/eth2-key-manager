@@ -6,11 +6,12 @@ import (
 
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-	"github.com/prysmaticlabs/prysm/shared/timeutils"
-	"github.com/stretchr/testify/require"
+	prysmTime "github.com/prysmaticlabs/prysm/time"
 	util "github.com/wealdtech/go-eth2-util"
+
+	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -37,7 +38,7 @@ func ignoreError(val interface{}, err error) interface{} {
 func TestReferenceAttestation(t *testing.T) {
 	sk := _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c")
 	pk := _byteArray("a9cf360aa15fb1d1d30ee2b578dc5884823c19661886ae8b892775ccb3bd96b7d7345569a2aa0b14e4d015c54a6a0c54")
-	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a24080212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
 	domain := _byteArray("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	sig := _byteArray("b4fa352d2d6dbdf884266af7ea0914451929b343527ea6c1737ac93b3dde8b7c98e6ce61d68b7a2e7b7af8f8d0fd429d0bdd5f930b83e6842bf4342d3d1d3d10fc0d15bab7649bb8aa8287ca104a1f79d396ce0217bb5cd3e6503a3bce4c9776")
 
@@ -61,7 +62,7 @@ func TestReferenceAttestation(t *testing.T) {
 
 	// decode attestation
 	attData := &eth.AttestationData{}
-	require.NoError(t, attData.Unmarshal(attestationDataByts))
+	require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
 
 	actualSig, err := signer.SignBeaconAttestation(attData, domain, pk)
 	require.NoError(t, err)
@@ -71,7 +72,7 @@ func TestReferenceAttestation(t *testing.T) {
 func TestAttestationSlashingSignatures(t *testing.T) {
 	t.Run("valid attestation, sign using public key", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		_, err = signer.SignBeaconAttestation(&eth.AttestationData{
@@ -93,7 +94,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 	t.Run("valid attestation, sign using account name. Should error", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 		_, err = signer.SignBeaconAttestation(&eth.AttestationData{
 			Slot:            67,
@@ -115,7 +116,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 	t.Run("double vote with different roots, should error", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		// first
@@ -157,7 +158,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 	t.Run("same vote with different domain, should not sign", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		// first
@@ -200,7 +201,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 	t.Run("surrounding vote, should err", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		// first
@@ -264,7 +265,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 	t.Run("surrounded vote, should err", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		// first
@@ -329,7 +330,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 func TestAttestationSignaturesNoSlashingData(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	signer, err := setupWithSlashingProtection(seed, false, true)
+	signer, err := setupWithSlashingProtection(t, seed, false, true)
 	require.NoError(t, err)
 
 	res, err := signer.SignBeaconAttestation(&eth.AttestationData{
@@ -353,7 +354,7 @@ func TestAttestationSignaturesNoSlashingData(t *testing.T) {
 
 func TestAttestationSignatures(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
-	signer, err := setupWithSlashingProtection(seed, true, true)
+	signer, err := setupWithSlashingProtection(t, seed, true, true)
 	require.NoError(t, err)
 
 	derivedSk, err := util.PrivateKeyFromSeedAndPath(seed, "m/12381/3600/0/0/0")
@@ -503,10 +504,10 @@ func TestAttestationSignatures(t *testing.T) {
 func TestFarFutureAttestationSignature(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	network := core.PraterNetwork
-	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(timeutils.Now().Unix() + FarFutureMaxValidEpoch))
+	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(prysmTime.Now().Unix() + FarFutureMaxValidEpoch))
 
 	t.Run("max valid source", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		_, err = signer.SignBeaconAttestation(&eth.AttestationData{
@@ -527,7 +528,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 		require.NoError(t, err)
 	})
 	t.Run("too far into the future source", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 		_, err = signer.SignBeaconAttestation(&eth.AttestationData{
 			Slot:            284115,
@@ -547,7 +548,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 		require.EqualError(t, err, "source epoch too far into the future")
 	})
 	t.Run("max valid target", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 		_, err = signer.SignBeaconAttestation(&eth.AttestationData{
 			Slot:            284115,
@@ -568,7 +569,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 		require.NoError(t, err)
 	})
 	t.Run("too far into the future target", func(tt *testing.T) {
-		signer, err := setupWithSlashingProtection(seed, true, true)
+		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
 		_, err = signer.SignBeaconAttestation(&eth.AttestationData{

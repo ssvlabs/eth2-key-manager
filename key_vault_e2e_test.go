@@ -157,6 +157,7 @@ func TestOpenKeyVault(t *testing.T) {
 
 			// import keyvault
 			importedVault, err := NewKeyVault(options)
+			require.NoError(t, err)
 			// test common tests
 			testVault(t, importedVault, test.seed) // this will create some wallets and accounts
 

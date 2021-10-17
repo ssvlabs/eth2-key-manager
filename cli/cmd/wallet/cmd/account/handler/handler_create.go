@@ -2,101 +2,63 @@ package handler
 
 import (
 	"encoding/hex"
+	"strings"
+
+	types "github.com/prysmaticlabs/eth2-types"
 
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	cmd2 "github.com/bloxapp/eth2-key-manager/cli/cmd"
+	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
-// Create creates a new wallet account and prints the storage.
+// CreateAccountFlagValues keeps all collected values for seed and seedless modes
+type CreateAccountFlagValues struct {
+	index            int
+	seed             string
+	seedBytes        []byte
+	privateKeys      [][]byte
+	accumulate       bool
+	responseType     flag.ResponseType
+	highestSources   []uint64
+	highestTargets   []uint64
+	highestProposals []uint64
+	network          core.Network
+}
+
+// Create creates a new wallet account(s) and prints the storage.
 func (h *Account) Create(cmd *cobra.Command, args []string) error {
 	err := core.InitBLS()
 	if err != nil {
 		return errors.Wrap(err, "failed to init BLS")
 	}
 
-	// Get index flag.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	accountFlags, err := CollectAccountFlags(cmd)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the index flag value")
+		return errors.Wrap(err, "failed to collect account flags")
 	}
 
-	// Get seed flag.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	err = h.BuildAccounts(accountFlags)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the seed flag value")
+		return errors.Wrap(err, "failed to build accounts")
 	}
+	return nil
+}
 
-	seedBytes, err := hex.DecodeString(seedFlagValue)
-	if err != nil {
-		return errors.Wrap(err, "failed to HEX decode seed")
-	}
-
-	// Get accumulate flag.
-	accumulateFlagValue, err := flag.GetAccumulateFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the accumulate flag value")
-	}
-
-	// Get response-type flag.
-	responseType, err := flag.GetResponseTypeFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the response type value")
-	}
-
-	// Get minimals slashing data flag
-	highestSources, err := flag.GetHighestSourceFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
-	}
-	highestTargets, err := flag.GetHighestTargetFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
-	}
-	highestProposals, err := flag.GetHighestProposalFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the minimal slashing data value")
-	}
-
-	network, err := cmd2.GetNetworkFlagValue(cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to network")
-	}
-
-	if accumulateFlagValue {
-		if len(highestSources) != (indexFlagValue + 1) {
-			return errors.Errorf("highest sources length when the accumulate flag is true need to be equal to indexFlagValue")
-		}
-		if len(highestTargets) != (indexFlagValue + 1) {
-			return errors.Errorf("highest targets length when the accumulate flag is true need to be indexFlagValue")
-		}
-		if len(highestProposals) != (indexFlagValue + 1) {
-			return errors.Errorf("highest proposals length when the accumulate flag is true need to be indexFlagValue")
-		}
-	} else {
-		if len(highestSources) != 1 {
-			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
-		}
-		if len(highestTargets) != 1 {
-			return errors.Errorf("highest targets length when the accumulate flag is false need to be 1")
-		}
-		if len(highestProposals) != 1 {
-			return errors.Errorf("highest proposals length when the accumulate flag is false need to be 1")
-		}
-	}
-
-	// TODO get rid of network
-	store := inmemory.NewInMemStore(network)
+// BuildAccounts builds accounts based on account flags.
+func (h *Account) BuildAccounts(accountFlags *CreateAccountFlagValues) error {
+	// Initialize store
+	store := inmemory.NewInMemStore(accountFlags.network)
 	options := &eth2keymanager.KeyVaultOptions{}
 	options.SetStorage(store)
 
-	_, err = eth2keymanager.NewKeyVault(options)
+	// Create new key vault
+	_, err := eth2keymanager.NewKeyVault(options)
 	if err != nil {
 		return errors.Wrap(err, "failed to create key vault")
 	}
@@ -106,55 +68,21 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
-	if accumulateFlagValue {
-		for i := 0; i <= indexFlagValue; i++ {
-			acc, err := wallet.CreateValidatorAccount(seedBytes, &i)
+	if accountFlags.accumulate {
+		for i := 0; i <= accountFlags.index; i++ {
+			err := GenerateAccounts(wallet, store, i, accountFlags)
 			if err != nil {
-				return errors.Wrap(err, "failed to create validator account")
-			}
-
-			// add minimal attestation protection data
-			minimalAtt := &eth.AttestationData{
-				Source: &eth.Checkpoint{Epoch: uint64(highestSources[i])},
-				Target: &eth.Checkpoint{Epoch: uint64(highestTargets[i])},
-			}
-			if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
-				return errors.Wrap(err, "failed to set validator minimal slashing protection")
-			}
-
-			// add minimal proposal protection data
-			minimalProposal := &eth.BeaconBlock{
-				Slot: uint64(highestProposals[i]),
-			}
-			if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
-				return errors.Wrap(err, "failed to set validator minimal slashing protection")
+				return err
 			}
 		}
 	} else {
-		acc, err := wallet.CreateValidatorAccount(seedBytes, &indexFlagValue)
+		err := GenerateAccounts(wallet, store, accountFlags.index, accountFlags)
 		if err != nil {
-			return errors.Wrap(err, "failed to create validator account")
-		}
-
-		// add minimal attestation protection data
-		minimalAtt := &eth.AttestationData{
-			Source: &eth.Checkpoint{Epoch: uint64(highestSources[0])},
-			Target: &eth.Checkpoint{Epoch: uint64(highestTargets[0])},
-		}
-		if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
-			return errors.Wrap(err, "failed to set validator minimal slashing protection")
-		}
-
-		// add minimal proposal protection data
-		minimalProposal := &eth.BeaconBlock{
-			Slot: uint64(highestProposals[0]),
-		}
-		if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
-			return errors.Wrap(err, "failed to set validator minimal slashing protection")
+			return err
 		}
 	}
 
-	if responseType == flag.StorageResponseType {
+	if accountFlags.responseType == flag.StorageResponseType {
 		// marshal storage
 		bytes, err := store.MarshalJSON()
 		if err != nil {
@@ -167,22 +95,220 @@ func (h *Account) Create(cmd *cobra.Command, args []string) error {
 
 	var accounts []map[string]string
 	for _, a := range wallet.Accounts() {
+		var withdrawalPubKey string
+		if len(accountFlags.privateKeys) > 0 {
+			withdrawalPubKey = ""
+		} else {
+			withdrawalPubKey = hex.EncodeToString(a.WithdrawalPublicKey())
+		}
 		accObj := map[string]string{
 			"id":               a.ID().String(),
 			"name":             a.Name(),
 			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey()),
-			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey()),
+			"withdrawalPubKey": withdrawalPubKey,
 		}
 		accounts = append(accounts, accObj)
 	}
 
-	if accumulateFlagValue {
+	if accountFlags.accumulate || len(accountFlags.privateKeys) > 1 {
 		err = h.printer.JSON(accounts)
 	} else if len(accounts) > 0 {
 		err = h.printer.JSON(accounts[0])
 	}
 	if err != nil {
 		return errors.Wrap(err, "failed to print accounts JSON")
+	}
+	return nil
+}
+
+// CollectAccountFlags returns collected flags for seed and seedless modes
+func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
+	accountFlagValues := CreateAccountFlagValues{}
+
+	// Seedless mode
+	if cmd.Flags().Changed(flag.GetPrivateKeyFlagName()) {
+		// Get privateKey flag value.
+		privateKeyValues, err := flag.GetPrivateKeyFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the private key flag value")
+		}
+
+		privateKeys := strings.Split(privateKeyValues, ",")
+
+		for _, pk := range privateKeys {
+			privateKeyBytes, err := hex.DecodeString(pk)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to HEX decode private-key")
+			}
+			accountFlagValues.privateKeys = append(accountFlagValues.privateKeys, privateKeyBytes)
+		}
+	} else {
+		// Get seed flag value.
+		seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
+		}
+		accountFlagValues.seed = seedFlagValue
+
+		// Get seed bytes
+		seedBytes, err := hex.DecodeString(seedFlagValue)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to HEX decode seed")
+		}
+		accountFlagValues.seedBytes = seedBytes
+
+		// Get accumulate flag value.
+		accumulateFlagValue, err := flag.GetAccumulateFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the accumulate flag value")
+		}
+		accountFlagValues.accumulate = accumulateFlagValue
+	}
+
+	// Get index flag value.
+	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
+	}
+	accountFlagValues.index = indexFlagValue
+
+	// Get response-type flag value.
+	responseType, err := flag.GetResponseTypeFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the response type value")
+	}
+	accountFlagValues.responseType = responseType
+
+	// Get HighestSource flag value.
+	highestSources, err := flag.GetHighestSourceFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the minimal slashing data value")
+	}
+	accountFlagValues.highestSources = highestSources
+
+	// Get HighestTarget flag value.
+	highestTargets, err := flag.GetHighestTargetFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the minimal slashing data value")
+	}
+	accountFlagValues.highestTargets = highestTargets
+
+	// Get HighestProposal flag value.
+	highestProposals, err := flag.GetHighestProposalFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the minimal slashing data value")
+	}
+	accountFlagValues.highestProposals = highestProposals
+
+	// Validate highest attestation/proposal values
+	highestValuesError := ValidateHighestValues(accountFlagValues)
+	if highestValuesError != nil {
+		return nil, highestValuesError
+	}
+
+	// Get network flag value.
+	network, err := rootcmd.GetNetworkFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the network flag value")
+	}
+	accountFlagValues.network = network
+
+	return &accountFlagValues, nil
+}
+
+// GenerateAccounts generates account by index using provided account flags
+func GenerateAccounts(wallet core.Wallet, store *inmemory.InMemStore, index int, accountFlags *CreateAccountFlagValues) error {
+	var acc core.ValidatorAccount
+	var err error
+
+	if len(accountFlags.privateKeys) > 0 {
+		for i, pk := range accountFlags.privateKeys {
+			indexToCreateAccountAt := accountFlags.index + i
+			acc, err = wallet.CreateValidatorAccountFromPrivateKey(pk, &indexToCreateAccountAt)
+			if err != nil {
+				return errors.Wrap(err, "failed to create validator account from private key")
+			}
+
+			err = SaveHighestData(acc, store, accountFlags, i)
+			if err != nil {
+				return errors.Wrap(err, "failed to save highest att/proposal data for account")
+			}
+		}
+	} else {
+		acc, err = wallet.CreateValidatorAccount(accountFlags.seedBytes, &index)
+		if err != nil {
+			return errors.Wrap(err, "failed to create validator account")
+		}
+
+		err = SaveHighestData(acc, store, accountFlags, index)
+		if err != nil {
+			return errors.Wrap(err, "Can not save highest sources, targets and proposals for account")
+		}
+	}
+	return nil
+}
+
+// SaveHighestData save the highest source, target and proposal for account
+func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, accountFlags *CreateAccountFlagValues, index int) error {
+	highestIndex := index
+	if !accountFlags.accumulate && len(accountFlags.privateKeys) <= 1 {
+		highestIndex = 0
+	}
+
+	// add minimal attestation protection data
+	minimalAtt := &eth.AttestationData{
+		Source: &eth.Checkpoint{Epoch: types.Epoch(accountFlags.highestSources[highestIndex])},
+		Target: &eth.Checkpoint{Epoch: types.Epoch(accountFlags.highestTargets[highestIndex])},
+	}
+	if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
+		return errors.Wrap(err, "failed to save highest attestation")
+	}
+
+	// add minimal proposal protection data
+	minimalProposal := &eth.BeaconBlock{
+		Slot: types.Slot(accountFlags.highestProposals[highestIndex]),
+	}
+	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
+		return errors.Wrap(err, "failed to save highest proposal")
+	}
+	return nil
+}
+
+// ValidateHighestValues Performs basic validation for account highest attestation/proposal values
+func ValidateHighestValues(accountFlagValues CreateAccountFlagValues) error {
+	if len(accountFlagValues.privateKeys) > 0 {
+		errorExplain := "length for seedless accounts need to be equal to private keys count"
+		privateKeysCount := len(accountFlagValues.privateKeys)
+
+		if len(accountFlagValues.highestSources) != privateKeysCount {
+			return errors.Errorf("highest sources " + errorExplain)
+		}
+		if len(accountFlagValues.highestTargets) != privateKeysCount {
+			return errors.Errorf("highest targets " + errorExplain)
+		}
+		if len(accountFlagValues.highestProposals) != privateKeysCount {
+			return errors.Errorf("highest proposals " + errorExplain)
+		}
+	} else if accountFlagValues.accumulate {
+		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {
+			return errors.Errorf("highest sources length when the accumulate flag is true need to be equal to index")
+		}
+		if len(accountFlagValues.highestTargets) != (accountFlagValues.index + 1) {
+			return errors.Errorf("highest targets length when the accumulate flag is true need to be index")
+		}
+		if len(accountFlagValues.highestProposals) != (accountFlagValues.index + 1) {
+			return errors.Errorf("highest proposals length when the accumulate flag is true need to be index")
+		}
+	} else {
+		if len(accountFlagValues.highestSources) != 1 {
+			return errors.Errorf("highest sources length when the accumulate flag is false need to be 1")
+		}
+		if len(accountFlagValues.highestTargets) != 1 {
+			return errors.Errorf("highest targets length when the accumulate flag is false need to be 1")
+		}
+		if len(accountFlagValues.highestProposals) != 1 {
+			return errors.Errorf("highest proposals length when the accumulate flag is false need to be 1")
+		}
 	}
 	return nil
 }

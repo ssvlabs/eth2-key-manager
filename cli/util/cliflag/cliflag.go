@@ -16,7 +16,9 @@ func AddPersistentStringFlag(c *cobra.Command, flag string, value string, descri
 	c.PersistentFlags().String(flag, value, fmt.Sprintf("%s%s", description, req))
 
 	if isRequired {
-		c.MarkPersistentFlagRequired(flag)
+		if err := c.MarkPersistentFlagRequired(flag); err != nil {
+			fmt.Printf("failed to mark persistent string flage : %s", err)
+		}
 	}
 }
 
@@ -30,7 +32,9 @@ func AddPersistentIntFlag(c *cobra.Command, flag string, value int, description 
 	c.PersistentFlags().Int(flag, value, fmt.Sprintf("%s%s", description, req))
 
 	if isRequired {
-		c.MarkPersistentFlagRequired(flag)
+		if err := c.MarkPersistentFlagRequired(flag); err != nil {
+			fmt.Printf("failed to mark persistent int flage : %s", err)
+		}
 	}
 }
 
@@ -44,6 +48,8 @@ func AddPersistentBoolFlag(c *cobra.Command, flag string, value bool, descriptio
 	c.PersistentFlags().Bool(flag, value, fmt.Sprintf("%s%s", description, req))
 
 	if isRequired {
-		c.MarkPersistentFlagRequired(flag)
+		if err := c.MarkPersistentFlagRequired(flag); err != nil {
+			fmt.Printf("failed to mark persistent bool flage : %s", err)
+		}
 	}
 }

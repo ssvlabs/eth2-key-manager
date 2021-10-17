@@ -43,7 +43,7 @@ func TestAccountMarshaling(t *testing.T) {
 		},
 	}
 
-	core.InitBLS()
+	require.NoError(t, core.InitBLS())
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {

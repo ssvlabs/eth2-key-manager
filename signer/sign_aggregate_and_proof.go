@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
+	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
 // SignAggregateAndProof signs aggregate and proof
@@ -24,7 +24,7 @@ func (signer *SimpleSigner) SignAggregateAndProof(agg *eth.AggregateAttestationA
 		return nil, err
 	}
 
-	root, err := helpers.ComputeSigningRoot(agg, domain)
+	root, err := signing.ComputeSigningRoot(agg, domain)
 	if err != nil {
 		return nil, err
 	}
