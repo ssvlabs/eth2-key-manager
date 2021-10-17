@@ -24,4 +24,5 @@ require (
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20210707101027-e8523651bf6f
 
+// go.mode throwing error when prysm point dirctly to v2.X so replace to v2.0.1 here
 replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20211005004110-843ed50e0acc
