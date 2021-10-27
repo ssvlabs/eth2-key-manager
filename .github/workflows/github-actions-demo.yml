@@ -29,21 +29,21 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos')
         run: go build -o keyvault-cli ./cli
 
-#      # START windows steps
-#      - name: install mingw-w64
-#        if: ${{ startsWith(matrix.os, 'windows')
-#        run: brew install mingw-w64
-#
-#      - name: Create Cli
-#        if: ${{ startsWith(matrix.os, 'windows')
-#        run: env CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o keyvault-cli.exe ./cli
+      # START windows steps
+      - name: install mingw-w64
+        if: ${{ startsWith(matrix.os, 'windows')
+        run: brew install mingw-w64
 
-#      # START ubuntu steps
-#      - name: Create Cli
-#        if: ${{ startsWith(matrix.os, 'ubuntu')
-#        run: go build -o keyvault-cli ./cli
-#
-#      - name: List files in the repository
-#        if: ${{ startsWith(matrix.os, 'ubuntu')
-#        run: |
-#          ls ${{ github.workspace }}
+      - name: Create Cli
+        if: ${{ startsWith(matrix.os, 'windows')
+        run: env CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o keyvault-cli.exe ./cli
+
+      # START ubuntu steps
+      - name: Create Cli
+        if: ${{ startsWith(matrix.os, 'ubuntu')
+        run: go build -o keyvault-cli ./cli
+
+      - name: List files in the repository
+        if: ${{ startsWith(matrix.os, 'ubuntu')
+        run: |
+          ls ${{ github.workspace }}
