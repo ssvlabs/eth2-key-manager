@@ -16,23 +16,23 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go-version }}
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
 
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: List files in the repository
-      - run: |
-          ls ${{ github.workspace }}
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }}
 
-      - name: Test
-      - run: go build -o keyvault-cli ./cli
+    - name: Test
+    - run: go build -o keyvault-cli ./cli
 
-      - name: List files in the repository
-      - run: |
-          ls ${{ github.workspace }}
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }}
 
 
