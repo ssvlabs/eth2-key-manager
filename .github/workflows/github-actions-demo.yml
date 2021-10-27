@@ -1,17 +1,29 @@
-name: GitHub Actions Demo
-on: [push]
+name: Build/release
+
+on: push
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
 jobs:
-  Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
+  release:
+    runs-on: ${{ matrix.os }}
+    # runs-on: [self-hosted]
+
+    strategy:
+      matrix:
+        go-version: [1.15.x, 1.16.x]
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
         uses: actions/checkout@v2
+      - name: Test
+        run: go build -o keyvault-cli ./cli
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+
