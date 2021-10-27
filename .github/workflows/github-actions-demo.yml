@@ -27,7 +27,7 @@ jobs:
       # START macOs steps
       - name: Create Cli
       - if: ${{ startsWith(matrix.os, 'macos')
-        run: go build -o keyvault-cli ./cli
+      - run: go build -o keyvault-cli ./cli
 
 #      # START windows steps
 #      - name: install mingw-w64
