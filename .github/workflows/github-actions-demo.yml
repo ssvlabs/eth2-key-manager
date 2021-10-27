@@ -22,8 +22,16 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
       - name: Test
-        run: go build -o keyvault-cli ./cli
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: go build -o keyvault-cli ./cli
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
 
 
