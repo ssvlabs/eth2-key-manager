@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -31,7 +32,7 @@ jobs:
       - run: go build -o keyvault-cli ./cli
 
       - name: List files in the repository
-        run: |
+      - run: |
           ls ${{ github.workspace }}
 
 
