@@ -12,29 +12,37 @@ jobs:
 
     strategy:
       matrix:
-        go-version: [1.15.x, 1.16.x]
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        go-version: [ 1.16.x ]
+        os: [ windows-latest, macos-latest, ubuntu-latest ]
 
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
 
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: List files in the repository
-      run: |
+      # START macOs steps
+      - name: Create Cli
+      - if: ${{ startsWith(matrix.os, 'macos')
+        run: go build -o keyvault-cli ./cli
+
+      # START windows steps
+      if: ${{ startsWith(matrix.os, 'windows')
+      - run: brew install mingw-w64
+
+      - name: Create Cli
+        if: ${{ startsWith(matrix.os, 'windows')
+        run: env CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o keyvault-cli.exe ./cli
+
+      # START ubuntu steps
+      - name: Create Cli
+        if: ${{ startsWith(matrix.os, 'ubuntu')
+        run: go build -o keyvault-cli ./cli
+
+      - name: List files in the repository
+        if: ${{ startsWith(matrix.os, 'ubuntu')
+        run: |
           ls ${{ github.workspace }}
-    - run: echo "🍏 This job's status is ${{ job.status }}."
-
-    - name: Test
-      run: go build -o keyvault-cli ./cli
-
-    - name: List files in the repository
-      run: |
-          ls ${{ github.workspace }}
-    - run: echo "🍏 This job's status is ${{ job.status }}."
-
-
