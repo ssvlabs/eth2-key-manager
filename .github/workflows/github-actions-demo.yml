@@ -24,6 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List files in the repository
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          ls ${{ github.workspace }}
+
       # START macOs steps
       - name: Create Cli For Mac
         if: ${{ startsWith(matrix.os, 'macos') }}
