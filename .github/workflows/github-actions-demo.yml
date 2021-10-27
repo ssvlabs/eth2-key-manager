@@ -23,8 +23,18 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v2
-#
-#    - name: Test
-#    - run: go build -o keyvault-cli ./cli
+
+    - name: List files in the repository
+      run: |
+          ls ${{ github.workspace }}
+    - run: echo "🍏 This job's status is ${{ job.status }}."
+
+    - name: Test
+      run: go build -o keyvault-cli ./cli
+
+    - name: List files in the repository
+      run: |
+          ls ${{ github.workspace }}
+    - run: echo "🍏 This job's status is ${{ job.status }}."
 
 
