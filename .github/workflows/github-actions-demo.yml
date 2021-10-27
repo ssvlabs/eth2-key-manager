@@ -38,12 +38,12 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows')
         run: env CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o keyvault-cli.exe ./cli
 
-      # START ubuntu steps
-      - name: Create Cli
-        if: ${{ startsWith(matrix.os, 'ubuntu')
-        run: go build -o keyvault-cli ./cli
-
-      - name: List files in the repository
-        if: ${{ startsWith(matrix.os, 'ubuntu')
-        run: |
-          ls ${{ github.workspace }}
+#      # START ubuntu steps
+#      - name: Create Cli
+#        if: ${{ startsWith(matrix.os, 'ubuntu')
+#        run: go build -o keyvault-cli ./cli
+#
+#      - name: List files in the repository
+#        if: ${{ startsWith(matrix.os, 'ubuntu')
+#        run: |
+#          ls ${{ github.workspace }}
