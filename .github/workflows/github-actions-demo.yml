@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         go-version: [ 1.16.x ]
-        os: [ windows-latest, macos-latest]
+        os: [ macos-latest, ubuntu-latest ]
 
     steps:
       - name: Install Go
@@ -30,11 +30,11 @@ jobs:
         run: go build -o keyvault-cli ./cli
 
       - name: install mingw-w64
-        if: ${{ startsWith(matrix.os, 'windows') }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: brew install mingw-w64
 
       - name: Create Cli For Windows
-        if: ${{ startsWith(matrix.os, 'windows') }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: env CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o keyvault-cli.exe ./cli
 
       # START windows steps
