@@ -33,6 +33,18 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos-latest') }}
         run: go build -o keyvault-cli ./cli
 
+      - name: Rename cli file
+        run: mv keyvault-cli mac-keyvault-cli
+
+      - name: Release assets Mac
+        if: ${{ startsWith(matrix.os, 'macos-latest') && startsWith(github.ref, 'refs/tags/v') }}
+        uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          allowUpdates: true
+          artifacts: "mac-keyvault-cli"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: install mingw-w64
         if: ${{ startsWith(matrix.os, 'macos-latest') }}
         run: brew install mingw-w64
@@ -40,6 +52,15 @@ jobs:
       - name: Create Cli For Windows
         if: ${{ startsWith(matrix.os, 'macos-latest') }}
         run: env CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o keyvault-cli.exe ./cli
+
+      - name: Release assets Windows
+        if: ${{ startsWith(matrix.os, 'macos-latest') && startsWith(github.ref, 'refs/tags/v') }}
+        uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          allowUpdates: true
+          artifacts: "keyvault-cli.exe"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # START ubuntu steps
       - name: Create Cli
@@ -49,7 +70,7 @@ jobs:
       - name: Rename cli file
         run: mv keyvault-cli linux-keyvault-cli
 
-      - name: Release assets
+      - name: Release assets Linux
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
         uses: ncipollo/release-action@v1
         with:
