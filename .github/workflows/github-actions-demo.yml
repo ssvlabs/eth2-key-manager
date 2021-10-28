@@ -2,8 +2,8 @@ name: Build/release
 
 on:
   push:
-   branches:
-     - gm/BLOXIBF-1982_gitactions
+    tags:
+      - v*
 
 
 env:
