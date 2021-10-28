@@ -1,6 +1,9 @@
 name: Build/release
 
-on: push
+on:
+  push:
+   branches:
+     - gm/BLOXIBF-1982_gitactions
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
