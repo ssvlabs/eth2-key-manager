@@ -55,5 +55,5 @@ jobs:
         with:
           draft: true
           allowUpdates: true
-          artifacts: "keyvault-cli"
+          artifacts: "linux-keyvault-cli"
           token: ${{ secrets.GITHUB_TOKEN }}
