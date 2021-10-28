@@ -52,6 +52,7 @@ jobs:
         with:
           draft: true
           allowUpdates: true
+          tag: v1.0.9-dev.1
           artifacts: "keyvault-cli"
           token: ${{ secrets.GITHUB_TOKEN }}
 
