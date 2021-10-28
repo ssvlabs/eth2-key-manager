@@ -31,6 +31,7 @@ type SimpleSigner struct {
 	slashingProtector core.SlashingProtector
 	network           core.Network
 	signLocks         map[string]*sync.RWMutex
+	mapLock           *sync.RWMutex
 }
 
 // NewSimpleSigner is the constructor of SimpleSigner
@@ -40,11 +41,15 @@ func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtecto
 		slashingProtector: slashingProtector,
 		network:           network,
 		signLocks:         map[string]*sync.RWMutex{},
+		mapLock:           &sync.RWMutex{},
 	}
 }
 
 // lock locks signer
 func (signer *SimpleSigner) lock(accountID uuid.UUID, operation string) {
+	signer.mapLock.Lock()
+	defer signer.mapLock.Unlock()
+
 	k := accountID.String() + "_" + operation
 	if val, ok := signer.signLocks[k]; ok {
 		val.Lock()
@@ -55,6 +60,9 @@ func (signer *SimpleSigner) lock(accountID uuid.UUID, operation string) {
 }
 
 func (signer *SimpleSigner) unlock(accountID uuid.UUID, operation string) {
+	signer.mapLock.RLock()
+	defer signer.mapLock.RUnlock()
+
 	k := accountID.String() + "_" + operation
 	if val, ok := signer.signLocks[k]; ok {
 		val.Unlock()
