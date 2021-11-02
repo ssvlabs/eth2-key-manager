@@ -90,9 +90,7 @@ jobs:
 
       - name: change Permission
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
-        run: |
-          echo ls
-          chmod 777 linux-keyvault-cli
+        run: chmod 777 ./linux-keyvault-cli
 
       - name: Release assets Linux
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
