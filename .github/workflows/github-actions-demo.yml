@@ -38,6 +38,7 @@ jobs:
         run: go build -o keyvault-cli ./cli
 
       - name: change Permission
+        if: ${{ startsWith(matrix.os, 'macos-latest') && startsWith(github.ref, 'refs/tags/v') }}
         run: chmod +x keyvault-cli
 
       - name: Rename cli file
@@ -76,7 +77,8 @@ jobs:
         run: go build -o keyvault-cli ./cli
 
       - name: change Permission
-        run: chmod +x keyvault-cli
+        if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
+        run: chmod +x /keyvault-cli
 
       - name: Rename cli file
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
