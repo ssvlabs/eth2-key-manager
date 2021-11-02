@@ -18,9 +18,9 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-types/v2 v2.5.2
 	github.com/wealdtech/go-eth2-util v1.6.3
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/text v0.3.6
 )
 
 // go.mode throwing error when prysm point dirctly to v2.X so replace to v2.0.1 here
-replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20211005004110-843ed50e0acc
+replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20211101172615-63308239d94f
