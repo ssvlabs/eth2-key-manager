@@ -84,7 +84,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
         run: |
           echo ls
-          chmod +x linux-keyvault-cli
+          chmod 777 linux-keyvault-cli
 
       - name: Release assets Linux
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') && startsWith(github.ref, 'refs/tags/v') }}
