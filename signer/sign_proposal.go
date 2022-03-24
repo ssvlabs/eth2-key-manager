@@ -68,10 +68,19 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 	// 5. generate ssz root hash and sign
 	var root [32]byte
 	switch b.Version() {
+	case version.Bellatrix:
+		block, ok := b.Proto().(*ethpb.BeaconBlockBellatrix)
+		if !ok {
+			return nil, errors.New("failed type assertion for bellatrix block")
+		}
+		root, err = signing.ComputeSigningRoot(block, domain)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not get signing root")
+		}
 	case version.Altair:
 		block, ok := b.Proto().(*ethpb.BeaconBlockAltair)
 		if !ok {
-			return nil, errors.New("could not convert obj to beacon block altair")
+			return nil, errors.New("failed type assertion for altair block")
 		}
 		root, err = signing.ComputeSigningRoot(block, domain)
 		if err != nil {
@@ -80,12 +89,14 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 	case version.Phase0:
 		block, ok := b.Proto().(*ethpb.BeaconBlock)
 		if !ok {
-			return nil, errors.New("could not convert obj to beacon block phase 0")
+			return nil, errors.New("failed type assertion for phase0 block")
 		}
 		root, err = signing.ComputeSigningRoot(block, domain)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get signing root")
 		}
+	default:
+		return nil, errors.Errorf("unsupported block version %d", b.Version())
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
