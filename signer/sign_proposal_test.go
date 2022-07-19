@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
+	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	prysmTime "github.com/prysmaticlabs/prysm/time"
@@ -57,7 +58,7 @@ func TestBenchmarkBlockProposalAltair(t *testing.T) {
 	blk := &eth.BeaconBlockAltair{}
 	require.NoError(t, blk.UnmarshalSSZ(_byteArray(blockSSZByts)))
 
-	altairBeaconInterface, err := wrapper.WrappedAltairBeaconBlock(blk)
+	altairBeaconInterface, err := wrapper.WrappedBeaconBlock(blk)
 	require.NoError(t, err)
 	sig, err := signer.SignBeaconBlock(altairBeaconInterface, _byteArray(domain), _byteArray(pk))
 	require.NoError(t, err)
@@ -98,7 +99,7 @@ func TestBenchmarkBlockProposalBellatrix(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, blk.UnmarshalSSZ(blockBytes))
 
-	bellatrixBeaconInterface, err := wrapper.WrappedBellatrixBeaconBlock(blk)
+	bellatrixBeaconInterface, err := wrapper.WrappedBeaconBlock(blk)
 	require.NoError(t, err)
 	sig, err := signer.SignBeaconBlock(bellatrixBeaconInterface, _byteArray(domain), _byteArray(pk))
 	require.NoError(t, err)
@@ -137,7 +138,7 @@ func TestBenchmarkBlockProposal(t *testing.T) {
 	blk := &eth.BeaconBlock{}
 	require.NoError(t, json.Unmarshal(_byteArray(blockByts), blk))
 
-	sig, err := signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), _byteArray(domain), _byteArray(pk))
+	sig, err := signer.SignBeaconBlock(wrapBeaconBlock(t, blk), _byteArray(domain), _byteArray(pk))
 	require.NoError(t, err)
 	require.EqualValues(t, _byteArray(sigByts), sig)
 }
@@ -151,14 +152,14 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = 99
 
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NoError(t, err)
 	})
 
 	t.Run("valid proposal, sign using nil pk. Should error", func(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = 99
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), nil)
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), nil)
 		require.NotNil(t, err)
 		require.Error(t, err, "account was not supplied")
 	})
@@ -167,7 +168,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = 99
 		blk.StateRoot = _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
 		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
@@ -176,7 +177,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = 99
 		blk.Body.Graffiti = []byte("different body root")
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
 		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
@@ -185,7 +186,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = 99
 		blk.ParentRoot = _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52458")
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
 		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
@@ -194,7 +195,7 @@ func TestProposalSlashingSignatures(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = 99
 		blk.ProposerIndex = 3
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), []byte("domain"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NotNil(t, err)
 		require.EqualError(t, err, "slashable proposal (HighestProposalVote), not signing")
 	})
@@ -212,7 +213,7 @@ func TestFarFutureProposalSignature(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = maxValidSlot
 
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.NoError(t, err)
 	})
 	t.Run("too far into the future source", func(tt *testing.T) {
@@ -222,7 +223,13 @@ func TestFarFutureProposalSignature(t *testing.T) {
 		blk := testBlock(t)
 		blk.Slot = maxValidSlot + 1
 
-		_, err = signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
+		_, err = signer.SignBeaconBlock(wrapBeaconBlock(t, blk), _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 		require.EqualError(t, err, "proposed block slot too far into the future")
 	})
+}
+
+func wrapBeaconBlock(t *testing.T, blk any) interfaces.BeaconBlock {
+	wrapped, err := wrapper.WrappedBeaconBlock(blk)
+	require.NoError(t, err)
+	return wrapped
 }

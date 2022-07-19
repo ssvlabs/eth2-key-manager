@@ -3,9 +3,9 @@ package signer
 import (
 	"sync"
 
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
+	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
 
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 	"github.com/google/uuid"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
@@ -15,7 +15,7 @@ import (
 
 // ValidatorSigner represents the behavior of the validator signer
 type ValidatorSigner interface {
-	SignBeaconBlock(block block.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
+	SignBeaconBlock(block interfaces.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
 	SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error)
 	SignAggregateAndProof(agg *eth.AggregateAttestationAndProof, domain []byte, pubKey []byte) ([]byte, error)
 	SignSlot(slot types.Slot, domain []byte, pubKey []byte) ([]byte, error)

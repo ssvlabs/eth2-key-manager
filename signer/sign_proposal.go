@@ -7,7 +7,7 @@ import (
 
 	"github.com/prysmaticlabs/prysm/runtime/version"
 
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
+	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
@@ -16,7 +16,7 @@ import (
 )
 
 // TEMPORARYPhase0BlockConversion takes prysm's beacon block interface and converts it to phase0 block
-func TEMPORARYPhase0BlockConversion(b block.BeaconBlock) *ethpb.BeaconBlock {
+func TEMPORARYPhase0BlockConversion(b interfaces.BeaconBlock) *ethpb.BeaconBlock {
 	return &ethpb.BeaconBlock{
 		ProposerIndex: b.ProposerIndex(),
 		Slot:          b.Slot(),
@@ -36,7 +36,7 @@ func TEMPORARYPhase0BlockConversion(b block.BeaconBlock) *ethpb.BeaconBlock {
 }
 
 // SignBeaconBlock signs the given beacon block
-func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -107,7 +107,7 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 }
 
 // verifySlashableAndUpdate verified if block is slashable, if not saves it as the highest
-func (signer *SimpleSigner) verifySlashableAndUpdate(b block.BeaconBlock, pubKey []byte) (*core.ProposalSlashStatus, error) {
+func (signer *SimpleSigner) verifySlashableAndUpdate(b interfaces.BeaconBlock, pubKey []byte) (*core.ProposalSlashStatus, error) {
 	/**
 	We convert the beacon block interface into a phase 0 block, we can allow to do so (even with the differences between phase0 and altair blocks)
 	because slashing conditions didn't change.
