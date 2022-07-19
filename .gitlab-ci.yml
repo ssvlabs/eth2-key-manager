@@ -13,11 +13,11 @@ variables:
   DOCKER_REPO_INFRA_STAGE: $ACCOUNT_ID_INFRA_STAGE.dkr.ecr.$AWS_REGION_INFRA_STAGE.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_STAGE: "1"
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
-  STAGE_GO_IMAGE: golang:1.17-bullseye
+  STAGE_GO_IMAGE: golang:1.18-bullseye
 
 Run linter:
   stage: lint
-  image: golang:1.17
+  image: golang:1.18
   tags:
     - blox-infra-stage
   script:
