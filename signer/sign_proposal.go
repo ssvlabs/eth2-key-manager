@@ -3,6 +3,7 @@ package signer
 import (
 	"encoding/hex"
 
+	ssz "github.com/ferranbt/fastssz"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/prysmaticlabs/prysm/runtime/version"
@@ -66,37 +67,28 @@ func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []b
 	}
 
 	// 5. generate ssz root hash and sign
-	var root [32]byte
+	var (
+		block ssz.HashRoot
+		ok    bool
+	)
 	switch b.Version() {
+	case version.BellatrixBlind:
+		block, ok = b.Proto().(*ethpb.BlindedBeaconBlockBellatrix)
 	case version.Bellatrix:
-		block, ok := b.Proto().(*ethpb.BeaconBlockBellatrix)
-		if !ok {
-			return nil, errors.New("failed type assertion for bellatrix block")
-		}
-		root, err = signing.ComputeSigningRoot(block, domain)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not get signing root")
-		}
+		block, ok = b.Proto().(*ethpb.BeaconBlockBellatrix)
 	case version.Altair:
-		block, ok := b.Proto().(*ethpb.BeaconBlockAltair)
-		if !ok {
-			return nil, errors.New("failed type assertion for altair block")
-		}
-		root, err = signing.ComputeSigningRoot(block, domain)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not get signing root")
-		}
+		block, ok = b.Proto().(*ethpb.BeaconBlockAltair)
 	case version.Phase0:
-		block, ok := b.Proto().(*ethpb.BeaconBlock)
-		if !ok {
-			return nil, errors.New("failed type assertion for phase0 block")
-		}
-		root, err = signing.ComputeSigningRoot(block, domain)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not get signing root")
-		}
+		block, ok = b.Proto().(*ethpb.BeaconBlock)
 	default:
 		return nil, errors.Errorf("unsupported block version %d", b.Version())
+	}
+	if !ok {
+		return nil, errors.Errorf("failed type assertion for %s block", version.String(b.Version()))
+	}
+	root, err := signing.ComputeSigningRoot(block, domain)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get signing root")
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
