@@ -23,6 +23,7 @@ type ValidatorSigner interface {
 	SignSyncCommittee(msgBlockRoot []byte, domain []byte, pubKey []byte) ([]byte, error)
 	SignSyncCommitteeSelectionData(data *eth.SyncAggregatorSelectionData, domain []byte, pubKey []byte) ([]byte, error)
 	SignSyncCommitteeContributionAndProof(contribAndProof *eth.ContributionAndProof, domain []byte, pubKey []byte) ([]byte, error)
+	SignRegistration(registration *eth.ValidatorRegistrationV1, domain []byte, pubKey []byte) ([]byte, error)
 }
 
 // SimpleSigner implements ValidatorSigner interface
