@@ -3,11 +3,12 @@ package signer
 import (
 	"encoding/hex"
 
+	ssz "github.com/ferranbt/fastssz"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/prysmaticlabs/prysm/runtime/version"
 
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
+	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
@@ -16,7 +17,7 @@ import (
 )
 
 // TEMPORARYPhase0BlockConversion takes prysm's beacon block interface and converts it to phase0 block
-func TEMPORARYPhase0BlockConversion(b block.BeaconBlock) *ethpb.BeaconBlock {
+func TEMPORARYPhase0BlockConversion(b interfaces.BeaconBlock) *ethpb.BeaconBlock {
 	return &ethpb.BeaconBlock{
 		ProposerIndex: b.ProposerIndex(),
 		Slot:          b.Slot(),
@@ -36,7 +37,7 @@ func TEMPORARYPhase0BlockConversion(b block.BeaconBlock) *ethpb.BeaconBlock {
 }
 
 // SignBeaconBlock signs the given beacon block
-func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -66,37 +67,28 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 	}
 
 	// 5. generate ssz root hash and sign
-	var root [32]byte
+	var (
+		block ssz.HashRoot
+		ok    bool
+	)
 	switch b.Version() {
+	case version.BellatrixBlind:
+		block, ok = b.Proto().(*ethpb.BlindedBeaconBlockBellatrix)
 	case version.Bellatrix:
-		block, ok := b.Proto().(*ethpb.BeaconBlockBellatrix)
-		if !ok {
-			return nil, errors.New("failed type assertion for bellatrix block")
-		}
-		root, err = signing.ComputeSigningRoot(block, domain)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not get signing root")
-		}
+		block, ok = b.Proto().(*ethpb.BeaconBlockBellatrix)
 	case version.Altair:
-		block, ok := b.Proto().(*ethpb.BeaconBlockAltair)
-		if !ok {
-			return nil, errors.New("failed type assertion for altair block")
-		}
-		root, err = signing.ComputeSigningRoot(block, domain)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not get signing root")
-		}
+		block, ok = b.Proto().(*ethpb.BeaconBlockAltair)
 	case version.Phase0:
-		block, ok := b.Proto().(*ethpb.BeaconBlock)
-		if !ok {
-			return nil, errors.New("failed type assertion for phase0 block")
-		}
-		root, err = signing.ComputeSigningRoot(block, domain)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not get signing root")
-		}
+		block, ok = b.Proto().(*ethpb.BeaconBlock)
 	default:
 		return nil, errors.Errorf("unsupported block version %d", b.Version())
+	}
+	if !ok {
+		return nil, errors.Errorf("failed type assertion for %s block", version.String(b.Version()))
+	}
+	root, err := signing.ComputeSigningRoot(block, domain)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get signing root")
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
@@ -107,7 +99,7 @@ func (signer *SimpleSigner) SignBeaconBlock(b block.BeaconBlock, domain []byte, 
 }
 
 // verifySlashableAndUpdate verified if block is slashable, if not saves it as the highest
-func (signer *SimpleSigner) verifySlashableAndUpdate(b block.BeaconBlock, pubKey []byte) (*core.ProposalSlashStatus, error) {
+func (signer *SimpleSigner) verifySlashableAndUpdate(b interfaces.BeaconBlock, pubKey []byte) (*core.ProposalSlashStatus, error) {
 	/**
 	We convert the beacon block interface into a phase 0 block, we can allow to do so (even with the differences between phase0 and altair blocks)
 	because slashing conditions didn't change.
