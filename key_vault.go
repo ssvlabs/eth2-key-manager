@@ -11,7 +11,7 @@ import (
 
 	// Force import a transitive dependency to fix an ambiguous import error.
 	// See https://github.com/btcsuite/btcd/issues/1839
-	_ "github.com/btcsuite/btcd/btcec"
+	_ "github.com/btcsuite/btcd/btcec/v2"
 )
 
 // InitCrypto initializes cryptography
