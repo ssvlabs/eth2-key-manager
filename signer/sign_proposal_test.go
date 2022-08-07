@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	consensusblocks "github.com/prysmaticlabs/prysm/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
-	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	prysmTime "github.com/prysmaticlabs/prysm/time"
@@ -58,7 +58,7 @@ func TestBenchmarkBlockProposalAltair(t *testing.T) {
 	blk := &eth.BeaconBlockAltair{}
 	require.NoError(t, blk.UnmarshalSSZ(_byteArray(blockSSZByts)))
 
-	altairBeaconInterface, err := wrapper.WrappedBeaconBlock(blk)
+	altairBeaconInterface, err := consensusblocks.NewBeaconBlock(blk)
 	require.NoError(t, err)
 	sig, err := signer.SignBeaconBlock(altairBeaconInterface, _byteArray(domain), _byteArray(pk))
 	require.NoError(t, err)
@@ -99,7 +99,7 @@ func TestBenchmarkBlockProposalBellatrix(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, blk.UnmarshalSSZ(blockBytes))
 
-	bellatrixBeaconInterface, err := wrapper.WrappedBeaconBlock(blk)
+	bellatrixBeaconInterface, err := consensusblocks.NewBeaconBlock(blk)
 	require.NoError(t, err)
 	sig, err := signer.SignBeaconBlock(bellatrixBeaconInterface, _byteArray(domain), _byteArray(pk))
 	require.NoError(t, err)
@@ -140,7 +140,7 @@ func TestBenchmarkBlindedBlockProposalBellatrix(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, blk.UnmarshalSSZ(blockBytes))
 
-	bellatrixBeaconInterface, err := wrapper.WrappedBeaconBlock(blk)
+	bellatrixBeaconInterface, err := consensusblocks.NewBeaconBlock(blk)
 	require.NoError(t, err)
 	sig, err := signer.SignBeaconBlock(bellatrixBeaconInterface, _byteArray(domain), _byteArray(pk))
 	require.NoError(t, err)
@@ -270,7 +270,7 @@ func TestFarFutureProposalSignature(t *testing.T) {
 }
 
 func wrapBeaconBlock(t *testing.T, blk any) interfaces.BeaconBlock {
-	wrapped, err := wrapper.WrappedBeaconBlock(blk)
+	wrapped, err := consensusblocks.NewBeaconBlock(blk)
 	require.NoError(t, err)
 	return wrapped
 }

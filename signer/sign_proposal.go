@@ -3,7 +3,7 @@ package signer
 import (
 	"encoding/hex"
 
-	ssz "github.com/ferranbt/fastssz"
+	ssz "github.com/prysmaticlabs/fastssz"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/prysmaticlabs/prysm/runtime/version"
@@ -67,19 +67,23 @@ func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []b
 	}
 
 	// 5. generate ssz root hash and sign
+	pb, err := b.Proto()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get Protobuf block")
+	}
 	var (
 		block ssz.HashRoot
 		ok    bool
 	)
 	switch b.Version() {
 	case version.BellatrixBlind:
-		block, ok = b.Proto().(*ethpb.BlindedBeaconBlockBellatrix)
+		block, ok = pb.(*ethpb.BlindedBeaconBlockBellatrix)
 	case version.Bellatrix:
-		block, ok = b.Proto().(*ethpb.BeaconBlockBellatrix)
+		block, ok = pb.(*ethpb.BeaconBlockBellatrix)
 	case version.Altair:
-		block, ok = b.Proto().(*ethpb.BeaconBlockAltair)
+		block, ok = pb.(*ethpb.BeaconBlockAltair)
 	case version.Phase0:
-		block, ok = b.Proto().(*ethpb.BeaconBlock)
+		block, ok = pb.(*ethpb.BeaconBlock)
 	default:
 		return nil, errors.Errorf("unsupported block version %d", b.Version())
 	}
