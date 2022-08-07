@@ -17,7 +17,7 @@ variables:
 
 Run linter:
   stage: lint
-  image: golang:1.18
+  image: $STAGE_GO_IMAGE
   tags:
     - blox-infra-stage
   script:
