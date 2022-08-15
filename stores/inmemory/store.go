@@ -22,10 +22,10 @@ type InMemStore struct {
 	accountsLock sync.Mutex
 	accounts     map[string]*wallets.HDAccount
 
-	highestAttestationLock sync.Mutex
+	highestAttestationLock sync.RWMutex
 	highestAttestation     map[string]*eth.AttestationData
 
-	highestProposalLock sync.Mutex
+	highestProposalLock sync.RWMutex
 	highestProposal     map[string]*eth.BeaconBlock
 
 	encryptor          encryptor2.Encryptor
