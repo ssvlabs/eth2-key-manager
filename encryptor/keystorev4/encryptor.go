@@ -101,10 +101,10 @@ func WithCipher(cipher string) Option {
 
 // New creates a new keystore V4 encryptor.
 // This takes the following options:
-// - cipher: the cipher to use when encrypting the secret, can be either "pbkdf2" (default) or "scrypt"
+// - cipher: the cipher to use when encrypting the secret, can be either "scrypt" (default) or "pbkdf2"
 func New(opts ...Option) *Encryptor {
 	options := options{
-		cipher: "pbkdf2",
+		cipher: "scrypt",
 	}
 	for _, o := range opts {
 		o.apply(&options)
