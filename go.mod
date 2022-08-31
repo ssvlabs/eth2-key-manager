@@ -3,8 +3,8 @@ module github.com/bloxapp/eth2-key-manager
 go 1.18
 
 require (
-	github.com/btcsuite/btcd/btcec/v2 v2.2.0
-	github.com/ethereum/go-ethereum v1.10.21
+	github.com/btcsuite/btcd/btcec/v2 v2.2.1
+	github.com/ethereum/go-ethereum v1.10.23
 	github.com/google/uuid v1.3.0
 	github.com/herumi/bls-eth-go-binary v0.0.0-20210917013441-d37c07cfda4e
 	github.com/pkg/errors v0.9.1
@@ -17,7 +17,7 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-types/v2 v2.5.2
 	github.com/wealdtech/go-eth2-util v1.6.3
-	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
+	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 	golang.org/x/text v0.3.7
 )
 
@@ -30,7 +30,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/dgraph-io/ristretto v0.0.4-0.20210318174700-74754f61e018 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/ferranbt/fastssz v0.0.0-20210905181407-59cf6761a7d5 // indirect
@@ -67,7 +67,7 @@ require (
 	github.com/wealdtech/go-bytesutil v1.1.1 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
-	golang.org/x/sys v0.0.0-20220702020025-31831981b65f // indirect
+	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	google.golang.org/genproto v0.0.0-20210426193834-eac7f76ac494 // indirect
 	google.golang.org/grpc v1.40.0 // indirect
