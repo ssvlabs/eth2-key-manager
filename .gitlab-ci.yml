@@ -31,7 +31,7 @@ Security check:
   tags:
     - blox-infra-stage
   script:
-    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
+    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.13.1
     - ./bin/gosec -exclude G104 ./...
 
 Test stage Docker image:
