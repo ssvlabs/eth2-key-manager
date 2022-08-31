@@ -21,8 +21,8 @@ Run linter:
   tags:
     - blox-infra-stage
   script:
-    - go get -u golang.org/x/lint/golint
-    - go get -u golang.org/x/tools/cmd/goimports
+    - go install golang.org/x/lint/golint@latest
+    - go install golang.org/x/tools/cmd/goimports@latest
     - ./scripts/lint.sh .
 
 Security check:
