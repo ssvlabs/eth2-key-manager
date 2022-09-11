@@ -3,10 +3,9 @@ package signer
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"log"
 	"testing"
 
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
@@ -55,7 +54,7 @@ func setupWithSlashingProtection(t *testing.T, seed []byte, setLatestAttestation
 	// update highest attestation
 	acc, err := wallet.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	if setLatestAttestation {
 		err := protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
@@ -276,7 +275,7 @@ func TestAggregateAndProofReferenceSignatures(t *testing.T) {
 	require.EqualValues(t, sigByts, sig)
 }
 
-//tested against a block and sig generated from  https://github.com/prysmaticlabs/prysm/blob/develop/shared/testutil/block.go#L170
+// tested against a block and sig generated from  https://github.com/prysmaticlabs/prysm/blob/develop/shared/testutil/block.go#L170
 func TestRandaoReferenceSignatures(t *testing.T) {
 	sk := _byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc")
 	pk := _byteArray("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972")

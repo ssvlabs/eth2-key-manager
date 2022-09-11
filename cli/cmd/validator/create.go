@@ -3,6 +3,7 @@ package validator
 import (
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -32,7 +33,7 @@ var createCmd = &cobra.Command{
 }
 
 func fileResultFactory(name string) (io.Writer, func(), error) {
-	outFile, err := os.Create(name + ".zip")
+	outFile, err := os.Create(filepath.Clean(name + ".zip"))
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to create zip file")
 	}

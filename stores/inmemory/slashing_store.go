@@ -16,9 +16,9 @@ func (store *InMemStore) SaveHighestAttestation(pubKey []byte, attestation *eth.
 
 // RetrieveHighestAttestation retrieves highest attestation
 func (store *InMemStore) RetrieveHighestAttestation(pubKey []byte) *eth.AttestationData {
-	store.highestAttestationLock.Lock()
+	store.highestAttestationLock.RLock()
 	val := store.highestAttestation[hex.EncodeToString(pubKey)]
-	store.highestAttestationLock.Unlock()
+	store.highestAttestationLock.RUnlock()
 	return val
 }
 
@@ -32,8 +32,8 @@ func (store *InMemStore) SaveHighestProposal(pubKey []byte, block *eth.BeaconBlo
 
 // RetrieveHighestProposal returns highest proposal
 func (store *InMemStore) RetrieveHighestProposal(pubKey []byte) *eth.BeaconBlock {
-	store.highestProposalLock.Lock()
+	store.highestProposalLock.RLock()
 	val := store.highestProposal[hex.EncodeToString(pubKey)]
-	store.highestProposalLock.Unlock()
+	store.highestProposalLock.RUnlock()
 	return val
 }

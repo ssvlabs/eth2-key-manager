@@ -8,6 +8,10 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+
+	// Force import a transitive dependency to fix an ambiguous import error.
+	// See https://github.com/btcsuite/btcd/issues/1839
+	_ "github.com/btcsuite/btcd/btcec/v2"
 )
 
 // InitCrypto initializes cryptography

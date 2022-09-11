@@ -4,7 +4,6 @@ stages:
   - test
 
 variables:
-
   #GLOBAL
   IMAGE_NAME: eth2-key-manager
 
@@ -14,17 +13,16 @@ variables:
   DOCKER_REPO_INFRA_STAGE: $ACCOUNT_ID_INFRA_STAGE.dkr.ecr.$AWS_REGION_INFRA_STAGE.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_STAGE: "1"
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
-  STAGE_GO_IMAGE: 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:golang-1.15
-
+  STAGE_GO_IMAGE: golang:1.18-bullseye
 
 Run linter:
   stage: lint
-  image: golang:1.15
+  image: $STAGE_GO_IMAGE
   tags:
     - blox-infra-stage
   script:
-    - go get -u golang.org/x/lint/golint
-    - go get -u golang.org/x/tools/cmd/goimports
+    - go install golang.org/x/lint/golint@latest
+    - go install golang.org/x/tools/cmd/goimports@latest
     - ./scripts/lint.sh .
 
 Security check:
@@ -33,13 +31,13 @@ Security check:
   tags:
     - blox-infra-stage
   script:
-    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
+    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.13.1
     - ./bin/gosec -exclude G104 ./...
 
 Test stage Docker image:
   stage: test
   image: $STAGE_GO_IMAGE
   tags:
-    - blox-infra-stage 
+    - blox-infra-stage
   script:
     - go test -v -cover -race -p 1 ./...

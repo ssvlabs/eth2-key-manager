@@ -6,8 +6,8 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/pkg/errors"
-	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 )
 
 // SignSyncCommittee sign sync committee
