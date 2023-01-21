@@ -2,12 +2,12 @@ package slashingprotection
 
 import (
 	"encoding/hex"
-	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"testing"
 
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/eth2-key-manager"
+	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )

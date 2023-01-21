@@ -3,20 +3,14 @@ package signer
 import (
 	"sync"
 
-	"github.com/attestantio/go-eth2-client/api"
 	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/google/uuid"
-)
 
-type VersionedBeaconBlock struct {
-	IsBlinded bool
-	Regular   *spec.VersionedBeaconBlock
-	Blinded   *api.VersionedBlindedBeaconBlock
-}
+	"github.com/bloxapp/eth2-key-manager/core"
+)
 
 // ValidatorSigner represents the behavior of the validator signer
 type ValidatorSigner interface {

@@ -2,6 +2,7 @@ package inmemory
 
 import (
 	"encoding/hex"
+
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 )
 
