@@ -3,6 +3,7 @@ package eth1deposit
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -29,8 +30,8 @@ func TestMainetDepositData(t *testing.T) {
 			validatorPrivKey:              _ignoreErr(hex.DecodeString("175db1c5411459893301c3f2ebe740e5da07db8f17c2df4fa0be6d31a48a4f79")),
 			withdrawalPubKey:              _ignoreErr(hex.DecodeString("8d176708b908f288cc0e9d43f75674e73c0db94026822c5ce2c3e0f9e773c9ee95fdba824302f1208c225b0ed2d54154")),
 			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("8ab63bb2ef45d5fe4b5ba3b6aa2db122db350c05846b6ffc1415c603ba998226599a21aa65a8cb55c1b888767bdac2b51901d34cde41003c689b8c125fc67d3abd2527ccaf1390c13c3fc65a7422de8a7e29ae8e9736321606172c7b3bf6de36")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("76139d2c8d8e87a4737ce7acbf97ce8980732921550c5443a8754635c11296d3")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("ad3a400c3aadeaf5f734ba88511bcd27872a4561080126b967e46d3742c9b62c62ff93503a166c37382868c46816fd58083db53731d0c5413dc2801a2308ffb35d18997779bf1af01cd76489ad42d91bb67211dd02723b728f8a8a08c3307a77")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("fb8defd3efaa1c73967bc4624e5f6ad548ffef348223a713f1118dc585a77fca")),
 		},
 	}
 
@@ -49,17 +50,17 @@ func TestMainetDepositData(t *testing.T) {
 				MaxEffectiveBalanceInGwei,
 			)
 			require.NoError(t, err)
-			require.Equal(t, val.PublicKey().Serialize(), depositData.PublicKey)
+			require.Equal(t, val.PublicKey().SerializeToHexStr(), strings.TrimPrefix(depositData.PublicKey.String(), "0x"))
 			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
 			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
 			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))
-			require.Equal(t, test.expectedSig, depositData.Signature, hex.EncodeToString(depositData.Signature))
+			require.Equal(t, hex.EncodeToString(test.expectedSig), strings.TrimPrefix(depositData.Signature.String(), "0x"))
 
-			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey))
+			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey[:]))
 			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
 			fmt.Printf("Amount: %d\n", depositData.Amount)
 			fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
-			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature))
+			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature[:]))
 		})
 	}
 }
@@ -67,7 +68,6 @@ func TestMainetDepositData(t *testing.T) {
 // tested against eth2.0-deposit-cli V1.1.0
 // Mnemonic: sphere attract wide clown fire balcony dance maple sphere seat design dentist eye orbit diet apart noise cinnamon wealth magic inject witness dress divorce
 func TestPraterDepositData(t *testing.T) {
-	t.Skip("prater deposit data test fails")
 	tests := []struct {
 		testname                      string
 		validatorPrivKey              []byte
@@ -80,8 +80,8 @@ func TestPraterDepositData(t *testing.T) {
 			validatorPrivKey:              _ignoreErr(hex.DecodeString("175db1c5411459893301c3f2ebe740e5da07db8f17c2df4fa0be6d31a48a4f79")),
 			withdrawalPubKey:              _ignoreErr(hex.DecodeString("8d176708b908f288cc0e9d43f75674e73c0db94026822c5ce2c3e0f9e773c9ee95fdba824302f1208c225b0ed2d54154")),
 			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("ab4c9da6a20f385da7a8beb8ac8f58d691d83cd31ba807dbb6de631f5b4c5b1e82e811e41422ccbcd16ef5cb370e50af093dd58ebbc1575b5ed0395ab94538bf0a938f75ec683d4e2e1090c6f1e79a85d771781c3d72a3718451684360e43241")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("06175367bbd24e1966fb7b4299d1a6b0fc107c4385872fc9e4f956e5ffcb61dc")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("aacdb59866b8092f004233799a41ca488b606c937689f1e09905476577269b6819ebf25ad0fc44e54799cc57852a5e19126b667fd9fd0df73d7e8d9f24203eb26ad920a0fdcc9e60f2e300fd0a3caf64b1fa19c59bf5dfb84fd14176948a92d2")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("b29c77d193afa3b6caadd22a845d39d047aaef991927e031e6fbbb4b6995b5f4")),
 		},
 	}
 
@@ -100,17 +100,17 @@ func TestPraterDepositData(t *testing.T) {
 				MaxEffectiveBalanceInGwei,
 			)
 			require.NoError(t, err)
-			require.Equal(t, val.PublicKey().Serialize(), depositData.PublicKey)
+			require.Equal(t, val.PublicKey().SerializeToHexStr(), strings.TrimPrefix(depositData.PublicKey.String(), "0x"))
 			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
 			require.Equal(t, MaxEffectiveBalanceInGwei, depositData.Amount)
 			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))
-			require.Equal(t, test.expectedSig, depositData.Signature, hex.EncodeToString(depositData.Signature))
+			require.Equal(t, hex.EncodeToString(test.expectedSig), strings.TrimPrefix(depositData.Signature.String(), "0x"))
 
-			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey))
+			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey[:]))
 			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
 			fmt.Printf("Amount: %d\n", depositData.Amount)
 			fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
-			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature))
+			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature[:]))
 		})
 	}
 }
@@ -119,7 +119,7 @@ func TestUnsupportedNetwork(t *testing.T) {
 	depositData, root, err := DepositData(
 		nil,
 		make([]byte, 48),
-		core.Network("not_supported"),
+		"not_supported",
 		MaxEffectiveBalanceInGwei,
 	)
 	require.EqualError(t, err, "Network not_supported is not supported")

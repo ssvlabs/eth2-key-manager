@@ -2,12 +2,12 @@ package slashingprotection
 
 import (
 	"encoding/hex"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"testing"
 
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
@@ -15,6 +15,13 @@ import (
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
 	return res
+}
+
+func _byteArray32(input string) [32]byte {
+	res, _ := hex.DecodeString(input)
+	var res32 [32]byte
+	copy(res32[:], res)
+	return res32
 }
 
 func store() *inmemory.InMemStore {
@@ -52,13 +59,14 @@ func setupProposal(t *testing.T, updateHighestProposal bool) (core.SlashingProte
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 
 	if updateHighestProposal {
-		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), &eth.BeaconBlock{
+		blk := &phase0.BeaconBlock{
 			Slot:          100,
 			ProposerIndex: 2,
-			ParentRoot:    []byte("A"),
-			StateRoot:     []byte("A"),
-			Body:          &eth.BeaconBlockBody{},
-		}))
+			ParentRoot:    _byteArray32("A"),
+			StateRoot:     _byteArray32("A"),
+			Body:          &phase0.BeaconBlockBody{},
+		}
+		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), blk.Slot))
 	}
 
 	return protector, []core.ValidatorAccount{account1, account2}, nil
@@ -68,13 +76,16 @@ func TestProposalProtection(t *testing.T) {
 	t.Run("New proposal, should not slash", func(t *testing.T) {
 		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+
+		blk := &phase0.BeaconBlock{
 			Slot:          101,
 			ProposerIndex: 2,
-			ParentRoot:    []byte("Z"),
-			StateRoot:     []byte("Z"),
-			Body:          &eth.BeaconBlockBody{},
-		})
+			ParentRoot:    _byteArray32("Z"),
+			StateRoot:     _byteArray32("Z"),
+			Body:          &phase0.BeaconBlockBody{},
+		}
+
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.ValidProposal)
 	})
@@ -82,13 +93,15 @@ func TestProposalProtection(t *testing.T) {
 	t.Run("No highest proposal db, should error", func(t *testing.T) {
 		protector, accounts, err := setupProposal(t, false)
 		require.NoError(t, err)
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+
+		blk := &phase0.BeaconBlock{
 			Slot:          99,
 			ProposerIndex: 2,
-			ParentRoot:    []byte("Z"),
-			StateRoot:     []byte("Z"),
-			Body:          &eth.BeaconBlockBody{},
-		})
+			ParentRoot:    _byteArray32("Z"),
+			StateRoot:     _byteArray32("Z"),
+			Body:          &phase0.BeaconBlockBody{},
+		}
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
 		require.EqualError(t, err, "highest proposal data is nil, can't determine if proposal is slashable")
 		require.Nil(t, res)
 	})
@@ -96,13 +109,16 @@ func TestProposalProtection(t *testing.T) {
 	t.Run("Lower than highest proposal db, should error", func(t *testing.T) {
 		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), &eth.BeaconBlock{
+
+		blk := &phase0.BeaconBlock{
 			Slot:          99,
 			ProposerIndex: 2,
-			ParentRoot:    []byte("Z"),
-			StateRoot:     []byte("Z"),
-			Body:          &eth.BeaconBlockBody{},
-		})
+			ParentRoot:    _byteArray32("Z"),
+			StateRoot:     _byteArray32("Z"),
+			Body:          &phase0.BeaconBlockBody{},
+		}
+
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.HighestProposalVote)
 	})

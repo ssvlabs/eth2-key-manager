@@ -1,23 +1,22 @@
 package core
 
 import (
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 )
 
 // SlashingProtector represents the behavior of the slashing protector
 type SlashingProtector interface {
-	IsSlashableAttestation(pubKey []byte, attestation *eth.AttestationData) (*AttestationSlashStatus, error)
-	IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) (*ProposalSlashStatus, error)
-	// Will potentially update the highest attestation given this latest attestation.
-	UpdateHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error
-	UpdateHighestProposal(pubKey []byte, block *eth.BeaconBlock) error
-	RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error)
+	IsSlashableAttestation(pubKey []byte, attestation *phase0.AttestationData) (*AttestationSlashStatus, error)
+	IsSlashableProposal(pubKey []byte, slot phase0.Slot) (*ProposalSlashStatus, error)
+	UpdateHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error
+	UpdateHighestProposal(pubKey []byte, slot phase0.Slot) error
+	RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error)
 }
 
 // SlashingStore represents the behavior of the slashing store
 type SlashingStore interface {
-	SaveHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error
-	RetrieveHighestAttestation(pubKey []byte) *eth.AttestationData
-	SaveHighestProposal(pubKey []byte, block *eth.BeaconBlock) error
-	RetrieveHighestProposal(pubKey []byte) *eth.BeaconBlock
+	SaveHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error
+	RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error)
+	SaveHighestProposal(pubKey []byte, slot phase0.Slot) error
+	RetrieveHighestProposal(pubKey []byte) (phase0.Slot, error)
 }

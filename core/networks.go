@@ -3,9 +3,7 @@ package core
 import (
 	"time"
 
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-
-	prysmTime "github.com/prysmaticlabs/prysm/time"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,17 +25,17 @@ func NetworkFromString(n string) Network {
 }
 
 // ForkVersion returns the fork version of the network.
-func (n Network) ForkVersion() []byte {
+func (n Network) ForkVersion() phase0.Version {
 	switch n {
 	case PyrmontNetwork:
-		return []byte{0, 0, 32, 9}
+		return phase0.Version{0, 0, 32, 9}
 	case PraterNetwork:
-		return []byte{0x00, 0x00, 0x10, 0x20}
+		return phase0.Version{0x00, 0x00, 0x10, 0x20}
 	case MainNetwork:
-		return []byte{0, 0, 0, 0}
+		return phase0.Version{0, 0, 0, 0}
 	default:
 		logrus.WithField("network", n).Fatal("undefined network")
-		return nil
+		return phase0.Version{}
 	}
 }
 
@@ -87,28 +85,28 @@ func (n Network) SlotsPerEpoch() uint64 {
 }
 
 // EstimatedCurrentSlot returns the estimation of the current slot
-func (n Network) EstimatedCurrentSlot() types.Slot {
-	return n.EstimatedSlotAtTime(prysmTime.Now().Unix())
+func (n Network) EstimatedCurrentSlot() phase0.Slot {
+	return n.EstimatedSlotAtTime(time.Now().Unix())
 }
 
 // EstimatedSlotAtTime estimates slot at the given time
-func (n Network) EstimatedSlotAtTime(time int64) types.Slot {
+func (n Network) EstimatedSlotAtTime(time int64) phase0.Slot {
 	genesis := int64(n.MinGenesisTime())
 	if time < genesis {
 		return 0
 	}
-	return types.Slot(uint64(time-genesis) / uint64(n.SlotDurationSec().Seconds()))
+	return phase0.Slot(uint64(time-genesis) / uint64(n.SlotDurationSec().Seconds()))
 }
 
 // EstimatedCurrentEpoch estimates the current epoch
 // https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/beacon-chain.md#compute_start_slot_at_epoch
-func (n Network) EstimatedCurrentEpoch() types.Epoch {
+func (n Network) EstimatedCurrentEpoch() phase0.Epoch {
 	return n.EstimatedEpochAtSlot(n.EstimatedCurrentSlot())
 }
 
 // EstimatedEpochAtSlot estimates epoch at the given slot
-func (n Network) EstimatedEpochAtSlot(slot types.Slot) types.Epoch {
-	return types.Epoch(slot / types.Slot(n.SlotsPerEpoch()))
+func (n Network) EstimatedEpochAtSlot(slot phase0.Slot) phase0.Epoch {
+	return phase0.Epoch(slot / phase0.Slot(n.SlotsPerEpoch()))
 }
 
 // Available networks.

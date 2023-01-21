@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -36,77 +34,77 @@ func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProt
 		return protector, []core.ValidatorAccount{account1, account2}
 	}
 
-	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &phase0.AttestationData{
 		Slot:            30,
-		CommitteeIndex:  5,
-		BeaconBlockRoot: []byte("A"),
-		Source: &eth.Checkpoint{
+		Index:           5,
+		BeaconBlockRoot: _byteArray32("A"),
+		Source: &phase0.Checkpoint{
 			Epoch: 1,
-			Root:  []byte("B"),
+			Root:  _byteArray32("B"),
 		},
-		Target: &eth.Checkpoint{
+		Target: &phase0.Checkpoint{
 			Epoch: 2,
-			Root:  []byte("C"),
+			Root:  _byteArray32("C"),
 		},
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &phase0.AttestationData{
 		Slot:            30,
-		CommitteeIndex:  5,
-		BeaconBlockRoot: []byte("A"),
-		Source: &eth.Checkpoint{
+		Index:           5,
+		BeaconBlockRoot: _byteArray32("A"),
+		Source: &phase0.Checkpoint{
 			Epoch: 2,
-			Root:  []byte("B"),
+			Root:  _byteArray32("B"),
 		},
-		Target: &eth.Checkpoint{
+		Target: &phase0.Checkpoint{
 			Epoch: 3,
-			Root:  []byte("C"),
+			Root:  _byteArray32("C"),
 		},
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &phase0.AttestationData{
 		Slot:            30,
-		CommitteeIndex:  5,
-		BeaconBlockRoot: []byte("B"),
-		Source: &eth.Checkpoint{
+		Index:           5,
+		BeaconBlockRoot: _byteArray32("B"),
+		Source: &phase0.Checkpoint{
 			Epoch: 3,
-			Root:  []byte("C"),
+			Root:  _byteArray32("C"),
 		},
-		Target: &eth.Checkpoint{
+		Target: &phase0.Checkpoint{
 			Epoch: 4,
-			Root:  []byte("D"),
+			Root:  _byteArray32("D"),
 		},
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &phase0.AttestationData{
 		Slot:            30,
-		CommitteeIndex:  5,
-		BeaconBlockRoot: []byte("B"),
-		Source: &eth.Checkpoint{
+		Index:           5,
+		BeaconBlockRoot: _byteArray32("B"),
+		Source: &phase0.Checkpoint{
 			Epoch: 4,
-			Root:  []byte("C"),
+			Root:  _byteArray32("C"),
 		},
-		Target: &eth.Checkpoint{
+		Target: &phase0.Checkpoint{
 			Epoch: 10,
-			Root:  []byte("D"),
+			Root:  _byteArray32("D"),
 		},
 	})
 	require.NoError(t, err)
 
-	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &eth.AttestationData{
+	err = protector.UpdateHighestAttestation(account1.ValidatorPublicKey(), &phase0.AttestationData{
 		Slot:            30,
-		CommitteeIndex:  5,
-		BeaconBlockRoot: []byte("B"),
-		Source: &eth.Checkpoint{
+		Index:           5,
+		BeaconBlockRoot: _byteArray32("B"),
+		Source: &phase0.Checkpoint{
 			Epoch: 5,
-			Root:  []byte("C"),
+			Root:  _byteArray32("C"),
 		},
-		Target: &eth.Checkpoint{
+		Target: &phase0.Checkpoint{
 			Epoch: 9,
-			Root:  []byte("D"),
+			Root:  _byteArray32("D"),
 		},
 	})
 	require.NoError(t, err)
@@ -118,17 +116,17 @@ func TestSurroundingVote(t *testing.T) {
 	protector, accounts := setupAttestation(t, true)
 
 	t.Run("1 Surrounded vote", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 2,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 5,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -138,17 +136,17 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("2 Surrounded votes", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 1,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 7,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -158,17 +156,17 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("1 Surrounding vote", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 5,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 7,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 		require.NoError(t, err)
@@ -177,17 +175,17 @@ func TestSurroundingVote(t *testing.T) {
 	})
 
 	t.Run("2 Surrounding vote", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 6,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 7,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 		require.NoError(t, err)
@@ -200,17 +198,17 @@ func TestDoubleAttestationVote(t *testing.T) {
 	protector, accounts := setupAttestation(t, true)
 
 	t.Run("Different committee index, should slash", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 2,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 3,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -220,17 +218,17 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("Different block root, should slash", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  5,
-			BeaconBlockRoot: []byte("AA"),
-			Source: &eth.Checkpoint{
+			Index:           5,
+			BeaconBlockRoot: _byteArray32("AA"),
+			Source: &phase0.Checkpoint{
 				Epoch: 2,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 3,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -240,17 +238,17 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("Same attestation, should be slashable (we can't be sure it's not slashable when using highest att.)", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  5,
-			BeaconBlockRoot: []byte("B"),
-			Source: &eth.Checkpoint{
+			Index:           5,
+			BeaconBlockRoot: _byteArray32("B"),
+			Source: &phase0.Checkpoint{
 				Epoch: 3,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 4,
-				Root:  []byte("D"),
+				Root:  _byteArray32("D"),
 			},
 		})
 		require.NoError(t, err)
@@ -259,17 +257,17 @@ func TestDoubleAttestationVote(t *testing.T) {
 	})
 
 	t.Run("new attestation, should not error", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  5,
-			BeaconBlockRoot: []byte("E"),
-			Source: &eth.Checkpoint{
+			Index:           5,
+			BeaconBlockRoot: _byteArray32("E"),
+			Source: &phase0.Checkpoint{
 				Epoch: 10,
-				Root:  []byte("I"),
+				Root:  _byteArray32("I"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 11,
-				Root:  []byte("H"),
+				Root:  _byteArray32("H"),
 			},
 		})
 		require.False(t, err != nil || res != nil)
@@ -283,17 +281,17 @@ func TestMinimalSlashingProtection(t *testing.T) {
 	fmt.Printf("%d", at.Target.Epoch) // 5,10
 
 	t.Run("source lower than highest source", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 4,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 11,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -302,17 +300,17 @@ func TestMinimalSlashingProtection(t *testing.T) {
 		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 	t.Run("source equal to highest source, target equal to highest target", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 5,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 10,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -321,17 +319,17 @@ func TestMinimalSlashingProtection(t *testing.T) {
 		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 	t.Run("source higher than highest source, target equal to highest target", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 6,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 10,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -340,17 +338,17 @@ func TestMinimalSlashingProtection(t *testing.T) {
 		require.Equal(t, core.HighestAttestationVote, res.Status)
 	})
 	t.Run("source equal to highest source, target higher than highest target", func(t *testing.T) {
-		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &eth.AttestationData{
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            30,
-			CommitteeIndex:  4,
-			BeaconBlockRoot: []byte("A"),
-			Source: &eth.Checkpoint{
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
 				Epoch: 6,
-				Root:  []byte("B"),
+				Root:  _byteArray32("B"),
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 11,
-				Root:  []byte("C"),
+				Root:  _byteArray32("C"),
 			},
 		})
 
@@ -363,8 +361,8 @@ func TestUpdateLatestAttestation(t *testing.T) {
 	protector, accounts := setupAttestation(t, false)
 	tests := []struct {
 		name                  string
-		sourceEpoch           types.Epoch
-		targetEpoch           types.Epoch
+		sourceEpoch           phase0.Epoch
+		targetEpoch           phase0.Epoch
 		expectedHighestSource uint64
 		expectedHighestTarget uint64
 	}{
@@ -408,11 +406,11 @@ func TestUpdateLatestAttestation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(tt *testing.T) {
 			k := accounts[0].ValidatorPublicKey()
-			err := protector.UpdateHighestAttestation(k, &eth.AttestationData{
-				Source: &eth.Checkpoint{
+			err := protector.UpdateHighestAttestation(k, &phase0.AttestationData{
+				Source: &phase0.Checkpoint{
 					Epoch: test.sourceEpoch,
 				},
-				Target: &eth.Checkpoint{
+				Target: &phase0.Checkpoint{
 					Epoch: test.targetEpoch,
 				},
 			})

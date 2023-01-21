@@ -3,14 +3,13 @@ package signer
 import (
 	"encoding/hex"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
-
+	"github.com/attestantio/go-eth2-client/spec/phase0"
+	"github.com/bloxapp/ssv-spec/types"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
 // SignBeaconAttestation signs beacon attestation data
-func (signer *SimpleSigner) SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignBeaconAttestation(attestation *phase0.AttestationData, domain phase0.Domain, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -48,7 +47,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *eth.AttestationDa
 	}
 
 	// 6. Prepare and sign data
-	root, err := signing.ComputeSigningRoot(attestation, domain)
+	root, err := types.ComputeETHSigningRoot(attestation, domain)
 	if err != nil {
 		return nil, err
 	}

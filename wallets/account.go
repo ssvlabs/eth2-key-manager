@@ -3,6 +3,7 @@ package wallets
 import (
 	"encoding/hex"
 	"encoding/json"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -167,10 +168,10 @@ func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
 		return nil, err
 	}
 	return map[string]interface{}{
-		"amount":                 depositData.GetAmount(),
-		"publicKey":              hex.EncodeToString(depositData.GetPublicKey()),
-		"signature":              hex.EncodeToString(depositData.GetSignature()),
-		"withdrawalCredentials":  hex.EncodeToString(depositData.GetWithdrawalCredentials()),
+		"amount":                 depositData.Amount,
+		"publicKey":              strings.TrimPrefix(depositData.PublicKey.String(), "0x"),
+		"signature":              strings.TrimPrefix(depositData.Signature.String(), "0x"),
+		"withdrawalCredentials":  hex.EncodeToString(depositData.WithdrawalCredentials),
 		"depositDataRoot":        hex.EncodeToString(root[:]),
 		"depositContractAddress": account.context.Storage.Network().DepositContractAddress(),
 	}, nil

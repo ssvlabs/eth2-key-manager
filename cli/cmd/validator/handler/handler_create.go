@@ -1,32 +1,7 @@
 package handler
 
 import (
-	"archive/zip"
-	"context"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"math/big"
-	"strings"
-	"time"
-
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	contracts "github.com/prysmaticlabs/prysm/contracts/deposit"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/spf13/cobra"
-
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/validator/flag"
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
-	eth1deposit "github.com/bloxapp/eth2-key-manager/eth1_deposit"
-	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
 // ValidatorConfig represents the validator config data
@@ -40,7 +15,7 @@ type ValidatorConfig struct {
 
 // Create is the handler to create validator(s).
 func (h *Handler) Create(cmd *cobra.Command, args []string) error {
-	// Get seeds count
+	/*// Get seeds count
 	seedsCount, err := flag.GetSeedsCountFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to get seeds count flag value")
@@ -172,12 +147,12 @@ func (h *Handler) Create(cmd *cobra.Command, args []string) error {
 				Crypto:  cryptoFields,
 			})
 		}
-	}
+	}*/
 
 	return nil
 }
 
-func (h *Handler) getWalletBalance(client *ethclient.Client, walletAddr string) (*big.Int, error) {
+/*func (h *Handler) getWalletBalance(client *ethclient.Client, walletAddr string) (*big.Int, error) {
 	address, err := hex.DecodeString(walletAddr)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to HEX decode the given wallet address")
@@ -293,4 +268,4 @@ func buildTransactionOpts(privateKey string) (*bind.TransactOpts, error) {
 	txOps.GasLimit = 500000
 	txOps.Context = context.Background()
 	return txOps, nil
-}
+}*/

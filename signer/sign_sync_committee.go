@@ -3,15 +3,14 @@ package signer
 import (
 	"encoding/hex"
 
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-
+	"github.com/attestantio/go-eth2-client/spec/altair"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
+	"github.com/bloxapp/ssv-spec/types"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 )
 
 // SignSyncCommittee sign sync committee
-func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -28,7 +27,7 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain []byte
 
 	// 3. sign
 	sszRoot := types.SSZBytes(msgBlockRoot)
-	root, err := signing.ComputeSigningRoot(&sszRoot, domain)
+	root, err := types.ComputeETHSigningRoot(&sszRoot, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -41,7 +40,7 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain []byte
 }
 
 // SignSyncCommitteeSelectionData sign sync committee slection data
-func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *eth.SyncAggregatorSelectionData, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -60,7 +59,7 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *eth.SyncAggrega
 	if data == nil {
 		return nil, errors.New("selection data nil")
 	}
-	root, err := signing.ComputeSigningRoot(data, domain)
+	root, err := types.ComputeETHSigningRoot(data, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -73,7 +72,7 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *eth.SyncAggrega
 }
 
 // SignSyncCommitteeContributionAndProof sign sync committee
-func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProof *eth.ContributionAndProof, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -92,7 +91,7 @@ func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProo
 	if contribAndProof == nil {
 		return nil, errors.New("contrib proof data nil")
 	}
-	root, err := signing.ComputeSigningRoot(contribAndProof, domain)
+	root, err := types.ComputeETHSigningRoot(contribAndProof, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}

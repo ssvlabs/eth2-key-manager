@@ -1,8 +1,8 @@
 package slashingprotection
 
 import (
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -18,7 +18,7 @@ func NewNormalProtection(store core.SlashingStore) *NormalProtection {
 }
 
 // IsSlashableAttestation detects double, surround and surrounded slashable events
-func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attestation *eth.AttestationData) (*core.AttestationSlashStatus, error) {
+func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attestation *phase0.AttestationData) (*core.AttestationSlashStatus, error) {
 	// lookupEndEpoch should be the latest written attestation, if not than req.Data.Target.Epoch
 	highest, err := protector.RetrieveHighestAttestation(pubKey)
 	if err != nil {
@@ -39,13 +39,16 @@ func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attesta
 }
 
 // IsSlashableProposal detects slashable proposal request
-func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) (*core.ProposalSlashStatus, error) {
-	highest := protector.store.RetrieveHighestProposal(pubKey)
-	if highest == nil {
+func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, slot phase0.Slot) (*core.ProposalSlashStatus, error) {
+	highest, err := protector.store.RetrieveHighestProposal(pubKey)
+	if err != nil {
+		return nil, errors.New("could not retrieve highest proposal")
+	}
+	if highest == 0 {
 		return nil, errors.New("highest proposal data is nil, can't determine if proposal is slashable")
 	}
 
-	if block.Slot > highest.Slot {
+	if slot > highest {
 		return &core.ProposalSlashStatus{
 			Proposal: nil,
 			Status:   core.ValidProposal,
@@ -59,13 +62,16 @@ func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, block *eth
 }
 
 // UpdateHighestAttestation potentially updates the highest attestation given this latest attestation.
-func (protector *NormalProtection) UpdateHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
+func (protector *NormalProtection) UpdateHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error {
 	// if no previous highest attestation found, set current
-	highest := protector.store.RetrieveHighestAttestation(pubKey)
+	highest, err := protector.store.RetrieveHighestAttestation(pubKey)
+	if err != nil {
+		return errors.New("could not retrieve highest attestation")
+	}
 	if highest == nil {
 		err := protector.store.SaveHighestAttestation(pubKey, attestation)
 		if err != nil {
-			return err
+			return errors.New("could not save highest attestation")
 		}
 		return nil
 	}
@@ -84,32 +90,35 @@ func (protector *NormalProtection) UpdateHighestAttestation(pubKey []byte, attes
 	if shouldUpdate {
 		err := protector.store.SaveHighestAttestation(pubKey, highest)
 		if err != nil {
-			return err
+			return errors.New("could not save highest attestation")
 		}
 	}
 	return nil
 }
 
 // UpdateHighestProposal updates highest proposal
-func (protector *NormalProtection) UpdateHighestProposal(key []byte, block *eth.BeaconBlock) error {
+func (protector *NormalProtection) UpdateHighestProposal(key []byte, slot phase0.Slot) error {
 	// if no previous highest proposal found, set current
-	highest := protector.store.RetrieveHighestProposal(key)
-	if highest == nil {
-		err := protector.store.SaveHighestProposal(key, block)
+	highest, err := protector.store.RetrieveHighestProposal(key)
+	if err != nil {
+		return errors.New("could not retrieve highest proposal")
+	}
+	if highest == 0 {
+		err := protector.store.SaveHighestProposal(key, slot)
 		if err != nil {
-			return err
+			return errors.New("could not save highest proposal")
 		}
 		return nil
 	}
 
-	if highest.Slot < block.Slot {
-		return protector.store.SaveHighestProposal(key, block)
+	if highest < slot {
+		return protector.store.SaveHighestProposal(key, slot)
 	}
 
 	return nil
 }
 
 // RetrieveHighestAttestation returns highest attestation data
-func (protector *NormalProtection) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {
-	return protector.store.RetrieveHighestAttestation(pubKey), nil
+func (protector *NormalProtection) RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error) {
+	return protector.store.RetrieveHighestAttestation(pubKey)
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -14,6 +14,13 @@ import (
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 )
+
+func _byteArray32(input string) [32]byte {
+	res, _ := hex.DecodeString(input)
+	var res32 [32]byte
+	copy(res32[:], res)
+	return res32
+}
 
 func TestMarshalingWallet(t *testing.T) {
 	err := core.InitBLS()
@@ -73,30 +80,23 @@ func TestMarshaling(t *testing.T) {
 	require.NoError(t, err)
 
 	// attestation
-	att := &eth.AttestationData{
+	att := &phase0.AttestationData{
 		Slot:            1,
-		CommitteeIndex:  1,
-		BeaconBlockRoot: []byte("A"),
-		Source: &eth.Checkpoint{
+		Index:           1,
+		BeaconBlockRoot: _byteArray32("A"),
+		Source: &phase0.Checkpoint{
 			Epoch: 1,
-			Root:  []byte("A"),
+			Root:  _byteArray32("A"),
 		},
-		Target: &eth.Checkpoint{
+		Target: &phase0.Checkpoint{
 			Epoch: 2,
-			Root:  []byte("A"),
+			Root:  _byteArray32("A"),
 		},
 	}
 	require.NoError(t, store.SaveHighestAttestation(acc.ValidatorPublicKey(), att))
 
 	// proposal
-	prop := &eth.BeaconBlock{
-		Slot:          1,
-		ProposerIndex: 1,
-		ParentRoot:    []byte("A"),
-		StateRoot:     []byte("A"),
-		Body:          &eth.BeaconBlockBody{},
-	}
-	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), prop))
+	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), 1))
 
 	// marshal
 	byts, err := json.Marshal(store)
@@ -122,11 +122,13 @@ func TestMarshaling(t *testing.T) {
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})
 	t.Run("verify attestation", func(t *testing.T) {
-		att2 := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
+		att2, err := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
+		require.NoError(t, err)
 		require.Equal(t, att.BeaconBlockRoot, att2.BeaconBlockRoot)
 	})
 	t.Run("verify proposal", func(t *testing.T) {
-		prop2 := store.RetrieveHighestProposal(acc.ValidatorPublicKey())
-		require.Equal(t, prop.StateRoot, prop2.StateRoot)
+		prop2, err := store.RetrieveHighestProposal(acc.ValidatorPublicKey())
+		require.NoError(t, err)
+		require.Equal(t, phase0.Slot(1), prop2)
 	})
 }

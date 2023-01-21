@@ -3,27 +3,33 @@ package signer
 import (
 	"sync"
 
-	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
-
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-
-	"github.com/google/uuid"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-
+	"github.com/attestantio/go-eth2-client/api"
+	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
+	"github.com/attestantio/go-eth2-client/spec"
+	"github.com/attestantio/go-eth2-client/spec/altair"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/google/uuid"
 )
+
+type VersionedBeaconBlock struct {
+	IsBlinded bool
+	Regular   *spec.VersionedBeaconBlock
+	Blinded   *api.VersionedBlindedBeaconBlock
+}
 
 // ValidatorSigner represents the behavior of the validator signer
 type ValidatorSigner interface {
-	SignBeaconBlock(block interfaces.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error)
-	SignBeaconAttestation(attestation *eth.AttestationData, domain []byte, pubKey []byte) ([]byte, error)
-	SignAggregateAndProof(agg *eth.AggregateAttestationAndProof, domain []byte, pubKey []byte) ([]byte, error)
-	SignSlot(slot types.Slot, domain []byte, pubKey []byte) ([]byte, error)
-	SignEpoch(epoch types.Epoch, domain []byte, pubKey []byte) ([]byte, error)
-	SignSyncCommittee(msgBlockRoot []byte, domain []byte, pubKey []byte) ([]byte, error)
-	SignSyncCommitteeSelectionData(data *eth.SyncAggregatorSelectionData, domain []byte, pubKey []byte) ([]byte, error)
-	SignSyncCommitteeContributionAndProof(contribAndProof *eth.ContributionAndProof, domain []byte, pubKey []byte) ([]byte, error)
-	SignRegistration(registration *eth.ValidatorRegistrationV1, domain []byte, pubKey []byte) ([]byte, error)
+	SignBeaconBlock(block *spec.VersionedBeaconBlock, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	//SignBlindedBeaconBlock(block *api.VersionedBlindedBeaconBlock, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignBeaconAttestation(attestation *phase0.AttestationData, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignAggregateAndProof(agg *phase0.AggregateAndProof, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignSlot(slot phase0.Slot, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignEpoch(epoch phase0.Epoch, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) ([]byte, error)
+	SignRegistration(registration *apiv1.ValidatorRegistration, domain phase0.Domain, pubKey []byte) ([]byte, error)
 }
 
 // SimpleSigner implements ValidatorSigner interface

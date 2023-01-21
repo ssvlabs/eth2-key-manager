@@ -3,9 +3,9 @@ package inmemory
 import (
 	"sync"
 
-	uuid "github.com/google/uuid"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
@@ -23,10 +23,10 @@ type InMemStore struct {
 	accounts     map[string]*wallets.HDAccount
 
 	highestAttestationLock sync.RWMutex
-	highestAttestation     map[string]*eth.AttestationData
+	highestAttestation     map[string]*phase0.AttestationData
 
 	highestProposalLock sync.RWMutex
-	highestProposal     map[string]*eth.BeaconBlock
+	highestProposal     map[string]phase0.Slot
 
 	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
@@ -42,8 +42,8 @@ func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encry
 	return &InMemStore{
 		network:            network,
 		accounts:           make(map[string]*wallets.HDAccount),
-		highestAttestation: make(map[string]*eth.AttestationData),
-		highestProposal:    make(map[string]*eth.BeaconBlock),
+		highestAttestation: make(map[string]*phase0.AttestationData),
+		highestProposal:    make(map[string]phase0.Slot),
 		encryptor:          encryptor,
 		encryptionPassword: password,
 	}

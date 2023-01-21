@@ -3,41 +3,17 @@ package signer
 import (
 	"encoding/hex"
 
-	ssz "github.com/prysmaticlabs/fastssz"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-
-	"github.com/prysmaticlabs/prysm/runtime/version"
-
-	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
-
+	"github.com/attestantio/go-eth2-client/spec"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
+	"github.com/bloxapp/ssv-spec/types"
+	"github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-// TEMPORARYPhase0BlockConversion takes prysm's beacon block interface and converts it to phase0 block
-func TEMPORARYPhase0BlockConversion(b interfaces.BeaconBlock) *ethpb.BeaconBlock {
-	return &ethpb.BeaconBlock{
-		ProposerIndex: b.ProposerIndex(),
-		Slot:          b.Slot(),
-		ParentRoot:    b.ParentRoot(),
-		StateRoot:     b.StateRoot(),
-		Body: &ethpb.BeaconBlockBody{
-			RandaoReveal:      b.Body().RandaoReveal(),
-			Eth1Data:          b.Body().Eth1Data(),
-			Graffiti:          b.Body().Graffiti(),
-			ProposerSlashings: b.Body().ProposerSlashings(),
-			AttesterSlashings: b.Body().AttesterSlashings(),
-			Attestations:      b.Body().Attestations(),
-			Deposits:          b.Body().Deposits(),
-			VoluntaryExits:    b.Body().VoluntaryExits(),
-		},
-	}
-}
-
 // SignBeaconBlock signs the given beacon block
-func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain phase0.Domain, pubKey []byte) ([]byte, error) {
 	// 1. get the account
 	if pubKey == nil {
 		return nil, errors.New("account was not supplied")
@@ -52,13 +28,18 @@ func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []b
 	signer.lock(account.ID(), "proposal")
 	defer signer.unlock(account.ID(), "proposal")
 
+	slot, err := b.Slot()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get block slot")
+	}
+
 	// 3. far future check
-	if !IsValidFarFutureSlot(signer.network, b.Slot()) {
+	if !IsValidFarFutureSlot(signer.network, slot) {
 		return nil, errors.Errorf("proposed block slot too far into the future")
 	}
 
 	// 4. check we can even sign this
-	status, err := signer.verifySlashableAndUpdate(b, pubKey)
+	status, err := signer.verifySlashableAndUpdate(pubKey, slot)
 	if err != nil {
 		return nil, err
 	}
@@ -66,31 +47,21 @@ func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []b
 		return nil, errors.Errorf("slashable proposal (%s), not signing", status.Status)
 	}
 
-	// 5. generate ssz root hash and sign
-	pb, err := b.Proto()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get Protobuf block")
-	}
-	var (
-		block ssz.HashRoot
-		ok    bool
-	)
-	switch b.Version() {
-	case version.BellatrixBlind:
-		block, ok = pb.(*ethpb.BlindedBeaconBlockBellatrix)
-	case version.Bellatrix:
-		block, ok = pb.(*ethpb.BeaconBlockBellatrix)
-	case version.Altair:
-		block, ok = pb.(*ethpb.BeaconBlockAltair)
-	case version.Phase0:
-		block, ok = pb.(*ethpb.BeaconBlock)
+	var block ssz.HashRoot
+	switch b.Version {
+	case spec.DataVersionPhase0:
+		block = b.Phase0
+	case spec.DataVersionAltair:
+		block = b.Altair
+	case spec.DataVersionBellatrix:
+		block = b.Bellatrix
+	case spec.DataVersionCapella:
+		block = b.Capella
 	default:
-		return nil, errors.Errorf("unsupported block version %d", b.Version())
+		return nil, errors.Errorf("unsupported block version %d", b.Version)
 	}
-	if !ok {
-		return nil, errors.Errorf("failed type assertion for %s block", version.String(b.Version()))
-	}
-	root, err := signing.ComputeSigningRoot(block, domain)
+
+	root, err := types.ComputeETHSigningRoot(block, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -103,19 +74,13 @@ func (signer *SimpleSigner) SignBeaconBlock(b interfaces.BeaconBlock, domain []b
 }
 
 // verifySlashableAndUpdate verified if block is slashable, if not saves it as the highest
-func (signer *SimpleSigner) verifySlashableAndUpdate(b interfaces.BeaconBlock, pubKey []byte) (*core.ProposalSlashStatus, error) {
-	/**
-	We convert the beacon block interface into a phase 0 block, we can allow to do so (even with the differences between phase0 and altair blocks)
-	because slashing conditions didn't change.
-	TODO - clean up clear separation between phase0 and altair
-	*/
-	phase0Blk := TEMPORARYPhase0BlockConversion(b)
-	status, err := signer.slashingProtector.IsSlashableProposal(pubKey, phase0Blk)
+func (signer *SimpleSigner) verifySlashableAndUpdate(pubKey []byte, slot phase0.Slot) (*core.ProposalSlashStatus, error) {
+	status, err := signer.slashingProtector.IsSlashableProposal(pubKey, slot)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := signer.slashingProtector.UpdateHighestProposal(pubKey, phase0Blk); err != nil {
+	if err := signer.slashingProtector.UpdateHighestProposal(pubKey, slot); err != nil {
 		return nil, err
 	}
 	return status, nil

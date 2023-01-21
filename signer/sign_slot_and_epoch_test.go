@@ -5,14 +5,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
@@ -57,26 +55,24 @@ func setupWithSlashingProtection(t *testing.T, seed []byte, setLatestAttestation
 		panic(err)
 	}
 	if setLatestAttestation {
-		err := protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+		err := protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), &phase0.AttestationData{
 			Slot:            0,
-			CommitteeIndex:  0,
-			BeaconBlockRoot: ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
-			Source: &eth.Checkpoint{
+			Index:           0,
+			BeaconBlockRoot: [32]byte{},
+			Source: &phase0.Checkpoint{
 				Epoch: 0,
-				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+				Root:  [32]byte{},
 			},
-			Target: &eth.Checkpoint{
+			Target: &phase0.Checkpoint{
 				Epoch: 0,
-				Root:  ignoreError(hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000")).([]byte),
+				Root:  [32]byte{},
 			},
 		})
 		require.NoError(t, err)
 	}
 
 	if setLatestProposal {
-		require.NoError(t, protector.UpdateHighestProposal(acc.ValidatorPublicKey(), &eth.BeaconBlock{
-			Slot: 0,
-		}))
+		require.NoError(t, protector.UpdateHighestProposal(acc.ValidatorPublicKey(), phase0.Slot(1)))
 	}
 
 	return NewSimpleSigner(wallet, protector, core.PraterNetwork), nil
@@ -147,9 +143,9 @@ func TestSlotSignatures(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		slot          types.Slot
+		slot          phase0.Slot
 		pubKey        []byte
-		domain        []byte
+		domain        [32]byte
 		expectedError error
 		msg           string
 	}{
@@ -214,7 +210,7 @@ func TestAggregateProofReferenceSignatures(t *testing.T) {
 	sk := _byteArray("6327b1e58c41d60dd7c3c8b9634204255707c2d12e2513c345001d8926745eea")
 	pk := _byteArray("954eb88ed1207f891dc3c28fa6cfdf8f53bf0ed3d838f3476c0900a61314d22d4f0a300da3cd010444dd5183e35a593c")
 	domain := _byteArray32("050000008c84cda94176cc2b1268357c57c3160131874a4408e155b0db826d11")
-	slot := types.Slot(0)
+	slot := phase0.Slot(0)
 	sigByts := _byteArray("a1167cdbebeae876b3fa82d4f4c35fc3dc4706c7ae20cee359919fdbc93a2588c3f7a15c80d12a20c78ac6381a9fe35d06f6b8ae7e95fb87fa2195511bd53ce6f385aa71dda52b38771f954348a57acad9dde225da614c50c02173314417b096")
 
 	// setup KeyVault
@@ -267,7 +263,7 @@ func TestAggregateAndProofReferenceSignatures(t *testing.T) {
 	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
 	// decode aggregated att proof
-	aggAndProof := &eth.AggregateAttestationAndProof{}
+	aggAndProof := &phase0.AggregateAndProof{}
 	require.NoError(t, aggAndProof.UnmarshalSSZ(aggAttByts))
 
 	sig, err := signer.SignAggregateAndProof(aggAndProof, domain, pk)
@@ -301,7 +297,7 @@ func TestRandaoReferenceSignatures(t *testing.T) {
 	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
 	// decode epoch
-	epoch := types.Epoch(binary.LittleEndian.Uint64(_byteArray("0000000000000000000000000000000000000000000000000000000000000000")))
+	epoch := phase0.Epoch(binary.LittleEndian.Uint64(_byteArray("0000000000000000000000000000000000000000000000000000000000000000")))
 
 	sig, err := signer.SignEpoch(epoch, domain, pk)
 	require.NoError(t, err)
@@ -318,9 +314,9 @@ func TestEpochSignatures(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		epoch         types.Epoch
+		epoch         phase0.Epoch
 		pubKey        []byte
-		domain        []byte
+		domain        [32]byte
 		expectedError error
 		msg           string
 	}{

@@ -3,14 +3,14 @@ package signer
 import (
 	"encoding/hex"
 
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
+	"github.com/bloxapp/ssv-spec/types"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
 )
 
 // SignSlot signes the given slot
-func (signer *SimpleSigner) SignSlot(slot types.Slot, domain []byte, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSlot(slot phase0.Slot, domain phase0.Domain, pubKey []byte) ([]byte, error) {
 	// 1. check we can even sign this
 	// TODO - should we?
 
@@ -24,7 +24,7 @@ func (signer *SimpleSigner) SignSlot(slot types.Slot, domain []byte, pubKey []by
 		return nil, err
 	}
 
-	root, err := signing.ComputeSigningRoot(slot, domain)
+	root, err := types.ComputeETHSigningRoot(types.SSZUint64(slot), domain)
 	if err != nil {
 		return nil, err
 	}

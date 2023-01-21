@@ -44,6 +44,7 @@ func blkByNumberRes() map[string]interface{} {
 }
 
 func TestValidatorCreate(t *testing.T) {
+	t.Skip("no usage")
 	walletPK := "15c20889f519082fccd95b385bb304bb29bf531a58afe2a67c89ebf802a23d1b"
 	walletAddr := "7015514B3da332d95EE1B94d32ADce4cAa0bAa28"
 
