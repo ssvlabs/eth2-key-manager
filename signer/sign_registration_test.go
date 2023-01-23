@@ -74,7 +74,7 @@ func TestSimpleSigner_SignRegistration(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignRegistration(test.data, test.domain, test.pubKey)
+			res, _, err := signer.SignRegistration(test.data, test.domain, test.pubKey)
 			fmt.Println(hex.EncodeToString(res))
 			if test.expectedError != nil {
 				if err != nil {

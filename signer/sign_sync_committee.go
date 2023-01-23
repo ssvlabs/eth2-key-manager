@@ -10,15 +10,15 @@ import (
 )
 
 // SignSyncCommittee sign sync committee
-func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// 1. get the account
 	if pubKey == nil {
-		return nil, errors.New("account was not supplied")
+		return nil, nil, errors.New("account was not supplied")
 	}
 
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(pubKey))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// 2. lock for current account
@@ -29,26 +29,26 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain phase0
 	sszRoot := types.SSZBytes(msgBlockRoot)
 	root, err := types.ComputeETHSigningRoot(&sszRoot, domain)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get signing root")
+		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return sig, nil
+	return sig, root[:], nil
 }
 
 // SignSyncCommitteeSelectionData sign sync committee slection data
-func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// 1. get the account
 	if pubKey == nil {
-		return nil, errors.New("account was not supplied")
+		return nil, nil, errors.New("account was not supplied")
 	}
 
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(pubKey))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// 2. lock for current account
@@ -57,30 +57,30 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *altair.SyncAggr
 
 	// 3. sign
 	if data == nil {
-		return nil, errors.New("selection data nil")
+		return nil, nil, errors.New("selection data nil")
 	}
 	root, err := types.ComputeETHSigningRoot(data, domain)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get signing root")
+		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return sig, nil
+	return sig, root[:], nil
 }
 
 // SignSyncCommitteeContributionAndProof sign sync committee
-func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// 1. get the account
 	if pubKey == nil {
-		return nil, errors.New("account was not supplied")
+		return nil, nil, errors.New("account was not supplied")
 	}
 
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(pubKey))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// 2. lock for current account
@@ -89,16 +89,16 @@ func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProo
 
 	// 3. sign
 	if contribAndProof == nil {
-		return nil, errors.New("contrib proof data nil")
+		return nil, nil, errors.New("contrib proof data nil")
 	}
 	root, err := types.ComputeETHSigningRoot(contribAndProof, domain)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get signing root")
+		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return sig, nil
+	return sig, root[:], nil
 }

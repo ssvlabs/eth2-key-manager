@@ -2,6 +2,7 @@ package signer
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
 	"time"
 
@@ -66,7 +67,8 @@ func TestReferenceAttestation(t *testing.T) {
 	attData := &phase0.AttestationData{}
 	require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
 
-	actualSig, err := signer.SignBeaconAttestation(attData, domain, pk)
+	actualSig, root, err := signer.SignBeaconAttestation(attData, domain, pk)
+	fmt.Println(string(root))
 	require.NoError(t, err)
 	require.EqualValues(t, sig, actualSig)
 }
@@ -77,7 +79,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -98,7 +100,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -122,7 +124,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -140,7 +142,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// second
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -164,7 +166,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -182,7 +184,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// second
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -207,7 +209,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            67,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -226,7 +228,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// add another attestation building on the base
 		// 77 <- 78 <- 79
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284116,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -246,7 +248,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		// surround previous vote
 		// 77 <- 78 <- 79
 		// 	<- 80
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284117,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -271,7 +273,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// first
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284115,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -290,7 +292,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 
 		// add another attestation building on the base
 		// 77 <- 78 <----------------------100
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284116,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -310,7 +312,7 @@ func TestAttestationSlashingSignatures(t *testing.T) {
 		// surround previous vote
 		// 77 <- 78 <----------------------100
 		// 								89 <- 90
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284117,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -335,7 +337,7 @@ func TestAttestationSignaturesNoSlashingData(t *testing.T) {
 	signer, err := setupWithSlashingProtection(t, seed, false, true)
 	require.NoError(t, err)
 
-	res, err := signer.SignBeaconAttestation(&phase0.AttestationData{
+	res, _, err := signer.SignBeaconAttestation(&phase0.AttestationData{
 		Slot:            284115,
 		Index:           2,
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -481,7 +483,7 @@ func TestAttestationSignatures(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignBeaconAttestation(test.req, test.domain, test.pubKey)
+			res, _, err := signer.SignBeaconAttestation(test.req, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -512,7 +514,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284115,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -532,7 +534,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 	t.Run("too far into the future source", func(tt *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284115,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -552,7 +554,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 	t.Run("max valid target", func(tt *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284115,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
@@ -574,7 +576,7 @@ func TestFarFutureAttestationSignature(t *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
 		require.NoError(t, err)
 
-		_, err = signer.SignBeaconAttestation(&phase0.AttestationData{
+		_, _, err = signer.SignBeaconAttestation(&phase0.AttestationData{
 			Slot:            284115,
 			Index:           2,
 			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),

@@ -41,7 +41,7 @@ func TestReferenceAttestationAggregation(t *testing.T) {
 	agg := &phase0.AggregateAndProof{}
 	require.NoError(t, agg.UnmarshalSSZ(aggByts))
 
-	actualSig, err := signer.SignAggregateAndProof(agg, domain, pk)
+	actualSig, _, err := signer.SignAggregateAndProof(agg, domain, pk)
 	require.NoError(t, err)
 	require.EqualValues(t, sig, actualSig)
 }

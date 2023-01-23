@@ -185,7 +185,7 @@ func TestSlotSignatures(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSlot(test.slot, test.domain, test.pubKey)
+			res, _, err := signer.SignSlot(test.slot, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -231,7 +231,7 @@ func TestAggregateProofReferenceSignatures(t *testing.T) {
 	protector := prot.NewNormalProtection(store)
 	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
-	sig, err := signer.SignSlot(slot, domain, pk)
+	sig, _, err := signer.SignSlot(slot, domain, pk)
 	require.NoError(t, err)
 	require.EqualValues(t, sigByts, sig)
 }
@@ -266,7 +266,7 @@ func TestAggregateAndProofReferenceSignatures(t *testing.T) {
 	aggAndProof := &phase0.AggregateAndProof{}
 	require.NoError(t, aggAndProof.UnmarshalSSZ(aggAttByts))
 
-	sig, err := signer.SignAggregateAndProof(aggAndProof, domain, pk)
+	sig, _, err := signer.SignAggregateAndProof(aggAndProof, domain, pk)
 	require.NoError(t, err)
 	require.EqualValues(t, sigByts, sig)
 }
@@ -299,7 +299,7 @@ func TestRandaoReferenceSignatures(t *testing.T) {
 	// decode epoch
 	epoch := phase0.Epoch(binary.LittleEndian.Uint64(_byteArray("0000000000000000000000000000000000000000000000000000000000000000")))
 
-	sig, err := signer.SignEpoch(epoch, domain, pk)
+	sig, _, err := signer.SignEpoch(epoch, domain, pk)
 	require.NoError(t, err)
 	require.EqualValues(t, sigByts, sig)
 }
@@ -356,7 +356,7 @@ func TestEpochSignatures(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignEpoch(test.epoch, test.domain, test.pubKey)
+			res, _, err := signer.SignEpoch(test.epoch, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())

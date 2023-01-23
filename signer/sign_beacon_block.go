@@ -13,15 +13,15 @@ import (
 )
 
 // SignBeaconBlock signs the given beacon block
-func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain phase0.Domain, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// 1. get the account
 	if pubKey == nil {
-		return nil, errors.New("account was not supplied")
+		return nil, nil, errors.New("account was not supplied")
 	}
 
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(pubKey))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// 2. lock for current account
@@ -30,21 +30,21 @@ func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain
 
 	slot, err := b.Slot()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get block slot")
+		return nil, nil, errors.Wrap(err, "could not get block slot")
 	}
 
 	// 3. far future check
 	if !IsValidFarFutureSlot(signer.network, slot) {
-		return nil, errors.Errorf("proposed block slot too far into the future")
+		return nil, nil, errors.Errorf("proposed block slot too far into the future")
 	}
 
 	// 4. check we can even sign this
 	status, err := signer.verifySlashableAndUpdate(pubKey, slot)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if status.Status != core.ValidProposal {
-		return nil, errors.Errorf("slashable proposal (%s), not signing", status.Status)
+		return nil, nil, errors.Errorf("slashable proposal (%s), not signing", status.Status)
 	}
 
 	var block ssz.HashRoot
@@ -58,19 +58,19 @@ func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain
 	case spec.DataVersionCapella:
 		block = b.Capella
 	default:
-		return nil, errors.Errorf("unsupported block version %d", b.Version)
+		return nil, nil, errors.Errorf("unsupported block version %d", b.Version)
 	}
 
 	root, err := types.ComputeETHSigningRoot(block, domain)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get signing root")
+		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return sig, nil
+	return sig, root[:], nil
 }
 
 // verifySlashableAndUpdate verified if block is slashable, if not saves it as the highest

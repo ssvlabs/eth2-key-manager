@@ -10,29 +10,29 @@ import (
 )
 
 // SignRegistration signs the given ValidatorRegistration.
-func (signer *SimpleSigner) SignRegistration(registration *apiv1.ValidatorRegistration, domain phase0.Domain, pubKey []byte) ([]byte, error) {
+func (signer *SimpleSigner) SignRegistration(registration *apiv1.ValidatorRegistration, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// Validate the registration.
 	if registration == nil {
-		return nil, errors.New("registration data is nil")
+		return nil, nil, errors.New("registration data is nil")
 	}
 
 	// Get the account.
 	if pubKey == nil {
-		return nil, errors.New("account was not supplied")
+		return nil, nil, errors.New("account was not supplied")
 	}
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(pubKey))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Produce the signature.
 	root, err := types.ComputeETHSigningRoot(registration, domain)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return sig, nil
+	return sig, root[:], nil
 }

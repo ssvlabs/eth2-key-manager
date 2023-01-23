@@ -75,7 +75,7 @@ func TestSimpleSigner_SignSyncCommitteeContributionAndProof(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSyncCommitteeContributionAndProof(test.data, test.domain, test.pubKey)
+			res, _, err := signer.SignSyncCommitteeContributionAndProof(test.data, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -150,7 +150,7 @@ func TestSimpleSigner_SignSyncCommitteeSelectionData(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSyncCommitteeSelectionData(test.data, test.domain, test.pubKey)
+			res, _, err := signer.SignSyncCommitteeSelectionData(test.data, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -214,7 +214,7 @@ func TestSimpleSigner_SignSyncCommittee(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSyncCommittee(test.root, test.domain, test.pubKey)
+			res, _, err := signer.SignSyncCommittee(test.root, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
