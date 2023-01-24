@@ -50,14 +50,14 @@ func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, slot phase
 
 	if slot > highest {
 		return &core.ProposalSlashStatus{
-			Proposal: nil,
-			Status:   core.ValidProposal,
+			Slot:   slot,
+			Status: core.ValidProposal,
 		}, nil
 	}
 
 	return &core.ProposalSlashStatus{
-		Proposal: nil,
-		Status:   core.HighestProposalVote,
+		Slot:   slot,
+		Status: core.HighestProposalVote,
 	}, nil
 }
 

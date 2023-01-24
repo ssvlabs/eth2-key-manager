@@ -1,6 +1,8 @@
 package core
 
-import "github.com/attestantio/go-eth2-client/spec"
+import (
+	"github.com/attestantio/go-eth2-client/spec/phase0"
+)
 
 // ProposalDetectionType represents proposal slashing detection type
 type ProposalDetectionType string
@@ -15,7 +17,7 @@ const (
 
 // ProposalSlashStatus represents proposal slashing status
 type ProposalSlashStatus struct {
-	Proposal *spec.VersionedBeaconBlock
-	Status   ProposalDetectionType
-	Error    error
+	Slot   phase0.Slot
+	Status ProposalDetectionType
+	Error  error
 }

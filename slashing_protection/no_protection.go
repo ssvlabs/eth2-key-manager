@@ -18,8 +18,8 @@ func (p *NoProtection) IsSlashableAttestation(pubKey []byte, attestation *phase0
 // IsSlashableProposal returns always valid result
 func (p *NoProtection) IsSlashableProposal(pubKey []byte, slot phase0.Slot) (*core.ProposalSlashStatus, error) {
 	return &core.ProposalSlashStatus{
-		Proposal: nil,
-		Status:   core.ValidProposal,
+		Slot:   slot,
+		Status: core.ValidProposal,
 	}, nil
 }
 
