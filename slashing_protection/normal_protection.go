@@ -26,6 +26,9 @@ func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attesta
 	}
 	if highest != nil {
 		// Source epoch can't be lower than previously known highest source, it can be equal or higher.
+		// We prevent double voting by rejecting another attestations with the same target epoch
+		// however you are eligible to sign the message with the same target epoch and the signing root,
+		// we are being strict by not storing the signing roots
 		if attestation.Source.Epoch < highest.Source.Epoch || attestation.Target.Epoch <= highest.Target.Epoch {
 			return &core.AttestationSlashStatus{
 				Attestation: attestation,
