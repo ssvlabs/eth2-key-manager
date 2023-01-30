@@ -1,7 +1,7 @@
 package slashingprotection
 
 import (
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -11,29 +11,29 @@ type NoProtection struct {
 }
 
 // IsSlashableAttestation returns always nils
-func (p *NoProtection) IsSlashableAttestation(pubKey []byte, attestation *eth.AttestationData) (*core.AttestationSlashStatus, error) {
+func (p *NoProtection) IsSlashableAttestation(pubKey []byte, attestation *phase0.AttestationData) (*core.AttestationSlashStatus, error) {
 	return nil, nil
 }
 
 // IsSlashableProposal returns always valid result
-func (p *NoProtection) IsSlashableProposal(pubKey []byte, block *eth.BeaconBlock) (*core.ProposalSlashStatus, error) {
+func (p *NoProtection) IsSlashableProposal(pubKey []byte, slot phase0.Slot) (*core.ProposalSlashStatus, error) {
 	return &core.ProposalSlashStatus{
-		Proposal: nil,
-		Status:   core.ValidProposal,
+		Slot:   slot,
+		Status: core.ValidProposal,
 	}, nil
 }
 
 // UpdateHighestProposal does nothing
-func (p *NoProtection) UpdateHighestProposal(pubKey []byte, block *eth.BeaconBlock) error {
+func (p *NoProtection) UpdateHighestProposal(pubKey []byte, slot phase0.Slot) error {
 	return nil
 }
 
 // UpdateHighestAttestation does nothing
-func (p *NoProtection) UpdateHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
+func (p *NoProtection) UpdateHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error {
 	return nil
 }
 
 // RetrieveHighestAttestation does nothing
-func (p *NoProtection) RetrieveHighestAttestation(pubKey []byte) (*eth.AttestationData, error) {
+func (p *NoProtection) RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error) {
 	return nil, nil
 }

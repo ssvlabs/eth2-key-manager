@@ -1,7 +1,7 @@
 package core
 
 import (
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 )
 
 // VoteDetectionType represents vote detection type
@@ -17,6 +17,6 @@ const (
 
 // AttestationSlashStatus represents attestation slashing status
 type AttestationSlashStatus struct {
-	Attestation *eth.AttestationData
+	Attestation *phase0.AttestationData
 	Status      VoteDetectionType
 }

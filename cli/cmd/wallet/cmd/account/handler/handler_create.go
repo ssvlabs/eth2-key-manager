@@ -4,10 +4,8 @@ import (
 	"encoding/hex"
 	"strings"
 
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
@@ -256,19 +254,16 @@ func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, acco
 	}
 
 	// add minimal attestation protection data
-	minimalAtt := &eth.AttestationData{
-		Source: &eth.Checkpoint{Epoch: types.Epoch(accountFlags.highestSources[highestIndex])},
-		Target: &eth.Checkpoint{Epoch: types.Epoch(accountFlags.highestTargets[highestIndex])},
+	minimalAtt := &phase0.AttestationData{
+		Source: &phase0.Checkpoint{Epoch: phase0.Epoch(accountFlags.highestSources[highestIndex])},
+		Target: &phase0.Checkpoint{Epoch: phase0.Epoch(accountFlags.highestTargets[highestIndex])},
 	}
 	if err := store.SaveHighestAttestation(acc.ValidatorPublicKey(), minimalAtt); err != nil {
 		return errors.Wrap(err, "failed to save highest attestation")
 	}
 
 	// add minimal proposal protection data
-	minimalProposal := &eth.BeaconBlock{
-		Slot: types.Slot(accountFlags.highestProposals[highestIndex]),
-	}
-	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), minimalProposal); err != nil {
+	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), phase0.Slot(accountFlags.highestProposals[highestIndex])); err != nil {
 		return errors.Wrap(err, "failed to save highest proposal")
 	}
 	return nil

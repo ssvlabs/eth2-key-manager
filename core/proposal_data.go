@@ -1,7 +1,7 @@
 package core
 
 import (
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 )
 
 // ProposalDetectionType represents proposal slashing detection type
@@ -17,7 +17,7 @@ const (
 
 // ProposalSlashStatus represents proposal slashing status
 type ProposalSlashStatus struct {
-	Proposal *eth.BeaconBlock
-	Status   ProposalDetectionType
-	Error    error
+	Slot   phase0.Slot
+	Status ProposalDetectionType
+	Error  error
 }

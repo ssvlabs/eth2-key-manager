@@ -3,9 +3,8 @@ package signer
 import (
 	"testing"
 
-	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-
+	"github.com/attestantio/go-eth2-client/spec/altair"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
@@ -16,24 +15,24 @@ func TestSimpleSigner_SignSyncCommitteeContributionAndProof(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		data          *eth.ContributionAndProof
+		data          *altair.ContributionAndProof
 		pubKey        []byte
-		domain        []byte
+		domain        [32]byte
 		expectedError error
 		sig           []byte
 	}{
 		{
 			name: "simple sign",
-			data: &eth.ContributionAndProof{
+			data: &altair.ContributionAndProof{
 				AggregatorIndex: 7,
-				Contribution: &eth.SyncCommitteeContribution{
+				Contribution: &altair.SyncCommitteeContribution{
 					Slot:              0,
-					BlockRoot:         make([]byte, 32),
+					BeaconBlockRoot:   [32]byte{},
 					SubcommitteeIndex: 0,
 					AggregationBits:   []byte{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-					Signature:         make([]byte, 96),
+					Signature:         [96]byte{},
 				},
-				SelectionProof: _byteArray("a3e966603e64cfd1d091718e3da0e4ed9b13619e7b40d805caf9eadaf84b72dc24fd7f09957a1438f937fbe3e12d6242190dcd5fcbced2b0ef57114ff369c65383eb8561bc56f4ab294ab3a3eba81134e1a90924e85e99e9742009ed4d8f9982"),
+				SelectionProof: _byteArray96("a3e966603e64cfd1d091718e3da0e4ed9b13619e7b40d805caf9eadaf84b72dc24fd7f09957a1438f937fbe3e12d6242190dcd5fcbced2b0ef57114ff369c65383eb8561bc56f4ab294ab3a3eba81134e1a90924e85e99e9742009ed4d8f9982"),
 			},
 			pubKey:        _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
 			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
@@ -76,7 +75,7 @@ func TestSimpleSigner_SignSyncCommitteeContributionAndProof(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSyncCommitteeContributionAndProof(test.data, test.domain, test.pubKey)
+			res, _, err := signer.SignSyncCommitteeContributionAndProof(test.data, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -98,16 +97,16 @@ func TestSimpleSigner_SignSyncCommitteeSelectionData(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		data          *eth.SyncAggregatorSelectionData
+		data          *altair.SyncAggregatorSelectionData
 		pubKey        []byte
-		domain        []byte
+		domain        [32]byte
 		expectedError error
 		sig           []byte
 	}{
 		{
 			name: "simple sign",
-			data: &eth.SyncAggregatorSelectionData{
-				Slot:              types.Slot(1),
+			data: &altair.SyncAggregatorSelectionData{
+				Slot:              phase0.Slot(1),
 				SubcommitteeIndex: 0,
 			},
 			pubKey:        _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
@@ -151,7 +150,7 @@ func TestSimpleSigner_SignSyncCommitteeSelectionData(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSyncCommitteeSelectionData(test.data, test.domain, test.pubKey)
+			res, _, err := signer.SignSyncCommitteeSelectionData(test.data, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
@@ -175,13 +174,13 @@ func TestSimpleSigner_SignSyncCommittee(t *testing.T) {
 		name          string
 		root          []byte
 		pubKey        []byte
-		domain        []byte
+		domain        [32]byte
 		expectedError error
 		sig           []byte
 	}{
 		{
 			name:          "simple sign",
-			root:          _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
+			root:          _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
 			pubKey:        _byteArray("8a90513c2a1ac279aab0c86c9ba6452f809c06d6439a3940aa869fd5cb878c2d7832553faef9059f914b8903c691ef66"),
 			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: nil,
@@ -189,7 +188,7 @@ func TestSimpleSigner_SignSyncCommittee(t *testing.T) {
 		},
 		{
 			name:          "unknown account, should error",
-			root:          _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
+			root:          _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
 			pubKey:        _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c"),
 			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: errors.New("account not found"),
@@ -197,7 +196,7 @@ func TestSimpleSigner_SignSyncCommittee(t *testing.T) {
 		},
 		{
 			name:          "nil account, should error",
-			root:          _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
+			root:          _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
 			pubKey:        nil,
 			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: errors.New("account was not supplied"),
@@ -205,7 +204,7 @@ func TestSimpleSigner_SignSyncCommittee(t *testing.T) {
 		},
 		{
 			name:          "empty account, should error",
-			root:          _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
+			root:          _byteArray("0000000081509579e35e84020ad8751eca180b44df470332d3ad18fc6fd52469"),
 			pubKey:        _byteArray(""),
 			domain:        _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
 			expectedError: errors.New("account not found"),
@@ -215,7 +214,7 @@ func TestSimpleSigner_SignSyncCommittee(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := signer.SignSyncCommittee(test.root, test.domain, test.pubKey)
+			res, _, err := signer.SignSyncCommittee(test.root, test.domain, test.pubKey)
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
