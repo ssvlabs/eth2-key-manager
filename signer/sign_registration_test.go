@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/attestantio/go-eth2-client/api"
 	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
@@ -15,16 +16,21 @@ func TestSimpleSigner_SignRegistration(t *testing.T) {
 	signer, err := setupNoSlashingProtectionSK(_byteArray("659e875e1b062c03f2f2a57332974d475b97df6cfc581d322e79642d39aca8fd"))
 	require.NoError(t, err)
 
-	registrationMock := &apiv1.ValidatorRegistration{
+	valRegistrationMock := &apiv1.ValidatorRegistration{
 		GasLimit:  123456,
 		Timestamp: time.UnixMilli(1658313712),
 	}
-	copy(registrationMock.FeeRecipient[:], "9831EeF7A86C19E32bEcDad091c1DbC974cf452a")
-	copy(registrationMock.Pubkey[:], "a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af")
+	copy(valRegistrationMock.FeeRecipient[:], "9831EeF7A86C19E32bEcDad091c1DbC974cf452a")
+	copy(valRegistrationMock.Pubkey[:], "a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af")
+
+	registrationMock := &api.VersionedValidatorRegistration{
+		Version: 0,
+		V1:      valRegistrationMock,
+	}
 
 	tests := []struct {
 		name          string
-		data          *apiv1.ValidatorRegistration
+		data          *api.VersionedValidatorRegistration
 		pubKey        []byte
 		domain        [32]byte
 		expectedError error
