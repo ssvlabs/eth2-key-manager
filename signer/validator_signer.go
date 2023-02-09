@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/attestantio/go-eth2-client/api"
-	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
@@ -24,7 +23,7 @@ type ValidatorSigner interface {
 	SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
-	SignRegistration(registration *apiv1.ValidatorRegistration, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignRegistration(registration *api.VersionedValidatorRegistration, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 }
 
 // SimpleSigner implements ValidatorSigner interface
