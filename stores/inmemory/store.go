@@ -26,7 +26,7 @@ type InMemStore struct {
 	highestAttestation     map[string]*phase0.AttestationData
 
 	highestProposalLock sync.RWMutex
-	highestProposal     map[string]phase0.Slot
+	highestProposal     map[string]*phase0.Slot
 
 	encryptor          encryptor2.Encryptor
 	encryptionPassword []byte
@@ -43,7 +43,7 @@ func NewInMemStoreWithEncryptor(network core.Network, encryptor encryptor2.Encry
 		network:            network,
 		accounts:           make(map[string]*wallets.HDAccount),
 		highestAttestation: make(map[string]*phase0.AttestationData),
-		highestProposal:    make(map[string]phase0.Slot),
+		highestProposal:    make(map[string]*phase0.Slot),
 		encryptor:          encryptor,
 		encryptionPassword: password,
 	}

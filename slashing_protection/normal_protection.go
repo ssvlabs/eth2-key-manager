@@ -47,11 +47,11 @@ func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, slot phase
 	if err != nil {
 		return nil, errors.New("could not retrieve highest proposal")
 	}
-	if highest == 0 {
+	if highest == nil {
 		return nil, errors.New("highest proposal data is nil, can't determine if proposal is slashable")
 	}
 
-	if slot > highest {
+	if slot > *highest {
 		return &core.ProposalSlashStatus{
 			Slot:   slot,
 			Status: core.ValidProposal,
@@ -106,15 +106,14 @@ func (protector *NormalProtection) UpdateHighestProposal(key []byte, slot phase0
 	if err != nil {
 		return errors.New("could not retrieve highest proposal")
 	}
-	if highest == 0 {
-		err := protector.store.SaveHighestProposal(key, slot)
-		if err != nil {
+	if highest == nil {
+		if err := protector.store.SaveHighestProposal(key, slot); err != nil {
 			return errors.New("could not save highest proposal")
 		}
 		return nil
 	}
 
-	if highest < slot {
+	if *highest < slot {
 		return protector.store.SaveHighestProposal(key, slot)
 	}
 
