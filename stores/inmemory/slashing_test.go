@@ -75,7 +75,7 @@ func TestSavingProposal(t *testing.T) {
 			proposal, err := storage.RetrieveHighestProposal(test.account.ValidatorPublicKey())
 			require.NoError(t, err)
 			require.NotNil(t, proposal)
-			require.EqualValues(t, test.proposal, proposal)
+			require.EqualValues(t, test.proposal, *proposal)
 		})
 	}
 }

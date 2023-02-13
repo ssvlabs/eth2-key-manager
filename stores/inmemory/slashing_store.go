@@ -25,13 +25,13 @@ func (store *InMemStore) RetrieveHighestAttestation(pubKey []byte) (*phase0.Atte
 // SaveHighestProposal saves the given highest attestation
 func (store *InMemStore) SaveHighestProposal(pubKey []byte, slot phase0.Slot) error {
 	store.highestProposalLock.Lock()
-	store.highestProposal[hex.EncodeToString(pubKey)] = slot
+	store.highestProposal[hex.EncodeToString(pubKey)] = &slot
 	store.highestProposalLock.Unlock()
 	return nil
 }
 
 // RetrieveHighestProposal returns highest proposal
-func (store *InMemStore) RetrieveHighestProposal(pubKey []byte) (phase0.Slot, error) {
+func (store *InMemStore) RetrieveHighestProposal(pubKey []byte) (*phase0.Slot, error) {
 	store.highestProposalLock.RLock()
 	val := store.highestProposal[hex.EncodeToString(pubKey)]
 	store.highestProposalLock.RUnlock()
