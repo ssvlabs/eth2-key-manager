@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	"github.com/bloxapp/ssv-spec/types"
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 
@@ -41,7 +40,7 @@ func (signer *SimpleSigner) SignBlock(block ssz.HashRoot, slot phase0.Slot, doma
 		return nil, nil, errors.Errorf("slashable proposal (%s), not signing", status.Status)
 	}
 
-	root, err := types.ComputeETHSigningRoot(block, domain)
+	root, err := ComputeETHSigningRoot(block, domain)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}

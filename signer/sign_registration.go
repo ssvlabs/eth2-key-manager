@@ -6,7 +6,6 @@ import (
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	"github.com/bloxapp/ssv-spec/types"
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 )
@@ -39,7 +38,7 @@ func (signer *SimpleSigner) SignRegistration(registration *api.VersionedValidato
 	}
 
 	// Produce the signature.
-	root, err := types.ComputeETHSigningRoot(reg, domain)
+	root, err := ComputeETHSigningRoot(reg, domain)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -4,8 +4,6 @@ import (
 	"encoding/hex"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	"github.com/bloxapp/ssv-spec/types"
-
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +22,7 @@ func (signer *SimpleSigner) SignSlot(slot phase0.Slot, domain phase0.Domain, pub
 		return nil, nil, err
 	}
 
-	root, err := types.ComputeETHSigningRoot(types.SSZUint64(slot), domain)
+	root, err := ComputeETHSigningRoot(SSZUint64(slot), domain)
 	if err != nil {
 		return nil, nil, err
 	}

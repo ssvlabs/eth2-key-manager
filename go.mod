@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/attestantio/go-eth2-client v0.15.2
-	github.com/bloxapp/ssv-spec v0.2.8-0.20230116160450-3526f3880cb9
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1
 	github.com/ferranbt/fastssz v0.1.2
 	github.com/google/uuid v1.3.0
@@ -23,7 +22,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
-	github.com/ethereum/go-ethereum v1.10.23 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/goccy/go-yaml v1.9.5 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
