@@ -7,6 +7,7 @@ import (
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
+	ssz "github.com/ferranbt/fastssz"
 	"github.com/google/uuid"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -68,4 +69,17 @@ func (signer *SimpleSigner) unlock(accountID uuid.UUID, operation string) {
 	if val, ok := signer.signLocks[k]; ok {
 		val.Unlock()
 	}
+}
+
+// ComputeETHSigningRoot returns computed root for eth signing
+func ComputeETHSigningRoot(obj ssz.HashRoot, domain phase0.Domain) (phase0.Root, error) {
+	root, err := obj.HashTreeRoot()
+	if err != nil {
+		return phase0.Root{}, err
+	}
+	signingContainer := phase0.SigningData{
+		ObjectRoot: root,
+		Domain:     domain,
+	}
+	return signingContainer.HashTreeRoot()
 }
