@@ -95,8 +95,9 @@ func TestMarshaling(t *testing.T) {
 	}
 	require.NoError(t, store.SaveHighestAttestation(acc.ValidatorPublicKey(), att))
 
+	highestProposalSlot := phase0.Slot(1)
 	// proposal
-	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), 1))
+	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), &highestProposalSlot))
 
 	// marshal
 	byts, err := json.Marshal(store)
