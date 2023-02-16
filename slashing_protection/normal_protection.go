@@ -107,7 +107,7 @@ func (protector *NormalProtection) UpdateHighestProposal(key []byte, slot phase0
 		return errors.New("could not retrieve highest proposal")
 	}
 	if highest == nil || *highest < slot {
-		if err := protector.store.SaveHighestProposal(key, slot); err != nil {
+		if err := protector.store.SaveHighestProposal(key, &slot); err != nil {
 			return errors.New("could not save highest proposal")
 		}
 	}
