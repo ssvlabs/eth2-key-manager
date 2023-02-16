@@ -262,8 +262,9 @@ func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, acco
 		return errors.Wrap(err, "failed to save highest attestation")
 	}
 
+	slot := phase0.Slot(accountFlags.highestProposals[highestIndex])
 	// add minimal proposal protection data
-	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), phase0.Slot(accountFlags.highestProposals[highestIndex])); err != nil {
+	if err := store.SaveHighestProposal(acc.ValidatorPublicKey(), &slot); err != nil {
 		return errors.Wrap(err, "failed to save highest proposal")
 	}
 	return nil
