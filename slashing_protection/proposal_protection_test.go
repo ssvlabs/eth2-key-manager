@@ -59,14 +59,8 @@ func setupProposal(t *testing.T, updateHighestProposal bool) (core.SlashingProte
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 
 	if updateHighestProposal {
-		blk := &phase0.BeaconBlock{
-			Slot:          100,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("A"),
-			StateRoot:     _byteArray32("A"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), blk.Slot))
+		highestProposal := phase0.Slot(100)
+		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), highestProposal))
 	}
 
 	return protector, []core.ValidatorAccount{account1, account2}, nil
@@ -77,15 +71,7 @@ func TestProposalProtection(t *testing.T) {
 		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
 
-		blk := &phase0.BeaconBlock{
-			Slot:          101,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("Z"),
-			StateRoot:     _byteArray32("Z"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(101))
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.ValidProposal)
 	})
@@ -94,14 +80,7 @@ func TestProposalProtection(t *testing.T) {
 		protector, accounts, err := setupProposal(t, false)
 		require.NoError(t, err)
 
-		blk := &phase0.BeaconBlock{
-			Slot:          99,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("Z"),
-			StateRoot:     _byteArray32("Z"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(99))
 		require.EqualError(t, err, "highest proposal data is nil, can't determine if proposal is slashable")
 		require.Nil(t, res)
 	})
@@ -110,15 +89,7 @@ func TestProposalProtection(t *testing.T) {
 		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
 
-		blk := &phase0.BeaconBlock{
-			Slot:          99,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("Z"),
-			StateRoot:     _byteArray32("Z"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(99))
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.HighestProposalVote)
 	})
