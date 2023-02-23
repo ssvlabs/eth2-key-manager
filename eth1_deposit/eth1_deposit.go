@@ -16,11 +16,7 @@ const (
 	BLSWithdrawalPrefixByte = byte(0)
 )
 
-// GenesisValidatorsRoot genesis validators root of the chain.
-var (
-	GenesisValidatorsRoot = phase0.Root{}
-	DomainDeposit         = [4]byte{0x03, 0x00, 0x00, 0x00}
-)
+var domainDeposit = [4]byte{0x03, 0x00, 0x00, 0x00}
 
 // IsSupportedDepositNetwork returns true if the given network is supported
 var IsSupportedDepositNetwork = func(network core.Network) bool {
@@ -45,7 +41,7 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 	}
 
 	// Create domain
-	domain, err := ComputeETHDomain(DomainDeposit, network.ForkVersion(), GenesisValidatorsRoot)
+	domain, err := core.ComputeETHDomain(domainDeposit, network.ForkVersion(), network.GenesisValidatorsRoot())
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to calculate domain")
 	}
@@ -87,21 +83,4 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 func withdrawalCredentialsHash(withdrawalPubKey []byte) []byte {
 	h := util.SHA256(withdrawalPubKey)
 	return append([]byte{BLSWithdrawalPrefixByte}, h[1:]...)[:32]
-}
-
-// ComputeETHDomain returns computed domain
-func ComputeETHDomain(domain phase0.DomainType, fork phase0.Version, genesisValidatorRoot phase0.Root) (phase0.Domain, error) {
-	ret := phase0.Domain{}
-	copy(ret[0:4], domain[:])
-
-	forkData := phase0.ForkData{
-		CurrentVersion:        fork,
-		GenesisValidatorsRoot: genesisValidatorRoot,
-	}
-	forkDataRoot, err := forkData.HashTreeRoot()
-	if err != nil {
-		return ret, err
-	}
-	copy(ret[4:32], forkDataRoot[0:28])
-	return ret, nil
 }

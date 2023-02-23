@@ -1,6 +1,8 @@
 package core
 
 import (
+	"github.com/attestantio/go-eth2-client/spec/bellatrix"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/google/uuid"
 )
 
@@ -32,4 +34,12 @@ type ValidatorAccount interface {
 
 	// SetContext sets the given context
 	SetContext(ctx *WalletContext)
+}
+
+// ValidatorInfo represents the information of a validator
+type ValidatorInfo struct {
+	Index                 phase0.ValidatorIndex
+	Pubkey                phase0.BLSPubKey
+	WithdrawalCredentials []byte
+	ToExecutionAddress    bellatrix.ExecutionAddress
 }

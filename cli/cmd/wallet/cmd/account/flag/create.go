@@ -39,7 +39,6 @@ const (
 	indexFlag            = "index"
 	seedFlag             = "seed"
 	privateKeyFlag       = "private-key"
-	accumulateFlag       = "accumulate"
 	responseTypeFlag     = "response-type"
 	highestKnownSource   = "highest-source"
 	highestKnownTarget   = "highest-target"
@@ -69,16 +68,6 @@ func AddIndexFlag(c *cobra.Command) {
 // GetIndexFlagValue gets the index flag from the command
 func GetIndexFlagValue(c *cobra.Command) (int, error) {
 	return c.Flags().GetInt(indexFlag)
-}
-
-// AddAccumulateFlag adds the accumulate flag to the command
-func AddAccumulateFlag(c *cobra.Command) {
-	cliflag.AddPersistentBoolFlag(c, accumulateFlag, false, "accumulate accounts", false)
-}
-
-// GetAccumulateFlagValue gets the accumulate flag from the command
-func GetAccumulateFlagValue(c *cobra.Command) (bool, error) {
-	return c.Flags().GetBool(accumulateFlag)
 }
 
 // AddResponseTypeFlag adds the response-type flag to the command

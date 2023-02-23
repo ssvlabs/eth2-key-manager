@@ -6,6 +6,8 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignSyncCommittee sign sync committee
@@ -26,7 +28,7 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain phase0
 
 	// 3. sign
 	sszRoot := SSZBytes(msgBlockRoot)
-	root, err := ComputeETHSigningRoot(&sszRoot, domain)
+	root, err := core.ComputeETHSigningRoot(&sszRoot, domain)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -58,7 +60,7 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *altair.SyncAggr
 	if data == nil {
 		return nil, nil, errors.New("selection data nil")
 	}
-	root, err := ComputeETHSigningRoot(data, domain)
+	root, err := core.ComputeETHSigningRoot(data, domain)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
@@ -90,7 +92,7 @@ func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProo
 	if contribAndProof == nil {
 		return nil, nil, errors.New("contrib proof data nil")
 	}
-	root, err := ComputeETHSigningRoot(contribAndProof, domain)
+	root, err := core.ComputeETHSigningRoot(contribAndProof, domain)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}

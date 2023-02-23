@@ -5,6 +5,8 @@ import (
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignEpoch signs the given epoch
@@ -22,7 +24,7 @@ func (signer *SimpleSigner) SignEpoch(epoch phase0.Epoch, domain phase0.Domain, 
 		return nil, nil, err
 	}
 
-	root, err := ComputeETHSigningRoot(SSZUint64(epoch), domain)
+	root, err := core.ComputeETHSigningRoot(SSZUint64(epoch), domain)
 	if err != nil {
 		return nil, nil, err
 	}

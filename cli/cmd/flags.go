@@ -10,7 +10,8 @@ import (
 
 // Flag names.
 const (
-	networkFlag = "network"
+	networkFlag    = "network"
+	accumulateFlag = "accumulate"
 )
 
 // AddNetworkFlag adds the network flag to the command
@@ -31,4 +32,14 @@ func GetNetworkFlagValue(c *cobra.Command) (core.Network, error) {
 	}
 
 	return ret, nil
+}
+
+// AddAccumulateFlag adds the accumulate flag to the command
+func AddAccumulateFlag(c *cobra.Command) {
+	cliflag.AddPersistentBoolFlag(c, accumulateFlag, false, "accumulate accounts", false)
+}
+
+// GetAccumulateFlagValue gets the accumulate flag from the command
+func GetAccumulateFlagValue(c *cobra.Command) (bool, error) {
+	return c.Flags().GetBool(accumulateFlag)
 }

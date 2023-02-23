@@ -5,6 +5,8 @@ import (
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignBeaconAttestation signs beacon attestation data
@@ -46,7 +48,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *phase0.Attestatio
 	}
 
 	// 6. Prepare and sign data
-	root, err := ComputeETHSigningRoot(attestation, domain)
+	root, err := core.ComputeETHSigningRoot(attestation, domain)
 	if err != nil {
 		return nil, nil, err
 	}
