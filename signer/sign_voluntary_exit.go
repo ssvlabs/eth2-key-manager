@@ -9,30 +9,30 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
-// SignAggregateAndProof signs aggregate and proof
-func (signer *SimpleSigner) SignAggregateAndProof(agg *phase0.AggregateAndProof, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
-	// 1. check we can even sign this
-	// TODO - should we?
+// SignVoluntaryExit signs the given VoluntaryExit.
+func (signer *SimpleSigner) SignVoluntaryExit(voluntaryExit *phase0.VoluntaryExit, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
+	// Validate the voluntary exit.
+	if voluntaryExit == nil {
+		return nil, nil, errors.New("voluntary exit data is nil")
+	}
 
-	// 2. get the account
+	// Get the account.
 	if pubKey == nil {
 		return nil, nil, errors.New("account was not supplied")
 	}
-
 	account, err := signer.wallet.AccountByPublicKey(hex.EncodeToString(pubKey))
 	if err != nil {
 		return nil, nil, err
 	}
 
-	root, err := core.ComputeETHSigningRoot(agg, domain)
+	// Produce the signature.
+	root, err := core.ComputeETHSigningRoot(voluntaryExit, domain)
 	if err != nil {
 		return nil, nil, err
 	}
-
 	sig, err := account.ValidationKeySign(root[:])
 	if err != nil {
 		return nil, nil, err
 	}
-
 	return sig, root[:], nil
 }

@@ -191,6 +191,27 @@ func TestAccountCreate(t *testing.T) {
 		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true need to be equal to index")
 	})
 
+	t.Run("highest proposal invalid (accumulate false)", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--seed=4121369f76a4f3c896f0ce38fbe84c377a282dae84c717d5c1b64a95d9ebaa48360bd1780511d2ac5386c2f4651af3f0c49a11768fc6c922dba867e84a0ee37f",
+			"--index=0",
+			"--response-type=object",
+			"--highest-source=1",
+			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.NotNil(t, actualOutput)
+		require.NoError(t, err)
+	})
+
 	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)

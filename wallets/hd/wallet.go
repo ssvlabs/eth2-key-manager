@@ -1,13 +1,17 @@
 package hd
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"sort"
 	"strconv"
 
+	"github.com/attestantio/go-eth2-client/spec/capella"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	util "github.com/wealdtech/go-eth2-util"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/wallets"
@@ -20,11 +24,10 @@ const (
 	ValidatorKeyPath  = WithdrawalKeyPath + "/0"
 )
 
-// Predefined errors
-var (
-	// ErrAccountNotFound is the error when account not found
-	ErrAccountNotFound = errors.New("account not found")
-)
+// ErrAccountNotFound is the error when account not found
+var ErrAccountNotFound = errors.New("account not found")
+
+var domainBlsToExecutionChange = phase0.DomainType{0x0a, 0x00, 0x00, 0x00}
 
 // Wallet represents hierarchical deterministic wallet
 type Wallet struct {
@@ -122,6 +125,73 @@ func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterD
 	}
 
 	return ret, nil
+}
+
+// CreateSignedBLSToExecutionChange using pointer and constructed key, using seed
+func (wallet *Wallet) CreateSignedBLSToExecutionChange(validator *core.ValidatorInfo, seed []byte, indexPointer *int) (*capella.SignedBLSToExecutionChange, error) {
+	// Create the master key based on the seed and network.
+	key, err := core.MasterKeyFromSeed(seed, wallet.context.Storage.Network())
+	if err != nil {
+		return nil, err
+	}
+
+	// Create validator key
+	validatorPath := fmt.Sprintf(ValidatorKeyPath, *indexPointer)
+	validatorKey, err := key.Derive(validatorPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !bytes.Equal(validatorKey.PublicKey().Serialize(), validator.Pubkey[:]) {
+		derivedPubKey := "0x" + hex.EncodeToString(validatorKey.PublicKey().Serialize())
+		providedPubKey := validator.Pubkey.String()
+		return nil, errors.Errorf("derived validator public key: %s, does not match with the provided one: %s", derivedPubKey, providedPubKey)
+	}
+
+	// Create withdrawal key
+	withdrawalPath := fmt.Sprintf(WithdrawalKeyPath, *indexPointer)
+	withdrawalKey, err := key.Derive(withdrawalPath)
+	if err != nil {
+		return nil, err
+	}
+
+	withdrawalCredentials := util.SHA256(withdrawalKey.PublicKey().Serialize())
+	withdrawalCredentials[0] = byte(0) // BLS_WITHDRAWAL_PREFIX
+
+	if !bytes.Equal(withdrawalCredentials, validator.WithdrawalCredentials) {
+		derivedCreds := "0x" + hex.EncodeToString(withdrawalCredentials)
+		providedCreds := "0x" + hex.EncodeToString(validator.WithdrawalCredentials)
+		return nil, errors.Errorf("derived withdrawal credentials: %s, does not match with the provided one: %s", derivedCreds, providedCreds)
+	}
+
+	blsToExecutionChange := &capella.BLSToExecutionChange{
+		ValidatorIndex:     validator.Index,
+		ToExecutionAddress: validator.ToExecutionAddress,
+	}
+	copy(blsToExecutionChange.FromBLSPubkey[:], withdrawalKey.PublicKey().Serialize())
+
+	// Compute domain
+	domain, err := core.ComputeETHDomain(domainBlsToExecutionChange, wallet.context.Storage.Network().ForkVersion(), wallet.context.Storage.Network().GenesisValidatorsRoot())
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to calculate domain")
+	}
+
+	signingRoot, err := core.ComputeETHSigningRoot(blsToExecutionChange, domain)
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := withdrawalKey.Sign(signingRoot[:])
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to sign credentials change")
+	}
+
+	signedOperation := &capella.SignedBLSToExecutionChange{
+		Message: blsToExecutionChange,
+	}
+	copy(signedOperation.Signature[:], signature)
+
+	return signedOperation, nil
 }
 
 // CreateValidatorAccountFromPrivateKey creates account having only private key

@@ -24,7 +24,7 @@ func init() {
 	flag.AddIndexFlag(createCmd)
 	flag.AddSeedFlag(createCmd)
 	flag.AddPrivateKeyFlag(createCmd)
-	flag.AddAccumulateFlag(createCmd)
+	rootcmd.AddAccumulateFlag(createCmd)
 	flag.AddResponseTypeFlag(createCmd)
 	flag.AddHighestSourceFlag(createCmd)
 	flag.AddHighestTargetFlag(createCmd)

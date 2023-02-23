@@ -156,7 +156,7 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 		accountFlagValues.seedBytes = seedBytes
 
 		// Get accumulate flag value.
-		accumulateFlagValue, err := flag.GetAccumulateFlagValue(cmd)
+		accumulateFlagValue, err := rootcmd.GetAccumulateFlagValue(cmd)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the accumulate flag value")
 		}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/attestantio/go-eth2-client/spec/capella"
 	"github.com/google/uuid"
 )
 
@@ -25,6 +26,9 @@ type Wallet interface {
 	// CreateValidatorAccount creates a new validation (validator) key pair in the wallet.
 	// Keep in mind ND wallets will probably not allow this function, use AddValidatorAccount.
 	CreateValidatorAccount(seed []byte, indexPointer *int) (ValidatorAccount, error)
+
+	// CreateSignedBLSToExecutionChange sets the BLS key to the execution key
+	CreateSignedBLSToExecutionChange(validator *ValidatorInfo, seed []byte, indexPointer *int) (*capella.SignedBLSToExecutionChange, error)
 
 	// CreateValidatorAccountFromPrivateKey creates validator account from Private Key
 	CreateValidatorAccountFromPrivateKey(privateKey []byte, indexPointer *int) (ValidatorAccount, error)

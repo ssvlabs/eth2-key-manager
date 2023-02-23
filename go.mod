@@ -32,6 +32,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7 // indirect
+	github.com/sanity-io/litter v1.5.5 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/wealdtech/go-bytesutil v1.1.1 // indirect
 	golang.org/x/sys v0.2.0 // indirect
