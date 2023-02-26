@@ -1,6 +1,9 @@
 package flag
 
 import (
+	"encoding/hex"
+	"strings"
+
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -32,8 +35,23 @@ func AddCurrentForkVersionFlag(c *cobra.Command) {
 }
 
 // GetCurrentForkVersionFlagValue gets the current fork version flag from the command
-func GetCurrentForkVersionFlagValue(c *cobra.Command) (string, error) {
-	return c.Flags().GetString(currentForkVersionFlag)
+func GetCurrentForkVersionFlagValue(c *cobra.Command) (phase0.Version, error) {
+	var currentForkVersion phase0.Version
+	currentForkVersionFlagValue, err := c.Flags().GetString(currentForkVersionFlag)
+	if err != nil {
+		return currentForkVersion, err
+	}
+	version, err := hex.DecodeString(strings.TrimPrefix(currentForkVersionFlagValue, "0x"))
+	if err != nil {
+		return currentForkVersion, errors.Wrap(err, "invalid current fork version supplied")
+	}
+	if len(version) != phase0.ForkVersionLength {
+		return currentForkVersion, errors.New("invalid length for current fork version")
+	}
+
+	copy(currentForkVersion[:], version)
+
+	return currentForkVersion, nil
 }
 
 // GetVoluntaryExitInfoFlagValue gets the voluntary exit info flag from the command

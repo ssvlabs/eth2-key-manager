@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"strings"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
@@ -151,14 +150,7 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the current fork version flag value")
 	}
-	version, err := hex.DecodeString(strings.TrimPrefix(currentForkVersionFlagValue, "0x"))
-	if err != nil {
-		return nil, errors.Wrap(err, "invalid current fork version supplied")
-	}
-	if len(version) != phase0.ForkVersionLength {
-		return nil, errors.New("invalid length for current fork version")
-	}
-	copy(voluntaryExitFlagValues.currentForkVersion[:], version)
+	voluntaryExitFlagValues.currentForkVersion = currentForkVersionFlagValue
 
 	// Get epoch flag value.
 	epochFlagValue, err := flag.GetEpochFlagValue(cmd)
