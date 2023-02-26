@@ -23,6 +23,7 @@ func init() {
 	// Define flags for the command.
 	flag.AddIndexFlag(voluntaryExitCmd)
 	flag.AddSeedFlag(voluntaryExitCmd)
+	flag.AddCurrentForkVersionFlag(voluntaryExitCmd)
 	flag.AddValidatorIndexFlag(voluntaryExitCmd)
 	flag.AddEpochFlag(voluntaryExitCmd)
 	rootcmd.AddAccumulateFlag(voluntaryExitCmd)

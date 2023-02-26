@@ -1,16 +1,21 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/hex"
 
 	"github.com/attestantio/go-eth2-client/spec/capella"
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	types "github.com/wealdtech/go-eth2-types/v2"
+	util "github.com/wealdtech/go-eth2-util"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/signer"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
@@ -22,6 +27,8 @@ type CredentialsFlagValues struct {
 	validators []*core.ValidatorInfo
 	network    core.Network
 }
+
+var domainBlsToExecutionChange = types.DomainType{0x0a, 0x00, 0x00, 0x00}
 
 // Credentials creates a new wallet account(s) and prints the storage.
 func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
@@ -51,6 +58,23 @@ func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "failed to open wallet")
 	}
 
+	// set the context for wallet to use withdrawal key as primary key
+	wallet.SetContext(&core.WalletContext{
+		Storage:        store,
+		WithdrawalMode: true,
+	})
+
+	// Compute domain
+	genesisValidatorsRoot := store.Network().GenesisValidatorsRoot()
+	genesisForkVersion := store.Network().GenesisForkVersion()
+	domainBytes, err := types.ComputeDomain(domainBlsToExecutionChange, genesisForkVersion[:], genesisValidatorsRoot[:])
+	if err != nil {
+		return errors.Wrap(err, "failed to calculate domain")
+	}
+	var domain phase0.Domain
+	copy(domain[:], domainBytes)
+
+	simpleSigner := signer.NewSimpleSigner(wallet, nil, store.Network())
 	signedBLSToExecutionChanges := make([]*capella.SignedBLSToExecutionChange, 0)
 
 	for i := 0; i <= credentialsFlags.index; i++ {
@@ -60,11 +84,49 @@ func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
 		} else {
 			index = credentialsFlags.index
 		}
+		validator := credentialsFlags.validators[i]
 
-		signedBLSToExecutionChange, err := wallet.CreateSignedBLSToExecutionChange(credentialsFlags.validators[i], credentialsFlags.seedBytes, &index)
+		// Its actually withdrawal account, since the wallet is in withdrawal mode
+		acc, err := wallet.CreateValidatorAccount(credentialsFlags.seedBytes, &index)
 		if err != nil {
-			return errors.Wrap(err, "failed to build BLS to execution change")
+			return errors.Wrap(err, "failed to create withdrawal account")
 		}
+
+		// Since the wallet is in withdrawal mode the validator account is the withdrawal account
+		derivedWithdrawalPubKey := acc.ValidatorPublicKey()
+		derivedValidatorPubKey := acc.WithdrawalPublicKey()
+
+		// validation that the derived validation public key is the same as the one in the validator info
+		if !bytes.Equal(derivedValidatorPubKey, validator.Pubkey[:]) {
+			derivedPubKey := "0x" + hex.EncodeToString(derivedValidatorPubKey)
+			providedPubKey := validator.Pubkey.String()
+			return errors.Errorf("derived validator public key: %s, does not match with the provided one: %s", derivedPubKey, providedPubKey)
+		}
+
+		// validation that the derived withdrawal credentials are the same as the one in the validator info
+		withdrawalCredentials := util.SHA256(derivedWithdrawalPubKey)
+		withdrawalCredentials[0] = byte(0) // BLS_WITHDRAWAL_PREFIX
+		if !bytes.Equal(withdrawalCredentials, validator.WithdrawalCredentials) {
+			derivedCreds := "0x" + hex.EncodeToString(withdrawalCredentials)
+			providedCreds := "0x" + hex.EncodeToString(validator.WithdrawalCredentials)
+			return errors.Errorf("derived withdrawal credentials: %s, does not match with the provided one: %s", derivedCreds, providedCreds)
+		}
+
+		blsToExecutionChange := &capella.BLSToExecutionChange{
+			ValidatorIndex:     validator.Index,
+			ToExecutionAddress: validator.ToExecutionAddress,
+		}
+		copy(blsToExecutionChange.FromBLSPubkey[:], derivedWithdrawalPubKey)
+
+		signature, _, err := simpleSigner.SignBLSToExecutionChange(blsToExecutionChange, domain, derivedWithdrawalPubKey)
+		if err != nil {
+			return errors.Wrap(err, "failed to sign voluntary exit")
+		}
+
+		signedBLSToExecutionChange := &capella.SignedBLSToExecutionChange{
+			Message: blsToExecutionChange,
+		}
+		copy(signedBLSToExecutionChange.Signature[:], signature)
 		signedBLSToExecutionChanges = append(signedBLSToExecutionChanges, signedBLSToExecutionChange)
 
 		if !credentialsFlags.accumulate {

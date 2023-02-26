@@ -8,8 +8,6 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignRegistration signs the given ValidatorRegistration.
@@ -40,7 +38,7 @@ func (signer *SimpleSigner) SignRegistration(registration *api.VersionedValidato
 	}
 
 	// Produce the signature.
-	root, err := core.ComputeETHSigningRoot(reg, domain)
+	root, err := ComputeETHSigningRoot(reg, domain)
 	if err != nil {
 		return nil, nil, err
 	}

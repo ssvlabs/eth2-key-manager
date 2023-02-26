@@ -5,8 +5,6 @@ import (
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignAggregateAndProof signs aggregate and proof
@@ -24,7 +22,7 @@ func (signer *SimpleSigner) SignAggregateAndProof(agg *phase0.AggregateAndProof,
 		return nil, nil, err
 	}
 
-	root, err := core.ComputeETHSigningRoot(agg, domain)
+	root, err := ComputeETHSigningRoot(agg, domain)
 	if err != nil {
 		return nil, nil, err
 	}

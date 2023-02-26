@@ -25,8 +25,8 @@ func NetworkFromString(n string) Network {
 	}
 }
 
-// ForkVersion returns the fork version of the network.
-func (n Network) ForkVersion() phase0.Version {
+// GenesisForkVersion returns the genesis fork version of the network.
+func (n Network) GenesisForkVersion() phase0.Version {
 	switch n {
 	case PyrmontNetwork:
 		return phase0.Version{0, 0, 32, 9}

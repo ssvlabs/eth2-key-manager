@@ -45,7 +45,7 @@ func (signer *SimpleSigner) SignBlock(block ssz.HashRoot, slot phase0.Slot, doma
 		return nil, nil, err
 	}
 
-	root, err := core.ComputeETHSigningRoot(block, domain)
+	root, err := ComputeETHSigningRoot(block, domain)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not get signing root")
 	}
