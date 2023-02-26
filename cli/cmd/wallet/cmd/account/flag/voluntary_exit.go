@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/flag"
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -29,7 +28,7 @@ func GetEpochFlagValue(c *cobra.Command) (int, error) {
 
 // AddCurrentForkVersionFlag adds the current fork version flag to the command
 func AddCurrentForkVersionFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, currentForkVersionFlag, "", "current fork version", true)
+	cliflag.AddPersistentStringFlag(c, currentForkVersionFlag, "", "current fork version (ForkVersionLength: 4 bytes)", true)
 }
 
 // GetCurrentForkVersionFlagValue gets the current fork version flag from the command
@@ -44,7 +43,7 @@ func GetVoluntaryExitInfoFlagValue(c *cobra.Command) ([]*core.ValidatorInfo, err
 		return nil, errors.Wrapf(err, "failed to parse validator indices")
 	}
 
-	indexFlagValue, err := flag.GetIndexFlagValue(c)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(c)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
 	}

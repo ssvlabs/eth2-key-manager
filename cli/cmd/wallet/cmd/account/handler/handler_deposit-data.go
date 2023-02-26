@@ -22,13 +22,13 @@ func (h *Account) DepositData(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Get index flag.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the index flag value")
 	}
 
 	// Get seed flag.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the seed flag value")
 	}

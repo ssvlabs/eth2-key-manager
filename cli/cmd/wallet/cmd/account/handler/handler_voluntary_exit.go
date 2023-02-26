@@ -37,7 +37,7 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 
 	voluntaryExitFlags, err := CollectVoluntaryExitFlags(cmd)
 	if err != nil {
-		return errors.Wrap(err, "failed to collect voluntaryExit flags")
+		return errors.Wrap(err, "failed to collect voluntary exit flags")
 	}
 
 	// Initialize store
@@ -112,8 +112,15 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, error) {
 	voluntaryExitFlagValues := VoluntaryExitFlagValues{}
 
+	// Get network flag value.
+	network, err := rootcmd.GetNetworkFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the network flag value")
+	}
+	voluntaryExitFlagValues.network = network
+
 	// Get seed flag value.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
 	}
@@ -133,18 +140,11 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	voluntaryExitFlagValues.accumulate = accumulateFlagValue
 
 	// Get index flag value.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
 	}
 	voluntaryExitFlagValues.index = indexFlagValue
-
-	// Get network flag value.
-	network, err := rootcmd.GetNetworkFlagValue(cmd)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the network flag value")
-	}
-	voluntaryExitFlagValues.network = network
 
 	// Get current fork version flag value.
 	currentForkVersionFlagValue, err := flag.GetCurrentForkVersionFlagValue(cmd)
@@ -170,7 +170,7 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	// Get validators info flag value.
 	validators, err := flag.GetVoluntaryExitInfoFlagValue(cmd)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the validators info flag value")
+		return nil, err
 	}
 	voluntaryExitFlagValues.validators = validators
 

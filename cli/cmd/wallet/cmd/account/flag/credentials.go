@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/flag"
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -54,8 +53,12 @@ func GetValidatorPublicKeyFlagValue(c *cobra.Command) ([]phase0.BLSPubKey, error
 	for _, pk := range validatorPubKeys {
 		validatorPubKeyBytes, err := hex.DecodeString(strings.TrimPrefix(pk, "0x"))
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to HEX decode validator public key")
+			return nil, errors.Wrap(err, "invalid validator public key supplied")
 		}
+		if len(validatorPubKeyBytes) != phase0.PublicKeyLength {
+			return nil, errors.New("invalid length for validator public key")
+		}
+
 		var validatorBLSPubKey phase0.BLSPubKey
 		copy(validatorBLSPubKey[:], validatorPubKeyBytes)
 		validatorBLSPubKeys = append(validatorBLSPubKeys, validatorBLSPubKey)
@@ -80,10 +83,14 @@ func GetWithdrawalCredentialsFlagValue(c *cobra.Command) ([][]byte, error) {
 	for _, cred := range withdrawalCreds {
 		withdrawalCredsBytes, err := hex.DecodeString(strings.TrimPrefix(cred, "0x"))
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to HEX decode withdrawal credentials")
+			return nil, errors.Wrap(err, "invalid withdrawal credentials supplied")
 		}
+		if len(withdrawalCredsBytes) != 32 {
+			return nil, errors.New("invalid length for withdrawal credentials")
+		}
+
 		if withdrawalCredsBytes[0] != byte(0) {
-			return nil, errors.New("non-BLS withdrawal credentials passed")
+			return nil, errors.New("non-BLS withdrawal credentials supplied")
 		}
 		withdrawalCredentialsList = append(withdrawalCredentialsList, withdrawalCredsBytes)
 	}
@@ -107,8 +114,12 @@ func GetToExecutionAddressFlagValue(c *cobra.Command) ([]bellatrix.ExecutionAddr
 	for _, wa := range toExecutionAddresses {
 		toExecutionAddressBytes, err := hex.DecodeString(strings.TrimPrefix(wa, "0x"))
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to HEX decode withdrawal address")
+			return nil, errors.Wrap(err, "invalid to execution address supplied")
 		}
+		if len(toExecutionAddressBytes) != bellatrix.ExecutionAddressLength {
+			return nil, errors.New("invalid length for to execution address")
+		}
+
 		var toExecutionAdd bellatrix.ExecutionAddress
 		copy(toExecutionAdd[:], toExecutionAddressBytes)
 		toExecutionAddressList = append(toExecutionAddressList, toExecutionAdd)
@@ -142,7 +153,7 @@ func GetValidatorInfoFlagValue(c *cobra.Command) ([]*core.ValidatorInfo, error) 
 		return nil, errors.New("validator indices, public keys, withdrawal credentials and to execution addresses must be of equal length")
 	}
 
-	indexFlagValue, err := flag.GetIndexFlagValue(c)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(c)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
 	}

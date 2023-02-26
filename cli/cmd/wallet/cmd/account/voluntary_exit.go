@@ -21,13 +21,13 @@ var voluntaryExitCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(voluntaryExitCmd)
-	flag.AddSeedFlag(voluntaryExitCmd)
+	rootcmd.AddNetworkFlag(voluntaryExitCmd)
+	rootcmd.AddSeedFlag(voluntaryExitCmd)
+	rootcmd.AddIndexFlag(voluntaryExitCmd)
+	rootcmd.AddAccumulateFlag(voluntaryExitCmd)
 	flag.AddCurrentForkVersionFlag(voluntaryExitCmd)
 	flag.AddValidatorIndexFlag(voluntaryExitCmd)
 	flag.AddEpochFlag(voluntaryExitCmd)
-	rootcmd.AddAccumulateFlag(voluntaryExitCmd)
-	rootcmd.AddNetworkFlag(voluntaryExitCmd)
 
 	Command.AddCommand(voluntaryExitCmd)
 }

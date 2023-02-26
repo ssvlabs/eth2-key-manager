@@ -12,11 +12,13 @@ import (
 const (
 	networkFlag    = "network"
 	accumulateFlag = "accumulate"
+	seedFlag       = "seed"
+	indexFlag      = "index"
 )
 
 // AddNetworkFlag adds the network flag to the command
 func AddNetworkFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, networkFlag, "", "Ethereum network", false)
+	cliflag.AddPersistentStringFlag(c, networkFlag, "", "Ethereum network", true)
 }
 
 // GetNetworkFlagValue gets the network flag from the command
@@ -42,4 +44,24 @@ func AddAccumulateFlag(c *cobra.Command) {
 // GetAccumulateFlagValue gets the accumulate flag from the command
 func GetAccumulateFlagValue(c *cobra.Command) (bool, error) {
 	return c.Flags().GetBool(accumulateFlag)
+}
+
+// AddSeedFlag adds the seed flag to the command
+func AddSeedFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, seedFlag, "", "key-vault seed", true)
+}
+
+// GetSeedFlagValue gets the seed flag from the command
+func GetSeedFlagValue(c *cobra.Command) (string, error) {
+	return c.Flags().GetString(seedFlag)
+}
+
+// AddIndexFlag adds the index flag to the command
+func AddIndexFlag(c *cobra.Command) {
+	cliflag.AddPersistentIntFlag(c, indexFlag, 0, "public key index", true)
+}
+
+// GetIndexFlagValue gets the index flag from the command
+func GetIndexFlagValue(c *cobra.Command) (int, error) {
+	return c.Flags().GetInt(indexFlag)
 }
