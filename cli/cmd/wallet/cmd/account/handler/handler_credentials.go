@@ -147,7 +147,7 @@ func CollectCredentialsFlags(cmd *cobra.Command) (*CredentialsFlagValues, error)
 	credentialsFlagValues := CredentialsFlagValues{}
 
 	// Get seed flag value.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
 	}
@@ -167,7 +167,7 @@ func CollectCredentialsFlags(cmd *cobra.Command) (*CredentialsFlagValues, error)
 	credentialsFlagValues.accumulate = accumulateFlagValue
 
 	// Get index flag value.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
 	}
@@ -183,7 +183,7 @@ func CollectCredentialsFlags(cmd *cobra.Command) (*CredentialsFlagValues, error)
 	// Get validators info flag value.
 	validators, err := flag.GetValidatorInfoFlagValue(cmd)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the validators info flag value")
+		return nil, err
 	}
 	credentialsFlagValues.validators = validators
 

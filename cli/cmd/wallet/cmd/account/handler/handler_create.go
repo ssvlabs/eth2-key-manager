@@ -142,7 +142,7 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 		}
 	} else {
 		// Get seed flag value.
-		seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+		seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
 		}
@@ -164,7 +164,7 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 	}
 
 	// Get index flag value.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
 	}

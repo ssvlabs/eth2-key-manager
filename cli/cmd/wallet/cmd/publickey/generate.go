@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/flag"
 	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/handler"
 )
 
@@ -26,9 +25,9 @@ var generateCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(generateCmd)
-	flag.AddSeedFlag(generateCmd)
 	rootcmd.AddNetworkFlag(generateCmd)
+	rootcmd.AddSeedFlag(generateCmd)
+	rootcmd.AddIndexFlag(generateCmd)
 
 	Command.AddCommand(generateCmd)
 }

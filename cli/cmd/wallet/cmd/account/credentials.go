@@ -21,14 +21,14 @@ var credentialsCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(credentialsCmd)
-	flag.AddSeedFlag(credentialsCmd)
+	rootcmd.AddNetworkFlag(credentialsCmd)
+	rootcmd.AddSeedFlag(credentialsCmd)
+	rootcmd.AddIndexFlag(credentialsCmd)
+	rootcmd.AddAccumulateFlag(credentialsCmd)
 	flag.AddValidatorIndexFlag(credentialsCmd)
 	flag.AddValidatorPublicKeyFlag(credentialsCmd)
 	flag.AddWithdrawalCredentialsFlag(credentialsCmd)
 	flag.AddToExecutionAddressFlag(credentialsCmd)
-	rootcmd.AddAccumulateFlag(credentialsCmd)
-	rootcmd.AddNetworkFlag(credentialsCmd)
 
 	Command.AddCommand(credentialsCmd)
 }

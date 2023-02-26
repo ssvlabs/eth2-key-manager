@@ -21,10 +21,10 @@ var depositDataCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(depositDataCmd)
-	flag.AddSeedFlag(depositDataCmd)
-	flag.AddPublicKeyFlag(depositDataCmd)
 	rootcmd.AddNetworkFlag(depositDataCmd)
+	rootcmd.AddSeedFlag(depositDataCmd)
+	rootcmd.AddIndexFlag(depositDataCmd)
+	flag.AddPublicKeyFlag(depositDataCmd)
 
 	Command.AddCommand(depositDataCmd)
 }
