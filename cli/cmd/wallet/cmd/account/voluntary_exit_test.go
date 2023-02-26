@@ -71,7 +71,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 		actualOutput := output.String()
 		require.EqualValues(t, actualOutput, "")
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to collect voluntary exit flags: invalid length for current fork version")
+		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to retrieve the current fork version flag value: invalid length for current fork version")
 	})
 
 	t.Run("Only one validator can be specified if accumulate is false", func(t *testing.T) {
