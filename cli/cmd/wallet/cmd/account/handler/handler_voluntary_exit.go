@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/hex"
+	"strings"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	types "github.com/wealdtech/go-eth2-types/v2"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
 	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
@@ -15,16 +17,15 @@ import (
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
-var domainVoluntaryExit = phase0.DomainType{0x04, 0x00, 0x00, 0x00}
-
 // VoluntaryExitFlagValues keeps all collected values for seed
 type VoluntaryExitFlagValues struct {
-	index      int
-	seedBytes  []byte
-	accumulate bool
-	epoch      int
-	validators []*core.ValidatorInfo
-	network    core.Network
+	index              int
+	seedBytes          []byte
+	accumulate         bool
+	currentForkVersion phase0.Version
+	epoch              int
+	validators         []*core.ValidatorInfo
+	network            core.Network
 }
 
 // VoluntaryExit creates a new wallet account(s) and prints the storage.
@@ -56,10 +57,13 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	}
 
 	// Compute domain
-	domain, err := core.ComputeETHDomain(domainVoluntaryExit, store.Network().ForkVersion(), store.Network().GenesisValidatorsRoot())
+	genesisValidatorsRoot := store.Network().GenesisValidatorsRoot()
+	domainBytes, err := types.ComputeDomain(types.DomainVoluntaryExit, voluntaryExitFlags.currentForkVersion[:], genesisValidatorsRoot[:])
 	if err != nil {
 		return errors.Wrap(err, "failed to calculate domain")
 	}
+	var domain phase0.Domain
+	copy(domain[:], domainBytes)
 
 	simpleSigner := signer.NewSimpleSigner(wallet, nil, store.Network())
 	signedVoluntaryExits := make([]*phase0.SignedVoluntaryExit, 0)
@@ -76,17 +80,17 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return errors.Wrap(err, "failed to create validator account")
 		}
-		ve := &phase0.VoluntaryExit{
+		voluntaryExit := &phase0.VoluntaryExit{
 			Epoch:          phase0.Epoch(voluntaryExitFlags.epoch),
 			ValidatorIndex: voluntaryExitFlags.validators[i].Index,
 		}
-		signature, _, err := simpleSigner.SignVoluntaryExit(ve, domain, acc.ValidatorPublicKey())
+		signature, _, err := simpleSigner.SignVoluntaryExit(voluntaryExit, domain, acc.ValidatorPublicKey())
 		if err != nil {
 			return errors.Wrap(err, "failed to sign voluntary exit")
 		}
 
 		signedVoluntaryExit := &phase0.SignedVoluntaryExit{
-			Message: ve,
+			Message: voluntaryExit,
 		}
 		copy(signedVoluntaryExit.Signature[:], signature)
 		signedVoluntaryExits = append(signedVoluntaryExits, signedVoluntaryExit)
@@ -141,6 +145,20 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 		return nil, errors.Wrap(err, "failed to retrieve the network flag value")
 	}
 	voluntaryExitFlagValues.network = network
+
+	// Get current fork version flag value.
+	currentForkVersionFlagValue, err := flag.GetCurrentForkVersionFlagValue(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the current fork version flag value")
+	}
+	version, err := hex.DecodeString(strings.TrimPrefix(currentForkVersionFlagValue, "0x"))
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid current fork version supplied")
+	}
+	if len(version) != phase0.ForkVersionLength {
+		return nil, errors.New("invalid length for current fork version")
+	}
+	copy(voluntaryExitFlagValues.currentForkVersion[:], version)
 
 	// Get epoch flag value.
 	epochFlagValue, err := flag.GetEpochFlagValue(cmd)

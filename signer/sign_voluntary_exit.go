@@ -5,8 +5,6 @@ import (
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignVoluntaryExit signs the given VoluntaryExit.
@@ -26,7 +24,7 @@ func (signer *SimpleSigner) SignVoluntaryExit(voluntaryExit *phase0.VoluntaryExi
 	}
 
 	// Produce the signature.
-	root, err := core.ComputeETHSigningRoot(voluntaryExit, domain)
+	root, err := ComputeETHSigningRoot(voluntaryExit, domain)
 	if err != nil {
 		return nil, nil, err
 	}

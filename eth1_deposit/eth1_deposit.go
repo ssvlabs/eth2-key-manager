@@ -3,6 +3,7 @@ package eth1deposit
 import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
+	types "github.com/wealdtech/go-eth2-types/v2"
 	util "github.com/wealdtech/go-eth2-util"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -15,8 +16,6 @@ const (
 	// BLSWithdrawalPrefixByte is the BLS withdrawal prefix
 	BLSWithdrawalPrefixByte = byte(0)
 )
-
-var domainDeposit = [4]byte{0x03, 0x00, 0x00, 0x00}
 
 // IsSupportedDepositNetwork returns true if the given network is supported
 var IsSupportedDepositNetwork = func(network core.Network) bool {
@@ -40,16 +39,17 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
 
-	// Create domain
-	domain, err := core.ComputeETHDomain(domainDeposit, network.ForkVersion(), network.GenesisValidatorsRoot())
+	// Compute domain
+	genesisForkVersion := network.GenesisForkVersion()
+	domain, err := types.ComputeDomain(types.DomainDeposit, genesisForkVersion[:], types.ZeroGenesisValidatorsRoot)
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to calculate domain")
 	}
 
 	signingData := phase0.SigningData{
 		ObjectRoot: objRoot,
-		Domain:     domain,
 	}
+	copy(signingData.Domain[:], domain[:])
 
 	root, err := signingData.HashTreeRoot()
 	if err != nil {

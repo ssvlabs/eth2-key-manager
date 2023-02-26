@@ -5,8 +5,6 @@ import (
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
-
-	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // SignSlot signes the given slot
@@ -24,7 +22,7 @@ func (signer *SimpleSigner) SignSlot(slot phase0.Slot, domain phase0.Domain, pub
 		return nil, nil, err
 	}
 
-	root, err := core.ComputeETHSigningRoot(SSZUint64(slot), domain)
+	root, err := ComputeETHSigningRoot(SSZUint64(slot), domain)
 	if err != nil {
 		return nil, nil, err
 	}

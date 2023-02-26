@@ -18,11 +18,12 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"wallet",
 			"account",
 			"voluntary-exit",
-			"--seed=847d135b3aecac8ae77c3fdfd46dc5849ad3b5bacd30a1b9082b6ff53c77357e923b12fcdc3d02728fd35c3685de1fe1e9c052c48f0d83566b1b2287cf0e54c3",
-			"--index=1",
-			"--accumulate=true",
-			"--validator-index=273230,273407",
-			"--epoch=157965",
+			"--seed=94227e2b758770d5703c7056d060d2bcdab49364bf14c917d43c71c4e619164c0e53e577cebfa8587e6febd36c3dd02eb44f8a0916b2aaabdf902a6bfe99caeb",
+			"--index=0",
+			//"--accumulate=true",
+			//"--validator-index=273230,273407",
+			"--validator-index=0",
+			"--epoch=1",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()

@@ -13,7 +13,8 @@ import (
 
 // Flag names.
 const (
-	epochFlag = "epoch"
+	epochFlag              = "epoch"
+	currentForkVersionFlag = "current-fork-version"
 )
 
 // AddEpochFlag adds the epoch flag to the command
@@ -24,6 +25,16 @@ func AddEpochFlag(c *cobra.Command) {
 // GetEpochFlagValue gets the epoch flag from the command
 func GetEpochFlagValue(c *cobra.Command) (int, error) {
 	return c.Flags().GetInt(epochFlag)
+}
+
+// AddCurrentForkVersionFlag adds the current fork version flag to the command
+func AddCurrentForkVersionFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, currentForkVersionFlag, "", "current fork version", true)
+}
+
+// GetCurrentForkVersionFlagValue gets the current fork version flag from the command
+func GetCurrentForkVersionFlagValue(c *cobra.Command) (string, error) {
+	return c.Flags().GetString(currentForkVersionFlag)
 }
 
 // GetVoluntaryExitInfoFlagValue gets the voluntary exit info flag from the command
