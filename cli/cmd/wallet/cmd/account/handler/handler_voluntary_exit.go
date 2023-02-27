@@ -29,6 +29,7 @@ type VoluntaryExitFlagValues struct {
 	responseType       rootcmd.ResponseType
 }
 
+// SignRequestEncoded is the encoded sign request
 type SignRequestEncoded struct {
 	PublicKey       []byte   `json:"public_key,omitempty"`
 	SignatureDomain [32]byte `json:"signature_domain,omitempty"`
