@@ -11,8 +11,8 @@ import (
 // credentialsCmd represents the credentials account command.
 var credentialsCmd = &cobra.Command{
 	Use:   "credentials",
-	Short: "Execute BLS to execution",
-	Long:  `This command executing BLS to execution change using seed`,
+	Short: "Sign BLS to execution message",
+	Long:  `This command signing BLS to execution change using seed`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		handler := handler.New(rootcmd.ResultPrinter)
 		return handler.Credentials(cmd, args)
@@ -25,8 +25,8 @@ func init() {
 	rootcmd.AddSeedFlag(credentialsCmd)
 	rootcmd.AddIndexFlag(credentialsCmd)
 	rootcmd.AddAccumulateFlag(credentialsCmd)
-	flag.AddValidatorIndexFlag(credentialsCmd)
-	flag.AddValidatorPublicKeyFlag(credentialsCmd)
+	flag.AddValidatorIndicesFlag(credentialsCmd)
+	flag.AddValidatorPublicKeysFlag(credentialsCmd)
 	flag.AddWithdrawalCredentialsFlag(credentialsCmd)
 	flag.AddToExecutionAddressFlag(credentialsCmd)
 

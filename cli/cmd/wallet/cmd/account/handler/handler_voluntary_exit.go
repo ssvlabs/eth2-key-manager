@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/hex"
+	"encoding/json"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
@@ -20,11 +22,18 @@ import (
 type VoluntaryExitFlagValues struct {
 	index              int
 	seedBytes          []byte
-	accumulate         bool
 	currentForkVersion phase0.Version
 	epoch              int
-	validators         []*core.ValidatorInfo
+	validator          *core.ValidatorInfo
 	network            core.Network
+	responseType       rootcmd.ResponseType
+}
+
+type SignRequestEncoded struct {
+	PublicKey       []byte   `json:"public_key,omitempty"`
+	SignatureDomain [32]byte `json:"signature_domain,omitempty"`
+	Data            []byte
+	ObjectType      string
 }
 
 // VoluntaryExit creates a new wallet account(s) and prints the storage.
@@ -64,25 +73,25 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	var domain phase0.Domain
 	copy(domain[:], domainBytes)
 
-	simpleSigner := signer.NewSimpleSigner(wallet, nil, store.Network())
-	signedVoluntaryExits := make([]*phase0.SignedVoluntaryExit, 0)
+	voluntaryExit := &phase0.VoluntaryExit{
+		Epoch:          phase0.Epoch(voluntaryExitFlags.epoch),
+		ValidatorIndex: voluntaryExitFlags.validator.Index,
+	}
 
-	for i := 0; i <= voluntaryExitFlags.index; i++ {
-		var index int
-		if voluntaryExitFlags.accumulate {
-			index = i
-		} else {
-			index = voluntaryExitFlags.index
-		}
-
-		acc, err := wallet.CreateValidatorAccount(voluntaryExitFlags.seedBytes, &index)
+	if voluntaryExitFlags.responseType == rootcmd.ObjectResponseType {
+		simpleSigner := signer.NewSimpleSigner(wallet, nil, store.Network())
+		acc, err := wallet.CreateValidatorAccount(voluntaryExitFlags.seedBytes, &voluntaryExitFlags.index)
 		if err != nil {
 			return errors.Wrap(err, "failed to create validator account")
 		}
-		voluntaryExit := &phase0.VoluntaryExit{
-			Epoch:          phase0.Epoch(voluntaryExitFlags.epoch),
-			ValidatorIndex: voluntaryExitFlags.validators[i].Index,
+
+		// validation that the derived validation public key is the same as the one in the validator info
+		if !bytes.Equal(acc.ValidatorPublicKey(), voluntaryExitFlags.validator.Pubkey[:]) {
+			derivedPubKey := "0x" + hex.EncodeToString(acc.ValidatorPublicKey())
+			providedPubKey := voluntaryExitFlags.validator.Pubkey.String()
+			return errors.Errorf("derived validator public key: %s, does not match with the provided one: %s", derivedPubKey, providedPubKey)
 		}
+
 		signature, _, err := simpleSigner.SignVoluntaryExit(voluntaryExit, domain, acc.ValidatorPublicKey())
 		if err != nil {
 			return errors.Wrap(err, "failed to sign voluntary exit")
@@ -92,17 +101,33 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 			Message: voluntaryExit,
 		}
 		copy(signedVoluntaryExit.Signature[:], signature)
-		signedVoluntaryExits = append(signedVoluntaryExits, signedVoluntaryExit)
 
-		if !voluntaryExitFlags.accumulate {
-			break
+		err = h.printer.JSON(signedVoluntaryExit)
+		if err != nil {
+			return errors.Wrap(err, "failed to print signed voluntary exit JSON")
 		}
+		return nil
 	}
 
-	err = h.printer.JSON(signedVoluntaryExits)
+	// Sign request
+	marshalSSZ, err := voluntaryExit.MarshalSSZ()
 	if err != nil {
-		return errors.Wrap(err, "failed to print signed voluntary exit JSON")
+		return errors.Wrap(err, "failed to marshal voluntary exit")
 	}
+
+	signRequest := &SignRequestEncoded{
+		PublicKey:       voluntaryExitFlags.validator.Pubkey[:],
+		SignatureDomain: domain,
+		Data:            marshalSSZ,
+		ObjectType:      "*models.SignRequestVoluntaryExit",
+	}
+
+	byts, err := json.Marshal(signRequest)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal sign request")
+	}
+
+	h.printer.Text(hex.EncodeToString(byts))
 
 	return nil
 }
@@ -118,25 +143,31 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	}
 	voluntaryExitFlagValues.network = network
 
-	// Get seed flag value.
-	seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
+	// Get response-type flag value.
+	responseType, err := rootcmd.GetResponseTypeFlagValue(cmd)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
+		return nil, errors.Wrap(err, "failed to retrieve the response type value")
 	}
+	voluntaryExitFlagValues.responseType = responseType
 
-	// Get seed bytes
-	seedBytes, err := hex.DecodeString(seedFlagValue)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to HEX decode seed")
-	}
-	voluntaryExitFlagValues.seedBytes = seedBytes
+	if responseType == rootcmd.ObjectResponseType {
+		// Get seed flag value.
+		seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
+		}
 
-	// Get accumulate flag value.
-	accumulateFlagValue, err := rootcmd.GetAccumulateFlagValue(cmd)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the accumulate flag value")
+		if seedFlagValue == "" {
+			return nil, errors.New("seed flag is required for object response type")
+		}
+
+		// Get seed bytes
+		seedBytes, err := hex.DecodeString(seedFlagValue)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to HEX decode seed")
+		}
+		voluntaryExitFlagValues.seedBytes = seedBytes
 	}
-	voluntaryExitFlagValues.accumulate = accumulateFlagValue
 
 	// Get index flag value.
 	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
@@ -159,12 +190,12 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	}
 	voluntaryExitFlagValues.epoch = epochFlagValue
 
-	// Get validators info flag value.
-	validators, err := flag.GetVoluntaryExitInfoFlagValue(cmd)
+	// Get validator info flag value.
+	validator, err := flag.GetVoluntaryExitInfoFlagValue(cmd)
 	if err != nil {
 		return nil, err
 	}
-	voluntaryExitFlagValues.validators = validators
+	voluntaryExitFlagValues.validator = validator
 
 	return &voluntaryExitFlagValues, nil
 }

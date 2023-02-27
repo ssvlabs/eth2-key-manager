@@ -16,36 +16,36 @@ import (
 
 // Flag names.
 const (
-	validatorIndex        = "validator-index"
-	validatorPublicKey    = "validator-public-key"
+	validatorIndices      = "validator-indices"
+	validatorPublicKeys   = "validator-public-keys"
 	withdrawalCredentials = "withdrawal-credentials"
 	toExecutionAddress    = "to-execution-address"
 )
 
-// AddValidatorIndexFlag adds the validator index flag to the command
-func AddValidatorIndexFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, validatorIndex, "", "comma separate string of validator indices", true)
+// AddValidatorIndicesFlag adds the validator indices flag to the command
+func AddValidatorIndicesFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, validatorIndices, "", "comma separate string of validator indices", true)
 }
 
-// GetValidatorIndexFlagValue gets the validator index flag from the command
-func GetValidatorIndexFlagValue(c *cobra.Command) ([]uint64, error) {
-	str, err := c.Flags().GetString(validatorIndex)
+// GetValidatorIndicesFlagValue gets the validator indices flag from the command
+func GetValidatorIndicesFlagValue(c *cobra.Command) ([]uint64, error) {
+	str, err := c.Flags().GetString(validatorIndices)
 	if err != nil {
 		return nil, err
 	}
 	return stringSliceToUint64Slice(str)
 }
 
-// AddValidatorPublicKeyFlag adds the validator public key flag to the command
-func AddValidatorPublicKeyFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, validatorPublicKey, "", "comma separate string of validator public keys", true)
+// AddValidatorPublicKeysFlag adds the validator public keys flag to the command
+func AddValidatorPublicKeysFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, validatorPublicKeys, "", "comma separate string of validator public keys", true)
 }
 
-// GetValidatorPublicKeyFlagValue gets the validator index flag from the command
-func GetValidatorPublicKeyFlagValue(c *cobra.Command) ([]phase0.BLSPubKey, error) {
-	validatorPublicKeyValues, err := c.Flags().GetString(validatorPublicKey)
+// GetValidatorPublicKeysFlagValue gets the validator public keys flag from the command
+func GetValidatorPublicKeysFlagValue(c *cobra.Command) ([]phase0.BLSPubKey, error) {
+	validatorPublicKeyValues, err := c.Flags().GetString(validatorPublicKeys)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the validator public key flag value")
+		return nil, errors.Wrap(err, "failed to retrieve the validator public keys flag value")
 	}
 
 	validatorPubKeys := strings.Split(validatorPublicKeyValues, ",")
@@ -129,12 +129,12 @@ func GetToExecutionAddressFlagValue(c *cobra.Command) ([]bellatrix.ExecutionAddr
 
 // GetValidatorInfoFlagValue gets the validator info flag from the command
 func GetValidatorInfoFlagValue(c *cobra.Command) ([]*core.ValidatorInfo, error) {
-	validatorIndices, err := GetValidatorIndexFlagValue(c)
+	validatorIndices, err := GetValidatorIndicesFlagValue(c)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse validator indices")
 	}
 
-	validatorPubKeys, err := GetValidatorPublicKeyFlagValue(c)
+	validatorPubKeys, err := GetValidatorPublicKeysFlagValue(c)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse validator public keys")
 	}
