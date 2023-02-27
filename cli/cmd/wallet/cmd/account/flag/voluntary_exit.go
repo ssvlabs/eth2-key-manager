@@ -8,13 +8,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // Flag names.
 const (
+	validatorPublicKey     = "validator-public-key"
+	validatorIndex         = "validator-index"
 	epochFlag              = "epoch"
 	currentForkVersionFlag = "current-fork-version"
 )
@@ -54,45 +55,62 @@ func GetCurrentForkVersionFlagValue(c *cobra.Command) (phase0.Version, error) {
 	return currentForkVersion, nil
 }
 
+// AddValidatorPublicKeyFlag adds the validator public key flag to the command
+func AddValidatorPublicKeyFlag(c *cobra.Command) {
+	cliflag.AddPersistentStringFlag(c, validatorPublicKey, "", "validator public key", true)
+}
+
+// GetValidatorPublicKeyFlagValue gets the validator public key flag from the command
+func GetValidatorPublicKeyFlagValue(c *cobra.Command) (phase0.BLSPubKey, error) {
+	var validatorBLSPubKey phase0.BLSPubKey
+	validatorPublicKeyValue, err := c.Flags().GetString(validatorPublicKey)
+	if err != nil {
+		return validatorBLSPubKey, errors.Wrap(err, "failed to retrieve the validator public key flag value")
+	}
+
+	validatorPubKeyBytes, err := hex.DecodeString(strings.TrimPrefix(validatorPublicKeyValue, "0x"))
+	if err != nil {
+		return validatorBLSPubKey, errors.Wrap(err, "invalid validator public key supplied")
+	}
+	if len(validatorPubKeyBytes) != phase0.PublicKeyLength {
+		return validatorBLSPubKey, errors.New("invalid length for validator public key")
+	}
+	copy(validatorBLSPubKey[:], validatorPubKeyBytes)
+
+	return validatorBLSPubKey, nil
+}
+
+// AddValidatorIndexFlag adds the validator index flag to the command
+func AddValidatorIndexFlag(c *cobra.Command) {
+	cliflag.AddPersistentIntFlag(c, validatorIndex, 0, "validator index", true)
+}
+
+// GetValidatorIndexFlagValue gets the validator index flag from the command
+func GetValidatorIndexFlagValue(c *cobra.Command) (phase0.ValidatorIndex, error) {
+	str, err := c.Flags().GetInt(validatorIndex)
+	if err != nil {
+		return 0, err
+	}
+
+	return phase0.ValidatorIndex(str), nil
+}
+
 // GetVoluntaryExitInfoFlagValue gets the voluntary exit info flag from the command
-func GetVoluntaryExitInfoFlagValue(c *cobra.Command) ([]*core.ValidatorInfo, error) {
-	validatorIndices, err := GetValidatorIndexFlagValue(c)
+func GetVoluntaryExitInfoFlagValue(c *cobra.Command) (*core.ValidatorInfo, error) {
+	validatorIndex, err := GetValidatorIndexFlagValue(c)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse validator indices")
+		return nil, errors.Wrapf(err, "failed to parse validator index")
 	}
 
-	indexFlagValue, err := rootcmd.GetIndexFlagValue(c)
+	validatorPubKey, err := GetValidatorPublicKeyFlagValue(c)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
+		return nil, errors.Wrapf(err, "failed to parse validator public key")
 	}
 
-	accumulate, err := rootcmd.GetAccumulateFlagValue(c)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse accumulate flag")
+	validatorInfo := &core.ValidatorInfo{
+		Index:  validatorIndex,
+		Pubkey: validatorPubKey,
 	}
 
-	if accumulate && indexFlagValue+1 != len(validatorIndices) {
-		return nil, errors.New("index flag value must be one less than the number of validator indices")
-	}
-
-	if !accumulate && len(validatorIndices) > 1 {
-		return nil, errors.New("only one validator can be specified if accumulate is false")
-	}
-
-	validatorInfoList := make([]*core.ValidatorInfo, len(validatorIndices))
-	for i := 0; i < len(validatorIndices); i++ {
-		validatorInfoList[i] = &core.ValidatorInfo{
-			Index: phase0.ValidatorIndex(validatorIndices[i]),
-		}
-	}
-
-	if accumulate && indexFlagValue+1 != len(validatorInfoList) {
-		return nil, errors.New("index flag value must be one less than the number of validator info")
-	}
-
-	if !accumulate && len(validatorInfoList) > 1 {
-		return nil, errors.New("only one validator info can be structured if accumulate is false")
-	}
-
-	return validatorInfoList, nil
+	return validatorInfo, nil
 }

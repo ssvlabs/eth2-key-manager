@@ -22,7 +22,7 @@ type CreateAccountFlagValues struct {
 	seedBytes        []byte
 	privateKeys      [][]byte
 	accumulate       bool
-	responseType     flag.ResponseType
+	responseType     rootcmd.ResponseType
 	highestSources   []uint64
 	highestTargets   []uint64
 	highestProposals []uint64
@@ -80,7 +80,7 @@ func (h *Account) BuildAccounts(accountFlags *CreateAccountFlagValues) error {
 		}
 	}
 
-	if accountFlags.responseType == flag.StorageResponseType {
+	if accountFlags.responseType == rootcmd.StorageResponseType {
 		// marshal storage
 		bytes, err := store.MarshalJSON()
 		if err != nil {
@@ -171,7 +171,7 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 	accountFlagValues.index = indexFlagValue
 
 	// Get response-type flag value.
-	responseType, err := flag.GetResponseTypeFlagValue(cmd)
+	responseType, err := rootcmd.GetResponseTypeFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the response type value")
 	}

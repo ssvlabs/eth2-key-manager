@@ -1,7 +1,6 @@
 package flag
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,34 +9,9 @@ import (
 	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
 )
 
-// ResponseType represents the network.
-type ResponseType string
-
-// Available response types.
-const (
-	// StorageResponseType represents the storage response type.
-	StorageResponseType ResponseType = "storage"
-
-	// ObjectResponseType represents the storage response type.
-	ObjectResponseType ResponseType = "object"
-)
-
-// ResponseTypeFromString returns response type from the given string value
-func ResponseTypeFromString(n string) ResponseType {
-	switch n {
-	case string(StorageResponseType):
-		return StorageResponseType
-	case string(ObjectResponseType):
-		return ObjectResponseType
-	default:
-		panic(fmt.Sprintf("undefined response type %s", n))
-	}
-}
-
 // Flag names.
 const (
 	privateKeyFlag       = "private-key"
-	responseTypeFlag     = "response-type"
 	highestKnownSource   = "highest-source"
 	highestKnownTarget   = "highest-target"
 	highestKnownProposal = "highest-proposal"
@@ -56,21 +30,6 @@ func GetPrivateKeyFlagValue(c *cobra.Command) (string, error) {
 // GetPrivateKeyFlagName gets privateKeyFlag name
 func GetPrivateKeyFlagName() string {
 	return privateKeyFlag
-}
-
-// AddResponseTypeFlag adds the response-type flag to the command
-func AddResponseTypeFlag(c *cobra.Command) {
-	cliflag.AddPersistentStringFlag(c, responseTypeFlag, string(StorageResponseType), "response type", false)
-}
-
-// GetResponseTypeFlagValue gets the response-type flag from the command
-func GetResponseTypeFlagValue(c *cobra.Command) (ResponseType, error) {
-	responseTypeValue, err := c.Flags().GetString(responseTypeFlag)
-	if err != nil {
-		return "", err
-	}
-
-	return ResponseTypeFromString(responseTypeValue), nil
 }
 
 // AddHighestSourceFlag adds the highest source flag to the command
