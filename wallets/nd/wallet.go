@@ -5,7 +5,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/attestantio/go-eth2-client/spec/capella"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
@@ -83,11 +82,6 @@ func (wallet *Wallet) AddValidatorAccount(account core.ValidatorAccount) error {
 	}
 
 	return nil
-}
-
-// CreateSignedBLSToExecutionChange sets the BLS key to the execution key
-func (wallet *Wallet) CreateSignedBLSToExecutionChange(validator *core.ValidatorInfo, seed []byte, indexPointer *int) (*capella.SignedBLSToExecutionChange, error) {
-	return nil, errors.Errorf("non deterministic wallet can't build BLS to execution change")
 }
 
 // DeleteAccountByPublicKey deletes account by public key
