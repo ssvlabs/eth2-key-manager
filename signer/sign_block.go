@@ -32,12 +32,17 @@ func (signer *SimpleSigner) SignBlock(block ssz.HashRoot, slot phase0.Slot, doma
 	}
 
 	// 4. check we can even sign this
-	status, err := signer.verifySlashableAndUpdate(pubKey, slot)
+	status, err := signer.slashingProtector.IsSlashableProposal(pubKey, slot)
 	if err != nil {
 		return nil, nil, err
 	}
 	if status.Status != core.ValidProposal {
 		return nil, nil, errors.Errorf("slashable proposal (%s), not signing", status.Status)
+	}
+
+	// 5. add to protection storage
+	if err = signer.slashingProtector.UpdateHighestProposal(pubKey, slot); err != nil {
+		return nil, nil, err
 	}
 
 	root, err := ComputeETHSigningRoot(block, domain)

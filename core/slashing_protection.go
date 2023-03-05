@@ -10,13 +10,14 @@ type SlashingProtector interface {
 	IsSlashableProposal(pubKey []byte, slot phase0.Slot) (*ProposalSlashStatus, error)
 	UpdateHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error
 	UpdateHighestProposal(pubKey []byte, slot phase0.Slot) error
-	RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error)
+	FetchHighestAttestation(pubKey []byte) (*phase0.AttestationData, bool, error)
+	FetchHighestProposal(pubKey []byte) (phase0.Slot, bool, error)
 }
 
 // SlashingStore represents the behavior of the slashing store
 type SlashingStore interface {
 	SaveHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error
-	RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error)
+	RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, bool, error)
 	SaveHighestProposal(pubKey []byte, slot phase0.Slot) error
 	RetrieveHighestProposal(pubKey []byte) (phase0.Slot, bool, error)
 }

@@ -93,4 +93,53 @@ func TestProposalProtection(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.HighestProposalVote)
 	})
+
+	t.Run("public key nil on fetch", func(t *testing.T) {
+		protector, _, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		res, found, err := protector.FetchHighestProposal(nil)
+		require.Error(t, err)
+		require.False(t, found)
+		require.Equal(t, phase0.Slot(0), res)
+		require.EqualError(t, err, "public key could not be nil")
+	})
+
+	t.Run("public key nil on update", func(t *testing.T) {
+		protector, _, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		err = protector.UpdateHighestProposal(nil, phase0.Slot(99))
+		require.Error(t, err)
+		require.EqualError(t, err, "could not retrieve highest proposal: public key could not be nil")
+	})
+
+	t.Run("public key nil on slashing check", func(t *testing.T) {
+		protector, _, err := setupProposal(t, true)
+		require.NoError(t, err)
+
+		res, err := protector.IsSlashableProposal(nil, phase0.Slot(99))
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.EqualError(t, err, "could not retrieve highest proposal: public key could not be nil")
+	})
+
+	t.Run("proposal slot 0 on update", func(t *testing.T) {
+		protector, accounts, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		err = protector.UpdateHighestProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(0))
+		require.Error(t, err)
+		require.EqualError(t, err, "proposal slot can not be 0")
+	})
+
+	t.Run("proposal slot 0 on slashable check", func(t *testing.T) {
+		protector, accounts, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(0))
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.EqualError(t, err, "proposal slot can not be 0")
+	})
 }

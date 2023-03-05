@@ -122,8 +122,10 @@ func TestMarshaling(t *testing.T) {
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})
 	t.Run("verify attestation", func(t *testing.T) {
-		att2, err := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
+		att2, found, err := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
 		require.NoError(t, err)
+		require.True(t, found)
+		require.NotNil(t, att2)
 		require.Equal(t, att.BeaconBlockRoot, att2.BeaconBlockRoot)
 	})
 	t.Run("verify proposal", func(t *testing.T) {
