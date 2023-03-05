@@ -81,7 +81,7 @@ func TestProposalProtection(t *testing.T) {
 		require.NoError(t, err)
 
 		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(99))
-		require.EqualError(t, err, "highest proposal data is nil, can't determine if proposal is slashable")
+		require.EqualError(t, err, "highest proposal data is not found, can't determine if proposal is slashable")
 		require.Nil(t, res)
 	})
 
