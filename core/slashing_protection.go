@@ -17,6 +17,6 @@ type SlashingProtector interface {
 type SlashingStore interface {
 	SaveHighestAttestation(pubKey []byte, attestation *phase0.AttestationData) error
 	RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error)
-	SaveHighestProposal(pubKey []byte, slot *phase0.Slot) error
-	RetrieveHighestProposal(pubKey []byte) (*phase0.Slot, error)
+	SaveHighestProposal(pubKey []byte, slot phase0.Slot) error
+	RetrieveHighestProposal(pubKey []byte) (phase0.Slot, bool, error)
 }

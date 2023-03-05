@@ -68,14 +68,14 @@ func TestSavingProposal(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// save
-			err := storage.SaveHighestProposal(test.account.ValidatorPublicKey(), &test.proposal)
+			err := storage.SaveHighestProposal(test.account.ValidatorPublicKey(), test.proposal)
 			require.NoError(t, err)
 
 			// fetch
-			proposal, err := storage.RetrieveHighestProposal(test.account.ValidatorPublicKey())
+			proposal, found, err := storage.RetrieveHighestProposal(test.account.ValidatorPublicKey())
 			require.NoError(t, err)
-			require.NotNil(t, proposal)
-			require.EqualValues(t, test.proposal, *proposal)
+			require.True(t, found)
+			require.EqualValues(t, test.proposal, proposal)
 		})
 	}
 }
