@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// tested against a real block and sig from the Prater testnet (validator index 438850)
+// tested against a real block and sig from the Prater testnet (slot 5133683)
 func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
 	signer, err := setupNoSlashingProtectionSK(_byteArray("37247532b925101f094fb0cc877f523859c4a73bcbfc88f3833b05c26bd37cc6"))
 	require.NoError(t, err)
