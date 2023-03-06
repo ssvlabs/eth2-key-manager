@@ -1,8 +1,6 @@
 package signer
 
 import (
-	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
@@ -10,13 +8,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// tested against a real block and sig from the Prater testnet (validator index 438850)
 func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
-	signer, err := setupNoSlashingProtectionSK(_byteArray("659e875e1b062c03f2f2a57332974d475b97df6cfc581d322e79642d39aca8fd"))
+	signer, err := setupNoSlashingProtectionSK(_byteArray("37247532b925101f094fb0cc877f523859c4a73bcbfc88f3833b05c26bd37cc6"))
 	require.NoError(t, err)
 
 	voluntaryExitMock := &phase0.VoluntaryExit{
-		Epoch:          1,
-		ValidatorIndex: 0,
+		Epoch:          160427,
+		ValidatorIndex: 438850,
 	}
 
 	tests := []struct {
@@ -30,16 +29,16 @@ func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
 		{
 			name:          "simple sign",
 			data:          voluntaryExitMock,
-			pubKey:        _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
-			domain:        _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
+			pubKey:        _byteArray("b5ade10d8cc63646ae7b30588c6fb9e482e51f98e396633a6e157bbde14bcdb771b7d147e5fb8b2bd6ce99323431008e"),
+			domain:        _byteArray32("04000000c2ce3aa85707d491e3dd033a53971deb9bed9d4813d74c99369642f5"),
 			expectedError: nil,
-			sig:           _byteArray("895740a6edec2907d16cc53b8c1357f8984706553a470748df2577cc6d881c6b75f88337bfad30421f9d620bb1dcb4ce15efa29dfc38679e2b3d3e99e0d773421ccb67f650522af1dac606327b2dacce8e5d767c6e4a6ed1eca45170d0a07c3c"),
+			sig:           _byteArray("8b8084ef095af3d0351a4c9308667b7254f3c0e9233e18f7ab59a29a6b6a3abdab9fbe9b7b61d9dd384675c4ed2b721a108890645ee9f69e97e2bccc586a35ddcebeaf20617d9c942fa1562db6814b016b8ebb4ee97d78c8ae27ae4b3dba2653"),
 		},
 		{
 			name:          "nil data",
 			data:          nil,
-			pubKey:        _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
-			domain:        _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
+			pubKey:        _byteArray("b5ade10d8cc63646ae7b30588c6fb9e482e51f98e396633a6e157bbde14bcdb771b7d147e5fb8b2bd6ce99323431008e"),
+			domain:        _byteArray32("04000000c2ce3aa85707d491e3dd033a53971deb9bed9d4813d74c99369642f5"),
 			expectedError: errors.New("voluntary exit data is nil"),
 			sig:           _byteArray("a3e966603e64cfd1d091718e3da0e4ed9b13619e7b40d805caf9eadaf84b72dc24fd7f09957a1438f937fbe3e12d6242190dcd5fcbced2b0ef57114ff369c65383eb8561bc56f4ab294ab3a3eba81134e1a90924e85e99e9742009ed4d8f9982"),
 		},
@@ -47,7 +46,7 @@ func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
 			name:          "unknown account, should error",
 			data:          voluntaryExitMock,
 			pubKey:        _byteArray("83e04069ed28b637f113d272a235af3e610401f252860ed2063d87d985931229458e3786e9b331cd73d9fc58863d9e4c"),
-			domain:        _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
+			domain:        _byteArray32("04000000c2ce3aa85707d491e3dd033a53971deb9bed9d4813d74c99369642f5"),
 			expectedError: errors.New("account not found"),
 			sig:           nil,
 		},
@@ -55,7 +54,7 @@ func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
 			name:          "nil account, should error",
 			data:          voluntaryExitMock,
 			pubKey:        nil,
-			domain:        _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
+			domain:        _byteArray32("04000000c2ce3aa85707d491e3dd033a53971deb9bed9d4813d74c99369642f5"),
 			expectedError: errors.New("account was not supplied"),
 			sig:           nil,
 		},
@@ -63,7 +62,7 @@ func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
 			name:          "empty account, should error",
 			data:          voluntaryExitMock,
 			pubKey:        _byteArray(""),
-			domain:        _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
+			domain:        _byteArray32("04000000c2ce3aa85707d491e3dd033a53971deb9bed9d4813d74c99369642f5"),
 			expectedError: errors.New("account not found"),
 			sig:           nil,
 		},
@@ -72,7 +71,6 @@ func TestSimpleSigner_SignVoluntaryExit(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			res, _, err := signer.SignVoluntaryExit(test.data, test.domain, test.pubKey)
-			fmt.Println(hex.EncodeToString(res))
 			if test.expectedError != nil {
 				if err != nil {
 					require.Equal(t, test.expectedError.Error(), err.Error())
