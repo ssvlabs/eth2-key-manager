@@ -33,7 +33,12 @@ func (p *NoProtection) UpdateHighestAttestation(pubKey []byte, attestation *phas
 	return nil
 }
 
-// RetrieveHighestAttestation does nothing
-func (p *NoProtection) RetrieveHighestAttestation(pubKey []byte) (*phase0.AttestationData, error) {
-	return nil, nil
+// FetchHighestAttestation does nothing
+func (p *NoProtection) FetchHighestAttestation(pubKey []byte) (*phase0.AttestationData, bool, error) {
+	return nil, false, nil
+}
+
+// FetchHighestProposal returns highest proposal data
+func (p *NoProtection) FetchHighestProposal(pubKey []byte) (phase0.Slot, bool, error) {
+	return 0, false, nil
 }

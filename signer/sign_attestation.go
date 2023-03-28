@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	"github.com/bloxapp/ssv-spec/types"
 	"github.com/pkg/errors"
 )
 
@@ -47,7 +46,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *phase0.Attestatio
 	}
 
 	// 6. Prepare and sign data
-	root, err := types.ComputeETHSigningRoot(attestation, domain)
+	root, err := ComputeETHSigningRoot(attestation, domain)
 	if err != nil {
 		return nil, nil, err
 	}

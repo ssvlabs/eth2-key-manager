@@ -59,14 +59,8 @@ func setupProposal(t *testing.T, updateHighestProposal bool) (core.SlashingProte
 	protector := NewNormalProtection(vault.Context.Storage.(core.SlashingStore))
 
 	if updateHighestProposal {
-		blk := &phase0.BeaconBlock{
-			Slot:          100,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("A"),
-			StateRoot:     _byteArray32("A"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), blk.Slot))
+		highestProposal := phase0.Slot(100)
+		require.NoError(t, protector.UpdateHighestProposal(account1.ValidatorPublicKey(), highestProposal))
 	}
 
 	return protector, []core.ValidatorAccount{account1, account2}, nil
@@ -77,15 +71,7 @@ func TestProposalProtection(t *testing.T) {
 		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
 
-		blk := &phase0.BeaconBlock{
-			Slot:          101,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("Z"),
-			StateRoot:     _byteArray32("Z"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(101))
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.ValidProposal)
 	})
@@ -94,15 +80,8 @@ func TestProposalProtection(t *testing.T) {
 		protector, accounts, err := setupProposal(t, false)
 		require.NoError(t, err)
 
-		blk := &phase0.BeaconBlock{
-			Slot:          99,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("Z"),
-			StateRoot:     _byteArray32("Z"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
-		require.EqualError(t, err, "highest proposal data is nil, can't determine if proposal is slashable")
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(99))
+		require.EqualError(t, err, "highest proposal data is not found, can't determine if proposal is slashable")
 		require.Nil(t, res)
 	})
 
@@ -110,16 +89,57 @@ func TestProposalProtection(t *testing.T) {
 		protector, accounts, err := setupProposal(t, true)
 		require.NoError(t, err)
 
-		blk := &phase0.BeaconBlock{
-			Slot:          99,
-			ProposerIndex: 2,
-			ParentRoot:    _byteArray32("Z"),
-			StateRoot:     _byteArray32("Z"),
-			Body:          &phase0.BeaconBlockBody{},
-		}
-
-		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), blk.Slot)
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(99))
 		require.NoError(t, err)
 		require.Equal(t, res.Status, core.HighestProposalVote)
+	})
+
+	t.Run("public key nil on fetch", func(t *testing.T) {
+		protector, _, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		res, found, err := protector.FetchHighestProposal(nil)
+		require.Error(t, err)
+		require.False(t, found)
+		require.Equal(t, phase0.Slot(0), res)
+		require.EqualError(t, err, "public key could not be nil")
+	})
+
+	t.Run("public key nil on update", func(t *testing.T) {
+		protector, _, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		err = protector.UpdateHighestProposal(nil, phase0.Slot(99))
+		require.Error(t, err)
+		require.EqualError(t, err, "could not retrieve highest proposal: public key could not be nil")
+	})
+
+	t.Run("public key nil on slashing check", func(t *testing.T) {
+		protector, _, err := setupProposal(t, true)
+		require.NoError(t, err)
+
+		res, err := protector.IsSlashableProposal(nil, phase0.Slot(99))
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.EqualError(t, err, "could not retrieve highest proposal: public key could not be nil")
+	})
+
+	t.Run("proposal slot 0 on update", func(t *testing.T) {
+		protector, accounts, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		err = protector.UpdateHighestProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(0))
+		require.Error(t, err)
+		require.EqualError(t, err, "proposal slot can not be 0")
+	})
+
+	t.Run("proposal slot 0 on slashable check", func(t *testing.T) {
+		protector, accounts, err := setupProposal(t, false)
+		require.NoError(t, err)
+
+		res, err := protector.IsSlashableProposal(accounts[0].ValidatorPublicKey(), phase0.Slot(0))
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.EqualError(t, err, "proposal slot can not be 0")
 	})
 }

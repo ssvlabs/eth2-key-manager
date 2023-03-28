@@ -353,7 +353,8 @@ func TestAttestationSignaturesNoSlashingData(t *testing.T) {
 		_byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac"),
 		_byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"))
 	require.Nil(t, res)
-	require.EqualError(t, err, "highest attestation data is nil, can't determine if attestation is slashable")
+	require.Error(t, err)
+	require.EqualError(t, err, "highest attestation data is not found, can't determine if attestation is slashable")
 }
 
 func TestAttestationSignatures(t *testing.T) {

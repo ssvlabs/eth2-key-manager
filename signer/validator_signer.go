@@ -4,10 +4,10 @@ import (
 	"sync"
 
 	"github.com/attestantio/go-eth2-client/api"
-	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
+	ssz "github.com/ferranbt/fastssz"
 	"github.com/google/uuid"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -24,7 +24,7 @@ type ValidatorSigner interface {
 	SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
-	SignRegistration(registration *apiv1.ValidatorRegistration, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignRegistration(registration *api.VersionedValidatorRegistration, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 }
 
 // SimpleSigner implements ValidatorSigner interface
@@ -69,4 +69,17 @@ func (signer *SimpleSigner) unlock(accountID uuid.UUID, operation string) {
 	if val, ok := signer.signLocks[k]; ok {
 		val.Unlock()
 	}
+}
+
+// ComputeETHSigningRoot returns computed root for eth signing
+func ComputeETHSigningRoot(obj ssz.HashRoot, domain phase0.Domain) (phase0.Root, error) {
+	root, err := obj.HashTreeRoot()
+	if err != nil {
+		return phase0.Root{}, err
+	}
+	signingContainer := phase0.SigningData{
+		ObjectRoot: root,
+		Domain:     domain,
+	}
+	return signingContainer.HashTreeRoot()
 }

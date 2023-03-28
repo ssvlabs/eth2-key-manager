@@ -96,7 +96,7 @@ func TestMarshaling(t *testing.T) {
 	require.NoError(t, store.SaveHighestAttestation(acc.ValidatorPublicKey(), att))
 
 	// proposal
-	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), 1))
+	require.NoError(t, store.SaveHighestProposal(acc.ValidatorPublicKey(), phase0.Slot(1)))
 
 	// marshal
 	byts, err := json.Marshal(store)
@@ -122,13 +122,16 @@ func TestMarshaling(t *testing.T) {
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})
 	t.Run("verify attestation", func(t *testing.T) {
-		att2, err := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
+		att2, found, err := store.RetrieveHighestAttestation(acc.ValidatorPublicKey())
 		require.NoError(t, err)
+		require.True(t, found)
+		require.NotNil(t, att2)
 		require.Equal(t, att.BeaconBlockRoot, att2.BeaconBlockRoot)
 	})
 	t.Run("verify proposal", func(t *testing.T) {
-		prop2, err := store.RetrieveHighestProposal(acc.ValidatorPublicKey())
+		prop2, found, err := store.RetrieveHighestProposal(acc.ValidatorPublicKey())
 		require.NoError(t, err)
+		require.True(t, found)
 		require.Equal(t, phase0.Slot(1), prop2)
 	})
 }

@@ -276,8 +276,10 @@ func TestDoubleAttestationVote(t *testing.T) {
 
 func TestMinimalSlashingProtection(t *testing.T) {
 	protector, accounts := setupAttestation(t, true)
-	at, err := protector.RetrieveHighestAttestation(accounts[0].ValidatorPublicKey())
+	at, found, err := protector.FetchHighestAttestation(accounts[0].ValidatorPublicKey())
 	require.NoError(t, err)
+	require.True(t, found)
+	require.NotNil(t, at)
 	fmt.Printf("%d", at.Target.Epoch) // 5,10
 
 	t.Run("source lower than highest source", func(t *testing.T) {
@@ -417,10 +419,63 @@ func TestUpdateLatestAttestation(t *testing.T) {
 			require.NoError(tt, err)
 
 			// Validate highest.
-			highest, err := protector.RetrieveHighestAttestation(k)
+			highest, found, err := protector.FetchHighestAttestation(k)
 			require.NoError(tt, err)
+			require.True(tt, found)
 			require.EqualValues(tt, highest.Source.Epoch, test.expectedHighestSource)
 			require.EqualValues(tt, highest.Target.Epoch, test.expectedHighestTarget)
 		})
 	}
+}
+
+func TestAttestationData(t *testing.T) {
+	protector, accounts := setupAttestation(t, true)
+
+	t.Run("public key nil on fetch", func(t *testing.T) {
+		res, found, err := protector.FetchHighestAttestation(nil)
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.False(t, found)
+		require.EqualError(t, err, "public key could not be nil")
+	})
+
+	t.Run("public key nil on update", func(t *testing.T) {
+		err := protector.UpdateHighestAttestation(nil, &phase0.AttestationData{})
+		require.Error(t, err)
+		require.EqualError(t, err, "could not retrieve highest attestation: public key could not be nil")
+	})
+
+	t.Run("public key nil on slashing check", func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(nil, &phase0.AttestationData{
+			Slot:            30,
+			Index:           4,
+			BeaconBlockRoot: _byteArray32("A"),
+			Source: &phase0.Checkpoint{
+				Epoch: 2,
+				Root:  _byteArray32("B"),
+			},
+			Target: &phase0.Checkpoint{
+				Epoch: 5,
+				Root:  _byteArray32("C"),
+			},
+		})
+
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.EqualError(t, err, "could not retrieve highest attestation: public key could not be nil")
+	})
+
+	t.Run("attestation data nil on update", func(t *testing.T) {
+		err := protector.UpdateHighestAttestation(accounts[0].ValidatorPublicKey(), nil)
+		require.Error(t, err)
+		require.EqualError(t, err, "attestation data could not be nil")
+	})
+
+	t.Run("attestation data nil on slashable check", func(t *testing.T) {
+		res, err := protector.IsSlashableAttestation(accounts[0].ValidatorPublicKey(), nil)
+
+		require.Error(t, err)
+		require.Nil(t, res)
+		require.EqualError(t, err, "attestation data could not be nil")
+	})
 }
