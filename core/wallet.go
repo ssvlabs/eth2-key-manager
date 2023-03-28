@@ -57,5 +57,6 @@ type Wallet interface {
 
 // WalletContext represents the wallet's context type
 type WalletContext struct {
-	Storage Storage
+	Storage        Storage
+	WithdrawalMode bool
 }

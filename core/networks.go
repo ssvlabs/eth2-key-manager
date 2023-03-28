@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/hex"
 	"time"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
@@ -24,8 +25,8 @@ func NetworkFromString(n string) Network {
 	}
 }
 
-// ForkVersion returns the fork version of the network.
-func (n Network) ForkVersion() phase0.Version {
+// GenesisForkVersion returns the genesis fork version of the network.
+func (n Network) GenesisForkVersion() phase0.Version {
 	switch n {
 	case PyrmontNetwork:
 		return phase0.Version{0, 0, 32, 9}
@@ -37,6 +38,22 @@ func (n Network) ForkVersion() phase0.Version {
 		logrus.WithField("network", n).Fatal("undefined network")
 		return phase0.Version{}
 	}
+}
+
+// GenesisValidatorsRoot returns the genesis validators root of the network.
+func (n Network) GenesisValidatorsRoot() phase0.Root {
+	var genValidatorsRoot phase0.Root
+	switch n {
+	case PraterNetwork:
+		rootBytes, _ := hex.DecodeString("043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb")
+		copy(genValidatorsRoot[:], rootBytes)
+	case MainNetwork:
+		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
+		copy(genValidatorsRoot[:], rootBytes)
+	default:
+		logrus.WithField("network", n).Fatal("undefined network")
+	}
+	return genValidatorsRoot
 }
 
 // DepositContractAddress returns the deposit contract address of the network.

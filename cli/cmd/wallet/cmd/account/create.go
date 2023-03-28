@@ -21,15 +21,15 @@ var createCmd = &cobra.Command{
 
 func init() {
 	// Define flags for the command.
-	flag.AddIndexFlag(createCmd)
-	flag.AddSeedFlag(createCmd)
+	rootcmd.AddNetworkFlag(createCmd)
+	rootcmd.AddSeedFlag(createCmd)
+	rootcmd.AddIndexFlag(createCmd)
+	rootcmd.AddAccumulateFlag(createCmd)
+	rootcmd.AddResponseTypeFlag(createCmd)
 	flag.AddPrivateKeyFlag(createCmd)
-	flag.AddAccumulateFlag(createCmd)
-	flag.AddResponseTypeFlag(createCmd)
 	flag.AddHighestSourceFlag(createCmd)
 	flag.AddHighestTargetFlag(createCmd)
 	flag.AddHighestProposalFlag(createCmd)
-	rootcmd.AddNetworkFlag(createCmd)
 
 	Command.AddCommand(createCmd)
 }

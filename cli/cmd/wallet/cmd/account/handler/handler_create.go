@@ -22,7 +22,7 @@ type CreateAccountFlagValues struct {
 	seedBytes        []byte
 	privateKeys      [][]byte
 	accumulate       bool
-	responseType     flag.ResponseType
+	responseType     rootcmd.ResponseType
 	highestSources   []uint64
 	highestTargets   []uint64
 	highestProposals []uint64
@@ -80,7 +80,7 @@ func (h *Account) BuildAccounts(accountFlags *CreateAccountFlagValues) error {
 		}
 	}
 
-	if accountFlags.responseType == flag.StorageResponseType {
+	if accountFlags.responseType == rootcmd.StorageResponseType {
 		// marshal storage
 		bytes, err := store.MarshalJSON()
 		if err != nil {
@@ -142,7 +142,7 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 		}
 	} else {
 		// Get seed flag value.
-		seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+		seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the seed flag value")
 		}
@@ -156,7 +156,7 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 		accountFlagValues.seedBytes = seedBytes
 
 		// Get accumulate flag value.
-		accumulateFlagValue, err := flag.GetAccumulateFlagValue(cmd)
+		accumulateFlagValue, err := rootcmd.GetAccumulateFlagValue(cmd)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve the accumulate flag value")
 		}
@@ -164,14 +164,14 @@ func CollectAccountFlags(cmd *cobra.Command) (*CreateAccountFlagValues, error) {
 	}
 
 	// Get index flag value.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
 	}
 	accountFlagValues.index = indexFlagValue
 
 	// Get response-type flag value.
-	responseType, err := flag.GetResponseTypeFlagValue(cmd)
+	responseType, err := rootcmd.GetResponseTypeFlagValue(cmd)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve the response type value")
 	}

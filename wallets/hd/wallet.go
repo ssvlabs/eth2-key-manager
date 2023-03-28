@@ -20,11 +20,8 @@ const (
 	ValidatorKeyPath  = WithdrawalKeyPath + "/0"
 )
 
-// Predefined errors
-var (
-	// ErrAccountNotFound is the error when account not found
-	ErrAccountNotFound = errors.New("account not found")
-)
+// ErrAccountNotFound is the error when account not found
+var ErrAccountNotFound = errors.New("account not found")
 
 // Wallet represents hierarchical deterministic wallet
 type Wallet struct {
@@ -91,11 +88,21 @@ func (wallet *Wallet) BuildValidatorAccount(indexPointer *int, key *core.MasterD
 		return nil, err
 	}
 
+	var primaryKey *core.HDKey
+	var secondaryPubKey []byte
+	if wallet.context.WithdrawalMode {
+		primaryKey = withdrawalKey
+		secondaryPubKey = validatorKey.PublicKey().Serialize()
+	} else {
+		primaryKey = validatorKey
+		secondaryPubKey = withdrawalKey.PublicKey().Serialize()
+	}
+
 	// Create ret account
 	ret := wallets.NewValidatorAccount(
 		name,
-		validatorKey,
-		withdrawalKey.PublicKey().Serialize(),
+		primaryKey,
+		secondaryPubKey,
 		baseAccountPath,
 		wallet.context,
 	)

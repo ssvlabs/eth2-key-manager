@@ -6,6 +6,7 @@ import (
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/altair"
+	"github.com/attestantio/go-eth2-client/spec/capella"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/google/uuid"
@@ -25,6 +26,8 @@ type ValidatorSigner interface {
 	SignSyncCommitteeSelectionData(data *altair.SyncAggregatorSelectionData, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommitteeContributionAndProof(contribAndProof *altair.ContributionAndProof, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignRegistration(registration *api.VersionedValidatorRegistration, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignVoluntaryExit(voluntaryExit *phase0.VoluntaryExit, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignBLSToExecutionChange(blsToExecutionChange *capella.BLSToExecutionChange, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 }
 
 // SimpleSigner implements ValidatorSigner interface

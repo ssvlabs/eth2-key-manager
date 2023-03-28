@@ -132,6 +132,7 @@ func TestMarshaling(t *testing.T) {
 		prop2, found, err := store.RetrieveHighestProposal(acc.ValidatorPublicKey())
 		require.NoError(t, err)
 		require.True(t, found)
+		require.NotNil(t, prop2)
 		require.Equal(t, phase0.Slot(1), prop2)
 	})
 }

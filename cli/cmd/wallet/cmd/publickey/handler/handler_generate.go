@@ -3,13 +3,13 @@ package handler
 import (
 	"encoding/hex"
 
+	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
 	"github.com/bloxapp/eth2-key-manager/core"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/publickey/flag"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 )
 
@@ -21,7 +21,7 @@ func (h *PublicKey) Generate(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Get index flag.
-	indexFlagValue, err := flag.GetIndexFlagValue(cmd)
+	indexFlagValue, err := rootcmd.GetIndexFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the index flag value")
 	}
@@ -31,7 +31,7 @@ func (h *PublicKey) Generate(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Get seed flag.
-	seedFlagValue, err := flag.GetSeedFlagValue(cmd)
+	seedFlagValue, err := rootcmd.GetSeedFlagValue(cmd)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve the seed flag value")
 	}

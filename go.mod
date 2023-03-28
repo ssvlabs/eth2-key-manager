@@ -23,6 +23,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/goccy/go-yaml v1.9.5 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.1 // indirect
@@ -36,6 +37,7 @@ require (
 	github.com/wealdtech/go-bytesutil v1.1.1 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -98,6 +98,7 @@ func TestSavingHighestProposal(t *testing.T) {
 			proposal, found, err := storage.RetrieveHighestProposal(valPubKey)
 			require.NoError(t, err)
 			require.True(t, found)
+			require.NotNil(t, proposal)
 			require.EqualValues(t, test.proposal, proposal)
 		})
 	}
