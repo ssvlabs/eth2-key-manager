@@ -99,11 +99,6 @@ func TestPraterDepositData(t *testing.T) {
 				core.PraterNetwork,
 				MaxEffectiveBalanceInGwei,
 			)
-			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey[:]))
-			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
-			fmt.Printf("Amount: %d\n", depositData.Amount)
-			fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
-			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature[:]))
 
 			require.NoError(t, err)
 			require.Equal(t, val.PublicKey().SerializeToHexStr(), strings.TrimPrefix(depositData.PublicKey.String(), "0x"))
@@ -112,6 +107,11 @@ func TestPraterDepositData(t *testing.T) {
 			require.Equal(t, test.expectedRoot, root[:], hex.EncodeToString(root[:]))
 			require.Equal(t, hex.EncodeToString(test.expectedSig), strings.TrimPrefix(depositData.Signature.String(), "0x"))
 
+			fmt.Printf("pubkey: %s\n", hex.EncodeToString(depositData.PublicKey[:]))
+			fmt.Printf("WithdrawalCredentials: %s\n", hex.EncodeToString(depositData.WithdrawalCredentials))
+			fmt.Printf("Amount: %d\n", depositData.Amount)
+			fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
+			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature[:]))
 		})
 	}
 }
