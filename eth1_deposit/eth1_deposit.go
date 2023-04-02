@@ -28,13 +28,13 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 		return nil, [32]byte{}, errors.Errorf("Network %s is not supported", network)
 	}
 
-	depositData := &phase0.DepositData{
+	depositMessage := &phase0.DepositMessage{
 		WithdrawalCredentials: withdrawalCredentialsHash(withdrawalPubKey),
 		Amount:                amount,
 	}
-	copy(depositData.PublicKey[:], validationKey.PublicKey().Serialize())
+	copy(depositMessage.PublicKey[:], validationKey.PublicKey().Serialize())
 
-	objRoot, err := depositData.HashTreeRoot()
+	objRoot, err := depositMessage.HashTreeRoot()
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
@@ -62,13 +62,19 @@ func DepositData(validationKey *core.HDKey, withdrawalPubKey []byte, network cor
 		return nil, [32]byte{}, errors.Wrap(err, "failed to sign the root")
 	}
 
-	copy(depositData.Signature[:], sig)
-	depositDataRoot, err := depositData.HashTreeRoot()
+	signedDepositData := &phase0.DepositData{
+		Amount:                amount,
+		WithdrawalCredentials: depositMessage.WithdrawalCredentials,
+	}
+	copy(signedDepositData.PublicKey[:], validationKey.PublicKey().Serialize())
+	copy(signedDepositData.Signature[:], sig)
+
+	depositDataRoot, err := signedDepositData.HashTreeRoot()
 	if err != nil {
 		return nil, [32]byte{}, errors.Wrap(err, "failed to determine the root hash of deposit data")
 	}
 
-	return depositData, depositDataRoot, nil
+	return signedDepositData, depositDataRoot, nil
 }
 
 // withdrawalCredentialsHash forms a 32 byte hash of the withdrawal public
