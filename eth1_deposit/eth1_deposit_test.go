@@ -149,6 +149,7 @@ func VerifyOperation(t *testing.T, depositData *phase0.DepositData, network core
 
 	genesisForkVersion := network.GenesisForkVersion()
 	domain, err := types.ComputeDomain(types.DomainDeposit, genesisForkVersion[:], types.ZeroGenesisValidatorsRoot)
+	require.NoError(t, err)
 	copy(container.Domain[:], domain[:])
 	signingRoot, err := container.HashTreeRoot()
 	require.NoError(t, err)
