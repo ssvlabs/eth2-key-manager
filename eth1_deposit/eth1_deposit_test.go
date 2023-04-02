@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
+	types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
@@ -19,6 +21,7 @@ func _ignoreErr(a []byte, err error) []byte {
 // Mnemonic: sphere attract wide clown fire balcony dance maple sphere seat design dentist eye orbit diet apart noise cinnamon wealth magic inject witness dress divorce
 func TestMainetDepositData(t *testing.T) {
 	tests := []struct {
+		network                       core.Network
 		testname                      string
 		validatorPrivKey              []byte
 		withdrawalPubKey              []byte
@@ -27,11 +30,12 @@ func TestMainetDepositData(t *testing.T) {
 		expectedRoot                  []byte
 	}{
 		{
+			network:                       core.MainNetwork,
 			validatorPrivKey:              _ignoreErr(hex.DecodeString("175db1c5411459893301c3f2ebe740e5da07db8f17c2df4fa0be6d31a48a4f79")),
 			withdrawalPubKey:              _ignoreErr(hex.DecodeString("8d176708b908f288cc0e9d43f75674e73c0db94026822c5ce2c3e0f9e773c9ee95fdba824302f1208c225b0ed2d54154")),
 			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("ad3a400c3aadeaf5f734ba88511bcd27872a4561080126b967e46d3742c9b62c62ff93503a166c37382868c46816fd58083db53731d0c5413dc2801a2308ffb35d18997779bf1af01cd76489ad42d91bb67211dd02723b728f8a8a08c3307a77")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("fb8defd3efaa1c73967bc4624e5f6ad548ffef348223a713f1118dc585a77fca")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("8ab63bb2ef45d5fe4b5ba3b6aa2db122db350c05846b6ffc1415c603ba998226599a21aa65a8cb55c1b888767bdac2b51901d34cde41003c689b8c125fc67d3abd2527ccaf1390c13c3fc65a7422de8a7e29ae8e9736321606172c7b3bf6de36")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("76139d2c8d8e87a4737ce7acbf97ce8980732921550c5443a8754635c11296d3")),
 		},
 	}
 
@@ -46,9 +50,11 @@ func TestMainetDepositData(t *testing.T) {
 			depositData, root, err := DepositData(
 				val,
 				test.withdrawalPubKey,
-				core.MainNetwork,
+				test.network,
 				MaxEffectiveBalanceInGwei,
 			)
+			VerifyOperation(t, depositData, test.network)
+
 			require.NoError(t, err)
 			require.Equal(t, val.PublicKey().SerializeToHexStr(), strings.TrimPrefix(depositData.PublicKey.String(), "0x"))
 			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
@@ -69,6 +75,7 @@ func TestMainetDepositData(t *testing.T) {
 // Mnemonic: sphere attract wide clown fire balcony dance maple sphere seat design dentist eye orbit diet apart noise cinnamon wealth magic inject witness dress divorce
 func TestPraterDepositData(t *testing.T) {
 	tests := []struct {
+		network                       core.Network
 		testname                      string
 		validatorPrivKey              []byte
 		withdrawalPubKey              []byte
@@ -77,11 +84,12 @@ func TestPraterDepositData(t *testing.T) {
 		expectedRoot                  []byte
 	}{
 		{
+			network:                       core.PraterNetwork,
 			validatorPrivKey:              _ignoreErr(hex.DecodeString("175db1c5411459893301c3f2ebe740e5da07db8f17c2df4fa0be6d31a48a4f79")),
-			withdrawalPubKey:              _ignoreErr(hex.DecodeString("8d176708b908f288cc0e9d43f75674e73c0db94026822c5ce2c3e0f9e773c9ee95fdba824302f1208c225b0ed2d54154")),
-			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16")),
-			expectedSig:                   _ignoreErr(hex.DecodeString("aacdb59866b8092f004233799a41ca488b606c937689f1e09905476577269b6819ebf25ad0fc44e54799cc57852a5e19126b667fd9fd0df73d7e8d9f24203eb26ad920a0fdcc9e60f2e300fd0a3caf64b1fa19c59bf5dfb84fd14176948a92d2")),
-			expectedRoot:                  _ignoreErr(hex.DecodeString("b29c77d193afa3b6caadd22a845d39d047aaef991927e031e6fbbb4b6995b5f4")),
+			withdrawalPubKey:              _ignoreErr(hex.DecodeString("b3d50de8d77299da8d830de1edfb34d3ce03c1941846e73870bb33f6de7b8a01383f6b32f55a1d038a4ddcb21a765194")),
+			expectedWithdrawalCredentials: _ignoreErr(hex.DecodeString("006029659d86cf9f19d53030273372c84b1912d0633cb15381a75cb92850f03a")),
+			expectedSig:                   _ignoreErr(hex.DecodeString("a2bcc9d2ac82062cb9806b761e8e8d405963620b8f5356fa70fe543812bf07c3031546482c737401ba1dec01d5690d0600c900ebe7dca5699e804ff4441ed4e25789b389bcdc69c6f4dc25ef40e5694f6de7723bda359c5c2a54e05ae90290ca")),
+			expectedRoot:                  _ignoreErr(hex.DecodeString("d243130779e16b4352bb8d2c80765334b4a7bdd4bc42356b37e42380dc47dac5")),
 		},
 	}
 
@@ -96,9 +104,11 @@ func TestPraterDepositData(t *testing.T) {
 			depositData, root, err := DepositData(
 				val,
 				test.withdrawalPubKey,
-				core.PraterNetwork,
+				test.network,
 				MaxEffectiveBalanceInGwei,
 			)
+			VerifyOperation(t, depositData, test.network)
+
 			require.NoError(t, err)
 			require.Equal(t, val.PublicKey().SerializeToHexStr(), strings.TrimPrefix(depositData.PublicKey.String(), "0x"))
 			require.Equal(t, test.expectedWithdrawalCredentials, depositData.WithdrawalCredentials)
@@ -111,8 +121,47 @@ func TestPraterDepositData(t *testing.T) {
 			fmt.Printf("Amount: %d\n", depositData.Amount)
 			fmt.Printf("root: %s\n", hex.EncodeToString(root[:]))
 			fmt.Printf("sig: %s\n", hex.EncodeToString(depositData.Signature[:]))
+
 		})
 	}
+}
+
+func VerifyOperation(t *testing.T, depositData *phase0.DepositData, network core.Network) {
+	depositMessage := &phase0.DepositMessage{
+		WithdrawalCredentials: depositData.WithdrawalCredentials,
+		Amount:                depositData.Amount,
+	}
+	copy(depositMessage.PublicKey[:], depositData.PublicKey[:])
+
+	depositMsgRoot, err := depositMessage.HashTreeRoot()
+	require.NoError(t, err)
+	require.NotNil(t, depositMsgRoot)
+
+	sigBytes := make([]byte, len(depositData.Signature))
+	copy(sigBytes, depositData.Signature[:])
+	sig, err := types.BLSSignatureFromBytes(sigBytes)
+	require.NoError(t, err)
+	require.NotNil(t, sig)
+
+	container := &phase0.SigningData{
+		ObjectRoot: depositMsgRoot,
+	}
+
+	genesisForkVersion := network.GenesisForkVersion()
+	domain, err := types.ComputeDomain(types.DomainDeposit, genesisForkVersion[:], types.ZeroGenesisValidatorsRoot)
+	require.NoError(t, err)
+	copy(container.Domain[:], domain[:])
+	signingRoot, err := container.HashTreeRoot()
+	require.NoError(t, err)
+	require.NotNil(t, signingRoot)
+
+	var pubkeyBytes [48]byte
+	copy(pubkeyBytes[:], depositData.PublicKey[:])
+
+	pubkey, err := types.BLSPublicKeyFromBytes(pubkeyBytes[:])
+	require.NoError(t, err)
+	require.NotNil(t, pubkey)
+	require.True(t, sig.Verify(signingRoot[:], pubkey))
 }
 
 func TestUnsupportedNetwork(t *testing.T) {
