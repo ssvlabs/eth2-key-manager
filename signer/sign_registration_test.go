@@ -18,10 +18,10 @@ func TestSimpleSigner_SignRegistration(t *testing.T) {
 
 	valRegistrationMock := &apiv1.ValidatorRegistration{
 		GasLimit:  123456,
-		Timestamp: time.UnixMilli(1658313712),
+		Timestamp: time.Unix(1658313712, 0),
 	}
-	copy(valRegistrationMock.FeeRecipient[:], "9831EeF7A86C19E32bEcDad091c1DbC974cf452a")
-	copy(valRegistrationMock.Pubkey[:], "a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af")
+	copy(valRegistrationMock.FeeRecipient[:], _byteArray("9831EeF7A86C19E32bEcDad091c1DbC974cf452a"))
+	copy(valRegistrationMock.Pubkey[:], _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"))
 
 	registrationMock := &api.VersionedValidatorRegistration{
 		Version: 0,
@@ -42,7 +42,7 @@ func TestSimpleSigner_SignRegistration(t *testing.T) {
 			pubKey:        _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
 			domain:        _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
 			expectedError: nil,
-			sig:           _byteArray("800a93d4361eda08cd00d4d9fd22c296d9e8253500d3702ede2516abfe5b6a89cfc23d27ce28f0c95828878880494cb815c74b203846d91c29010c6111c3b245f4e270e5f1f9ee40dec985f6e7b733059d88a662f4d1341b0f015fbd5ed829a4"),
+			sig:           _byteArray("b088d9d27c783f3d5eb57a0df1e99f030e035ebcfdeb745da95400ab46a0c461f05f61533379d3bc56c5e94dfdf8560d0a31cfb9162f11ba9a82522f4043764a02008f6fef3b0167cbf2db9a749095343412a38568fe39d14c3ebcdddad7ee36"),
 		},
 		{
 			name:          "nil data",

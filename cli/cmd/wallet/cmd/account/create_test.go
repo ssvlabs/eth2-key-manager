@@ -71,7 +71,7 @@ func TestAccountCreate(t *testing.T) {
 		err := cmd.RootCmd.Execute()
 		actualOutput := output.String()
 		require.EqualValues(t, actualOutput, "")
-		require.EqualError(t, err, "failed to collect account flags: failed to retrieve the network flag value: unknown network")
+		require.EqualError(t, err, "failed to collect account flags: failed to retrieve the network flag value: failed to parse network: undefined network")
 	})
 
 	t.Run("Successfully create account at specific index and return as storage", func(t *testing.T) {

@@ -65,7 +65,10 @@ func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
 	})
 
 	// Compute domain
-	genesisValidatorsRoot := store.Network().GenesisValidatorsRoot()
+	genesisValidatorsRoot, err := store.Network().GenesisValidatorsRoot()
+	if err != nil {
+		return errors.Wrap(err, "failed to get genesis validators root")
+	}
 	genesisForkVersion := store.Network().GenesisForkVersion()
 	domainBytes, err := types.ComputeDomain(domainBlsToExecutionChange, genesisForkVersion[:], genesisValidatorsRoot[:])
 	if err != nil {
