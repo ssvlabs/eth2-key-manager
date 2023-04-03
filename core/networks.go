@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,16 +13,16 @@ import (
 type Network string
 
 // NetworkFromString returns network from the given string value
-func NetworkFromString(n string) Network {
+func NetworkFromString(n string) (Network, error) {
 	switch n {
 	case string(PyrmontNetwork):
-		return PyrmontNetwork
+		return PyrmontNetwork, nil
 	case string(PraterNetwork):
-		return PraterNetwork
+		return PraterNetwork, nil
 	case string(MainNetwork):
-		return MainNetwork
+		return MainNetwork, nil
 	default:
-		return ""
+		return "", errors.New("undefined network")
 	}
 }
 
@@ -41,19 +42,26 @@ func (n Network) GenesisForkVersion() phase0.Version {
 }
 
 // GenesisValidatorsRoot returns the genesis validators root of the network.
-func (n Network) GenesisValidatorsRoot() phase0.Root {
+func (n Network) GenesisValidatorsRoot() (phase0.Root, error) {
 	var genValidatorsRoot phase0.Root
 	switch n {
 	case PraterNetwork:
-		rootBytes, _ := hex.DecodeString("043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb")
+		rootBytes, err := hex.DecodeString("043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb")
+		if err != nil {
+			return phase0.Root{}, err
+		}
 		copy(genValidatorsRoot[:], rootBytes)
 	case MainNetwork:
-		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
+		rootBytes, err := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
+		if err != nil {
+			return phase0.Root{}, err
+		}
 		copy(genValidatorsRoot[:], rootBytes)
 	default:
 		logrus.WithField("network", n).Fatal("undefined network")
+		return phase0.Root{}, errors.New("undefined network")
 	}
-	return genValidatorsRoot
+	return genValidatorsRoot, nil
 }
 
 // DepositContractAddress returns the deposit contract address of the network.

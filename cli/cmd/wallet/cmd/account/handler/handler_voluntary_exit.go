@@ -66,7 +66,10 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	}
 
 	// Compute domain
-	genesisValidatorsRoot := store.Network().GenesisValidatorsRoot()
+	genesisValidatorsRoot, err := store.Network().GenesisValidatorsRoot()
+	if err != nil {
+		return errors.Wrap(err, "failed to get genesis validators root")
+	}
 	domainBytes, err := types.ComputeDomain(types.DomainVoluntaryExit, voluntaryExitFlags.currentForkVersion[:], genesisValidatorsRoot[:])
 	if err != nil {
 		return errors.Wrap(err, "failed to calculate domain")

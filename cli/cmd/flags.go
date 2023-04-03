@@ -55,12 +55,12 @@ func GetNetworkFlagValue(c *cobra.Command) (core.Network, error) {
 		return "", err
 	}
 
-	ret := core.NetworkFromString(networkValue)
-	if len(ret) == 0 {
-		return "", errors.New("unknown network")
+	network, err := core.NetworkFromString(networkValue)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to parse network")
 	}
 
-	return ret, nil
+	return network, nil
 }
 
 // AddAccumulateFlag adds the accumulate flag to the command
