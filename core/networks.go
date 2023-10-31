@@ -45,7 +45,7 @@ func (n Network) GenesisForkVersion() phase0.Version {
 }
 
 // NetworkFromGenesisForkVersion returns the network base on the 4 bytes of the genesis fork version
-func NetworkFromGenesisForkVersion(fork phase0.Version) Network {
+func NetworkFromGenesisForkVersion(f phase0.Version) Network {
     switch f {
 	case phase0.Version{0, 0, 32, 9}:
 		return PyrmontNetwork
