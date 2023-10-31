@@ -46,7 +46,7 @@ func (n Network) GenesisForkVersion() phase0.Version {
 
 // NetworkFromGenesisForkVersion returns the network base on the 4 bytes of the genesis fork version
 func NetworkFromGenesisForkVersion(fork phase0.Version) Network {
-    switch fork {
+    switch f {
 	case phase0.Version{0, 0, 32, 9}:
 		return PyrmontNetwork
     case phase0.Version{0x00, 0x00, 0x10, 0x20}:
@@ -56,7 +56,7 @@ func NetworkFromGenesisForkVersion(fork phase0.Version) Network {
     case phase0.Version{0, 0, 0, 0}:
         return MainNetwork
     default:
-        logrus.WithField("network", n).Fatal("undefined network")
+        logrus.WithField("fork version", f).Fatal("undefined fork version")
 		return ""
     }
 }
