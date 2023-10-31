@@ -44,6 +44,23 @@ func (n Network) GenesisForkVersion() phase0.Version {
 	}
 }
 
+// NetworkFromGenesisForkVersion returns the network base on the 4 bytes of the genesis fork version
+func NetworkFromGenesisForkVersion(fork phase0.Version) Network {
+    switch fork {
+	case phase0.Version{0, 0, 32, 9}:
+		return PyrmontNetwork
+    case phase0.Version{0x00, 0x00, 0x10, 0x20}:
+        return PraterNetwork
+    case phase0.Version{0x01, 0x01, 0x70, 0x00}:
+        return HoleskyNetwork
+    case phase0.Version{0, 0, 0, 0}:
+        return MainNetwork
+    default:
+        logrus.WithField("network", n).Fatal("undefined network")
+		return ""
+    }
+}
+
 // GenesisValidatorsRoot returns the genesis validators root of the network.
 func (n Network) GenesisValidatorsRoot() phase0.Root {
 	var genValidatorsRoot phase0.Root
