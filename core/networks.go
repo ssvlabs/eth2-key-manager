@@ -11,6 +11,7 @@ import (
 // Network represents the network.
 type Network string
 
+// Networks is a list of all available networks
 var Networks = []Network{MainNetwork, HoleskyNetwork, PraterNetwork, PyrmontNetwork}
 
 // NetworkFromString returns network from the given string value
