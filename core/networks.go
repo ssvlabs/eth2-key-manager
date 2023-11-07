@@ -18,6 +18,8 @@ func NetworkFromString(n string) Network {
 		return PyrmontNetwork
 	case string(PraterNetwork):
 		return PraterNetwork
+	case string(HoleskyNetwork):
+		return HoleskyNetwork
 	case string(MainNetwork):
 		return MainNetwork
 	default:
@@ -32,6 +34,8 @@ func (n Network) GenesisForkVersion() phase0.Version {
 		return phase0.Version{0, 0, 32, 9}
 	case PraterNetwork:
 		return phase0.Version{0x00, 0x00, 0x10, 0x20}
+	case HoleskyNetwork:
+		return phase0.Version{0x01, 0x01, 0x70, 0x00}
 	case MainNetwork:
 		return phase0.Version{0, 0, 0, 0}
 	default:
@@ -46,6 +50,9 @@ func (n Network) GenesisValidatorsRoot() phase0.Root {
 	switch n {
 	case PraterNetwork:
 		rootBytes, _ := hex.DecodeString("043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb")
+		copy(genValidatorsRoot[:], rootBytes)
+	case HoleskyNetwork:
+		rootBytes, _ := hex.DecodeString("9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1")
 		copy(genValidatorsRoot[:], rootBytes)
 	case MainNetwork:
 		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
@@ -63,6 +70,8 @@ func (n Network) DepositContractAddress() string {
 		return "0x8c5fecdC472E27Bc447696F431E425D02dd46a8c"
 	case PraterNetwork:
 		return "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b"
+	case HoleskyNetwork:
+		return "0x4242424242424242424242424242424242424242"
 	case MainNetwork:
 		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 	default:
@@ -83,6 +92,8 @@ func (n Network) MinGenesisTime() uint64 {
 		return 1605700807
 	case PraterNetwork:
 		return 1616508000
+	case HoleskyNetwork:
+		return 1695902400
 	case MainNetwork:
 		return 1606824023
 	default:
@@ -133,6 +144,9 @@ const (
 
 	// PraterNetwork represents the Prater test network.
 	PraterNetwork Network = "prater"
+
+	// HoleskyNetwork represents the Holesky test network.
+	HoleskyNetwork Network = "holesky"
 
 	// MainNetwork represents the main network.
 	MainNetwork Network = "mainnet"
