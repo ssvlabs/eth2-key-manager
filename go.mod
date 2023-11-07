@@ -16,7 +16,7 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.8.0
 	github.com/wealdtech/go-eth2-util v1.6.3
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.3.8
 )
 
 require (
