@@ -1,0 +1,80 @@
+{
+  "slot": "330420",
+  "proposer_index": "2989",
+  "parent_root": "0xb71e6d9234d751e1be8c9315e1a75a3b9deb0eefba3be0f07fe8986d8429c4c5",
+  "state_root": "0x3b12214235394d62f3a6fe542cc3f3dde32fdc4e7ef3bedcb5b6a942eb70e43d",
+  "body":
+  {
+    "randao_reveal": "0xa37c2a57eb741fcbd3a2bf6aa420e42bcb2b62fcdcc8aaf45e8349a9e4a8e296020abead458fe0c83370e7f0eb70aa2d00efce65645a9f54571f953732d981ad5dd1cb8324ecf21d49bf83de07eb2381f73f5186aa1847ab1ff022ad787961e1",
+    "eth1_data":
+    {
+      "deposit_root": "0xe5700ac7bf08aa474241beaab310610d5944343c12b12b9710fbce881d30f157",
+      "deposit_count": "850",
+      "block_hash": "0x75399ff8fe6bde7268d9ab755a1e3ede1289ee6f55c10745301f36afee5cad29"
+    },
+    "graffiti": "0x707279736d2d6e65746865726d696e642d31f09f90bc00000000000000000000",
+    "proposer_slashings":
+    [],
+    "attester_slashings":
+    [],
+    "attestations":
+    [
+      {
+        "aggregation_bits": "0x3ffffbfff7effeffffffffffd7ff",
+        "data":
+        {
+          "slot": "330419",
+          "index": "0",
+          "beacon_block_root": "0xb71e6d9234d751e1be8c9315e1a75a3b9deb0eefba3be0f07fe8986d8429c4c5",
+          "source":
+          {
+            "epoch": "10324",
+            "root": "0xfbc0ed105c2a3353b4ee92e635933c9e2f3727adfd596bc6d0cdb2fb9e7bcf53"
+          },
+          "target":
+          {
+            "epoch": "10325",
+            "root": "0x97329165314620e3052d95b034afe3b85e24affc08553a3afddbe238d2a9bb14"
+          }
+        },
+        "signature": "0xa5bdb24e552275ac5dfa78ea4fe6d964a21b91a62f3cbeb7bee94a5142a94da8300a804056545a1085adc0f780dade6a14aca2ec6f235424501bd16b6b9e800a54ed8f8b88acaabde39004f8eafc345fd43e699aa09f21085a694fd849ebd672"
+      }
+    ],
+    "deposits":
+    [],
+    "voluntary_exits":
+    [],
+    "sync_aggregate":
+    {
+      "sync_committee_bits": "0xfffb7bffffedefffbfefffefbbbf773e7fff6bfb7f7ffeff7fffefffeffdffffffffffffffffffffe77fffdfdfb6fdf7ffffeffefefffffffffffeeffffdfdff",
+      "sync_committee_signature": "0x847ba9d7241b8134ac94b14c6c9e2dad2417c93127073df55bc0d078d9ef3207f2123de87576dcb23ba7f8805b3f6fd1054d9e58a31215e76ae2a20c390db51acd8d66959a646fad621ddfd70244dd960f46c92505db1600b5a4bc1051747332"
+    },
+    "execution_payload_header":
+    {
+      "parent_hash": "0xfa00af7d018fba68d09bdaa0d34d631d26391d0c3d9959d4fe47af68abaad465",
+      "fee_recipient": "0xf97e180c050e5ab072211ad2c213eb5aee4df134",
+      "state_root": "0x1bd7bfb6a183fdebf6639e42fa2f80216964b287f822a4f655aee65a260ea67d",
+      "receipts_root": "0x10457e39b8c68ced2071538b4c7034fe68f9c666187fd6b2d6ddcc21149f0d10",
+      "logs_bloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "prev_randao": "0x8c01a2115459154f92e0cb4d7f0ea012b19267cdb99108afb01c7241f7bf80ed",
+      "block_number": "314416",
+      "gas_limit": "30000000",
+      "gas_used": "42000",
+      "timestamp": "1705227840",
+      "extra_data": "0x4e65746865726d696e64",
+      "base_fee_per_gas": "9",
+      "block_hash": "0xb7a15466670218f30d73968a5f082f42c16fa1900b65dcb8326ce1bb4f3ddced",
+      "transactions_root": "0x2bdc18a7e09675c11341cecc5f0b6d7f26367bd8e2ddaeca3197c557477fa146",
+      "withdrawals_root": "0x8bc701c13e723b9b091594730cd155aec552bdc5d0c036117285e11a29c43302",
+      "blob_gas_used": "262144",
+      "excess_blob_gas": "0"
+    },
+    "bls_to_execution_changes":
+    [],
+    "blob_kzg_commitments":
+    [
+      "0x97808f75a6766619f3d39461fb7dc745d564d9cff78b10febb742451d8a1b4e568e6f4ba933f1151e2882eb7268b5de1",
+      "0xa927342c1afda8075953e164dc6b05ea458a66932a811e96979ce4828c2050ef01a11a42c3fec90d73ef6da042f1054e"
+    ]
+  }
+}

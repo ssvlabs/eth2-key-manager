@@ -45,7 +45,7 @@ func (store *InMemStore) SaveHighestProposal(pubKey []byte, slot phase0.Slot) er
 	}
 
 	store.highestProposalLock.Lock()
-	store.highestProposal[hex.EncodeToString(pubKey)] = slot
+	store.highestProposal[hex.EncodeToString(pubKey)] = uint64(slot)
 	store.highestProposalLock.Unlock()
 	return nil
 }
@@ -59,5 +59,5 @@ func (store *InMemStore) RetrieveHighestProposal(pubKey []byte) (phase0.Slot, bo
 	store.highestProposalLock.RLock()
 	val, found := store.highestProposal[hex.EncodeToString(pubKey)]
 	store.highestProposalLock.RUnlock()
-	return val, found, nil
+	return phase0.Slot(val), found, nil
 }

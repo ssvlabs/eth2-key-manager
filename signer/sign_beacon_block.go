@@ -24,6 +24,9 @@ func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain
 		block = b.Bellatrix
 	case spec.DataVersionCapella:
 		block = b.Capella
+	case spec.DataVersionDeneb:
+		block = b.Deneb
+
 	default:
 		return nil, nil, errors.Errorf("unsupported block version %d", b.Version)
 	}

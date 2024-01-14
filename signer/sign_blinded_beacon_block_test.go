@@ -5,13 +5,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/attestantio/go-eth2-client/api"
 	apiv1bellatrix "github.com/attestantio/go-eth2-client/api/v1/bellatrix"
 	apiv1capella "github.com/attestantio/go-eth2-client/api/v1/capella"
+	apiv1deneb "github.com/attestantio/go-eth2-client/api/v1/deneb"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/bellatrix"
+	"github.com/attestantio/go-eth2-client/spec/deneb"
 	"github.com/stretchr/testify/require"
 
 	eth2keymanager "github.com/bloxapp/eth2-key-manager"
@@ -99,6 +103,85 @@ func TestBenchmarkBlindedBlockProposalCapella(t *testing.T) {
 	versionedBlindedBeaconBlock := &api.VersionedBlindedBeaconBlock{
 		Version: spec.DataVersionCapella,
 		Capella: blk,
+	}
+
+	sig, _, err := signer.SignBlindedBeaconBlock(versionedBlindedBeaconBlock, _byteArray32(domain), _byteArray(pk))
+	fmt.Println(hex.EncodeToString(sig))
+	require.NoError(t, err)
+	require.EqualValues(t, _byteArray(sigByts), sig)
+}
+
+func TestBenchmarkBlindedBlockProposalDeneb(t *testing.T) {
+	require.NoError(t, core.InitBLS())
+
+	// fixture
+	sk := "17f8b2dbb824318970a9c82b4f5456d598342dac248f89c252dd30bb9e85e43c"
+	pk := "81d6fc2f01633e8eab3ba4d72588e14f45b00e68ab887bdd4ec5e8558965db21189310df973837106216777b07fc0805"
+	domain := "00000000ec9c75d44197ee8cb111b5113efa166654b791baefe8fb222a630fc2"
+	blockRoot := "7c4a5b95737cdb6c88f790439e32e777fdb6e8bc2ec327ba64adf0fb91d1c412"
+	sigByts := "925f9c30991cb035da8dbcf2571f09867ea1c0b7ef0ead466725cc50460bf41b5b24ec8ca8c8179b16b85e222559f2db0ea6d3635f0a271335457504f5cf8760fd859036cf1d037b3b545674468cb4553fd6934ed25c0840b72d7bb3dee26500"
+
+	blindedBlkJSON, err := os.Open("dencun-devnet-12-deneb-blinded-block.json")
+	require.NoError(t, err)
+	defer blindedBlkJSON.Close()
+
+	blindedBlkBytes, err := io.ReadAll(blindedBlkJSON)
+	require.NoError(t, err)
+
+	blindedBeaconBlock := &apiv1deneb.BlindedBeaconBlock{}
+	require.NoError(t, json.Unmarshal(blindedBlkBytes, blindedBeaconBlock))
+
+	blindedSSZ, err := blindedBeaconBlock.MarshalSSZ()
+	require.NoError(t, err)
+
+	unmarshalBlindedBeaconBlock := &apiv1deneb.BlindedBeaconBlock{}
+	require.NoError(t, unmarshalBlindedBeaconBlock.UnmarshalSSZ(blindedSSZ))
+
+	blindedRoot, err := unmarshalBlindedBeaconBlock.HashTreeRoot()
+	require.NoError(t, err)
+
+	blkJSON, err := os.Open("dencun-devnet-12-deneb-block.json")
+	require.NoError(t, err)
+	defer blkJSON.Close()
+
+	blkBytes, err := io.ReadAll(blkJSON)
+	require.NoError(t, err)
+
+	beaconBlock := &deneb.BeaconBlock{}
+	require.NoError(t, json.Unmarshal(blkBytes, beaconBlock))
+
+	ssz, err := beaconBlock.MarshalSSZ()
+	require.NoError(t, err)
+
+	unmarshalBeaconBlock := &deneb.BeaconBlock{}
+	require.NoError(t, unmarshalBeaconBlock.UnmarshalSSZ(ssz))
+
+	root, err := unmarshalBeaconBlock.HashTreeRoot()
+	require.NoError(t, err)
+
+	require.EqualValues(t, _byteArray(blockRoot), blindedRoot[:])
+	require.EqualValues(t, _byteArray(blockRoot), root[:])
+
+	// setup KeyVault
+	store := inmemStorage()
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store)
+	options.SetWalletType(core.NDWallet)
+	vault, err := eth2keymanager.NewKeyVault(options)
+	require.NoError(t, err)
+	wallet, err := vault.Wallet()
+	require.NoError(t, err)
+	k, err := core.NewHDKeyFromPrivateKey(_byteArray(sk), "")
+	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
+	require.NoError(t, wallet.AddValidatorAccount(acc))
+
+	// setup signer
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PraterNetwork)
+
+	versionedBlindedBeaconBlock := &api.VersionedBlindedBeaconBlock{
+		Version: spec.DataVersionDeneb,
+		Deneb:   blindedBeaconBlock,
 	}
 
 	sig, _, err := signer.SignBlindedBeaconBlock(versionedBlindedBeaconBlock, _byteArray32(domain), _byteArray(pk))
