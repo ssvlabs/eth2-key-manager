@@ -50,7 +50,7 @@ func TestMarshalingHDKey(t *testing.T) {
 			name: "Base account derivation (base path only)",
 			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "", // after basePath
-			err:  errors.New("invalid relative path. Example: /1/0/0"),
+			err:  errors.New("invalid relative path. Example: /1/2/3"),
 		},
 	}
 
@@ -172,31 +172,101 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			expectedKey: _bigIntFromSkHex("843e5a2e02693309cc14de8ee6b616bffc7a1aa16d670ff906a39bd3792630917b325669b1c9057d4209bf153e7ba7b5"),
 		},
 		{
+			name:        "Base account derivation (too big index) in second position",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0/1000", // after basePath
+			err:         nil,
+			expectedKey: _bigIntFromSkHex("870d7a7eade91784962604e141bc5072a6ba485c873b4934b197afba02cf56625fbbf5e98b278acc17bd040268f8c326"),
+		},
+		{
+			name:        "Large Number in First Position",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/1000/0/0",
+			err:         nil,
+			expectedKey: _bigIntFromSkHex("b3befa8735a59a2371dc0db8c82738715bd8fb887ad245a5042396773dd08208e45b1067df61e02e9cfe6dddc5116c9f"),
+		},
+		{
+			name:        "Large Number in Second Position",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0/1000/0",
+			err:         nil,
+			expectedKey: _bigIntFromSkHex("ac65c29d1c94a4fd9a58a625ada6fe8587c85f963f6ff01bf8040108c0acb7f1334e1db9ce389c6da64bca8ab3061cbc"),
+		},
+		{
+			name:        "Large Number in Third Position",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0/0/1000",
+			err:         nil,
+			expectedKey: _bigIntFromSkHex("8ed2b33e1550274715e371cd6134cda81545e36d1b39ede4e3ac6b25728a1575464a985ac01e4b11553f2ef26f1269fb"),
+		},
+		{
 			name:        "bad path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "0/0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/0/0"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name:        "bad path (too long)",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "0/0/0/0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/0/0"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name:        "bad path (too short)",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/0/0"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 		{
 			name:        "not a relative path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "m/0/0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/0/0"),
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
+			name:        "Negative Index Handling",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/-1/0/0",
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
+			name:        "Negative Index Handling",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0/-1/0",
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
+			name:        "Negative Index Handling",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0/0/-1",
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
+			name:        "Empty String Path",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "",
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
+			name:        "Only Slashes in Path",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "///",
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
+			name:        "Minimum Group Path",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0",
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
 	}
