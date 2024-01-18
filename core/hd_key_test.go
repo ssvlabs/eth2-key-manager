@@ -165,16 +165,16 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			expectedKey: _bigIntFromSkHex("aaa63a09aa2c0ce6a2a29940df8981eeefac0ea193bf90f2e06edd41356054f2907bc2e1eb5aaa4097361841914cd274"),
 		},
 		{
+			name:        "Base account derivation (too big index)",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/1000/0", // after basePath
+			err:         nil,
+			expectedKey: _bigIntFromSkHex("843e5a2e02693309cc14de8ee6b616bffc7a1aa16d670ff906a39bd3792630917b325669b1c9057d4209bf153e7ba7b5"),
+		},
+		{
 			name:        "bad path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "0/0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/2/3"),
-			expectedKey: nil,
-		},
-		{
-			name:        "too large of an index, bad path",
-			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
-			path:        "/1000/0", // after basePath
 			err:         errors.New("invalid relative path. Example: /1/2/3"),
 			expectedKey: nil,
 		},
