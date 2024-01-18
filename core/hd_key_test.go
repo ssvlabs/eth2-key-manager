@@ -50,7 +50,7 @@ func TestMarshalingHDKey(t *testing.T) {
 			name: "Base account derivation (base path only)",
 			seed: _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path: "", // after basePath
-			err:  errors.New("invalid relative path. Example: /1/2/3"),
+			err:  errors.New("invalid relative path. Example: /1/0/0"),
 		},
 	}
 
@@ -175,14 +175,28 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			name:        "bad path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "0/0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			err:         errors.New("invalid relative path. Example: /1/0/0"),
+			expectedKey: nil,
+		},
+		{
+			name:        "bad path (too long)",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "0/0/0/0", // after basePath
+			err:         errors.New("invalid relative path. Example: /1/0/0"),
+			expectedKey: nil,
+		},
+		{
+			name:        "bad path (too short)",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "0", // after basePath
+			err:         errors.New("invalid relative path. Example: /1/0/0"),
 			expectedKey: nil,
 		},
 		{
 			name:        "not a relative path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "m/0/0", // after basePath
-			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			err:         errors.New("invalid relative path. Example: /1/0/0"),
 			expectedKey: nil,
 		},
 	}

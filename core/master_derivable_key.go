@@ -54,7 +54,7 @@ func MasterKeyFromPrivateKey(privateKey []byte, network Network) (*MasterDerivab
 // Derive derives a HD key based on the given relative path.
 func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 	if !validateRelativePath(relativePath) {
-		return nil, errors.New("invalid relative path. Example: /1/2/3")
+		return nil, errors.New("invalid relative path. Example: /1/0/0")
 	}
 
 	var key *e2types.BLSPrivateKey
