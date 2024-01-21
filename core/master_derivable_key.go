@@ -88,6 +88,6 @@ func (master *MasterDerivableKey) Derive(relativePath string) (*HDKey, error) {
 }
 
 func validateRelativePath(relativePath string) bool {
-	match, _ := regexp.MatchString(`^\/\d+\/\d+\/?\d*$`, relativePath)
+	match, _ := regexp.MatchString(`^\/\d+(\/\d+)(\/\d+)?$`, relativePath)
 	return match
 }

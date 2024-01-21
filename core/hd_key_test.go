@@ -221,6 +221,13 @@ func TestDerivableKeyRelativePathDerivation(t *testing.T) {
 			expectedKey: nil,
 		},
 		{
+			name:        "bad path (too short 2)",
+			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
+			path:        "/0/9/", // after basePath
+			err:         errors.New("invalid relative path. Example: /1/2/3"),
+			expectedKey: nil,
+		},
+		{
 			name:        "not a relative path",
 			seed:        _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff"),
 			path:        "m/0/0", // after basePath
