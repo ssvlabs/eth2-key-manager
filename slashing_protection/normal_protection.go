@@ -3,18 +3,37 @@ package slashingprotection
 import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // NormalProtection implements normal protection logic
 type NormalProtection struct {
-	store core.SlashingStore
+	logger *zap.Logger
+	store  core.SlashingStore
+}
+
+type Option func(protection *NormalProtection)
+
+func WithLogger(logger *zap.Logger) Option {
+	return func(p *NormalProtection) {
+		p.logger = logger.Named("NormalProtection")
+	}
 }
 
 // NewNormalProtection is the constructor of NormalProtection
-func NewNormalProtection(store core.SlashingStore) *NormalProtection {
-	return &NormalProtection{store: store}
+func NewNormalProtection(store core.SlashingStore, options ...Option) *NormalProtection {
+	np := &NormalProtection{
+		logger: zap.NewNop(),
+		store:  store,
+	}
+
+	for _, opt := range options {
+		opt(np)
+	}
+
+	return np
 }
 
 // IsSlashableAttestation detects double, surround and surrounded slashable events
@@ -37,6 +56,13 @@ func (protector *NormalProtection) IsSlashableAttestation(pubKey []byte, attesta
 		// however you are eligible to sign the message with the same target epoch and the signing root,
 		// we are being strict by not storing the signing roots
 		if attestation.Source.Epoch < highest.Source.Epoch || attestation.Target.Epoch <= highest.Target.Epoch {
+			protector.logger.Warn("detected slashable attestation",
+				zap.Uint64("attestation_source_epoch", uint64(attestation.Source.Epoch)),
+				zap.Uint64("highest_source_epoch", uint64(highest.Source.Epoch)),
+				zap.Uint64("attestation_target_epoch", uint64(attestation.Target.Epoch)),
+				zap.Uint64("highest_target_epoch", uint64(highest.Target.Epoch)),
+			)
+
 			return &core.AttestationSlashStatus{
 				Attestation: attestation,
 				Status:      core.HighestAttestationVote,
@@ -69,6 +95,11 @@ func (protector *NormalProtection) IsSlashableProposal(pubKey []byte, slot phase
 		}, nil
 	}
 
+	protector.logger.Warn("detected slashable proposal",
+		zap.Uint64("proposal_slot", uint64(slot)),
+		zap.Uint64("highest_slot", uint64(highest)),
+	)
+
 	return &core.ProposalSlashStatus{
 		Slot:   slot,
 		Status: core.HighestProposalVote,
@@ -87,6 +118,11 @@ func (protector *NormalProtection) UpdateHighestAttestation(pubKey []byte, attes
 		return errors.Wrap(err, "could not retrieve highest attestation")
 	}
 	if !found || highest == nil {
+		protector.logger.Info("saving highest attestation (previous highest not found)",
+			zap.Uint64("source_epoch", uint64(attestation.Source.Epoch)),
+			zap.Uint64("target_epoch", uint64(attestation.Target.Epoch)),
+		)
+
 		if err = protector.store.SaveHighestAttestation(pubKey, attestation); err != nil {
 			return errors.Wrap(err, "could not save highest attestation")
 		}
@@ -105,6 +141,11 @@ func (protector *NormalProtection) UpdateHighestAttestation(pubKey []byte, attes
 	}
 
 	if shouldUpdate {
+		protector.logger.Info("saving highest attestation (higher than previous highest)",
+			zap.Uint64("source_epoch", uint64(attestation.Source.Epoch)),
+			zap.Uint64("target_epoch", uint64(attestation.Target.Epoch)),
+		)
+
 		err = protector.store.SaveHighestAttestation(pubKey, highest)
 		if err != nil {
 			return errors.Wrap(err, "could not save highest attestation")
