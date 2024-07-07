@@ -1,8 +1,6 @@
 # Blox Eth Key Manager - Wallets
 
 
-[![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
-
 ### Hierarchical Deterministic(HD)
 
 An EIP 2333,2334,2335 compliant HD wallet for BLS12-381
