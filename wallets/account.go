@@ -22,7 +22,7 @@ type HDAccount struct {
 	id               uuid.UUID
 	validationKey    *core.HDKey
 	withdrawalPubKey []byte
-	contextMtx       *sync.RWMutex
+	contextMtx       sync.RWMutex
 	context          *core.WalletContext
 }
 
@@ -124,7 +124,6 @@ func NewValidatorAccount(
 		validationKey:    validationKey,
 		withdrawalPubKey: withdrawalPubKey,
 		basePath:         basePath,
-		contextMtx:       &sync.RWMutex{},
 		context:          context,
 	}
 }
