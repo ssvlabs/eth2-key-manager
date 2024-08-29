@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"strings"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -21,6 +22,7 @@ type HDAccount struct {
 	id               uuid.UUID
 	validationKey    *core.HDKey
 	withdrawalPubKey []byte
+	contextMtx       *sync.RWMutex
 	context          *core.WalletContext
 }
 
@@ -122,6 +124,7 @@ func NewValidatorAccount(
 		validationKey:    validationKey,
 		withdrawalPubKey: withdrawalPubKey,
 		basePath:         basePath,
+		contextMtx:       &sync.RWMutex{},
 		context:          context,
 	}
 }
@@ -161,7 +164,7 @@ func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
 	depositData, root, err := eth1deposit.DepositData(
 		account.validationKey,
 		account.withdrawalPubKey,
-		account.context.Storage.Network(),
+		account.GetContext().Storage.Network(),
 		eth1deposit.MaxEffectiveBalanceInGwei,
 	)
 	if err != nil {
@@ -173,11 +176,20 @@ func (account *HDAccount) GetDepositData() (map[string]interface{}, error) {
 		"signature":              strings.TrimPrefix(depositData.Signature.String(), "0x"),
 		"withdrawalCredentials":  hex.EncodeToString(depositData.WithdrawalCredentials),
 		"depositDataRoot":        hex.EncodeToString(root[:]),
-		"depositContractAddress": account.context.Storage.Network().DepositContractAddress(),
+		"depositContractAddress": account.GetContext().Storage.Network().DepositContractAddress(),
 	}, nil
 }
 
 // SetContext is the context setter
 func (account *HDAccount) SetContext(ctx *core.WalletContext) {
+	account.contextMtx.Lock()
+	defer account.contextMtx.Unlock()
 	account.context = ctx
+}
+
+// SetContext is the context setter
+func (account *HDAccount) GetContext() *core.WalletContext {
+	account.contextMtx.RLock()
+	defer account.contextMtx.RUnlock()
+	return account.context
 }
