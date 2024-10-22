@@ -276,13 +276,13 @@ func ValidateHighestValues(accountFlagValues CreateAccountFlagValues) error {
 		privateKeysCount := len(accountFlagValues.privateKeys)
 
 		if len(accountFlagValues.highestSources) != privateKeysCount {
-			return errors.Errorf("highest sources " + errorExplain)
+			return errors.Errorf("highest sources: %v", errorExplain)
 		}
 		if len(accountFlagValues.highestTargets) != privateKeysCount {
-			return errors.Errorf("highest targets " + errorExplain)
+			return errors.Errorf("highest targets: %v", errorExplain)
 		}
 		if len(accountFlagValues.highestProposals) != privateKeysCount {
-			return errors.Errorf("highest proposals " + errorExplain)
+			return errors.Errorf("highest proposals: %v", errorExplain)
 		}
 	} else if accountFlagValues.accumulate {
 		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {
