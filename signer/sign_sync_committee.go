@@ -21,8 +21,9 @@ func (signer *SimpleSigner) SignSyncCommittee(msgBlockRoot []byte, domain phase0
 	}
 
 	// 2. lock for current account
-	signer.lock(account.ID(), "sync_committee")
-	defer signer.unlock(account.ID(), "sync_committee")
+	val := signer.lock(account.ID(), "sync_committee")
+	val.Lock()
+	defer val.Unlock()
 
 	// 3. sign
 	sszRoot := SSZBytes(msgBlockRoot)
@@ -51,8 +52,9 @@ func (signer *SimpleSigner) SignSyncCommitteeSelectionData(data *altair.SyncAggr
 	}
 
 	// 2. lock for current account
-	signer.lock(account.ID(), "sync_committee_selection_data")
-	defer signer.unlock(account.ID(), "sync_committee_selection_data")
+	val := signer.lock(account.ID(), "sync_committee_selection_data")
+	val.Lock()
+	defer val.Unlock()
 
 	// 3. sign
 	if data == nil {
@@ -83,8 +85,9 @@ func (signer *SimpleSigner) SignSyncCommitteeContributionAndProof(contribAndProo
 	}
 
 	// 2. lock for current account
-	signer.lock(account.ID(), "sync_committee_selection_and_proof")
-	defer signer.unlock(account.ID(), "sync_committee_selection_and_proof")
+	val := signer.lock(account.ID(), "sync_committee_selection_and_proof")
+	val.Lock()
+	defer val.Unlock()
 
 	// 3. sign
 	if contribAndProof == nil {

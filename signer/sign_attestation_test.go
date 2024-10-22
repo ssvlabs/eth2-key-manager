@@ -73,6 +73,57 @@ func TestReferenceAttestation(t *testing.T) {
 	require.EqualValues(t, sig, actualSig)
 }
 
+// tested against a block and sig generated from https://github.com/prysmaticlabs/prysm/blob/master/shared/testutil/block.go#L357
+func TestLockSameValidatorInParallel(t *testing.T) {
+	sk := _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c")
+	pk := _byteArray("a9cf360aa15fb1d1d30ee2b578dc5884823c19661886ae8b892775ccb3bd96b7d7345569a2aa0b14e4d015c54a6a0c54")
+	domain := _byteArray32("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
+
+	store := inmemStorage()
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store)
+	options.SetWalletType(core.NDWallet)
+	vault, err := eth2keymanager.NewKeyVault(options)
+	require.NoError(t, err)
+	wallet, err := vault.Wallet()
+	require.NoError(t, err)
+
+	k, err := core.NewHDKeyFromPrivateKey(sk, "")
+	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
+	require.NoError(t, err)
+	require.NoError(t, wallet.AddValidatorAccount(acc))
+
+	//// setup signer
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.MainNetwork)
+
+	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+
+	// decode attestation
+	attData := &phase0.AttestationData{}
+	require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
+
+	go func() {
+		_, _, err := signer.SignBeaconAttestation(attData, phase0.Domain{0}, pk)
+		require.NoError(t, err)
+
+	}()
+
+	ch := make(chan struct{})
+
+	go func() {
+		_, _, err := signer.SignBeaconAttestation(attData, domain, pk)
+		close(ch)
+		require.NoError(t, err)
+	}()
+
+	select {
+	case <-ch:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("timeout")
+	}
+}
+
 func TestAttestationSlashingSignatures(t *testing.T) {
 	t.Run("valid attestation, sign using public key", func(t *testing.T) {
 		seed, _ := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
