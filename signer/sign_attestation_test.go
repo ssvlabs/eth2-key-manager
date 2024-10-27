@@ -3,6 +3,8 @@ package signer
 import (
 	"encoding/hex"
 	"fmt"
+	"log"
+	"sync"
 	"testing"
 	"time"
 
@@ -121,6 +123,117 @@ func TestLockSameValidatorInParallel(t *testing.T) {
 	case <-ch:
 	case <-time.After(200 * time.Millisecond):
 		t.Fatal("timeout")
+	}
+}
+
+func TestManyValidatorsParallel(t *testing.T) {
+	type testValidator struct {
+		sk     []byte
+		pk     []byte
+		id     string
+		wallet core.Wallet
+	}
+
+	testValidators := []testValidator{
+		{
+			sk: _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c"),
+			pk: _byteArray("a9cf360aa15fb1d1d30ee2b578dc5884823c19661886ae8b892775ccb3bd96b7d7345569a2aa0b14e4d015c54a6a0c54"),
+			id: "1",
+		},
+		{
+			sk: _byteArray("6327b1e58c41d60dd7c3c8b9634204255707c2d12e2513c345001d8926745eea"),
+			pk: _byteArray("954eb88ed1207f891dc3c28fa6cfdf8f53bf0ed3d838f3476c0900a61314d22d4f0a300da3cd010444dd5183e35a593c"),
+			id: "2",
+		},
+		{
+			sk: _byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"),
+			pk: _byteArray("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972"),
+			id: "3",
+		},
+	}
+
+	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	domain := _byteArray32("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
+
+	// decode base attestation to setup the protector with
+	baseAttData := &phase0.AttestationData{}
+	require.NoError(t, baseAttData.UnmarshalSSZ(attestationDataByts))
+
+	// decode attestation to be signed
+	attData := &phase0.AttestationData{}
+	require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
+	attData.Slot += phase0.Slot(core.PraterNetwork.SlotsPerEpoch())
+	attData.Source.Epoch++
+	attData.Target.Epoch++
+
+	// setup KeyVault
+	store := inmemStorage()
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store)
+	options.SetWalletType(core.NDWallet)
+	vault, err := eth2keymanager.NewKeyVault(options)
+	require.NoError(t, err)
+	wallet, err := vault.Wallet()
+	require.NoError(t, err)
+
+	// create accounts
+	protector := prot.NewNormalProtection(store)
+	for i := range testValidators {
+		k, err := core.NewHDKeyFromPrivateKey(testValidators[i].sk, "")
+		require.NoError(t, err)
+		acc := wallets.NewValidatorAccount(testValidators[i].id, k, nil, "", vault.Context)
+		require.NoError(t, err)
+		require.NoError(t, wallet.AddValidatorAccount(acc))
+		testValidators[i].wallet = wallet
+		require.EqualValues(t, testValidators[i].pk, acc.ValidatorPublicKey())
+		require.EqualValues(t, testValidators[i].pk, k.PublicKey().Serialize())
+
+		err = protector.UpdateHighestAttestation(acc.ValidatorPublicKey(), baseAttData)
+		require.NoError(t, err)
+	}
+
+	// setup signer
+	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
+
+	// Sign attestation in parallel.
+	type validatorResult struct {
+		signs int
+		errs  int
+	}
+	var validatorResults = map[string]*validatorResult{}
+	var mu sync.Mutex
+	for _, v := range testValidators {
+		validatorResults[string(v.pk)] = &validatorResult{}
+	}
+
+	var wg sync.WaitGroup
+	const goroutinesPerValidator = 10
+	for _, v := range testValidators {
+		v := v
+		for i := 0; i < goroutinesPerValidator; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				_, _, err := signer.SignBeaconAttestation(attData, domain, v.pk)
+				// require.EqualValues(t, sig, actualSig)
+				log.Printf("pk: %s, err: %v", hex.EncodeToString(v.pk), err)
+
+				mu.Lock()
+				defer mu.Unlock()
+				if err != nil {
+					validatorResults[string(v.pk)].errs++
+					require.ErrorContains(t, err, "slashable attestation (HighestAttestationVote), not signing")
+				} else {
+					validatorResults[string(v.pk)].signs++
+				}
+			}()
+		}
+	}
+	wg.Wait()
+
+	for _, v := range validatorResults {
+		require.Equal(t, 1, v.signs)
+		require.Equal(t, goroutinesPerValidator-1, v.errs)
 	}
 }
 
