@@ -21,9 +21,7 @@ func (signer *SimpleSigner) SignBeaconAttestation(attestation *phase0.Attestatio
 	// 2. lock for current account
 	val := signer.lock(account.ID(), "attestation")
 	val.Lock()
-	defer func() {
-		val.Unlock()
-	}()
+	defer val.Unlock()
 
 	// 3. far future check
 	if !IsValidFarFutureEpoch(signer.network, attestation.Target.Epoch) {
