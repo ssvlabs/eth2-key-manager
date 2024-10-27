@@ -103,25 +103,35 @@ func TestLockSameValidatorInParallel(t *testing.T) {
 	attData := &phase0.AttestationData{}
 	require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
 
-	go func() {
-		_, _, err := signer.SignBeaconAttestation(attData, phase0.Domain{0}, pk)
-		require.NoError(t, err)
-
-	}()
-
 	ch := make(chan struct{})
 
 	go func() {
-		_, _, err := signer.SignBeaconAttestation(attData, domain, pk)
-		close(ch)
+		_, _, err := signer.SignBeaconAttestation(attData, phase0.Domain{0}, pk)
 		require.NoError(t, err)
+		close(ch)
 	}()
+
+	ch2 := make(chan struct{})
+
+	go func() {
+		_, _, err := signer.SignBeaconAttestation(attData, domain, pk)
+		require.NoError(t, err)
+		close(ch2)
+
+	}()
+
+	select {
+	case <-ch2:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("timeout")
+	}
 
 	select {
 	case <-ch:
 	case <-time.After(200 * time.Millisecond):
 		t.Fatal("timeout")
 	}
+
 }
 
 func TestAttestationSlashingSignatures(t *testing.T) {
