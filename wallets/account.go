@@ -186,7 +186,7 @@ func (account *HDAccount) SetContext(ctx *core.WalletContext) {
 	account.context = ctx
 }
 
-// SetContext is the context setter
+// GetContext is the context getter
 func (account *HDAccount) GetContext() *core.WalletContext {
 	account.contextMtx.RLock()
 	defer account.contextMtx.RUnlock()
