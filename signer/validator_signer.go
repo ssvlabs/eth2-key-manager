@@ -51,26 +51,16 @@ func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtecto
 }
 
 // lock locks signer
-func (signer *SimpleSigner) lock(accountID uuid.UUID, operation string) {
+func (signer *SimpleSigner) lock(accountID uuid.UUID, operation string) *sync.RWMutex {
 	signer.mapLock.Lock()
 	defer signer.mapLock.Unlock()
 
 	k := accountID.String() + "_" + operation
 	if val, ok := signer.signLocks[k]; ok {
-		val.Lock()
+		return val
 	} else {
 		signer.signLocks[k] = &sync.RWMutex{}
-		signer.signLocks[k].Lock()
-	}
-}
-
-func (signer *SimpleSigner) unlock(accountID uuid.UUID, operation string) {
-	signer.mapLock.RLock()
-	defer signer.mapLock.RUnlock()
-
-	k := accountID.String() + "_" + operation
-	if val, ok := signer.signLocks[k]; ok {
-		val.Unlock()
+		return signer.signLocks[k]
 	}
 }
 
