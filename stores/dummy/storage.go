@@ -3,8 +3,8 @@ package dummy
 import (
 	"github.com/google/uuid"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/encryptor"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/encryptor"
 )
 
 // Storage is the storage mock

@@ -1,8 +1,8 @@
 package eth2keymanager
 
 import (
-	"github.com/bloxapp/eth2-key-manager/core"
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	encryptor2 "github.com/ssvlabs/eth2-key-manager/encryptor"
 )
 
 // KeyVaultOptions contains options to create a new key vault object

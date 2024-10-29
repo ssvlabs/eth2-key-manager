@@ -6,8 +6,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/seed/flag"
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/cli/cmd/seed/flag"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // Generate generates a new key-vault seed and prints it.

@@ -3,16 +3,16 @@
 <!-- [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbloxapp%2Feth2-key-manager.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbloxapp%2Feth2-key-manager?ref=badge_shield) -->
 
 Blox Eth Key Manager is a library wrapping all major functionality an eth 2.0 validator will need:
-  - [Multi storage implementations](https://github.com/bloxapp/eth2-key-manager/tree/master/stores)
-  - [Signer](https://github.com/bloxapp/eth2-key-manager/tree/master/validator_signer)
-  - [Slashing protection](https://github.com/bloxapp/eth2-key-manager/tree/master/slashing_protection)
-  - [HD wallet](https://github.com/bloxapp/eth2-key-manager/tree/master/wallet_hd) (EIP-2333,2334,2335 compliant)
+  - [Multi storage implementations](https://github.com/ssvlabs/eth2-key-manager/tree/master/stores)
+  - [Signer](https://github.com/ssvlabs/eth2-key-manager/tree/master/validator_signer)
+  - [Slashing protection](https://github.com/ssvlabs/eth2-key-manager/tree/master/slashing_protection)
+  - [HD wallet](https://github.com/ssvlabs/eth2-key-manager/tree/master/wallet_hd) (EIP-2333,2334,2335 compliant)
   - Tests
 
 ### Installation
 
  ```sh
-go get github.com/bloxapp/eth2-key-manager
+go get github.com/ssvlabs/eth2-key-manager
    ```
 
 ### Security and Architecture

@@ -3,8 +3,8 @@ package mnemonic
 import (
 	"github.com/spf13/cobra"
 
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/mnemonic/handler"
+	rootcmd "github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/cli/cmd/mnemonic/handler"
 )
 
 // generateCmd represents the generate mnemonic command.

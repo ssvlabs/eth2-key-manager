@@ -6,9 +6,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	hd2 "github.com/bloxapp/eth2-key-manager/wallets/hd"
-	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	hd2 "github.com/ssvlabs/eth2-key-manager/wallets/hd"
+	"github.com/ssvlabs/eth2-key-manager/wallets/nd"
 )
 
 // MarshalJSON is the custom JSON marshaler

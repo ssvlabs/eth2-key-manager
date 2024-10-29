@@ -3,7 +3,7 @@ package flag
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
+	"github.com/ssvlabs/eth2-key-manager/cli/util/cliflag"
 )
 
 // Flag names.

@@ -9,9 +9,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
-	"github.com/bloxapp/eth2-key-manager/core"
+	rootcmd "github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/cli/util/cliflag"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // Flag names.

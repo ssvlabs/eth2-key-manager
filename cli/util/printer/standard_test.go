@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/eth2-key-manager/cli/util/printer"
+	"github.com/ssvlabs/eth2-key-manager/cli/util/printer"
 )
 
 func TestText(t *testing.T) {
