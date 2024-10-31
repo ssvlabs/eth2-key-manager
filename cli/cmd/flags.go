@@ -6,8 +6,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/bloxapp/eth2-key-manager/cli/util/cliflag"
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/cli/util/cliflag"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // ResponseType represents the network.

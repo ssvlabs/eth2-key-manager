@@ -1,4 +1,4 @@
-# Blox Eth Key Manager - Stores
+# Eth Key Manager - Stores
 
 
 Store is a place that saves and fetches data used by a portfolio,wallet and accounts. 
@@ -11,7 +11,7 @@ Currently there are the following implementations:
 
 #### Develop you own store
 You could develop you own store, for example saving it to an S3, local file system and so on.
-To implement a store, simple override the methods below from [here](https://github.com/bloxapp/eth2-key-manager/blob/master/core/storage.go)
+To implement a store, simple override the methods below from [here](https://github.com/ssvlabs/eth2-key-manager/blob/master/core/storage.go)
 ```go
 // Implements methods to store and retrieve data
 // Any encryption is done on the implementation level but is not obligatory

@@ -6,10 +6,10 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
-	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/wallets"
+	eth2keymanager "github.com/ssvlabs/eth2-key-manager"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	prot "github.com/ssvlabs/eth2-key-manager/slashing_protection"
+	"github.com/ssvlabs/eth2-key-manager/wallets"
 )
 
 func TestReferenceAttestationAggregation(t *testing.T) {

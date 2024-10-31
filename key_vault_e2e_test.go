@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
-	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/encryptor/keystorev4"
+	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
 func _byteArray(input string) []byte {

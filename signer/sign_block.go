@@ -7,7 +7,7 @@ import (
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // SignBlock signs the given beacon block

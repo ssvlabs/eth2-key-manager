@@ -7,7 +7,7 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 func setupAttestation(t *testing.T, withAttestationData bool) (core.SlashingProtector, []core.ValidatorAccount) {

@@ -9,10 +9,10 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/wallets"
-	"github.com/bloxapp/eth2-key-manager/wallets/hd"
-	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/wallets"
+	"github.com/ssvlabs/eth2-key-manager/wallets/hd"
+	"github.com/ssvlabs/eth2-key-manager/wallets/nd"
 )
 
 func _byteArray32(input string) [32]byte {

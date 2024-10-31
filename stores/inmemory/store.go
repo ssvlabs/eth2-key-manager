@@ -7,9 +7,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
-	"github.com/bloxapp/eth2-key-manager/wallets"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	encryptor2 "github.com/ssvlabs/eth2-key-manager/encryptor"
+	"github.com/ssvlabs/eth2-key-manager/wallets"
 )
 
 // InMemStore implements core.Storage using in-memory store.

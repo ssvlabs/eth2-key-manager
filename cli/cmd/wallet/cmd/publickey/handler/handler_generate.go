@@ -3,14 +3,14 @@ package handler
 import (
 	"encoding/hex"
 
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/core"
+	rootcmd "github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/core"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
+	eth2keymanager "github.com/ssvlabs/eth2-key-manager"
+	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
 // Generate generates a new wallet account at specific index and prints the account.

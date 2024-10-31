@@ -1,4 +1,4 @@
-# Blox Eth Key Manager - Wallets
+# Eth Key Manager - Wallets
 
 
 ### Hierarchical Deterministic(HD)

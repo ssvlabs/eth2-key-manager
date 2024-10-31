@@ -3,7 +3,7 @@ package slashingprotection
 import (
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // NoProtection implements slashing protector interface with dummy implementation
