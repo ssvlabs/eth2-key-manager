@@ -1,4 +1,4 @@
-# Blox Eth Key Manager - Stores
+# Eth Key Manager - Stores
 
 
 Store is a place that saves and fetches data used by a portfolio,wallet and accounts. 

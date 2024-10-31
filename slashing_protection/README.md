@@ -1,4 +1,4 @@
-# Blox Eth Key Manager - Slashing Protector
+# Eth Key Manager - Slashing Protector
 
 
 

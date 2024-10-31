@@ -1,4 +1,4 @@
-# Blox Eth Key Manager - ETH 1 Deposit 
+# Eth Key Manager - ETH 1 Deposit 
 
 
 Easily create an eth1 deposit.
