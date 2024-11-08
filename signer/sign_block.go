@@ -7,7 +7,7 @@ import (
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // SignBlock signs the given beacon block
@@ -23,8 +23,9 @@ func (signer *SimpleSigner) SignBlock(block ssz.HashRoot, slot phase0.Slot, doma
 	}
 
 	// 2. lock for current account
-	signer.lock(account.ID(), "proposal")
-	defer signer.unlock(account.ID(), "proposal")
+	val := signer.lock(account.ID(), "proposal")
+	val.Lock()
+	defer val.Unlock()
 
 	// 3. far future check
 	if !IsValidFarFutureSlot(signer.network, slot) {

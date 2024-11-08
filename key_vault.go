@@ -5,9 +5,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/wallets/hd"
-	"github.com/bloxapp/eth2-key-manager/wallets/nd"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/wallets/hd"
+	"github.com/ssvlabs/eth2-key-manager/wallets/nd"
 
 	// Force import a transitive dependency to fix an ambiguous import error.
 	// See https://github.com/btcsuite/btcd/issues/1839

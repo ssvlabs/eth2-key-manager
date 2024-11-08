@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 // Predefined errors

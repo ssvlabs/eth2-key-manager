@@ -1,7 +1,5 @@
-# Blox Eth Key Manager - Wallets
+# Eth Key Manager - Wallets
 
-
-[![blox.io](https://s3.us-east-2.amazonaws.com/app-files.blox.io/static/media/powered_by.png)](https://blox.io)
 
 ### Hierarchical Deterministic(HD)
 

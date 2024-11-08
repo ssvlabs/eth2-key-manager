@@ -10,11 +10,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
-	prot "github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
-	"github.com/bloxapp/eth2-key-manager/wallets"
+	eth2keymanager "github.com/ssvlabs/eth2-key-manager"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	prot "github.com/ssvlabs/eth2-key-manager/slashing_protection"
+	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
+	"github.com/ssvlabs/eth2-key-manager/wallets"
 )
 
 func inmemStorage() *inmemory.InMemStore {

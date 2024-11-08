@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/wallets"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/wallets"
 )
 
 // Default values according to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2334.md

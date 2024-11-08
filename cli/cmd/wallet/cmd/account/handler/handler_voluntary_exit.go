@@ -10,12 +10,12 @@ import (
 	"github.com/spf13/cobra"
 	types "github.com/wealdtech/go-eth2-types/v2"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/signer"
-	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
+	eth2keymanager "github.com/ssvlabs/eth2-key-manager"
+	rootcmd "github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/signer"
+	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
 // VoluntaryExitFlagValues keeps all collected values for seed

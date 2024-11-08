@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	encryptor2 "github.com/bloxapp/eth2-key-manager/encryptor"
+	encryptor2 "github.com/ssvlabs/eth2-key-manager/encryptor"
 )
 
 func TestEncrypt(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/util/printer"
+	"github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/cli/util/printer"
 )
 
 func TestSeedGenerate(t *testing.T) {

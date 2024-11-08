@@ -8,11 +8,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	eth2keymanager "github.com/bloxapp/eth2-key-manager"
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
+	eth2keymanager "github.com/ssvlabs/eth2-key-manager"
+	rootcmd "github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/cli/cmd/wallet/cmd/account/flag"
+	"github.com/ssvlabs/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
 // CreateAccountFlagValues keeps all collected values for seed and seedless modes
@@ -276,13 +276,13 @@ func ValidateHighestValues(accountFlagValues CreateAccountFlagValues) error {
 		privateKeysCount := len(accountFlagValues.privateKeys)
 
 		if len(accountFlagValues.highestSources) != privateKeysCount {
-			return errors.Errorf("highest sources " + errorExplain)
+			return errors.Errorf("highest sources %v", errorExplain)
 		}
 		if len(accountFlagValues.highestTargets) != privateKeysCount {
-			return errors.Errorf("highest targets " + errorExplain)
+			return errors.Errorf("highest targets %v", errorExplain)
 		}
 		if len(accountFlagValues.highestProposals) != privateKeysCount {
-			return errors.Errorf("highest proposals " + errorExplain)
+			return errors.Errorf("highest proposals %v", errorExplain)
 		}
 	} else if accountFlagValues.accumulate {
 		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {

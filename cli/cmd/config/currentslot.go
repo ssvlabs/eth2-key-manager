@@ -3,8 +3,8 @@ package seed
 import (
 	"github.com/spf13/cobra"
 
-	rootcmd "github.com/bloxapp/eth2-key-manager/cli/cmd"
-	"github.com/bloxapp/eth2-key-manager/cli/cmd/config/handler"
+	rootcmd "github.com/ssvlabs/eth2-key-manager/cli/cmd"
+	"github.com/ssvlabs/eth2-key-manager/cli/cmd/config/handler"
 )
 
 // currentSlotCmd represents the command to get the current slot.

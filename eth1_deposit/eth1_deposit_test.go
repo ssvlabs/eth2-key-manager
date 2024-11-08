@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	types "github.com/wealdtech/go-eth2-types/v2"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
 func _ignoreErr(a []byte, err error) []byte {
