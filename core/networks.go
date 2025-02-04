@@ -20,6 +20,8 @@ func NetworkFromString(n string) Network {
 		return PraterNetwork
 	case string(HoleskyNetwork):
 		return HoleskyNetwork
+	case string(MekongNetwork):
+		return MekongNetwork
 	case string(MainNetwork):
 		return MainNetwork
 	default:
@@ -36,6 +38,8 @@ func (n Network) GenesisForkVersion() phase0.Version {
 		return phase0.Version{0x00, 0x00, 0x10, 0x20}
 	case HoleskyNetwork:
 		return phase0.Version{0x01, 0x01, 0x70, 0x00}
+	case MekongNetwork:
+		return phase0.Version{0x10, 0x63, 0x76, 0x24}
 	case MainNetwork:
 		return phase0.Version{0, 0, 0, 0}
 	default:
@@ -54,6 +58,9 @@ func (n Network) GenesisValidatorsRoot() phase0.Root {
 	case HoleskyNetwork:
 		rootBytes, _ := hex.DecodeString("9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1")
 		copy(genValidatorsRoot[:], rootBytes)
+	case MekongNetwork:
+		rootBytes, _ := hex.DecodeString("9838240bca889c52818d7502179b393a828f61f15119d9027827c36caeb67db7")
+		copy(genValidatorsRoot[:], rootBytes)
 	case MainNetwork:
 		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
 		copy(genValidatorsRoot[:], rootBytes)
@@ -71,6 +78,8 @@ func (n Network) DepositContractAddress() string {
 	case PraterNetwork:
 		return "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b"
 	case HoleskyNetwork:
+		return "0x4242424242424242424242424242424242424242"
+	case MekongNetwork:
 		return "0x4242424242424242424242424242424242424242"
 	case MainNetwork:
 		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
@@ -94,6 +103,8 @@ func (n Network) MinGenesisTime() uint64 {
 		return 1616508000
 	case HoleskyNetwork:
 		return 1695902400
+	case MekongNetwork:
+		return 1730822340 + 60 // genesis delay
 	case MainNetwork:
 		return 1606824023
 	default:
@@ -147,6 +158,9 @@ const (
 
 	// HoleskyNetwork represents the Holesky test network.
 	HoleskyNetwork Network = "holesky"
+
+	// MekongNetwork represents the Mekong test network.
+	MekongNetwork Network = "mekong"
 
 	// MainNetwork represents the main network.
 	MainNetwork Network = "mainnet"
