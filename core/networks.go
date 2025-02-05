@@ -39,7 +39,7 @@ func (n Network) GenesisForkVersion() phase0.Version {
 	case HoleskyNetwork:
 		return phase0.Version{0x01, 0x01, 0x70, 0x00}
 	case MekongNetwork:
-		return phase0.Version{0x10, 0x63, 0x76, 0x24}
+		return phase0.Version{0x10, 0x58, 0x55, 0x57}
 	case MainNetwork:
 		return phase0.Version{0, 0, 0, 0}
 	default:
@@ -59,7 +59,7 @@ func (n Network) GenesisValidatorsRoot() phase0.Root {
 		rootBytes, _ := hex.DecodeString("9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1")
 		copy(genValidatorsRoot[:], rootBytes)
 	case MekongNetwork:
-		rootBytes, _ := hex.DecodeString("9838240bca889c52818d7502179b393a828f61f15119d9027827c36caeb67db7")
+		rootBytes, _ := hex.DecodeString("5c074f81fbc78dc7ba47460572a4286fffe989e9921abfd50791e01e4044d274")
 		copy(genValidatorsRoot[:], rootBytes)
 	case MainNetwork:
 		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
@@ -104,7 +104,7 @@ func (n Network) MinGenesisTime() uint64 {
 	case HoleskyNetwork:
 		return 1695902400
 	case MekongNetwork:
-		return 1730822340 + 60 // genesis delay
+		return 1738603800 + 60 // genesis delay
 	case MainNetwork:
 		return 1606824023
 	default:
