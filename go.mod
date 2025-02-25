@@ -5,7 +5,7 @@ go 1.21.0
 toolchain go1.22.6
 
 require (
-	github.com/attestantio/go-eth2-client v0.23.2-0.20250204090132-2e07a2cbc932
+	github.com/attestantio/go-eth2-client v0.24.0
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1
 	github.com/ferranbt/fastssz v0.1.4
 	github.com/google/uuid v1.3.0
