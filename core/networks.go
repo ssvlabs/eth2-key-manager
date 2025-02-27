@@ -18,6 +18,8 @@ func NetworkFromString(n string) Network {
 		return PyrmontNetwork
 	case string(PraterNetwork):
 		return PraterNetwork
+	case string(SepoliaNetwork):
+		return SepoliaNetwork
 	case string(HoleskyNetwork):
 		return HoleskyNetwork
 	case string(MainNetwork):
@@ -34,6 +36,8 @@ func (n Network) GenesisForkVersion() phase0.Version {
 		return phase0.Version{0, 0, 32, 9}
 	case PraterNetwork:
 		return phase0.Version{0x00, 0x00, 0x10, 0x20}
+	case SepoliaNetwork:
+		return phase0.Version{0x90, 0x00, 0x00, 0x69}
 	case HoleskyNetwork:
 		return phase0.Version{0x01, 0x01, 0x70, 0x00}
 	case MainNetwork:
@@ -50,6 +54,9 @@ func (n Network) GenesisValidatorsRoot() phase0.Root {
 	switch n {
 	case PraterNetwork:
 		rootBytes, _ := hex.DecodeString("043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb")
+		copy(genValidatorsRoot[:], rootBytes)
+	case SepoliaNetwork:
+		rootBytes, _ := hex.DecodeString("d8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078")
 		copy(genValidatorsRoot[:], rootBytes)
 	case HoleskyNetwork:
 		rootBytes, _ := hex.DecodeString("9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1")
@@ -70,6 +77,8 @@ func (n Network) DepositContractAddress() string {
 		return "0x8c5fecdC472E27Bc447696F431E425D02dd46a8c"
 	case PraterNetwork:
 		return "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b"
+	case SepoliaNetwork:
+		return "0x4242424242424242424242424242424242424242"
 	case HoleskyNetwork:
 		return "0x4242424242424242424242424242424242424242"
 	case MainNetwork:
@@ -92,6 +101,8 @@ func (n Network) MinGenesisTime() uint64 {
 		return 1605700807
 	case PraterNetwork:
 		return 1616508000
+	case SepoliaNetwork:
+		return 1655733600
 	case HoleskyNetwork:
 		return 1695902400
 	case MainNetwork:
@@ -144,6 +155,9 @@ const (
 
 	// PraterNetwork represents the Prater test network.
 	PraterNetwork Network = "prater"
+
+	// SepoliaNetwork represents the Sepolia test network.
+	SepoliaNetwork Network = "sepolia"
 
 	// HoleskyNetwork represents the Holesky test network.
 	HoleskyNetwork Network = "holesky"
