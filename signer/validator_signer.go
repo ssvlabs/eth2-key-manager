@@ -19,7 +19,7 @@ type ValidatorSigner interface {
 	SignBeaconBlock(block *spec.VersionedBeaconBlock, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignBlindedBeaconBlock(block *api.VersionedBlindedBeaconBlock, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignBeaconAttestation(attestation *phase0.AttestationData, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
-	SignAggregateAndProof(agg *phase0.AggregateAndProof, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignAggregateAndProof(agg ssz.HashRoot, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSlot(slot phase0.Slot, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignEpoch(epoch phase0.Epoch, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
