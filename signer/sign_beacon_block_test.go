@@ -13,6 +13,7 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/bellatrix"
 	"github.com/attestantio/go-eth2-client/spec/capella"
 	"github.com/attestantio/go-eth2-client/spec/deneb"
+	"github.com/attestantio/go-eth2-client/spec/electra"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/stretchr/testify/require"
 
@@ -246,6 +247,156 @@ func TestBlockProposalDeneb(t *testing.T) {
 	versionedBeaconBlock := &spec.VersionedBeaconBlock{
 		Version: spec.DataVersionDeneb,
 		Deneb:   beaconBlock,
+	}
+	sig, _, err := signer.SignBeaconBlock(versionedBeaconBlock, _byteArray32(domain), _byteArray(pk))
+	fmt.Println(hex.EncodeToString(sig))
+	require.NoError(t, err)
+	require.EqualValues(t, _byteArray(sigByts), sig)
+}
+
+// tested against a real block and sig from the devnet6 (slot 58430)
+// https://dora.pectra-devnet-6.ethpandaops.io/slot/58430
+func TestBlockProposalElectra(t *testing.T) {
+	require.NoError(t, core.InitBLS())
+
+	// fixture
+	sk := "4387296cbebc40a5dbb3a5b39b65a0c58a7e673944d44da3602e061762dd028d"
+	pk := "b846c9e4e4482aece0dd3f82b3ac429e9315542953f2960f1575f239d3efccc73fa783591378cf349f575369932a2b8b"
+	domain := "00000000e551da7785705c8c2e2f4ed229e22096eab18686d02a647950a11205"
+	blockRoot := "73f4c8f0020d8fdd152aceb84b2984730ff0a4f1cd9473dc67db7cdafc991afb"
+	sigByts := "adb8c16ce9f9505e7faa495fcda269c4f9a6498e61c4b716b9afb347f60593ee075c315c7f65dd677ea226bd40da2d430f6948b8b255c288577284dc0d3bdecc50cf8ab46044b3e4ad102b5d351555133ff86968f3b1ec4e3f6fac331b8cdee3"
+
+	blkBytes := []byte(`{
+      "slot": "58430",
+      "proposer_index": "71682",
+      "parent_root": "0x0a8a09e05b8be4f379eb0c2f87fc2a9ac872bdd68d497a114e2fd877d56868e0",
+      "state_root": "0x20f3f418181441d26dc2b0dd2768ead0a3595afe71db4f40744e45ac8e59267a",
+      "body": {
+        "randao_reveal": "0xb0c089ebc07e4276f7e91ea10b7fac1c9d1b68a34b47d56f4497fe160aefca67a1e0d06abf094fce6f00107d82e4018501b4cfa4a631ad60a880548e7c51b1f55e77c7b0765fe8d6f03682b11dc7ed1dc0fa98965c1977715c8e57a92502c5cc",
+        "eth1_data": {
+          "deposit_root": "0xe51ae5cae00e26a0a5c58f885c6ec574315cbe1da7a92368fbb878d9a38f55b1",
+          "deposit_count": "5251",
+          "block_hash": "0x3c1f0de2241872a48d400f6d04654dd672530e27f2da8e6cad36aea9b79964ce"
+        },
+        "graffiti": "0x7373762e6e6574776f726b000000000000000000000000000000000000000000",
+        "proposer_slashings": [],
+        "attester_slashings": [],
+        "attestations": [
+          {
+            "aggregation_bits": "0xdfdfffffff7fffffffefefddfcfffffefffffffffffbfffffffffdfffdfffbfffffffffffffffffffff7dffffffffffffff7fff7fffdfffffffffffdfff7dfffffffffffffdff7ffffd7fd6ffffffffffffffff7bbffffffefffffefffffeffbfdfffffefffffe7ffffffffffffffffffffdfffffffffffffffffdfdeffffffffbfffffdfffffffffffffedfeffffffffbffffffffffeffffffffffffffff7ffffffefed7ffffdffffffffffffffffffffef7fbfffffbdfffffffffffbffffb7fffefffff7ffffffffffeffffff7f7effffefffffffffffffffffffdfdbbfffffffffffefffffffbffffffeffffdfffffbffffffffffffffffffdf7fff7fffffbfffeffffffeffffffffffffdfffffbfdffeffff7fffffff01",
+            "data": {
+              "slot": "58429",
+              "index": "0",
+              "beacon_block_root": "0x0a8a09e05b8be4f379eb0c2f87fc2a9ac872bdd68d497a114e2fd877d56868e0",
+              "source": {
+                "epoch": "1824",
+                "root": "0x6566576196ea7da7c1c4663cdd94dddbdbcd036c86ce0976a456458902683ae2"
+              },
+              "target": {
+                "epoch": "1825",
+                "root": "0x9ddf3ce96863108c25238d250d651cb69ea765d89b85663633e64a417e0d107c"
+              }
+            },
+            "signature": "0xb3f7d23639124854023d4bb62de9d987595d8927d465374bf62b4df065b90a03c07aabeb615d53cb91fe6521df5df10809e05d513a2506ff799003ce0cd02ed204d2b884c66dcfcb13580c00fac82a749b70be109666c212e1d710aec763577e",
+            "committee_bits": "0xffff010000000000"
+          },
+          {
+            "aggregation_bits": "0x0000000000000000000800000000000008",
+            "data": {
+              "slot": "58429",
+              "index": "0",
+              "beacon_block_root": "0xbdf72335b18206fb7c671cf5fd6f08e5c41837afdd0e55c225e976c2d74c9dd3",
+              "source": {
+                "epoch": "1824",
+                "root": "0x6566576196ea7da7c1c4663cdd94dddbdbcd036c86ce0976a456458902683ae2"
+              },
+              "target": {
+                "epoch": "1825",
+                "root": "0x9ddf3ce96863108c25238d250d651cb69ea765d89b85663633e64a417e0d107c"
+              }
+            },
+            "signature": "0x84599de34546e862b56e235f886d3f814b9cf2b166a515517de256d0f2105476ff17f4e4220f72b2db004fde59895105064d6864b7a32a0be9072bf7aff6123a087dcd369abb986a9750d1409f8731d1a76bafc9101a15a8623d957fa3ae5c49",
+            "committee_bits": "0x0000010000000000"
+          }
+        ],
+        "deposits": [],
+        "voluntary_exits": [],
+        "sync_aggregate": {
+          "sync_committee_bits": "0xfffffffffffffffbeff7ffffffffffbffbffffff7ffffffffffffffffffffffffeffffefffffffffffffeefffffefffffffbfffffffdfddfffffffffffff7fff",
+          "sync_committee_signature": "0x9315b2eb6d4abb5c559631d27ec021a1d8d5e5ec2c31dc73f0efdfdec9b064907af5ab35e39700a0312103b3f050520a041260b08e13a960d612ef5baa2671a80fb68fe61b92cd7d55ffaa9bfc70bec4ef034a3e91a74a68a34e25f7ad57fa52"
+        },
+        "execution_payload": {
+          "parent_hash": "0x0031f1adca11ff9561285640d43a0fb051dd92261a4eb436a992adb442ee5a38",
+          "fee_recipient": "0x5cc0dde14e7256340cc820415a6022a7d1c93a35",
+          "state_root": "0x2bc6d9bc2b886007a5dca709a2f38677c6fae9c4df57bcd957c1cb758c1f170d",
+          "receipts_root": "0x64be3f4b7e3fec53e6c54326207a53ab30e4923603d81a5bb8b68a2129cdcaaa",
+          "logs_bloom": "0x00200000000000000000000080000000000000000000100000000000200000000000000000800000000080000000000000000000000010000000000000000000000020000000010001800408000000200000000000000000000000000000000000000000000000000000000000000008000000000000000000000810000040000000000000000000008000000000000000000000000000080000004010000000800000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000001000000000000000000000000000000000010200000000000000000000000000000000000000000000",
+          "prev_randao": "0x18d1ed959a38bd14251430545d1627a2bedfb7398e176287da96af31cb1d1af4",
+          "block_number": "52220",
+          "gas_limit": "30029237",
+          "gas_used": "149119",
+          "timestamp": "1739305020",
+          "extra_data": "0xd883010f00846765746888676f312e32332e36856c696e7578",
+          "base_fee_per_gas": "7",
+          "block_hash": "0xdea862d95a549dbcd3eeaf163ea9c18180a97fe3cad643fba64993e56cb042ee",
+          "transactions": [
+            "0x02f9017a8501a5887710822fd885012a05f2008512a05f2000830249f094d27d57804f09a93989e290cf12cb872c39ad2ad280b901040cc7326300000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000bc37ade48e3c40000000000000000000000000000b3db4f6329df01ac317a70200f6614e1cd0db6f7000000000000000000000000fc7360b3b28cf4204268a8354dbec60720d155d200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c8ae6c2d3f6695e41b5cb149beae76600f4ac97d000000000000000000000000d0ada425f6835193b8507d7de3a77ec1bd6c5377c080a0c7406081f4f7bc260de49ac10c0cc699a7756a4ce486624913714a4ae7e08feaa06617ba22a6adcc5a670e9f7c661fb7093412c2814e7819cbdcb2e94f9720562c",
+            "0x03f8988501a58877107984773594008504a817c80082520894559bbf8ca0c7ca02f280792127958ca6ebdea8a48080c08504a817c800e1a0016316f61a259aa607096440fc3eeb90356e079be01975d2fb18347bd50df33c01a0a8852bc4da84a79f14fbce40eab6927f3213bfd612778965a579e0ef4ba5b53ea076bd3aeba730b4fc8aaf055819f3432a2b49fc3ccc6aa1cbfe14117956496b7f",
+            "0x03f8988501a58877107784773594008504a817c8008252089445fd980a780887e4fc4ae9f8d042d112d0802ac28080c08504a817c800e1a001aaab2e45067d92fe73be497c6db544c736d11178f08aebaa46f3cf1e5b428280a0e74d1a7eacd977fb3755d8a7f666cac629231acc3f2f9870b03a9d225aeb3b71a05c310f93997dbb3af47e6035c858db08c900afa0546468336fd13efbc2758249"
+          ],
+          "withdrawals": [],
+          "blob_gas_used": "262144",
+          "excess_blob_gas": "69468160"
+        },
+        "bls_to_execution_changes": [],
+        "blob_kzg_commitments": [
+          "0xa95caabd009e189b9f205e0328ff847ad886e4f8e719bd7219875fbb9688fb3fbe7704bb1dfa7e2993a3dea8d0cf767d",
+          "0xa90581f0bdb72f608d082931e7fb2f87b2fd4b22d2231cd380beabc0912bd1327d0e100dd2b9d23d861a82e3c7731f3b"
+        ],
+        "execution_requests": {
+          "deposits": [],
+          "withdrawals": [],
+          "consolidations": []
+        }
+      }
+    }`)
+
+	beaconBlock := &electra.BeaconBlock{}
+	require.NoError(t, json.Unmarshal(blkBytes, beaconBlock))
+
+	ssz, err := beaconBlock.MarshalSSZ()
+	require.NoError(t, err)
+
+	unmarshalBeaconBlock := &electra.BeaconBlock{}
+	require.NoError(t, unmarshalBeaconBlock.UnmarshalSSZ(ssz))
+
+	root, err := unmarshalBeaconBlock.HashTreeRoot()
+	require.NoError(t, err)
+
+	require.EqualValues(t, _byteArray(blockRoot), root[:])
+
+	// setup KeyVault
+	store := inmemStorage()
+	options := &eth2keymanager.KeyVaultOptions{}
+	options.SetStorage(store)
+	options.SetWalletType(core.HDWallet)
+	vault, err := eth2keymanager.NewKeyVault(options)
+	require.NoError(t, err)
+	wallet, err := vault.Wallet()
+	require.NoError(t, err)
+
+	k, err := core.NewHDKeyFromPrivateKey(_byteArray(sk), "")
+	require.NoError(t, err)
+	acc := wallets.NewValidatorAccount("1", k, nil, "", vault.Context)
+	require.NoError(t, wallet.AddValidatorAccount(acc))
+	require.Equal(t, acc.ValidatorPublicKey(), _byteArray(pk))
+
+	// setup signer
+	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.PraterNetwork)
+
+	versionedBeaconBlock := &spec.VersionedBeaconBlock{
+		Version: spec.DataVersionElectra,
+		Electra: beaconBlock,
 	}
 	sig, _, err := signer.SignBeaconBlock(versionedBeaconBlock, _byteArray32(domain), _byteArray(pk))
 	fmt.Println(hex.EncodeToString(sig))
