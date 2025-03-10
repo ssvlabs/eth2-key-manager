@@ -2,11 +2,21 @@ package core
 
 import (
 	"encoding/hex"
+	"runtime/debug"
 	"time"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
 	"github.com/sirupsen/logrus"
 )
+
+// logFatalWithStack logs a fatal message with a stack trace
+func logFatalWithStack(field string, value interface{}, message string) {
+	stackTrace := string(debug.Stack())
+	logrus.WithFields(logrus.Fields{
+		field:        value,
+		"stacktrace": stackTrace,
+	}).Fatal(message)
+}
 
 // Network represents the network.
 type Network string
@@ -39,7 +49,7 @@ func (n Network) GenesisForkVersion() phase0.Version {
 	case MainNetwork:
 		return phase0.Version{0, 0, 0, 0}
 	default:
-		logrus.WithField("network", n).Fatal("undefined network")
+		logFatalWithStack("network", n, "undefined network")
 		return phase0.Version{}
 	}
 }
@@ -58,7 +68,7 @@ func (n Network) GenesisValidatorsRoot() phase0.Root {
 		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
 		copy(genValidatorsRoot[:], rootBytes)
 	default:
-		logrus.WithField("network", n).Fatal("undefined network")
+		logFatalWithStack("network", n, "undefined network")
 	}
 	return genValidatorsRoot
 }
@@ -75,7 +85,7 @@ func (n Network) DepositContractAddress() string {
 	case MainNetwork:
 		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 	default:
-		logrus.WithField("network", n).Fatal("undefined network")
+		logFatalWithStack("network", n, "undefined network")
 		return ""
 	}
 }
@@ -97,7 +107,7 @@ func (n Network) MinGenesisTime() uint64 {
 	case MainNetwork:
 		return 1606824023
 	default:
-		logrus.WithField("network", n).Fatal("undefined network")
+		logFatalWithStack("network", n, "undefined network")
 		return 0
 	}
 }
