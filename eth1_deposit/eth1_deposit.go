@@ -19,7 +19,7 @@ const (
 
 // IsSupportedDepositNetwork returns true if the given network is supported
 var IsSupportedDepositNetwork = func(network core.Network) bool {
-	return network == core.PyrmontNetwork || network == core.PraterNetwork || network == core.HoleskyNetwork || network == core.MainNetwork
+	return network == core.PyrmontNetwork || network == core.PraterNetwork || network == core.HoleskyNetwork || network == core.MainNetwork || network == core.HoodiNetwork || network == core.SepoliaNetwork
 }
 
 // DepositData is basically copied from https://github.com/prysmaticlabs/prysm/blob/master/shared/keystore/deposit_input.go
