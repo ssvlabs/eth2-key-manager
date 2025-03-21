@@ -2,6 +2,7 @@ package signer
 
 import (
 	"sync"
+	"time"
 
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
@@ -32,7 +33,7 @@ type ValidatorSigner interface {
 
 type network interface {
 	EstimatedEpochAtSlot(slot phase0.Slot) phase0.Epoch
-	EstimatedSlotAtTime(time int64) phase0.Slot
+	EstimatedSlotAtTime(time time.Time) phase0.Slot
 }
 
 // SimpleSigner implements ValidatorSigner interface
