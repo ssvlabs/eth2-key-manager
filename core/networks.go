@@ -73,13 +73,13 @@ var networks = map[Network]NetworkConfig{
 }
 
 // NetworkFromString converts a string to a Network type.
-func NetworkFromString(n string) Network {
+func NetworkFromString(n string) (Network, error) {
 	_, ok := networks[Network(n)]
 	if !ok {
-		return ""
+		return "", fmt.Errorf("unknown network %s", n)
 	}
 
-	return Network(n)
+	return Network(n), nil
 }
 
 // NetworkFromForkVersion returns network from the given fork version

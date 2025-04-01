@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/ssvlabs/eth2-key-manager/cli/util/cliflag"
@@ -55,9 +54,9 @@ func GetNetworkFlagValue(c *cobra.Command) (core.Network, error) {
 		return "", err
 	}
 
-	ret := core.NetworkFromString(networkValue)
-	if len(ret) == 0 {
-		return "", errors.New("unknown network")
+	ret, err := core.NetworkFromString(networkValue)
+	if err != nil {
+		return "", err
 	}
 
 	return ret, nil

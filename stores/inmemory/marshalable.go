@@ -62,7 +62,10 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		store.network = core.NetworkFromString(string(byts))
+		store.network, err = core.NetworkFromString(string(byts))
+		if err != nil {
+			return err
+		}
 	} else {
 		return errors.New("could not find var: network")
 	}

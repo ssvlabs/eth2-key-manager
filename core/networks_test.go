@@ -9,7 +9,9 @@ import (
 )
 
 func TestNetworkMainnet(t *testing.T) {
-	net := NetworkFromString(string(MainNetwork))
+	net, err := NetworkFromString(string(MainNetwork))
+	require.NoError(t, err)
+	require.Equal(t, MainNetwork, net)
 
 	secondsPassedSinceGenesis := time.Now().Unix() - 1606824023
 	require.EqualValues(t, phase0.Epoch(secondsPassedSinceGenesis/(12*32)), net.EstimatedCurrentEpoch())
