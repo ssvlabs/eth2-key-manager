@@ -62,7 +62,10 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		store.network = core.NetworkFromString(string(byts))
+		store.network, err = core.NetworkFromString(string(byts))
+		if err != nil {
+			return err
+		}
 	} else {
 		return errors.New("could not find var: network")
 	}
@@ -75,21 +78,22 @@ func (store *InMemStore) UnmarshalJSON(data []byte) error {
 				return err
 			}
 
-			if walletType == core.HDWallet {
+			switch walletType {
+			case core.HDWallet:
 				hd := &hd2.Wallet{}
 				err = json.Unmarshal(byts, &hd)
 				if err != nil {
 					return err
 				}
 				store.wallet = hd
-			} else if walletType == core.NDWallet {
+			case core.NDWallet:
 				nd := &nd.Wallet{}
 				err = json.Unmarshal(byts, &nd)
 				if err != nil {
 					return err
 				}
 				store.wallet = nd
-			} else {
+			default:
 				return errors.Errorf("unknown wallet type %s", walletType)
 			}
 		} else {

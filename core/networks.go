@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
@@ -11,117 +12,134 @@ import (
 // Network represents the network.
 type Network string
 
-// NetworkFromString returns network from the given string value
-func NetworkFromString(n string) Network {
-	switch n {
-	case string(PyrmontNetwork):
-		return PyrmontNetwork
-	case string(PraterNetwork):
-		return PraterNetwork
-	case string(SepoliaNetwork):
-		return SepoliaNetwork
-	case string(HoleskyNetwork):
-		return HoleskyNetwork
-	case string(HoodiNetwork):
-		return HoodiNetwork
-	case string(MainNetwork):
-		return MainNetwork
-	default:
-		return ""
+// NetworkConfig stores configuration specific to an Ethereum network.
+type NetworkConfig struct {
+	GenesisForkVersion     phase0.Version
+	GenesisValidatorsRoot  string
+	DepositContractAddress string
+	MinGenesisTime         uint64
+}
+
+// Available networks.
+const (
+	// PraterNetwork represents the Prater test network.
+	PraterNetwork Network = "prater"
+
+	// SepoliaNetwork represents the Sepolia test network.
+	SepoliaNetwork Network = "sepolia"
+
+	// HoleskyNetwork represents the Holesky test network.
+	HoleskyNetwork Network = "holesky"
+
+	// HoodiNetwork represents the Hoodi test network.
+	HoodiNetwork Network = "hoodi"
+
+	// MainNetwork represents the main network.
+	MainNetwork Network = "mainnet"
+)
+
+// Network configurations.
+var networks = map[Network]NetworkConfig{
+	PraterNetwork: {
+		GenesisForkVersion:     phase0.Version{0x00, 0x00, 0x10, 0x20},
+		GenesisValidatorsRoot:  "043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb",
+		DepositContractAddress: "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b",
+		MinGenesisTime:         1616508000,
+	},
+	SepoliaNetwork: {
+		GenesisForkVersion:     phase0.Version{0x90, 0x00, 0x00, 0x69},
+		GenesisValidatorsRoot:  "d8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078",
+		DepositContractAddress: "0x4242424242424242424242424242424242424242",
+		MinGenesisTime:         1655733600,
+	},
+	HoleskyNetwork: {
+		GenesisForkVersion:     phase0.Version{0x01, 0x01, 0x70, 0x00},
+		GenesisValidatorsRoot:  "9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1",
+		DepositContractAddress: "0x4242424242424242424242424242424242424242",
+		MinGenesisTime:         1695902400,
+	},
+	HoodiNetwork: {
+		GenesisForkVersion:     phase0.Version{0x10, 0x00, 0x09, 0x10},
+		GenesisValidatorsRoot:  "212f13fc4df078b6cb7db228f1c8307566dcecf900867401a92023d7ba99cb5f",
+		DepositContractAddress: "0x00000000219ab540356cBB839Cbe05303d7705Fa",
+		MinGenesisTime:         1742213400,
+	},
+	MainNetwork: {
+		GenesisForkVersion:     phase0.Version{0, 0, 0, 0},
+		GenesisValidatorsRoot:  "4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95",
+		DepositContractAddress: "0x00000000219ab540356cBB839Cbe05303d7705Fa",
+		MinGenesisTime:         1606824023,
+	},
+}
+
+// NetworkFromString converts a string to a Network type.
+func NetworkFromString(n string) (Network, error) {
+	_, ok := networks[Network(n)]
+	if !ok {
+		return "", fmt.Errorf("unknown network %s", n)
 	}
+
+	return Network(n), nil
+}
+
+// NetworkFromForkVersion returns network from the given fork version
+func NetworkFromForkVersion(version phase0.Version) (Network, error) {
+	for net, cfg := range networks {
+		if cfg.GenesisForkVersion == version {
+			return net, nil
+		}
+	}
+	return "", fmt.Errorf("network not found for the given fork version")
 }
 
 // GenesisForkVersion returns the genesis fork version of the network.
 func (n Network) GenesisForkVersion() phase0.Version {
-	switch n {
-	case PyrmontNetwork:
-		return phase0.Version{0, 0, 32, 9}
-	case PraterNetwork:
-		return phase0.Version{0x00, 0x00, 0x10, 0x20}
-	case SepoliaNetwork:
-		return phase0.Version{0x90, 0x00, 0x00, 0x69}
-	case HoleskyNetwork:
-		return phase0.Version{0x01, 0x01, 0x70, 0x00}
-	case HoodiNetwork:
-		return phase0.Version{0x10, 0x00, 0x09, 0x10}
-	case MainNetwork:
-		return phase0.Version{0, 0, 0, 0}
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
-		return phase0.Version{}
+	if cfg, exists := networks[n]; exists {
+		return cfg.GenesisForkVersion
 	}
+	logrus.WithField("network", n).Fatal("undefined network")
+	return phase0.Version{}
 }
 
 // GenesisValidatorsRoot returns the genesis validators root of the network.
 func (n Network) GenesisValidatorsRoot() phase0.Root {
-	var genValidatorsRoot phase0.Root
-	switch n {
-	case PraterNetwork:
-		rootBytes, _ := hex.DecodeString("043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb")
-		copy(genValidatorsRoot[:], rootBytes)
-	case SepoliaNetwork:
-		rootBytes, _ := hex.DecodeString("d8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078")
-		copy(genValidatorsRoot[:], rootBytes)
-	case HoleskyNetwork:
-		rootBytes, _ := hex.DecodeString("9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1")
-		copy(genValidatorsRoot[:], rootBytes)
-	case HoodiNetwork:
-		rootBytes, _ := hex.DecodeString("212f13fc4df078b6cb7db228f1c8307566dcecf900867401a92023d7ba99cb5f")
-		copy(genValidatorsRoot[:], rootBytes)
-	case MainNetwork:
-		rootBytes, _ := hex.DecodeString("4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95")
-		copy(genValidatorsRoot[:], rootBytes)
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
+	var root phase0.Root
+	if cfg, exists := networks[n]; exists {
+		if cfg.GenesisValidatorsRoot == "" {
+			return root
+		}
+		rootBytes, err := hex.DecodeString(cfg.GenesisValidatorsRoot)
+		if err != nil {
+			logrus.WithError(err).Fatal("invalid genesis validators root")
+		}
+		copy(root[:], rootBytes)
+		return root
 	}
-	return genValidatorsRoot
+	logrus.WithField("network", n).Fatal("undefined network")
+	return root
 }
 
 // DepositContractAddress returns the deposit contract address of the network.
 func (n Network) DepositContractAddress() string {
-	switch n {
-	case PyrmontNetwork:
-		return "0x8c5fecdC472E27Bc447696F431E425D02dd46a8c"
-	case PraterNetwork:
-		return "0xff50ed3d0ec03ac01d4c79aad74928bff48a7b2b"
-	case SepoliaNetwork:
-		return "0x4242424242424242424242424242424242424242"
-	case HoleskyNetwork:
-		return "0x4242424242424242424242424242424242424242"
-	case HoodiNetwork:
-		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
-	case MainNetwork:
-		return "0x00000000219ab540356cBB839Cbe05303d7705Fa"
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
-		return ""
+	if cfg, exists := networks[n]; exists {
+		return cfg.DepositContractAddress
 	}
+	logrus.WithField("network", n).Fatal("undefined network")
+	return ""
+}
+
+// MinGenesisTime returns the min genesis time of the network.
+func (n Network) MinGenesisTime() uint64 {
+	if cfg, exists := networks[n]; exists {
+		return cfg.MinGenesisTime
+	}
+	logrus.WithField("network", n).Fatal("undefined network")
+	return 0
 }
 
 // FullPath returns the full path of the network.
 func (n Network) FullPath(relativePath string) string {
 	return BaseEIP2334Path + relativePath
-}
-
-// MinGenesisTime returns min genesis time value
-func (n Network) MinGenesisTime() uint64 {
-	switch n {
-	case PyrmontNetwork:
-		return 1605700807
-	case PraterNetwork:
-		return 1616508000
-	case SepoliaNetwork:
-		return 1655733600
-	case HoleskyNetwork:
-		return 1695902400
-	case HoodiNetwork:
-		return 1742212800 + 600
-	case MainNetwork:
-		return 1606824023
-	default:
-		logrus.WithField("network", n).Fatal("undefined network")
-		return 0
-	}
 }
 
 // SlotDurationSec returns slot duration
@@ -158,24 +176,3 @@ func (n Network) EstimatedCurrentEpoch() phase0.Epoch {
 func (n Network) EstimatedEpochAtSlot(slot phase0.Slot) phase0.Epoch {
 	return phase0.Epoch(slot / phase0.Slot(n.SlotsPerEpoch()))
 }
-
-// Available networks.
-const (
-	// PyrmontNetwork represents the Pyrmont test network.
-	PyrmontNetwork Network = "pyrmont"
-
-	// PraterNetwork represents the Prater test network.
-	PraterNetwork Network = "prater"
-
-	// SepoliaNetwork represents the Sepolia test network.
-	SepoliaNetwork Network = "sepolia"
-
-	// HoleskyNetwork represents the Holesky test network.
-	HoleskyNetwork Network = "holesky"
-
-	// HoodiNetwork represents the Hoodi test network.
-	HoodiNetwork Network = "hoodi"
-
-	// MainNetwork represents the main network.
-	MainNetwork Network = "mainnet"
-)
