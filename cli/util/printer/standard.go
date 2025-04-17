@@ -33,7 +33,7 @@ func New(out io.Writer) Printer {
 
 // Text implements Printer interface.
 func (p *StandardPrinter) Text(text string) {
-	fmt.Fprintln(p.out, text)
+	_, _ = fmt.Fprintln(p.out, text)
 }
 
 // JSON implements Printer interface.
@@ -47,9 +47,9 @@ func (p *StandardPrinter) JSON(obj interface{}) error {
 	return nil
 }
 
-// JSON implements Printer interface.
+// Error implements Printer interface.
 func (p *StandardPrinter) Error(err error) {
 	if err != nil {
-		fmt.Fprintln(p.out, "Error:", err.Error())
+		_, _ = fmt.Fprintln(p.out, "Error:", err.Error())
 	}
 }
