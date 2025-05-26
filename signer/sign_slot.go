@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// SignSlot signes the given slot
+// SignSlot signs the given slot
 func (signer *SimpleSigner) SignSlot(slot phase0.Slot, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// 1. check we can even sign this
 	// TODO - should we?

@@ -2,7 +2,7 @@
 
 
 Easily create an eth1 deposit.
-Inludes:
+Includes:
 
     - DepositData method that takes a valdiation and withdrawal accounts and returns deposit data
     - A JS example of packaging it into a transaction and sending
