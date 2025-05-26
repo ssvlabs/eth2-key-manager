@@ -95,7 +95,7 @@ func TestLockSameValidatorInParallel(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, wallet.AddValidatorAccount(acc))
 
-	//// setup signer
+	// // setup signer
 	signer := NewSimpleSigner(wallet, &prot.NoProtection{}, core.MainNetwork)
 
 	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
@@ -192,7 +192,6 @@ func TestManyValidatorsParallel(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	// setup signer
 	signer := NewSimpleSigner(wallet, protector, core.PraterNetwork)
 
 	// Sign attestation in parallel.
@@ -682,7 +681,7 @@ func TestAttestationSignatures(t *testing.T) {
 func TestFarFutureAttestationSignature(t *testing.T) {
 	seed := _byteArray("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff")
 	network := core.PraterNetwork
-	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(time.Now().Unix() + FarFutureMaxValidEpoch))
+	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(time.Now().Add(MaxFarFutureDelta)))
 
 	t.Run("max valid source", func(tt *testing.T) {
 		signer, err := setupWithSlashingProtection(t, seed, true, true)
