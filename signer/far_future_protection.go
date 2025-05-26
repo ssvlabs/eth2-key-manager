@@ -4,22 +4,18 @@ import (
 	"time"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-
-	"github.com/ssvlabs/eth2-key-manager/core"
 )
 
-// FarFutureMaxValidEpoch is the max epoch of far future signing
-var FarFutureMaxValidEpoch = int64(time.Minute.Seconds() * 20)
+// MaxFarFutureDelta is the max delta of far future signing
+var MaxFarFutureDelta = time.Minute * 20
 
-// IsValidFarFutureEpoch prevents far into the future signing request, verify a slot is within the current epoch
-// https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/validator.md#protection-best-practices
-func IsValidFarFutureEpoch(network core.Network, epoch phase0.Epoch) bool {
-	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(time.Now().Unix() + FarFutureMaxValidEpoch))
+func IsValidFarFutureEpoch(network Network, epoch phase0.Epoch) bool {
+	maxValidEpoch := network.EstimatedEpochAtSlot(network.EstimatedSlotAtTime(time.Now().Add(MaxFarFutureDelta)))
 	return epoch <= maxValidEpoch
 }
 
 // IsValidFarFutureSlot returns true if the given slot is valid
-func IsValidFarFutureSlot(network core.Network, slot phase0.Slot) bool {
-	maxValidSlot := network.EstimatedSlotAtTime(time.Now().Unix() + FarFutureMaxValidEpoch)
+func IsValidFarFutureSlot(network Network, slot phase0.Slot) bool {
+	maxValidSlot := network.EstimatedSlotAtTime(time.Now().Add(MaxFarFutureDelta))
 	return slot <= maxValidSlot
 }

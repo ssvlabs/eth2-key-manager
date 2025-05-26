@@ -2,6 +2,7 @@ package signer
 
 import (
 	"sync"
+	"time"
 
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
@@ -30,17 +31,22 @@ type ValidatorSigner interface {
 	SignBLSToExecutionChange(blsToExecutionChange *capella.BLSToExecutionChange, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 }
 
+type Network interface {
+	EstimatedEpochAtSlot(slot phase0.Slot) phase0.Epoch
+	EstimatedSlotAtTime(time time.Time) phase0.Slot
+}
+
 // SimpleSigner implements ValidatorSigner interface
 type SimpleSigner struct {
 	wallet            core.Wallet
 	slashingProtector core.SlashingProtector
-	network           core.Network
+	network           Network
 	signLocks         map[string]*sync.RWMutex
 	mapLock           *sync.RWMutex
 }
 
 // NewSimpleSigner is the constructor of SimpleSigner
-func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtector, network core.Network) *SimpleSigner {
+func NewSimpleSigner(wallet core.Wallet, slashingProtector core.SlashingProtector, network Network) *SimpleSigner {
 	return &SimpleSigner{
 		wallet:            wallet,
 		slashingProtector: slashingProtector,
