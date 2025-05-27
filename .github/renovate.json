@@ -1,2 +1,5 @@
-extends:
-- github>ssvlabs/shared-configs//renovate/renovate.json
+{
+  "extends": [
+    "github>ssvlabs/shared-configs//renovate/renovate.json"
+  ]
+}
