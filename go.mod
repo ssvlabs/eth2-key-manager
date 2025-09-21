@@ -5,8 +5,7 @@ go 1.21.0
 toolchain go1.22.6
 
 require (
-	// TODO: Update go-eth2-client when a stable fulu version is released.
-	github.com/attestantio/go-eth2-client v0.26.1-0.20250829122455-ff89a2135a43
+	github.com/attestantio/go-eth2-client v0.27.0
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1
 	github.com/ferranbt/fastssz v0.1.4
 	github.com/google/uuid v1.3.0
