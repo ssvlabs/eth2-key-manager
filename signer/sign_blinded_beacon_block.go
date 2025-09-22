@@ -25,6 +25,8 @@ func (signer *SimpleSigner) SignBlindedBeaconBlock(b *api.VersionedBlindedBeacon
 		block = b.Deneb
 	case spec.DataVersionElectra:
 		block = b.Electra
+	case spec.DataVersionFulu:
+		block = b.Fulu
 	default:
 		return nil, nil, errors.Errorf("unsupported block version %d", b.Version)
 	}

@@ -5,7 +5,7 @@ go 1.21.0
 toolchain go1.22.6
 
 require (
-	github.com/attestantio/go-eth2-client v0.24.0
+	github.com/attestantio/go-eth2-client v0.27.0
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1
 	github.com/ferranbt/fastssz v0.1.4
 	github.com/google/uuid v1.3.0
@@ -17,8 +17,8 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-types/v2 v2.8.0
 	github.com/wealdtech/go-eth2-util v1.6.3
-	golang.org/x/crypto v0.32.0
-	golang.org/x/text v0.21.0
+	golang.org/x/crypto v0.33.0
+	golang.org/x/text v0.22.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20240618144021-706c95b2dd15 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/wealdtech/go-bytesutil v1.1.1 // indirect
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
