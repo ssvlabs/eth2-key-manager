@@ -29,6 +29,7 @@ type ValidatorSigner interface {
 	SignRegistration(registration *api.VersionedValidatorRegistration, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignVoluntaryExit(voluntaryExit *phase0.VoluntaryExit, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignBLSToExecutionChange(blsToExecutionChange *capella.BLSToExecutionChange, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignPreconfCommitment(data []byte, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 }
 
 type Network interface {
