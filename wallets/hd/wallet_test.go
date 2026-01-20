@@ -116,8 +116,8 @@ func TestAccountDerivation(t *testing.T) {
 			account, err := w.CreateValidatorAccount(seed, &test.index)
 			require.NoError(t, err)
 
-			require.Equal(t, test.expectedValidationKey, account.ValidatorPublicKey(), fmt.Sprintf("expceted validation pk: %s\n", hex.EncodeToString(account.ValidatorPublicKey())))
-			require.Equal(t, test.expectedWithdrawalKey, account.WithdrawalPublicKey(), fmt.Sprintf("expceted withdrawal pk: %s\n", hex.EncodeToString(account.WithdrawalPublicKey())))
+			require.Equal(t, test.expectedValidationKey, account.ValidatorPublicKey(), fmt.Sprintf("expected validation pk: %s\n", hex.EncodeToString(account.ValidatorPublicKey())))
+			require.Equal(t, test.expectedWithdrawalKey, account.WithdrawalPublicKey(), fmt.Sprintf("expected withdrawal pk: %s\n", hex.EncodeToString(account.WithdrawalPublicKey())))
 		})
 	}
 }
