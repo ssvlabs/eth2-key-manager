@@ -6,7 +6,6 @@ import (
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 )
 
@@ -26,7 +25,7 @@ func (signer *SimpleSigner) SignRegistration(registration *api.VersionedValidato
 		return nil, nil, err
 	}
 
-	var reg ssz.HashRoot
+	var reg HashRoot
 	switch registration.Version {
 	case spec.BuilderVersionV1:
 		if registration.V1 == nil {

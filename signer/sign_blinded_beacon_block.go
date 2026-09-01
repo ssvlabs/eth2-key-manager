@@ -4,7 +4,6 @@ import (
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +14,7 @@ func (signer *SimpleSigner) SignBlindedBeaconBlock(b *api.VersionedBlindedBeacon
 		return nil, nil, errors.Wrap(err, "could not get block slot")
 	}
 
-	var block ssz.HashRoot
+	var block HashRoot
 	switch b.Version {
 	case spec.DataVersionBellatrix:
 		block = b.Bellatrix
