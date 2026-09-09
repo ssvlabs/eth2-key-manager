@@ -3,7 +3,6 @@ package signer
 import (
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 )
 
@@ -14,7 +13,7 @@ func (signer *SimpleSigner) SignBeaconBlock(b *spec.VersionedBeaconBlock, domain
 		return nil, nil, errors.Wrap(err, "could not get block slot")
 	}
 
-	var block ssz.HashRoot
+	var block HashRoot
 	switch b.Version {
 	case spec.DataVersionPhase0:
 		block = b.Phase0

@@ -4,14 +4,13 @@ import (
 	"encoding/hex"
 
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 )
 
 // SignAggregateAndProof signs aggregate and proof.
 // It can be *phase0.AggregateAndProof or *electra.AggregateAndProof since electra.
-// As we don't use any AggregateAndProof's fields, we can just use ssz.HashRoot.
-func (signer *SimpleSigner) SignAggregateAndProof(agg ssz.HashRoot, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
+// As we don't use any AggregateAndProof's fields, we can just use HashRoot.
+func (signer *SimpleSigner) SignAggregateAndProof(agg HashRoot, domain phase0.Domain, pubKey []byte) ([]byte, []byte, error) {
 	// 1. check we can even sign this
 	// TODO - should we?
 
