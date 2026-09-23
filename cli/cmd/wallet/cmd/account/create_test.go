@@ -172,7 +172,7 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is false needs to be 1")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is false needs to be 1: got 5, need 1")
 	})
 
 	t.Run("highest proposal invalid (accumulate false)", func(t *testing.T) {
@@ -191,7 +191,7 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.EqualError(t, err, "failed to collect account flags: highest proposals length when the accumulate flag is false needs to be 1")
+		require.EqualError(t, err, "failed to collect account flags: highest proposals length when the accumulate flag is false needs to be 1: got 6, need 1")
 	})
 
 	t.Run("highest sources invalid (accumulate true)", func(t *testing.T) {
@@ -211,7 +211,7 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true needs to be index + 1")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true needs to be index + 1: got 1, need 2")
 	})
 
 	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
@@ -308,7 +308,7 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.EqualError(t, err, "failed to collect account flags: highest sources length for seedless accounts needs to be equal to private keys count")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length for seedless accounts needs to be equal to private keys count: got 2, need 1")
 	})
 
 	t.Run("Fail to HEX decode private key", func(t *testing.T) {

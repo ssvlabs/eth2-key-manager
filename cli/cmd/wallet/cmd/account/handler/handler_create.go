@@ -269,40 +269,29 @@ func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, acco
 	return nil
 }
 
-// ValidateHighestValues performs basic validation for account highest attestation/proposal values
+// ValidateHighestValues checks that one highest source, target and proposal is given per account to create.
 func ValidateHighestValues(accountFlagValues CreateAccountFlagValues) error {
-	if len(accountFlagValues.privateKeys) > 0 {
-		errorExplain := "length for seedless accounts needs to be equal to private keys count"
-		privateKeysCount := len(accountFlagValues.privateKeys)
+	var rule string
+	var need int
+	switch {
+	case len(accountFlagValues.privateKeys) > 0:
+		rule, need = "for seedless accounts needs to be equal to private keys count", len(accountFlagValues.privateKeys)
+	case accountFlagValues.accumulate:
+		rule, need = "when the accumulate flag is true needs to be index + 1", accountFlagValues.index+1
+	default:
+		rule, need = "when the accumulate flag is false needs to be 1", 1
+	}
 
-		if len(accountFlagValues.highestSources) != privateKeysCount {
-			return errors.Errorf("highest sources %v", errorExplain)
-		}
-		if len(accountFlagValues.highestTargets) != privateKeysCount {
-			return errors.Errorf("highest targets %v", errorExplain)
-		}
-		if len(accountFlagValues.highestProposals) != privateKeysCount {
-			return errors.Errorf("highest proposals %v", errorExplain)
-		}
-	} else if accountFlagValues.accumulate {
-		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest sources length when the accumulate flag is true needs to be index + 1")
-		}
-		if len(accountFlagValues.highestTargets) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest targets length when the accumulate flag is true needs to be index + 1")
-		}
-		if len(accountFlagValues.highestProposals) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest proposals length when the accumulate flag is true needs to be index + 1")
-		}
-	} else {
-		if len(accountFlagValues.highestSources) != 1 {
-			return errors.Errorf("highest sources length when the accumulate flag is false needs to be 1")
-		}
-		if len(accountFlagValues.highestTargets) != 1 {
-			return errors.Errorf("highest targets length when the accumulate flag is false needs to be 1")
-		}
-		if len(accountFlagValues.highestProposals) != 1 {
-			return errors.Errorf("highest proposals length when the accumulate flag is false needs to be 1")
+	for _, highest := range []struct {
+		name   string
+		values []uint64
+	}{
+		{"sources", accountFlagValues.highestSources},
+		{"targets", accountFlagValues.highestTargets},
+		{"proposals", accountFlagValues.highestProposals},
+	} {
+		if got := len(highest.values); got != need {
+			return errors.Errorf("highest %s length %s: got %d, need %d", highest.name, rule, got, need)
 		}
 	}
 	return nil
