@@ -12,6 +12,7 @@ import (
 
 func TestAccountDepositData(t *testing.T) {
 	t.Run("Successfully retrieve deposit-data", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -30,6 +31,7 @@ func TestAccountDepositData(t *testing.T) {
 	})
 
 	t.Run("Successfully retrieve deposit-data for launchtest network", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -48,6 +50,7 @@ func TestAccountDepositData(t *testing.T) {
 	})
 
 	t.Run("Fail retrieve deposit-data for unmatched index and publickey", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -57,6 +60,7 @@ func TestAccountDepositData(t *testing.T) {
 			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
 			"--index=5",
 			"--publickey=81fd26fe6e7cdbe1d0d45020050ba94c625f5236bf162b9ad3fca137d9120a0572c6f59b8cc70fae6cd6bb471b673e97",
+			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)

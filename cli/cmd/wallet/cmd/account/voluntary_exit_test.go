@@ -14,6 +14,7 @@ import (
 
 func TestAccountVoluntaryExit(t *testing.T) {
 	t.Run("Successfully sign voluntary exit", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -35,13 +36,14 @@ func TestAccountVoluntaryExit(t *testing.T) {
 	})
 
 	t.Run("Successfully prepare sign voluntary exit request for key-vault", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
 			"wallet",
 			"account",
 			"voluntary-exit",
-			"--response-type=storage", // set explicitly: flags persist across subtests (shared RootCmd)
+			"--response-type=storage",
 			"--current-fork-version=0x02001020",
 			"--index=0",
 			"--validator-index=273230",
@@ -57,6 +59,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 	})
 
 	t.Run("Invalid current fork version length", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -76,6 +79,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 	})
 
 	t.Run("Invalid validator public key", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -95,6 +99,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 	})
 
 	t.Run("Negative validator index", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -114,6 +119,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 	})
 
 	t.Run("Negative epoch", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -133,6 +139,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 	})
 
 	t.Run("Seed flag is required for object response type", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{

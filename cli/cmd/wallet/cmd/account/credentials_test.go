@@ -12,6 +12,7 @@ import (
 
 func TestAccountCredentials(t *testing.T) {
 	t.Run("Successfully handle credentials change at specific index", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -33,6 +34,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Successfully handle accumulated credentials change", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -55,6 +57,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Only one validator can be specified if accumulate is false", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -78,6 +81,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Not equal length - should be 2 validator indices", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -101,6 +105,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Not equal length - should be two public keys", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -124,6 +129,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Not equal length - should be two withdrawal credentials", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -147,6 +153,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Not equal length - should be two to execution addresses", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -170,6 +177,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Derived pub key does not match with the provided", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -193,6 +201,7 @@ func TestAccountCredentials(t *testing.T) {
 	})
 
 	t.Run("Derived withdrawal credentials does not match with the provided", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{

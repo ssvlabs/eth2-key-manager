@@ -12,6 +12,7 @@ import (
 
 func TestAccountList(t *testing.T) {
 	t.Run("Successfully list accounts", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -27,6 +28,7 @@ func TestAccountList(t *testing.T) {
 	})
 
 	t.Run("Fail to JSON un-marshal", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{

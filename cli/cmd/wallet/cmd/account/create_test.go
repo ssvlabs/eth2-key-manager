@@ -12,6 +12,7 @@ import (
 
 func TestAccountCreate(t *testing.T) {
 	t.Run("Successfully create account at specific index and return as object (prater)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -33,6 +34,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Successfully create account at specific index and return as object (mainnet)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -54,6 +56,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("no network flag", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -75,6 +78,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Successfully create account at specific index and return as storage", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -95,6 +99,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Successfully create accounts till specific index and return as objects", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -117,6 +122,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Successfully create accounts till specific index and return as storage", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -138,6 +144,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Fail to HEX decode seed", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -146,6 +153,9 @@ func TestAccountCreate(t *testing.T) {
 			"create",
 			"--seed=01213",
 			"--index=1",
+			"--highest-source=1",
+			"--highest-target=2",
+			"--highest-proposal=2",
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
@@ -154,6 +164,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("highest sources invalid (accumulate false)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -169,10 +180,11 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true need to be equal to index")
+		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is false need to be 1")
 	})
 
 	t.Run("highest proposal invalid (accumulate false)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -188,10 +200,11 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true need to be equal to index")
+		require.EqualError(t, err, "failed to collect account flags: highest proposals length when the accumulate flag is false need to be 1")
 	})
 
 	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -213,6 +226,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Successfully create seedless account at specific index and return as storage", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -233,6 +247,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Successfully create 3 seedless accounts from specific index and return as objects", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -254,6 +269,7 @@ func TestAccountCreate(t *testing.T) {
 	})
 
 	t.Run("Missing Highest Values", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -266,10 +282,11 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to collect account flags: highest sources length for seedless accounts need to be equal to private keys count")
+		require.EqualError(t, err, `required flag(s) "highest-proposal", "highest-source", "highest-target" not set`)
 	})
 
 	t.Run("Fail to HEX decode private key", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
