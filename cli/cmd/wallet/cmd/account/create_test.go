@@ -28,9 +28,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully create account at specific index and return as object (mainnet)", func(t *testing.T) {
@@ -50,9 +49,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=mainnet",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("no network flag", func(t *testing.T) {
@@ -72,8 +70,7 @@ func TestAccountCreate(t *testing.T) {
 			"--network=not_known",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect account flags: failed to retrieve the network flag value: unknown network not_known")
 	})
 
@@ -93,9 +90,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully create accounts till specific index and return as objects", func(t *testing.T) {
@@ -116,9 +112,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully create accounts till specific index and return as storage", func(t *testing.T) {
@@ -138,9 +133,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Fail to HEX decode seed", func(t *testing.T) {
@@ -159,7 +153,6 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.Error(t, err)
 		require.EqualError(t, err, "failed to collect account flags: failed to HEX decode seed: encoding/hex: odd length hex string")
 	})
 
@@ -179,7 +172,6 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.Error(t, err)
 		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is false need to be 1")
 	})
 
@@ -199,7 +191,6 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.Error(t, err)
 		require.EqualError(t, err, "failed to collect account flags: highest proposals length when the accumulate flag is false need to be 1")
 	})
 
@@ -220,9 +211,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully create seedless account at specific index and return as storage", func(t *testing.T) {
@@ -241,9 +231,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully create 3 seedless accounts from specific index and return as objects", func(t *testing.T) {
@@ -263,9 +252,8 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Missing Highest Values", func(t *testing.T) {
@@ -281,7 +269,6 @@ func TestAccountCreate(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.Error(t, err)
 		require.EqualError(t, err, `required flag(s) "highest-proposal", "highest-source", "highest-target" not set`)
 	})
 
@@ -301,7 +288,6 @@ func TestAccountCreate(t *testing.T) {
 			"--highest-source=2",
 		})
 		err := cmd.RootCmd.Execute()
-		require.Error(t, err)
 		require.EqualError(t, err, "failed to collect account flags: failed to HEX decode private-key: encoding/hex: odd length hex string")
 	})
 }

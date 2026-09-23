@@ -25,9 +25,8 @@ func TestAccountDepositData(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully retrieve deposit-data for launchtest network", func(t *testing.T) {
@@ -44,9 +43,8 @@ func TestAccountDepositData(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Fail retrieve deposit-data for unmatched index and publickey", func(t *testing.T) {
@@ -63,7 +61,6 @@ func TestAccountDepositData(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		require.Error(t, err)
 		require.EqualError(t, err, "failed to get account by public key: account not found")
 	})
 }
