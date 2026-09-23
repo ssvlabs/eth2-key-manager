@@ -1,10 +1,10 @@
 # Eth Key Manager
 
  Eth Key Manager is a library wrapping all major functionality an eth 2.0 validator will need:
-  - [Multi storage implementations](https://github.com/ssvlabs/eth2-key-manager/tree/master/stores)
-  - [Signer](https://github.com/ssvlabs/eth2-key-manager/tree/master/validator_signer)
-  - [Slashing protection](https://github.com/ssvlabs/eth2-key-manager/tree/master/slashing_protection)
-  - [HD wallet](https://github.com/ssvlabs/eth2-key-manager/tree/master/wallet_hd) (EIP-2333,2334,2335 compliant)
+  - [Multi storage implementations](stores)
+  - [Signer](signer)
+  - [Slashing protection](slashing_protection)
+  - [HD wallet](wallets/hd) (EIP-2333,2334,2335 compliant)
   - Tests
 
 ### Installation
@@ -26,4 +26,4 @@ Wallets and accounts are derived according to [EIP-2334](https://github.com/ethe
 The seed is needed just to execute specific operations like creating new accounts or signing with the withdrawal key. <br/><br/>
 
 Examples:
-- [Basic Use]()
+- [Basic Use](examples/basic_use)
