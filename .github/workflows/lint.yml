@@ -24,8 +24,8 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v6
         with:
-          # golangci-lint (pinned in tool.mod) needs Go >= 1.25 to build/run via
-          # `go tool`. Keep in sync with tool.mod's go directive.
+          # Keep in sync with tool.mod's go directive: golangci-lint is built
+          # from tool.mod via `go tool`.
           go-version: "1.25"
           cache: false
 

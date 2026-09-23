@@ -1,5 +1,14 @@
 // Tools have their own module file so their (large) dependency graph is kept
 // out of the main go.mod. Run tools via: go tool -modfile=tool.mod <tool>
+//
+// Bump (or add) a tool via: go get -modfile=tool.mod -tool <package>@<version>
+// If that needs a newer Go than yours, run it with GOTOOLCHAIN=go<version>
+// (automatic toolchain switching fails with -modfile), and update go-version in
+// .github/workflows/lint.yml to match the go directive below.
+//
+// Never run `go mod tidy -modfile=tool.mod`: -modfile only swaps the file; the
+// main module is still the whole repo, so tidy would pull in the library's
+// entire dependency graph (at versions that ignore go.mod).
 module github.com/ssvlabs/eth2-key-manager
 
 go 1.25.0

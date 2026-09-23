@@ -1,11 +1,6 @@
-ifndef $(GOPATH)
-    GOPATH=$(shell go env GOPATH)
-    export GOPATH
-endif
-
-# Tools (golangci-lint, ...) are pinned in tool.mod and run via the Go toolchain,
-# so their versions are reproducible and checksum-verified through tool.sum -- no
-# curl|sh installer needed. Requires a Go toolchain >= the version in tool.mod.
+# Tools are pinned in tool.mod (checksum-verified via tool.sum) and run with
+# `go tool`, which needs a Go toolchain >= tool.mod's go directive. See tool.mod
+# for how to bump them.
 RUN_TOOL=go tool -modfile=tool.mod
 
 #Lint (incl. gosec and gofmt, see .golangci.yml)
