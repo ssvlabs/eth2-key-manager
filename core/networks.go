@@ -158,12 +158,12 @@ func (n Network) EstimatedCurrentSlot() phase0.Slot {
 }
 
 // EstimatedSlotAtTime estimates slot at the given time
-func (n Network) EstimatedSlotAtTime(time time.Time) phase0.Slot {
+func (n Network) EstimatedSlotAtTime(t time.Time) phase0.Slot {
 	genesis := int64(n.MinGenesisTime())
-	if time.Unix() < genesis {
+	if t.Unix() < genesis {
 		return 0
 	}
-	return phase0.Slot(uint64(time.Unix()-genesis) / uint64(n.SlotDurationSec().Seconds()))
+	return phase0.Slot(uint64(t.Unix()-genesis) / uint64(n.SlotDurationSec().Seconds()))
 }
 
 // EstimatedCurrentEpoch estimates the current epoch
