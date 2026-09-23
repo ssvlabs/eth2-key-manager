@@ -22,9 +22,9 @@ func TestText(t *testing.T) {
 
 func TestJSON(t *testing.T) {
 	obj := struct {
-		data string
+		Data string
 	}{
-		data: "some data",
+		Data: "some data",
 	}
 	expectedData, err := json.MarshalIndent(obj, "", "  ")
 	require.NoError(t, err)

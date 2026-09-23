@@ -18,12 +18,12 @@ import (
 	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
-// VoluntaryExitFlagValues keeps all collected values for seed
+// VoluntaryExitFlagValues keeps all collected values for the voluntary-exit command
 type VoluntaryExitFlagValues struct {
 	index              int
 	seedBytes          []byte
 	currentForkVersion phase0.Version
-	epoch              int
+	epoch              phase0.Epoch
 	validator          *core.ValidatorInfo
 	network            core.Network
 	responseType       rootcmd.ResponseType
@@ -37,7 +37,7 @@ type SignRequestEncoded struct {
 	ObjectType      string
 }
 
-// VoluntaryExit creates a new wallet account(s) and prints the storage.
+// VoluntaryExit prints a signed voluntary exit (object response type) or a hex-encoded key-vault sign request for it.
 func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	err := core.InitBLS()
 	if err != nil {
@@ -75,7 +75,7 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	copy(domain[:], domainBytes)
 
 	voluntaryExit := &phase0.VoluntaryExit{
-		Epoch:          phase0.Epoch(voluntaryExitFlags.epoch),
+		Epoch:          voluntaryExitFlags.epoch,
 		ValidatorIndex: voluntaryExitFlags.validator.Index,
 	}
 
@@ -133,7 +133,7 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// CollectVoluntaryExitFlags returns collected flags for seed
+// CollectVoluntaryExitFlags returns the collected voluntary-exit flags
 func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, error) {
 	voluntaryExitFlagValues := VoluntaryExitFlagValues{}
 
@@ -187,7 +187,7 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	// Get epoch flag value.
 	epochFlagValue, err := flag.GetEpochFlagValue(cmd)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
+		return nil, errors.Wrap(err, "failed to retrieve the epoch flag value")
 	}
 	voluntaryExitFlagValues.epoch = epochFlagValue
 
