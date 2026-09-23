@@ -194,6 +194,26 @@ func TestAccountCreate(t *testing.T) {
 		require.EqualError(t, err, "failed to collect account flags: highest proposals length when the accumulate flag is false need to be 1")
 	})
 
+	t.Run("highest sources invalid (accumulate true)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
+			"--index=1",
+			"--accumulate=true",
+			"--highest-source=1",
+			"--highest-target=2,3",
+			"--highest-proposal=2,3",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		require.EqualError(t, err, "failed to collect account flags: highest sources length when the accumulate flag is true need to be index + 1")
+	})
+
 	t.Run("Successfully create seedless account at specific index and return as object (prater)", func(t *testing.T) {
 		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
@@ -270,6 +290,25 @@ func TestAccountCreate(t *testing.T) {
 		})
 		err := cmd.RootCmd.Execute()
 		require.EqualError(t, err, `required flag(s) "highest-proposal", "highest-source", "highest-target" not set`)
+	})
+
+	t.Run("highest sources invalid (seedless)", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"create",
+			"--private-key=63bc15d14d1460491535700fa2b6ac8873e1ede401cfc46e0c5ce77f08989898",
+			"--index=1",
+			"--highest-source=1,2",
+			"--highest-target=2",
+			"--highest-proposal=2",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		require.EqualError(t, err, "failed to collect account flags: highest sources length for seedless accounts need to be equal to private keys count")
 	})
 
 	t.Run("Fail to HEX decode private key", func(t *testing.T) {

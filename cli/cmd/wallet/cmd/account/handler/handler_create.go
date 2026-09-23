@@ -269,7 +269,7 @@ func SaveHighestData(acc core.ValidatorAccount, store *inmemory.InMemStore, acco
 	return nil
 }
 
-// ValidateHighestValues Performs basic validation for account highest attestation/proposal values
+// ValidateHighestValues performs basic validation for account highest attestation/proposal values
 func ValidateHighestValues(accountFlagValues CreateAccountFlagValues) error {
 	if len(accountFlagValues.privateKeys) > 0 {
 		errorExplain := "length for seedless accounts need to be equal to private keys count"
@@ -286,13 +286,13 @@ func ValidateHighestValues(accountFlagValues CreateAccountFlagValues) error {
 		}
 	} else if accountFlagValues.accumulate {
 		if len(accountFlagValues.highestSources) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest sources length when the accumulate flag is true need to be equal to index")
+			return errors.Errorf("highest sources length when the accumulate flag is true need to be index + 1")
 		}
 		if len(accountFlagValues.highestTargets) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest targets length when the accumulate flag is true need to be index")
+			return errors.Errorf("highest targets length when the accumulate flag is true need to be index + 1")
 		}
 		if len(accountFlagValues.highestProposals) != (accountFlagValues.index + 1) {
-			return errors.Errorf("highest proposals length when the accumulate flag is true need to be index")
+			return errors.Errorf("highest proposals length when the accumulate flag is true need to be index + 1")
 		}
 	} else {
 		if len(accountFlagValues.highestSources) != 1 {
