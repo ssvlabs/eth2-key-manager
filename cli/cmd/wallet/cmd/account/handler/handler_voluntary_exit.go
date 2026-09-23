@@ -18,7 +18,7 @@ import (
 	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
-// VoluntaryExitFlagValues keeps all collected values for seed
+// VoluntaryExitFlagValues keeps all collected values for the voluntary-exit command
 type VoluntaryExitFlagValues struct {
 	index              int
 	seedBytes          []byte
@@ -37,7 +37,7 @@ type SignRequestEncoded struct {
 	ObjectType      string
 }
 
-// VoluntaryExit creates a new wallet account(s) and prints the storage.
+// VoluntaryExit prints a signed voluntary exit (object response type) or a hex-encoded key-vault sign request for it.
 func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	err := core.InitBLS()
 	if err != nil {
@@ -133,7 +133,7 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// CollectVoluntaryExitFlags returns collected flags for seed
+// CollectVoluntaryExitFlags returns the collected voluntary-exit flags
 func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, error) {
 	voluntaryExitFlagValues := VoluntaryExitFlagValues{}
 
