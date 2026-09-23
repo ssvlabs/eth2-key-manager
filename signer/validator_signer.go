@@ -9,7 +9,6 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/altair"
 	"github.com/attestantio/go-eth2-client/spec/capella"
 	"github.com/attestantio/go-eth2-client/spec/phase0"
-	ssz "github.com/ferranbt/fastssz"
 	"github.com/google/uuid"
 
 	"github.com/ssvlabs/eth2-key-manager/core"
@@ -20,7 +19,7 @@ type ValidatorSigner interface {
 	SignBeaconBlock(block *spec.VersionedBeaconBlock, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignBlindedBeaconBlock(block *api.VersionedBlindedBeaconBlock, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignBeaconAttestation(attestation *phase0.AttestationData, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
-	SignAggregateAndProof(agg ssz.HashRoot, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
+	SignAggregateAndProof(agg HashRoot, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSlot(slot phase0.Slot, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignEpoch(epoch phase0.Epoch, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
 	SignSyncCommittee(msgBlockRoot []byte, domain phase0.Domain, pubKey []byte) (sig []byte, root []byte, err error)
@@ -70,8 +69,15 @@ func (signer *SimpleSigner) lock(accountID uuid.UUID, operation string) *sync.RW
 	}
 }
 
+// HashRoot is the minimal interface needed to compute a signing root: just
+// HashTreeRoot(). fastssz's ssz.HashRoot additionally requires GetTree(), which
+// dynamic-ssz-generated types (go-eth2-client Gloas) do not implement.
+type HashRoot interface {
+	HashTreeRoot() ([32]byte, error)
+}
+
 // ComputeETHSigningRoot returns computed root for eth signing
-func ComputeETHSigningRoot(obj ssz.HashRoot, domain phase0.Domain) (phase0.Root, error) {
+func ComputeETHSigningRoot(obj HashRoot, domain phase0.Domain) (phase0.Root, error) {
 	root, err := obj.HashTreeRoot()
 	if err != nil {
 		return phase0.Root{}, err

@@ -8,7 +8,10 @@ UNFORMATTED=$(shell gofmt -s -l .)
 .PHONY: lint-prepare
 lint-prepare:
 	@echo "Preparing Linter"
-	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s latest
+	# Pin the installer to a release tag (not master) and pin the version, for
+	# reproducible, checksum-verified installs. The master install.sh currently
+	# fails checksum verification for every version.
+	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/v2.12.2/install.sh | sh -s -- -b ./bin v2.12.2
 
 .PHONY: lint
 lint:
