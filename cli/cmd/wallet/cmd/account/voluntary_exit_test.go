@@ -2,6 +2,8 @@ package account_test
 
 import (
 	"bytes"
+	"encoding/hex"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -40,6 +42,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"wallet",
 			"account",
 			"voluntary-exit",
+			"--response-type=storage", // set explicitly: flags persist across subtests (shared RootCmd)
 			"--current-fork-version=0x02001020",
 			"--index=0",
 			"--validator-index=273230",
@@ -51,6 +54,9 @@ func TestAccountVoluntaryExit(t *testing.T) {
 		actualOutput := output.String()
 		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		signRequest, err := hex.DecodeString(strings.TrimSpace(actualOutput))
+		require.NoError(t, err)
+		require.Contains(t, string(signRequest), `"ObjectType":"*models.SignRequestVoluntaryExit"`)
 	})
 
 	t.Run("Invalid current fork version length", func(t *testing.T) {
