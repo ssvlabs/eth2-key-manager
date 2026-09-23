@@ -30,9 +30,8 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully prepare sign voluntary exit request for key-vault", func(t *testing.T) {
@@ -51,10 +50,8 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
-		signRequest, err := hex.DecodeString(strings.TrimSpace(actualOutput))
+		signRequest, err := hex.DecodeString(strings.TrimSpace(output.String()))
 		require.NoError(t, err)
 		require.Contains(t, string(signRequest), `"ObjectType":"*models.SignRequestVoluntaryExit"`)
 	})
@@ -74,9 +71,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to retrieve the current fork version flag value: invalid length for current fork version")
 	})
 
@@ -95,9 +90,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to parse validator public key: invalid validator public key supplied: encoding/hex: odd length hex string")
 	})
 
@@ -116,9 +109,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to parse validator index: validator index must not be negative")
 	})
 
@@ -137,9 +128,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to retrieve the epoch flag value: epoch must not be negative")
 	})
 
@@ -160,9 +149,7 @@ func TestAccountVoluntaryExit(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect voluntary exit flags: seed flag is required for object response type")
 	})
 }
