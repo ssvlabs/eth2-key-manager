@@ -53,7 +53,7 @@ func TestAccountCreate(t *testing.T) {
 		require.NotEmpty(t, output.String())
 	})
 
-	t.Run("no network flag", func(t *testing.T) {
+	t.Run("unknown network", func(t *testing.T) {
 		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)

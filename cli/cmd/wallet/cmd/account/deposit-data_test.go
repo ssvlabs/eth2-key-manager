@@ -29,24 +29,6 @@ func TestAccountDepositData(t *testing.T) {
 		require.NotEmpty(t, output.String())
 	})
 
-	t.Run("Successfully retrieve deposit-data for launchtest network", func(t *testing.T) {
-		resetFlags(t, cmd.RootCmd)
-		var output bytes.Buffer
-		cmd.ResultPrinter = printer.New(&output)
-		cmd.RootCmd.SetArgs([]string{
-			"wallet",
-			"account",
-			"deposit-data",
-			"--seed=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
-			"--index=0",
-			"--publickey=95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"--network=prater",
-		})
-		err := cmd.RootCmd.Execute()
-		require.NoError(t, err)
-		require.NotEmpty(t, output.String())
-	})
-
 	t.Run("Fail retrieve deposit-data for unmatched index and publickey", func(t *testing.T) {
 		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
