@@ -95,6 +95,48 @@ func TestAccountVoluntaryExit(t *testing.T) {
 		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to parse validator public key: invalid validator public key supplied: encoding/hex: odd length hex string")
 	})
 
+	t.Run("Negative validator index", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"voluntary-exit",
+			"--current-fork-version=0x02001020",
+			"--index=1",
+			"--validator-index=-1",
+			"--validator-public-key=0xb2dc1daa8c9cd104d4503028639e41a41e4f06ee5cc90ebfaeab3c41f43a148ce9afa4ebd1b8be3f54e4d6c15e870c7c",
+			"--epoch=1",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.EqualValues(t, actualOutput, "")
+		require.Error(t, err)
+		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to parse validator index: validator index must not be negative")
+	})
+
+	t.Run("Negative epoch", func(t *testing.T) {
+		var output bytes.Buffer
+		cmd.ResultPrinter = printer.New(&output)
+		cmd.RootCmd.SetArgs([]string{
+			"wallet",
+			"account",
+			"voluntary-exit",
+			"--current-fork-version=0x02001020",
+			"--index=1",
+			"--validator-index=1",
+			"--validator-public-key=0xb2dc1daa8c9cd104d4503028639e41a41e4f06ee5cc90ebfaeab3c41f43a148ce9afa4ebd1b8be3f54e4d6c15e870c7c",
+			"--epoch=-1",
+			"--network=prater",
+		})
+		err := cmd.RootCmd.Execute()
+		actualOutput := output.String()
+		require.EqualValues(t, actualOutput, "")
+		require.Error(t, err)
+		require.EqualError(t, err, "failed to collect voluntary exit flags: failed to retrieve the epoch flag value: epoch must not be negative")
+	})
+
 	t.Run("Seed flag is required for object response type", func(t *testing.T) {
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)

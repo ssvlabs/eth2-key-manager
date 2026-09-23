@@ -23,7 +23,7 @@ type VoluntaryExitFlagValues struct {
 	index              int
 	seedBytes          []byte
 	currentForkVersion phase0.Version
-	epoch              int
+	epoch              phase0.Epoch
 	validator          *core.ValidatorInfo
 	network            core.Network
 	responseType       rootcmd.ResponseType
@@ -75,7 +75,7 @@ func (h *Account) VoluntaryExit(cmd *cobra.Command, args []string) error {
 	copy(domain[:], domainBytes)
 
 	voluntaryExit := &phase0.VoluntaryExit{
-		Epoch:          phase0.Epoch(voluntaryExitFlags.epoch),
+		Epoch:          voluntaryExitFlags.epoch,
 		ValidatorIndex: voluntaryExitFlags.validator.Index,
 	}
 
@@ -187,7 +187,7 @@ func CollectVoluntaryExitFlags(cmd *cobra.Command) (*VoluntaryExitFlagValues, er
 	// Get epoch flag value.
 	epochFlagValue, err := flag.GetEpochFlagValue(cmd)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the index flag value")
+		return nil, errors.Wrap(err, "failed to retrieve the epoch flag value")
 	}
 	voluntaryExitFlagValues.epoch = epochFlagValue
 
