@@ -13,7 +13,7 @@ import (
 	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
-// Generate generates a new wallet account at specific index and prints the account.
+// Generate derives the wallet account at the given index and prints its public keys.
 func (h *PublicKey) Generate(cmd *cobra.Command, _ []string) error {
 	err := core.InitBLS()
 	if err != nil {
