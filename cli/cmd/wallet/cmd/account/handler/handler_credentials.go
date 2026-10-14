@@ -19,7 +19,7 @@ import (
 	"github.com/ssvlabs/eth2-key-manager/stores/inmemory"
 )
 
-// CredentialsFlagValues keeps all collected values for seed
+// CredentialsFlagValues keeps all collected values for the credentials command
 type CredentialsFlagValues struct {
 	index      int
 	seedBytes  []byte
@@ -30,7 +30,7 @@ type CredentialsFlagValues struct {
 
 var domainBlsToExecutionChange = types.DomainType{0x0a, 0x00, 0x00, 0x00}
 
-// Credentials creates a new wallet account(s) and prints the storage.
+// Credentials prints signed BLS-to-execution changes for the given validators.
 func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
 	err := core.InitBLS()
 	if err != nil {
@@ -120,7 +120,7 @@ func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
 
 		signature, _, err := simpleSigner.SignBLSToExecutionChange(blsToExecutionChange, domain, derivedWithdrawalPubKey)
 		if err != nil {
-			return errors.Wrap(err, "failed to sign voluntary exit")
+			return errors.Wrap(err, "failed to sign BLS-to-execution change")
 		}
 
 		signedBLSToExecutionChange := &capella.SignedBLSToExecutionChange{
@@ -142,7 +142,7 @@ func (h *Account) Credentials(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// CollectCredentialsFlags returns collected flags for seed
+// CollectCredentialsFlags returns the collected credentials flags
 func CollectCredentialsFlags(cmd *cobra.Command) (*CredentialsFlagValues, error) {
 	credentialsFlagValues := CredentialsFlagValues{}
 

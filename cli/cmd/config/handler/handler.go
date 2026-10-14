@@ -15,7 +15,7 @@ type Config struct {
 	network core.Network
 }
 
-// New is the constructor of Seed handler.
+// New is the constructor of Config handler.
 func New(printer printer.Printer, network core.Network) *Config {
 	return &Config{
 		printer: printer,

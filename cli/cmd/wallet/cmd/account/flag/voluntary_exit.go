@@ -26,8 +26,16 @@ func AddEpochFlag(c *cobra.Command) {
 }
 
 // GetEpochFlagValue gets the epoch flag from the command
-func GetEpochFlagValue(c *cobra.Command) (int, error) {
-	return c.Flags().GetInt(epochFlag)
+func GetEpochFlagValue(c *cobra.Command) (phase0.Epoch, error) {
+	epoch, err := c.Flags().GetInt(epochFlag)
+	if err != nil {
+		return 0, err
+	}
+	if epoch < 0 {
+		return 0, errors.New("epoch must not be negative")
+	}
+
+	return phase0.Epoch(epoch), nil
 }
 
 // AddCurrentForkVersionFlag adds the current fork version flag to the command
@@ -87,12 +95,15 @@ func AddValidatorIndexFlag(c *cobra.Command) {
 
 // GetValidatorIndexFlagValue gets the validator index flag from the command
 func GetValidatorIndexFlagValue(c *cobra.Command) (phase0.ValidatorIndex, error) {
-	str, err := c.Flags().GetInt(validatorIndex)
+	index, err := c.Flags().GetInt(validatorIndex)
 	if err != nil {
 		return 0, err
 	}
+	if index < 0 {
+		return 0, errors.New("validator index must not be negative")
+	}
 
-	return phase0.ValidatorIndex(str), nil
+	return phase0.ValidatorIndex(index), nil
 }
 
 // GetVoluntaryExitInfoFlagValue gets the voluntary exit info flag from the command

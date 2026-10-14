@@ -15,7 +15,7 @@ type StandardPrinter struct {
 	out io.Writer
 }
 
-// NewStandardOutputPrinter is the constructor of StandardOutputPrinter.
+// NewStandardOutputPrinter is the constructor of StandardPrinter.
 // Uses stdout to print data.
 func NewStandardOutputPrinter() Printer {
 	return &StandardPrinter{
@@ -23,7 +23,7 @@ func NewStandardOutputPrinter() Printer {
 	}
 }
 
-// New is the constructor of StandardOutputPrinter.
+// New is the constructor of StandardPrinter.
 // Uses the given writer to print data.
 func New(out io.Writer) Printer {
 	return &StandardPrinter{
@@ -47,7 +47,7 @@ func (p *StandardPrinter) JSON(obj interface{}) error {
 	return nil
 }
 
-// JSON implements Printer interface.
+// Error implements Printer interface.
 func (p *StandardPrinter) Error(err error) {
 	if err != nil {
 		fmt.Fprintln(p.out, "Error:", err.Error()) //nolint:errcheck

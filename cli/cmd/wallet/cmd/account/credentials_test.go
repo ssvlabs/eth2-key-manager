@@ -12,6 +12,7 @@ import (
 
 func TestAccountCredentials(t *testing.T) {
 	t.Run("Successfully handle credentials change at specific index", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -27,12 +28,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Successfully handle accumulated credentials change", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -49,12 +50,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.NotNil(t, actualOutput)
 		require.NoError(t, err)
+		require.NotEmpty(t, output.String())
 	})
 
 	t.Run("Only one validator can be specified if accumulate is false", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -71,13 +72,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect credentials flags: only one validator can be specified if accumulate is false")
 	})
 
 	t.Run("Not equal length - should be 2 validator indices", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -94,13 +94,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect credentials flags: validator indices, public keys, withdrawal credentials and to execution addresses must be of equal length")
 	})
 
 	t.Run("Not equal length - should be two public keys", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -117,13 +116,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect credentials flags: validator indices, public keys, withdrawal credentials and to execution addresses must be of equal length")
 	})
 
 	t.Run("Not equal length - should be two withdrawal credentials", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -140,13 +138,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect credentials flags: validator indices, public keys, withdrawal credentials and to execution addresses must be of equal length")
 	})
 
 	t.Run("Not equal length - should be two to execution addresses", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -163,13 +160,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "failed to collect credentials flags: validator indices, public keys, withdrawal credentials and to execution addresses must be of equal length")
 	})
 
 	t.Run("Derived pub key does not match with the provided", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -186,13 +182,12 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "derived validator public key: 0xb2dc1daa8c9cd104d4503028639e41a41e4f06ee5cc90ebfaeab3c41f43a148ce9afa4ebd1b8be3f54e4d6c15e870c7c, does not match with the provided one: 0xb2dc1daa8c9cd104d4503028639e41a41e4f06ee5cc90ebfaeab3c41f43a148ce9afa4ebd1b8be3f54e4d6c15e870c7a")
 	})
 
 	t.Run("Derived withdrawal credentials does not match with the provided", func(t *testing.T) {
+		resetFlags(t, cmd.RootCmd)
 		var output bytes.Buffer
 		cmd.ResultPrinter = printer.New(&output)
 		cmd.RootCmd.SetArgs([]string{
@@ -209,9 +204,7 @@ func TestAccountCredentials(t *testing.T) {
 			"--network=prater",
 		})
 		err := cmd.RootCmd.Execute()
-		actualOutput := output.String()
-		require.EqualValues(t, actualOutput, "")
-		require.Error(t, err)
+		require.Empty(t, output.String())
 		require.EqualError(t, err, "derived withdrawal credentials: 0x00d9cdf17e3a79317a4e5cd18580b1d10b1df360bbca5c5f8ac5b79b45c29d15, does not match with the provided one: 0x00d9cdf17e3a79317a4e5cd18580b1d10b1df360bbca5c5f8ac5b79b45c29d14")
 	})
 }
