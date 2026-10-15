@@ -43,7 +43,7 @@ func TestStoringWithEncryption(t *testing.T) {
 		{
 			testName: "secret longer than 32 bytes, should error",
 			password: []byte("12345"),
-			secret:   []byte("i am much longer than 32 bytes of data beleive me people!"),
+			secret:   []byte("i am much longer than 32 bytes of data believe me people!"),
 			err:      errors.New("secret can be only 32 bytes (not 57 bytes)"),
 		},
 		{
